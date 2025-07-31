@@ -1,53 +1,14 @@
 #!/bin/bash
-APP_JAR="cloudgene.jar"
-APP_UPDATE_URL="https://get.cloudgene.io"
 
 set -e
 
-FOLDER=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-
-update() {
-  if command -v curl > /dev/null 2>&1; then
-    curl -fsSL ${APP_UPDATE_URL} | bash
-  else
-    wget -qO- ${APP_UPDATE_URL} | bash
-  fi
-}
-
-FILE_PATH_JAR=${FOLDER}/${APP_JAR}
-
-export JAVA_PROGRAM_ARGS=`echo "$@"`
-
-# change current directory
-cd $FOLDER
-
-ENV_FILE="cloudgene.env"
-if [[ "$CG_ENV_FILE" ]]; then
-  ENV_FILE="$CG_ENV_FILE"
-fi
-
-if [ -f "$ENV_FILE" ]; then
-    source "$ENV_FILE"
-    echo "File '$ENV_FILE' exists and has been sourced."
-fi
+SCRIPT_DIR=$( cd "$( dirname "$0" )" && pwd )
+JAR_PATH="$SCRIPT_DIR/cloudgene.jar"
 
 JAVA_ARGS="-Xmx10G"
-if [[ "$CG_JAVA_ARGS" ]]; then
-  JAVA_ARGS="$CG_JAVA_ARGS"
+if [ "$1" = "debug" ]; then
+    shift;
+    JAVA_ARGS="${JAVA_ARGS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:8000"
 fi
 
-JAVA_CMD="java"
-if [[ "$CG_JAVA_CMD" ]]; then
-  JAVA_CMD="$CG_JAVA_CMD"
-fi
-
-
-# execute cloudgene
-if [ "${JAVA_PROGRAM_ARGS}" = "update" ]; then
-  echo "Updating application..."
-  cd "${FOLDER}"
-  update
-else
-  echo "Start cloudgene with java args: ${JAVA_ARGS}"
-  exec ${JAVA_CMD} ${JAVA_ARGS} -jar "${FILE_PATH_JAR}" "$@"
-fi
+java $JAVA_ARGS -jar "$JAR_PATH" "$@"
