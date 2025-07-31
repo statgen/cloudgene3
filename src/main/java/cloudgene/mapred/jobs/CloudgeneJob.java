@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 
 import cloudgene.mapred.util.GlobUtil;
+import cloudgene.mapred.util.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -218,6 +219,13 @@ public class CloudgeneJob extends AbstractJob {
 
 	@Override
 	public boolean cleanUp() {
+
+		Settings settings = getSettings();
+		boolean skipCleanup = settings.getSkipWorkspaceCleanup();
+		if (skipCleanup) {
+			log.info("[Job {}] Skipping cleanup.", getId());
+			return false;
+		}
 
 		log.info("[Job {}] Cleaning up...", getId());
 
