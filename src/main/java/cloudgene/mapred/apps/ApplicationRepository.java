@@ -87,8 +87,8 @@ public class ApplicationRepository {
 			indexApps.put(app.getId(), app);
 
 		}
-		
-		Collections.sort(apps);		
+
+		Collections.sort(apps);
 		log.info("Loaded " + apps.size() + " applications.");
 	}
 
@@ -332,7 +332,8 @@ public class ApplicationRepository {
 		FileUtil.deleteDirectory(appPath);
 		FileUtil.createDirectory(appPath);
 
-		String baseKey = S3Util.getKey(url);
+		S3Util.UrlParts urlParts = S3Util.getParts(url);
+		String baseKey = urlParts.key();
 
 		ObjectListing listing = S3Util.listObjects(url);
 
