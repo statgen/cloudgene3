@@ -19,3 +19,8 @@
 /apps
 *.DS_Store
 /.apt_generated/
+/test*.txt
+.idea
+.vscode
+/test-config
+scratch
