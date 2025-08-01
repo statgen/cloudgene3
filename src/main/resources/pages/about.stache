@@ -1,0 +1,284 @@
+<h1 id="about">About</h1>
+<h2 id="genotype-imputation">Genotype Imputation</h2>
+<p>Genotype imputation is a key component of genetic association studies, where it increases power, facilitates
+    meta-analysis, and aids interpretation of signals. This imputation server allows registered users to perform
+    genotype imputation for their own samples. Typically, this allows tens of millions of genetic variants to be
+    genotyped with very high-fidelity in samples that have been genotyped with an affordable genotyping array.
+    Imputation works by comparing short stretches of an individual genome to stretches of previously characterized
+    genomes. Since all humans are related, this process can typically and accurately reconstruct much of the missing
+    data in each genome.</p>
+<h2 id="the-topmed-imputation-panel-and-server">The TOPMed Imputation Panel and Server</h2>
+<p>The TOPMed Imputation Reference panel is a diverse reference panel including information from 133,597 deeply
+    sequenced human genomes. The panel is available to the community through a collaboration between TOPMed Study
+    Investigators, the National Heart Lung and Blood Institute and the University of Michigan Imputation Server team.
+</p>
+<h3 id="the-topmed-study">The TOPMed Study</h3>
+<p>The Trans-Omics for Precision Medicine (TOPMed) program seeks to elucidate the genetic architecture and disease
+    biology of heart, lung, blood, and sleep disorders, with the ultimate goal of improving diagnosis, treatment, and
+    prevention. The initial phases of the program included whole genome sequencing of individuals with rich phenotypic
+    data and diverse backgrounds. This reference panel is built on a subset of 133,597 TOPMed samples for whom high
+    quality whole genome sequence data was available and for where contributing studies approved this use of the data,
+    taking into account both the limited risks associated with including a sample in an imputation reference panel that
+    is only available through this imputation server and also other study and sample specific use restrictions.</p>
+<p>Version r3 of the panel, which is the current version available to the scientific community at large, includes
+    133,597 reference samples and 445,600,184 genetic variants distributed across the 22 autosomes and the X chromosome.
+</p>
+<p>For a more detailed description of the study, see the TOPMed pre-print currently on BioXriv <a
+        href="https://www.biorxiv.org/content/10.1101/563866v1" data-toggle="modal"
+        data-target="#topmedStudyModal">Taliun, D. et al. (2019) Sequencing of 53,831 diverse genomes from the NHLBI
+        TOPMed Program. Biorxiv, doi:10.1101/563866
+        <svg fill="var(--color-blueberry)" version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="14px"
+            height="14px" viewBox="0 0 24 24" style="margin-left: 0.25rem;">
+            <path
+                d="M 0,15.609374 V 7.2187491 H 5.1505597 10.30112 L 10.910188,6.6093432 11.519255,5.9999371 10.564316,5.044784 9.6093751,4.0896309 V 2.044815 -3.0028053e-7 H 16.804688 24 V 7.1953116 14.390624 h -2.044815 -2.044817 l -0.955152,-0.954941 -0.955154,-0.954939 -0.609406,0.609067 -0.609405,0.609069 V 18.84944 24 H 8.3906251 0 Z m 14.414062,3.246094 c 0,-1.514648 -0.0079,-2.753907 -0.01753,-2.753907 -0.0096,0 -0.821756,0.804184 -1.80471,1.787076 l -1.787189,1.787076 -3.2401772,-3.240177 -3.240177,-3.240177 1.7870754,-1.787191 c 0.9828914,-0.982954 1.7870754,-1.7950739 1.7870754,-1.8047105 0,-0.00961 -1.2392579,-0.017522 -2.7539062,-0.017522 H 2.3906249 v 6.0117185 6.011719 h 6.0117189 6.0117182 z m -0.01685,-6.146047 3.603002,-3.6030772 1.446496,1.4468272 1.446495,1.446828 h 0.358088 0.358085 V 7.1953116 2.3906241 H 16.804688 12 v 0.3577821 0.3577821 l 1.025391,1.028297 c 0.563964,0.5655636 1.209333,1.2172855 1.434153,1.4482713 L 14.8683,6.0027304 11.272086,9.5990023 7.675871,13.195274 9.2343514,14.753887 c 0.8571646,0.857237 1.5587886,1.558612 1.5591656,1.558612 3.77e-4,0 1.622035,-1.621385 3.603688,-3.603078 z">
+            </path>
+        </svg></a>.</p>
+<h3 id="the-michigan-imputation-server">The Michigan Imputation Server</h3>
+<p>The Michigan Imputation Server is a joint of effort of the statistical genetics teams at the University of Michigan
+    in the U.S.A. and at the University of Innsbruck in Austria. The Michigan Imputation Server technology provides a
+    web-based service for imputation that facilitates access to imputation reference panels and greatly improves user
+    experience and productivity. The server maintains a private list of reference genomes, which are not directly
+    accessible by panel users. Users can request imputation of their own samples and securely download the results. </p>
+<p>For information on imputation server technology, please see:</p>
+<ul>
+    <li>Imputation Server &mdash; <a href="http://dx.doi.org/10.1038/ng.3656" data-toggle="modal"
+            data-target="#imputationServerModal">
+            Das, S., Forer, L., Schönherr, S., Sidore, C., Locke, A. E., Kwong, A., Vrieze, S. I., Chew, E. Y., Levy,
+            S., McGue, M., Schlessinger, D., Stambolian, D., Loh, P.-R., Iacono, W. G., Swaroop, A., Scott, L. J.,
+            Cucca, F., Kronenberg, F., Boehnke, M., … Fuchsberger, C. (2016). Next-generation genotype imputation
+            service and methods. Nature Genetics, 48(10), 1284&ndash;1287.
+            <svg fill="var(--color-blueberry)" version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                width="14px" height="14px" viewBox="0 0 24 24" style="margin-left: 0.25rem;">
+                <path
+                    d="M 0,15.609374 V 7.2187491 H 5.1505597 10.30112 L 10.910188,6.6093432 11.519255,5.9999371 10.564316,5.044784 9.6093751,4.0896309 V 2.044815 -3.0028053e-7 H 16.804688 24 V 7.1953116 14.390624 h -2.044815 -2.044817 l -0.955152,-0.954941 -0.955154,-0.954939 -0.609406,0.609067 -0.609405,0.609069 V 18.84944 24 H 8.3906251 0 Z m 14.414062,3.246094 c 0,-1.514648 -0.0079,-2.753907 -0.01753,-2.753907 -0.0096,0 -0.821756,0.804184 -1.80471,1.787076 l -1.787189,1.787076 -3.2401772,-3.240177 -3.240177,-3.240177 1.7870754,-1.787191 c 0.9828914,-0.982954 1.7870754,-1.7950739 1.7870754,-1.8047105 0,-0.00961 -1.2392579,-0.017522 -2.7539062,-0.017522 H 2.3906249 v 6.0117185 6.011719 h 6.0117189 6.0117182 z m -0.01685,-6.146047 3.603002,-3.6030772 1.446496,1.4468272 1.446495,1.446828 h 0.358088 0.358085 V 7.1953116 2.3906241 H 16.804688 12 v 0.3577821 0.3577821 l 1.025391,1.028297 c 0.563964,0.5655636 1.209333,1.2172855 1.434153,1.4482713 L 14.8683,6.0027304 11.272086,9.5990023 7.675871,13.195274 9.2343514,14.753887 c 0.8571646,0.857237 1.5587886,1.558612 1.5591656,1.558612 3.77e-4,0 1.622035,-1.621385 3.603688,-3.603078 z">
+                </path>
+            </svg></a>
+    </li>
+    <li>Eagle Haplotype Phasing &mdash; <a href="http://dx.doi.org/10.1038/ng.3679" data-toggle="modal"
+            data-target="#eagleModal">
+            Loh, P.-R., Danecek, P., Palamara, P. F., Fuchsberger, C., A Reshef, Y., K Finucane, H., Schoenherr, S.,
+            Forer, L., McCarthy, S., Abecasis, G. R., Durbin, R., &amp; L Price, A. (2016). Reference-based phasing
+            using the Haplotype Reference Consortium panel. Nature Genetics, 48(11), 1443&ndash;1448.
+            <svg fill="var(--color-blueberry)" version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                width="14px" height="14px" viewBox="0 0 24 24" style="margin-left: 0.25rem;">
+                <path
+                    d="M 0,15.609374 V 7.2187491 H 5.1505597 10.30112 L 10.910188,6.6093432 11.519255,5.9999371 10.564316,5.044784 9.6093751,4.0896309 V 2.044815 -3.0028053e-7 H 16.804688 24 V 7.1953116 14.390624 h -2.044815 -2.044817 l -0.955152,-0.954941 -0.955154,-0.954939 -0.609406,0.609067 -0.609405,0.609069 V 18.84944 24 H 8.3906251 0 Z m 14.414062,3.246094 c 0,-1.514648 -0.0079,-2.753907 -0.01753,-2.753907 -0.0096,0 -0.821756,0.804184 -1.80471,1.787076 l -1.787189,1.787076 -3.2401772,-3.240177 -3.240177,-3.240177 1.7870754,-1.787191 c 0.9828914,-0.982954 1.7870754,-1.7950739 1.7870754,-1.8047105 0,-0.00961 -1.2392579,-0.017522 -2.7539062,-0.017522 H 2.3906249 v 6.0117185 6.011719 h 6.0117189 6.0117182 z m -0.01685,-6.146047 3.603002,-3.6030772 1.446496,1.4468272 1.446495,1.446828 h 0.358088 0.358085 V 7.1953116 2.3906241 H 16.804688 12 v 0.3577821 0.3577821 l 1.025391,1.028297 c 0.563964,0.5655636 1.209333,1.2172855 1.434153,1.4482713 L 14.8683,6.0027304 11.272086,9.5990023 7.675871,13.195274 9.2343514,14.753887 c 0.8571646,0.857237 1.5587886,1.558612 1.5591656,1.558612 3.77e-4,0 1.622035,-1.621385 3.603688,-3.603078 z">
+                </path>
+            </svg></a>
+    </li>
+    <li>Minimac Imputation &mdash; <a href="https://doi.org/10.1093/bioinformatics/btu704" data-toggle="modal"
+            data-target="#minimacModal">Fuchsberger, C., Abecasis, G. R., &amp; Hinds, D. A. (2014). minimac2: faster
+            genotype imputation. Bioinformatics, 31(5), 782&ndash;784.
+            <svg fill="var(--color-blueberry)" version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                width="14px" height="14px" viewBox="0 0 24 24" style="margin-left: 0.25rem;">
+                <path
+                    d="M 0,15.609374 V 7.2187491 H 5.1505597 10.30112 L 10.910188,6.6093432 11.519255,5.9999371 10.564316,5.044784 9.6093751,4.0896309 V 2.044815 -3.0028053e-7 H 16.804688 24 V 7.1953116 14.390624 h -2.044815 -2.044817 l -0.955152,-0.954941 -0.955154,-0.954939 -0.609406,0.609067 -0.609405,0.609069 V 18.84944 24 H 8.3906251 0 Z m 14.414062,3.246094 c 0,-1.514648 -0.0079,-2.753907 -0.01753,-2.753907 -0.0096,0 -0.821756,0.804184 -1.80471,1.787076 l -1.787189,1.787076 -3.2401772,-3.240177 -3.240177,-3.240177 1.7870754,-1.787191 c 0.9828914,-0.982954 1.7870754,-1.7950739 1.7870754,-1.8047105 0,-0.00961 -1.2392579,-0.017522 -2.7539062,-0.017522 H 2.3906249 v 6.0117185 6.011719 h 6.0117189 6.0117182 z m -0.01685,-6.146047 3.603002,-3.6030772 1.446496,1.4468272 1.446495,1.446828 h 0.358088 0.358085 V 7.1953116 2.3906241 H 16.804688 12 v 0.3577821 0.3577821 l 1.025391,1.028297 c 0.563964,0.5655636 1.209333,1.2172855 1.434153,1.4482713 L 14.8683,6.0027304 11.272086,9.5990023 7.675871,13.195274 9.2343514,14.753887 c 0.8571646,0.857237 1.5587886,1.558612 1.5591656,1.558612 3.77e-4,0 1.622035,-1.621385 3.603688,-3.603078 z">
+                </path>
+            </svg></a>
+    </li>
+</ul>
+<h3 id="the-national-heart-lung-and-blood-institute">The National Heart Lung and Blood Institute</h3>
+<p>The National Heart Lung and Blood Institute is part of the National Institutes of Health and has provided key support
+    to the development of the studies that collectively constitute the TOPMed Program. The Institute has also sponsored
+    the sequencing and analysis of whole genome sequence and other data within the TOPMed program. NHLBI is sponsoring
+    this imputation server and providing underlying compute resources through its BioDataCatalyst program.</p>
+<h2 id="citation">Citation</h2>
+<p>If you use the Imputation Server in your work, please cite:</p>
+<ul>
+    <li>TOPMed Study &mdash; <a href="https://www.biorxiv.org/content/10.1101/563866v1" data-toggle="modal"
+            data-target="#topmedStudyModal">Taliun, D. et al. (2019) Sequencing of 53,831 diverse genomes from the NHLBI
+            TOPMed Program. Biorxiv, doi:10.1101/563866
+            <svg fill="var(--color-blueberry)" version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                width="14px" height="14px" viewBox="0 0 24 24" style="margin-left: 0.25rem;">
+                <path
+                    d="M 0,15.609374 V 7.2187491 H 5.1505597 10.30112 L 10.910188,6.6093432 11.519255,5.9999371 10.564316,5.044784 9.6093751,4.0896309 V 2.044815 -3.0028053e-7 H 16.804688 24 V 7.1953116 14.390624 h -2.044815 -2.044817 l -0.955152,-0.954941 -0.955154,-0.954939 -0.609406,0.609067 -0.609405,0.609069 V 18.84944 24 H 8.3906251 0 Z m 14.414062,3.246094 c 0,-1.514648 -0.0079,-2.753907 -0.01753,-2.753907 -0.0096,0 -0.821756,0.804184 -1.80471,1.787076 l -1.787189,1.787076 -3.2401772,-3.240177 -3.240177,-3.240177 1.7870754,-1.787191 c 0.9828914,-0.982954 1.7870754,-1.7950739 1.7870754,-1.8047105 0,-0.00961 -1.2392579,-0.017522 -2.7539062,-0.017522 H 2.3906249 v 6.0117185 6.011719 h 6.0117189 6.0117182 z m -0.01685,-6.146047 3.603002,-3.6030772 1.446496,1.4468272 1.446495,1.446828 h 0.358088 0.358085 V 7.1953116 2.3906241 H 16.804688 12 v 0.3577821 0.3577821 l 1.025391,1.028297 c 0.563964,0.5655636 1.209333,1.2172855 1.434153,1.4482713 L 14.8683,6.0027304 11.272086,9.5990023 7.675871,13.195274 9.2343514,14.753887 c 0.8571646,0.857237 1.5587886,1.558612 1.5591656,1.558612 3.77e-4,0 1.622035,-1.621385 3.603688,-3.603078 z">
+                </path>
+            </svg></a>
+    </li>
+    <li>Imputation Server &mdash; <a href="http://dx.doi.org/10.1038/ng.3656" data-toggle="modal"
+            data-target="#imputationServerModal">Das, S., Forer, L., Schönherr, S., Sidore, C., Locke, A. E., Kwong, A.,
+            Vrieze, S. I., Chew, E. Y., Levy, S., McGue, M., Schlessinger, D., Stambolian, D., Loh, P.-R., Iacono, W.
+            G., Swaroop, A., Scott, L. J., Cucca, F., Kronenberg, F., Boehnke, M., … Fuchsberger, C. (2016).
+            Next-generation genotype imputation service and methods. Nature Genetics, 48(10), 1284&ndash;1287.
+            <svg fill="var(--color-blueberry)" version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                width="14px" height="14px" viewBox="0 0 24 24" style="margin-left: 0.25rem;">
+                <path
+                    d="M 0,15.609374 V 7.2187491 H 5.1505597 10.30112 L 10.910188,6.6093432 11.519255,5.9999371 10.564316,5.044784 9.6093751,4.0896309 V 2.044815 -3.0028053e-7 H 16.804688 24 V 7.1953116 14.390624 h -2.044815 -2.044817 l -0.955152,-0.954941 -0.955154,-0.954939 -0.609406,0.609067 -0.609405,0.609069 V 18.84944 24 H 8.3906251 0 Z m 14.414062,3.246094 c 0,-1.514648 -0.0079,-2.753907 -0.01753,-2.753907 -0.0096,0 -0.821756,0.804184 -1.80471,1.787076 l -1.787189,1.787076 -3.2401772,-3.240177 -3.240177,-3.240177 1.7870754,-1.787191 c 0.9828914,-0.982954 1.7870754,-1.7950739 1.7870754,-1.8047105 0,-0.00961 -1.2392579,-0.017522 -2.7539062,-0.017522 H 2.3906249 v 6.0117185 6.011719 h 6.0117189 6.0117182 z m -0.01685,-6.146047 3.603002,-3.6030772 1.446496,1.4468272 1.446495,1.446828 h 0.358088 0.358085 V 7.1953116 2.3906241 H 16.804688 12 v 0.3577821 0.3577821 l 1.025391,1.028297 c 0.563964,0.5655636 1.209333,1.2172855 1.434153,1.4482713 L 14.8683,6.0027304 11.272086,9.5990023 7.675871,13.195274 9.2343514,14.753887 c 0.8571646,0.857237 1.5587886,1.558612 1.5591656,1.558612 3.77e-4,0 1.622035,-1.621385 3.603688,-3.603078 z">
+                </path>
+            </svg></a>
+    </li>
+    <li>Minimac Imputation &mdash; <a href="https://doi.org/10.1093/bioinformatics/btu704" data-toggle="modal"
+            data-target="#minimacModal">Fuchsberger, C., Abecasis, G. R., &amp; Hinds, D. A. (2014). minimac2: faster
+            genotype imputation. Bioinformatics, 31(5), 782&ndash;784.
+            <svg fill="var(--color-blueberry)" version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                width="14px" height="14px" viewBox="0 0 24 24" style="margin-left: 0.25rem;">
+                <path
+                    d="M 0,15.609374 V 7.2187491 H 5.1505597 10.30112 L 10.910188,6.6093432 11.519255,5.9999371 10.564316,5.044784 9.6093751,4.0896309 V 2.044815 -3.0028053e-7 H 16.804688 24 V 7.1953116 14.390624 h -2.044815 -2.044817 l -0.955152,-0.954941 -0.955154,-0.954939 -0.609406,0.609067 -0.609405,0.609069 V 18.84944 24 H 8.3906251 0 Z m 14.414062,3.246094 c 0,-1.514648 -0.0079,-2.753907 -0.01753,-2.753907 -0.0096,0 -0.821756,0.804184 -1.80471,1.787076 l -1.787189,1.787076 -3.2401772,-3.240177 -3.240177,-3.240177 1.7870754,-1.787191 c 0.9828914,-0.982954 1.7870754,-1.7950739 1.7870754,-1.8047105 0,-0.00961 -1.2392579,-0.017522 -2.7539062,-0.017522 H 2.3906249 v 6.0117185 6.011719 h 6.0117189 6.0117182 z m -0.01685,-6.146047 3.603002,-3.6030772 1.446496,1.4468272 1.446495,1.446828 h 0.358088 0.358085 V 7.1953116 2.3906241 H 16.804688 12 v 0.3577821 0.3577821 l 1.025391,1.028297 c 0.563964,0.5655636 1.209333,1.2172855 1.434153,1.4482713 L 14.8683,6.0027304 11.272086,9.5990023 7.675871,13.195274 9.2343514,14.753887 c 0.8571646,0.857237 1.5587886,1.558612 1.5591656,1.558612 3.77e-4,0 1.622035,-1.621385 3.603688,-3.603078 z">
+                </path>
+            </svg></a>
+    </li>
+</ul>
+<h2 id="acknowledgement">Acknowledgement</h2>
+<p>Trans-Omics in Precision Medicine (TOPMed) program imputation panel (version TOPMed-r3) supported by the National
+    Heart, Lung and Blood Institute (NHLBI); see www.nhlbiwgs.org. TOPMed study investigators contributed data to the
+    reference panel, which can be accessed through the <a href="https://imputation.biodatacatalyst.nhlbi.nih.gov">TOPMed
+        Imputation Server</a>. The panel was constructed and implemented by the TOPMed Informatics Research Center at
+    the University of Michigan (3R01HL-117626-02S1; contract HHSN268201800002I). The TOPMed Data Coordinating Center
+    (3R01HL-120393-02S1; contract HHSN268201800001I) provided additional data management, sample identity checks, and
+    overall program coordination and support. We gratefully acknowledge the studies and participants who provided
+    biological samples and data for TOPMed.</p>
+
+<!-- TOPMed Study Modal -->
+<div class="modal fade" id="topmedStudyModal" tabindex="-1" role="dialog" aria-labelledby="topmedStudyModal"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="topmedStudyModalLabel">Leaving BioData Catalyst</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <p>
+                        This graphic notice (
+                        <svg fill="var(--color-blueberry)" version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px"
+                            y="0px" width="14px" height="14px" viewBox="0 0 24 24">
+                            <path
+                                d="M 0,15.609374 V 7.2187491 H 5.1505597 10.30112 L 10.910188,6.6093432 11.519255,5.9999371 10.564316,5.044784 9.6093751,4.0896309 V 2.044815 -3.0028053e-7 H 16.804688 24 V 7.1953116 14.390624 h -2.044815 -2.044817 l -0.955152,-0.954941 -0.955154,-0.954939 -0.609406,0.609067 -0.609405,0.609069 V 18.84944 24 H 8.3906251 0 Z m 14.414062,3.246094 c 0,-1.514648 -0.0079,-2.753907 -0.01753,-2.753907 -0.0096,0 -0.821756,0.804184 -1.80471,1.787076 l -1.787189,1.787076 -3.2401772,-3.240177 -3.240177,-3.240177 1.7870754,-1.787191 c 0.9828914,-0.982954 1.7870754,-1.7950739 1.7870754,-1.8047105 0,-0.00961 -1.2392579,-0.017522 -2.7539062,-0.017522 H 2.3906249 v 6.0117185 6.011719 h 6.0117189 6.0117182 z m -0.01685,-6.146047 3.603002,-3.6030772 1.446496,1.4468272 1.446495,1.446828 h 0.358088 0.358085 V 7.1953116 2.3906241 H 16.804688 12 v 0.3577821 0.3577821 l 1.025391,1.028297 c 0.563964,0.5655636 1.209333,1.2172855 1.434153,1.4482713 L 14.8683,6.0027304 11.272086,9.5990023 7.675871,13.195274 9.2343514,14.753887 c 0.8571646,0.857237 1.5587886,1.558612 1.5591656,1.558612 3.77e-4,0 1.622035,-1.621385 3.603688,-3.603078 z">
+                            </path>
+                        </svg>
+                        ) next to a link within the NHLBI BioData Catalyst ecosystem indicates that the link leads to
+                        another site that is not a federal government website.
+                    </p>
+                    <p>NHLBI cannot attest to the accuracy of information provided on external websites.</p>
+                    <p>Linking to a non-federal website does not constitute an endorsement by NHLBI of the sponsors or
+                        of the information and products presented on the website.</p>
+                    <p>You will be subject to the destination's privacy policy when you follow the link.</p>
+                    <p>Are you sure you want to navigate to this site?</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <a href="https://www.biorxiv.org/content/10.1101/563866v1" class="btn btn-primary"
+                    role="button">Continue</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Imputation Server Modal -->
+<div class="modal fade" id="imputationServerModal" tabindex="-1" role="dialog" aria-labelledby="imputationServerModal"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imputationServerModalLabel">Leaving BioData Catalyst</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <p>
+                        This graphic notice (
+                        <svg fill="var(--color-blueberry)" version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px"
+                            y="0px" width="14px" height="14px" viewBox="0 0 24 24">
+                            <path
+                                d="M 0,15.609374 V 7.2187491 H 5.1505597 10.30112 L 10.910188,6.6093432 11.519255,5.9999371 10.564316,5.044784 9.6093751,4.0896309 V 2.044815 -3.0028053e-7 H 16.804688 24 V 7.1953116 14.390624 h -2.044815 -2.044817 l -0.955152,-0.954941 -0.955154,-0.954939 -0.609406,0.609067 -0.609405,0.609069 V 18.84944 24 H 8.3906251 0 Z m 14.414062,3.246094 c 0,-1.514648 -0.0079,-2.753907 -0.01753,-2.753907 -0.0096,0 -0.821756,0.804184 -1.80471,1.787076 l -1.787189,1.787076 -3.2401772,-3.240177 -3.240177,-3.240177 1.7870754,-1.787191 c 0.9828914,-0.982954 1.7870754,-1.7950739 1.7870754,-1.8047105 0,-0.00961 -1.2392579,-0.017522 -2.7539062,-0.017522 H 2.3906249 v 6.0117185 6.011719 h 6.0117189 6.0117182 z m -0.01685,-6.146047 3.603002,-3.6030772 1.446496,1.4468272 1.446495,1.446828 h 0.358088 0.358085 V 7.1953116 2.3906241 H 16.804688 12 v 0.3577821 0.3577821 l 1.025391,1.028297 c 0.563964,0.5655636 1.209333,1.2172855 1.434153,1.4482713 L 14.8683,6.0027304 11.272086,9.5990023 7.675871,13.195274 9.2343514,14.753887 c 0.8571646,0.857237 1.5587886,1.558612 1.5591656,1.558612 3.77e-4,0 1.622035,-1.621385 3.603688,-3.603078 z">
+                            </path>
+                        </svg>
+                        ) next to a link within the NHLBI BioData Catalyst ecosystem indicates that the link leads to
+                        another site that is not a federal government website.
+                    </p>
+                    <p>NHLBI cannot attest to the accuracy of information provided on external websites.</p>
+                    <p>Linking to a non-federal website does not constitute an endorsement by NHLBI of the sponsors or
+                        of the information and products presented on the website.</p>
+                    <p>You will be subject to the destination's privacy policy when you follow the link.</p>
+                    <p>Are you sure you want to navigate to this site?</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <a href="http://dx.doi.org/10.1038/ng.3656" class="btn btn-primary" role="button">Continue</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Minimac Modal -->
+<div class="modal fade" id="minimacModal" tabindex="-1" role="dialog" aria-labelledby="minimacModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="minimacModalLabel">Leaving BioData Catalyst</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <p>
+                        This graphic notice (
+                        <svg fill="var(--color-blueberry)" version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px"
+                            y="0px" width="14px" height="14px" viewBox="0 0 24 24">
+                            <path
+                                d="M 0,15.609374 V 7.2187491 H 5.1505597 10.30112 L 10.910188,6.6093432 11.519255,5.9999371 10.564316,5.044784 9.6093751,4.0896309 V 2.044815 -3.0028053e-7 H 16.804688 24 V 7.1953116 14.390624 h -2.044815 -2.044817 l -0.955152,-0.954941 -0.955154,-0.954939 -0.609406,0.609067 -0.609405,0.609069 V 18.84944 24 H 8.3906251 0 Z m 14.414062,3.246094 c 0,-1.514648 -0.0079,-2.753907 -0.01753,-2.753907 -0.0096,0 -0.821756,0.804184 -1.80471,1.787076 l -1.787189,1.787076 -3.2401772,-3.240177 -3.240177,-3.240177 1.7870754,-1.787191 c 0.9828914,-0.982954 1.7870754,-1.7950739 1.7870754,-1.8047105 0,-0.00961 -1.2392579,-0.017522 -2.7539062,-0.017522 H 2.3906249 v 6.0117185 6.011719 h 6.0117189 6.0117182 z m -0.01685,-6.146047 3.603002,-3.6030772 1.446496,1.4468272 1.446495,1.446828 h 0.358088 0.358085 V 7.1953116 2.3906241 H 16.804688 12 v 0.3577821 0.3577821 l 1.025391,1.028297 c 0.563964,0.5655636 1.209333,1.2172855 1.434153,1.4482713 L 14.8683,6.0027304 11.272086,9.5990023 7.675871,13.195274 9.2343514,14.753887 c 0.8571646,0.857237 1.5587886,1.558612 1.5591656,1.558612 3.77e-4,0 1.622035,-1.621385 3.603688,-3.603078 z">
+                            </path>
+                        </svg>
+                        ) next to a link within the NHLBI BioData Catalyst ecosystem indicates that the link leads to
+                        another site that is not a federal government website.
+                    </p>
+                    <p>NHLBI cannot attest to the accuracy of information provided on external websites.</p>
+                    <p>Linking to a non-federal website does not constitute an endorsement by NHLBI of the sponsors or
+                        of the information and products presented on the website.</p>
+                    <p>You will be subject to the destination's privacy policy when you follow the link.</p>
+                    <p>Are you sure you want to navigate to this site?</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <a href="https://doi.org/10.1093/bioinformatics/btu704" class="btn btn-primary"
+                    role="button">Continue</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Eagle Modal -->
+<div class="modal fade" id="eagleModal" tabindex="-1" role="dialog" aria-labelledby="eagleModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eagleModalLabel">Leaving BioData Catalyst</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <p>This graphic notice (
+                        <svg fill="var(--color-blueberry)" version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px"
+                            y="0px" width="14px" height="14px" viewBox="0 0 24 24">
+                            <path
+                                d="M 0,15.609374 V 7.2187491 H 5.1505597 10.30112 L 10.910188,6.6093432 11.519255,5.9999371 10.564316,5.044784 9.6093751,4.0896309 V 2.044815 -3.0028053e-7 H 16.804688 24 V 7.1953116 14.390624 h -2.044815 -2.044817 l -0.955152,-0.954941 -0.955154,-0.954939 -0.609406,0.609067 -0.609405,0.609069 V 18.84944 24 H 8.3906251 0 Z m 14.414062,3.246094 c 0,-1.514648 -0.0079,-2.753907 -0.01753,-2.753907 -0.0096,0 -0.821756,0.804184 -1.80471,1.787076 l -1.787189,1.787076 -3.2401772,-3.240177 -3.240177,-3.240177 1.7870754,-1.787191 c 0.9828914,-0.982954 1.7870754,-1.7950739 1.7870754,-1.8047105 0,-0.00961 -1.2392579,-0.017522 -2.7539062,-0.017522 H 2.3906249 v 6.0117185 6.011719 h 6.0117189 6.0117182 z m -0.01685,-6.146047 3.603002,-3.6030772 1.446496,1.4468272 1.446495,1.446828 h 0.358088 0.358085 V 7.1953116 2.3906241 H 16.804688 12 v 0.3577821 0.3577821 l 1.025391,1.028297 c 0.563964,0.5655636 1.209333,1.2172855 1.434153,1.4482713 L 14.8683,6.0027304 11.272086,9.5990023 7.675871,13.195274 9.2343514,14.753887 c 0.8571646,0.857237 1.5587886,1.558612 1.5591656,1.558612 3.77e-4,0 1.622035,-1.621385 3.603688,-3.603078 z">
+                            </path>
+                        </svg>
+                        ) next to a link within the NHLBI BioData Catalyst ecosystem indicates that the link leads to
+                        another site that is not a federal government website.
+                    </p>
+                    <p>NHLBI cannot attest to the accuracy of information provided on external websites.</p>
+                    <p>Linking to a non-federal website does not constitute an endorsement by NHLBI of the sponsors or
+                        of the information and products presented on the website.</p>
+                    <p>You will be subject to the destination's privacy policy when you follow the link.</p>
+                    <p>Are you sure you want to navigate to this site?</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <a href="http://dx.doi.org/10.1038/ng.3679" class="btn btn-primary" role="button">Continue</a>
+            </div>
+        </div>
+    </div>
+</div>

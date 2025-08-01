@@ -1,37 +1,272 @@
-<div class="jumbotron jumbotron-fluid bg-primary text-white">
-  <div class="container">
-    <h1>Welcome to Cloudgene!</h1>
-    <p>Congratulations! The webserver was installed successfully!</p>
-    {{#is(loggedIn, true)}}
-      <p>
-        <a class="btn btn-primary btn-lg" href="http://www.cloudgene.io" target="_blank" role="button">Learn more »</a>
-      </p>
-    {{else}}
-      <p>
-        <a class="btn btn-lg btn-success" href="#!pages/login">Login</a>&nbsp;
-        <a class="btn btn-lg btn-primary" href="#!pages/register">Sign up now</a>
-      </p>
-    {{/is}}
-  </div>
+<div class="container-fluid" style="background: #f4f4f6;">
+    <div class="row alert-warning pt-2 pb-2">
+        <div class="col-md-12 text-center">
+            Sep 2025 release: new v2 backend.
+        </div>
+    </div>
 </div>
 
-<div class="container bd-content" style="margin-bottom: 0px;">
+<div class="jumbotron jumbotron-fluid text-white text-center" style="background: #f4f4f6; margin-bottom: 0px; ">
+    <div class="container">
+        <h1 class="jumbotron-heading" style="color: #393939;">TOPMed Imputation Server</h1>
+        <p class="lead text-center" style="color: #393939">
+            Free Next-Generation Genotype Imputation Service
+        </p>
+        {{#is(loggedIn, false)}}
+        <p>
+            <br>
+            <a class="btn btn-lg btn-success" href="/#!pages/register">Sign up now</a>&nbsp;
+            <a class="btn btn-lg btn-secondary" href="/#!pages/login">Login</a>
+        </p>
+        {{/is}}
 
-  <h3>Congratulations</h3>
+    </div>
+</div>
 
-  <p>The webserver was installed successfully!</p>
+<div class="text-white" style="background: #c0143c;">
+    <div class="container pt-3">
+        <div class="row justify-content-center text-center ">
+            <div class="col-md-3 text-center">
+                <p>
+                    <span class="lead" style="font-size: 200%;">
+                        {{div(counter.complete.chromosomes, 22000000)}}M
+                    </span>
+                    <br>Imputed Genomes
+                </p>
+            </div>
+            <div class="col-md-3 text-center">
+                <p>
+                    <span class="lead" style="font-size: 200%;">
+                        {{counter.users}}
+                    </span>
+                    <br>Registered Users
+                </p>
+            </div>
+            <div class="col-md-3 text-center">
+                <p>
+                    <span class="lead" style="font-size: 200%;">
+                        {{#sum(counter.running.runs, counter.waiting.runs)}}
+                            {{sum(counter.running.runs, counter.waiting.runs)}}
+                        {{/sum(counter.running.runs, counter.waiting.runs)}}
+                        {{^sum(counter.running.runs, counter.waiting.runs)}}
+                            0
+                        {{/sum(counter.running.runs, counter.waiting.runs)}}
+                    </span>
+                    <br>Active Jobs
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-light py-5" style="margin-top: 0px;">
+    <div class="container">
 
 
-  <h3>What's next?</h3>
+        <h2 class="text-center pb-3">The easiest way to impute genotypes</h2>
 
-  <p>Since this is a fresh installation of Cloudgene, please perform the following steps to complete the installation:
-    <ol>
-      <li><b>Login</b> as admin with the default admin password</li>
-      <li>Change your password immediately (see <a href="#!pages/profile">Profile</a>)</li>
-      <li>Open the <a href="admin.html">Admin-Panel</a> and install your first <a href="admin.html#!pages/admin-apps">application</a></li>
-    </ol>
+        <!-- Workflow Description -->
 
-  <p>Once you're up and running, we suggest you have a look at the <a href="http://docs.cloudgene.io" target="_blank"><i class="fas fa-book"></i> Documentation</a>.<br></p>
-  <p>To replace this pages create a file <code>pages/home.stache</code> and adapt it.</p>
+        <div class="card-deck text-center ">
+            <div class="card box-shadow">
+                <div class="card-body">
+                    <p><img src="/static/images/up-cloud.png" width="105px" alt="Upload to cloud symbol"></p>
+                    <b>Upload your genotypes to our secured service.</b>
+                </div>
+            </div>
+            <div class="card box-shadow">
+                <div class="card-body">
+                    <p><img src="/static/images/impute.png" width="105px" alt="Imputation Symbol"></p>
+                    <b>Choose a reference panel</b>. We will take care of pre-phasing and imputation.
+                </div>
+            </div>
+            <div class="card box-shadow">
+                <div class="card-body">
+                    <p><img src="/static/images/down-cloud.png" width="105px" alt="Download from cloud symbol"></p>
+                    <b>Download the results</b>.<br>All results are encrypted with a one-time password. After 7 days,
+                    all results are deleted from our server.
+                </div>
+            </div>
+        </div>
 
+    </div>
+</div>
+
+<div class="bg-light py-5">
+    <div class="container">
+        <h4 class="text-center pb-3">The TOPMed Imputation Server is powered by software invented and developed by the
+            <a href="https://imputationserver.sph.umich.edu/index.html#!" data-toggle="modal"
+                data-target="#michISModal">University
+                of Michigan <svg fill="var(--color-blueberry)" version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px"
+                    y="0px" width="14px" height="14px" viewBox="0 0 24 24" style="margin-left: 0.25rem;">
+                    <path
+                        d="M 0,15.609374 V 7.2187491 H 5.1505597 10.30112 L 10.910188,6.6093432 11.519255,5.9999371 10.564316,5.044784 9.6093751,4.0896309 V 2.044815 -3.0028053e-7 H 16.804688 24 V 7.1953116 14.390624 h -2.044815 -2.044817 l -0.955152,-0.954941 -0.955154,-0.954939 -0.609406,0.609067 -0.609405,0.609069 V 18.84944 24 H 8.3906251 0 Z m 14.414062,3.246094 c 0,-1.514648 -0.0079,-2.753907 -0.01753,-2.753907 -0.0096,0 -0.821756,0.804184 -1.80471,1.787076 l -1.787189,1.787076 -3.2401772,-3.240177 -3.240177,-3.240177 1.7870754,-1.787191 c 0.9828914,-0.982954 1.7870754,-1.7950739 1.7870754,-1.8047105 0,-0.00961 -1.2392579,-0.017522 -2.7539062,-0.017522 H 2.3906249 v 6.0117185 6.011719 h 6.0117189 6.0117182 z m -0.01685,-6.146047 3.603002,-3.6030772 1.446496,1.4468272 1.446495,1.446828 h 0.358088 0.358085 V 7.1953116 2.3906241 H 16.804688 12 v 0.3577821 0.3577821 l 1.025391,1.028297 c 0.563964,0.5655636 1.209333,1.2172855 1.434153,1.4482713 L 14.8683,6.0027304 11.272086,9.5990023 7.675871,13.195274 9.2343514,14.753887 c 0.8571646,0.857237 1.5587886,1.558612 1.5591656,1.558612 3.77e-4,0 1.622035,-1.621385 3.603688,-3.603078 z">
+                    </path>
+                </svg></a> and driven by data
+            provided by the investigators of the <a href="https://nhlbiwgs.org/" data-toggle="modal"
+                data-target="#topmedModal">TOPMed Program <svg fill="var(--color-blueberry)" version="1.1"
+                    xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="14px" height="14px" viewBox="0 0 24 24"
+                    style="margin-left: 0.25rem;">
+                    <path
+                        d="M 0,15.609374 V 7.2187491 H 5.1505597 10.30112 L 10.910188,6.6093432 11.519255,5.9999371 10.564316,5.044784 9.6093751,4.0896309 V 2.044815 -3.0028053e-7 H 16.804688 24 V 7.1953116 14.390624 h -2.044815 -2.044817 l -0.955152,-0.954941 -0.955154,-0.954939 -0.609406,0.609067 -0.609405,0.609069 V 18.84944 24 H 8.3906251 0 Z m 14.414062,3.246094 c 0,-1.514648 -0.0079,-2.753907 -0.01753,-2.753907 -0.0096,0 -0.821756,0.804184 -1.80471,1.787076 l -1.787189,1.787076 -3.2401772,-3.240177 -3.240177,-3.240177 1.7870754,-1.787191 c 0.9828914,-0.982954 1.7870754,-1.7950739 1.7870754,-1.8047105 0,-0.00961 -1.2392579,-0.017522 -2.7539062,-0.017522 H 2.3906249 v 6.0117185 6.011719 h 6.0117189 6.0117182 z m -0.01685,-6.146047 3.603002,-3.6030772 1.446496,1.4468272 1.446495,1.446828 h 0.358088 0.358085 V 7.1953116 2.3906241 H 16.804688 12 v 0.3577821 0.3577821 l 1.025391,1.028297 c 0.563964,0.5655636 1.209333,1.2172855 1.434153,1.4482713 L 14.8683,6.0027304 11.272086,9.5990023 7.675871,13.195274 9.2343514,14.753887 c 0.8571646,0.857237 1.5587886,1.558612 1.5591656,1.558612 3.77e-4,0 1.622035,-1.621385 3.603688,-3.603078 z">
+                    </path>
+                </svg></a>.
+        </h4>
+    </div>
+</div>
+
+<!-- News and Logos -->
+<div class="py-5 bg-light">
+    <div class="container  ">
+        <div class="card ">
+            <div class="card-body">
+                <div class="container">
+                    <div class="row">
+                        <h5 style="padding-top: 10px; padding-bottom: 0px; margin-bottom: 10px;">Latest News</h5>
+                        <hr style="padding-top: 0px; margin-top: 0px;">
+                        <p>
+                            <small class="text-muted"><i class="far fa-calendar-alt"></i> 32 September 2025</small><br>
+                            We are pleased to announce the release of Version 2 of the Imputation Server. <b>TO DO:</b>
+                            write some nice words here about the new tech.
+                        </p>
+                        <p>
+                            <small class="text-muted"><i class="far fa-calendar-alt"></i> 11 March 2024</small><br>
+                            We would like to remind users that there is a limit of <b>three concurrent jobs per
+                                person</b>. The TOPMed imputation server is a free resource, and these limits allow us
+                            to provide service to a wide audience. Please do not attempt to bypass these limits by
+                            creating multiple accounts. We monitor usage, and reserve the right to terminate jobs or
+                            accounts that are in violation of the policy.
+                        </p>
+                        <p>
+                            <small class="text-muted"><i class="far fa-calendar-alt"></i> 07 December 2023</small><br>
+                            We have released the new TOPMed-r3 reference panel, with ~30% more sites and samples than
+                            TOPMed-r2. The server has been updated to improve security and performance. Additional
+                            details about the new panel and updates will be described soon. The TOPMed-r2 panel is no
+                            longer available. Automated scripts should be updated to use <i>topmed-r3</i>, as shown in
+                            the latest <a href="https://topmedimpute.readthedocs.io/en/latest/api/">documentation</a>.
+                        </p>
+                        <p>
+                            <small class="text-muted"><i class="far fa-calendar-alt"></i> 12 June 2023</small><br>
+                            As users of TOPMed data, we'd like to call your attention to the following funding call: <a
+                                href="https://grants.nih.gov/grants/guide/notice-files/NOT-HL-23-067.html">Integrative
+                                Omics Analysis of NHLBI TOPMed Data</a>.
+                        </p>
+                        <p>
+                            <small class="text-muted"><i class="far fa-calendar-alt"></i> 17 May 2021</small><br>
+                            We are happy to announce that service has returned to full capacity. We have made
+                            significant system changes to the underlying infrastructure to help address past performance
+                            issues, and will continue to monitor the system closely. Thank you for your patience!
+                        </p>
+                        <p>
+                            <small class="text-muted"><i class="far fa-calendar-alt"></i> 21 October 2020</small><br>
+                            <b>Scheduled Maintenance Announcement:</b> An Imputation Server maintenance window is
+                            planned for Thursday, October 22nd starting at 5:00PM EST. through Sunday, October 25th.
+                            During this window, no new jobs will be able to be created. All existing jobs will finish as
+                            scheduled.
+                        </p>
+                        <p>
+                            <small class="text-muted"><i class="far fa-calendar-alt"></i> 12 August 2020</small><br>
+                            The server is online with full functionality after the latest maintenance window. We have
+                            also made improvements to efficiency and increased overall throughput. If you notice any
+                            issues, please contact us.
+                        </p>
+                        <p>
+                            <small class="text-muted"><i class="far fa-calendar-alt"></i> 1 May 2020</small><br>
+                            The server continues to be under a heavy load and jobs may be queued for long periods of
+                            time. Jobs may still be running even after an email notification has been sent. Please do
+                            not cancel and restart jobs as that removes your place in the queue.
+                        </p>
+                        <p>
+                            <small class="text-muted"><i class="far fa-calendar-alt"></i> 13 April 2020</small><br>
+                            Due to heavy load on the Imputation Server, we are experiencing intermittent job failures.
+                            Please bear with us as we work to improve job queueing under heavy load. As possible, users
+                            may want to delay job submission until the load subsides. We are excited that the TOPMed
+                            panel is in such high demand and are working to ensure that the server performs well.
+                        </p>
+                        <p>
+                            <small class="text-muted"><i class="far fa-calendar-alt"></i> 10 March 2020</small><br>
+                            Based on whole genome sequence under NHLBI's TOPMed Program, imputation from a TOPMed
+                            reference panel will soon be available to the community. Built from 97,256 deeply sequenced
+                            human genomes, this panel contains 308,107,085 genetic variants, and improves imputation
+                            compared to existing reference panels. The TOPMed Imputation Server is running in a cloud
+                            computing environment supported by the NHLBI BioData Catalyst program. The panel and server
+                            are currently in beta-testing. Imputation with HRC and 1000 Genome panels are still
+                            supported at Michigan Imputation Server.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- IS Modal -->
+<div class="modal fade" id="michISModal" tabindex="-1" role="dialog" aria-labelledby="michISModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="michISModalLabel">Leaving BioData Catalyst</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <p>This graphic notice ( <svg fill="var(--color-blueberry)" version="1.1"
+                            xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="14px" height="14px"
+                            viewBox="0 0 24 24">
+                            <path
+                                d="M 0,15.609374 V 7.2187491 H 5.1505597 10.30112 L 10.910188,6.6093432 11.519255,5.9999371 10.564316,5.044784 9.6093751,4.0896309 V 2.044815 -3.0028053e-7 H 16.804688 24 V 7.1953116 14.390624 h -2.044815 -2.044817 l -0.955152,-0.954941 -0.955154,-0.954939 -0.609406,0.609067 -0.609405,0.609069 V 18.84944 24 H 8.3906251 0 Z m 14.414062,3.246094 c 0,-1.514648 -0.0079,-2.753907 -0.01753,-2.753907 -0.0096,0 -0.821756,0.804184 -1.80471,1.787076 l -1.787189,1.787076 -3.2401772,-3.240177 -3.240177,-3.240177 1.7870754,-1.787191 c 0.9828914,-0.982954 1.7870754,-1.7950739 1.7870754,-1.8047105 0,-0.00961 -1.2392579,-0.017522 -2.7539062,-0.017522 H 2.3906249 v 6.0117185 6.011719 h 6.0117189 6.0117182 z m -0.01685,-6.146047 3.603002,-3.6030772 1.446496,1.4468272 1.446495,1.446828 h 0.358088 0.358085 V 7.1953116 2.3906241 H 16.804688 12 v 0.3577821 0.3577821 l 1.025391,1.028297 c 0.563964,0.5655636 1.209333,1.2172855 1.434153,1.4482713 L 14.8683,6.0027304 11.272086,9.5990023 7.675871,13.195274 9.2343514,14.753887 c 0.8571646,0.857237 1.5587886,1.558612 1.5591656,1.558612 3.77e-4,0 1.622035,-1.621385 3.603688,-3.603078 z">
+                            </path>
+                        </svg> ) next to a link within the NHLBI BioData Catalyst ecosystem indicates that the link
+                        leads to another site that is not a federal government website.</p>
+                    <p>NHLBI cannot attest to the accuracy of information provided on external websites.</p>
+                    <p>Linking to a non-federal website does not constitute an endorsement by NHLBI of the sponsors or
+                        of the information and products presented on the website.</p>
+                    <p>You will be subject to the destination's privacy policy when you follow the link.</p>
+                    <p>Are you sure you want to navigate to this site?</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <a href="https://imputationserver.sph.umich.edu/index.html#!" class="btn btn-primary"
+                    role="button">Continue</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOPMed Modal -->
+<div class="modal fade" id="topmedModal" tabindex="-1" role="dialog" aria-labelledby="topmedModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="topmedModalLabel">Leaving BioData Catalyst</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <p>This graphic notice ( <svg fill="var(--color-blueberry)" version="1.1"
+                            xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="14px" height="14px"
+                            viewBox="0 0 24 24">
+                            <path
+                                d="M 0,15.609374 V 7.2187491 H 5.1505597 10.30112 L 10.910188,6.6093432 11.519255,5.9999371 10.564316,5.044784 9.6093751,4.0896309 V 2.044815 -3.0028053e-7 H 16.804688 24 V 7.1953116 14.390624 h -2.044815 -2.044817 l -0.955152,-0.954941 -0.955154,-0.954939 -0.609406,0.609067 -0.609405,0.609069 V 18.84944 24 H 8.3906251 0 Z m 14.414062,3.246094 c 0,-1.514648 -0.0079,-2.753907 -0.01753,-2.753907 -0.0096,0 -0.821756,0.804184 -1.80471,1.787076 l -1.787189,1.787076 -3.2401772,-3.240177 -3.240177,-3.240177 1.7870754,-1.787191 c 0.9828914,-0.982954 1.7870754,-1.7950739 1.7870754,-1.8047105 0,-0.00961 -1.2392579,-0.017522 -2.7539062,-0.017522 H 2.3906249 v 6.0117185 6.011719 h 6.0117189 6.0117182 z m -0.01685,-6.146047 3.603002,-3.6030772 1.446496,1.4468272 1.446495,1.446828 h 0.358088 0.358085 V 7.1953116 2.3906241 H 16.804688 12 v 0.3577821 0.3577821 l 1.025391,1.028297 c 0.563964,0.5655636 1.209333,1.2172855 1.434153,1.4482713 L 14.8683,6.0027304 11.272086,9.5990023 7.675871,13.195274 9.2343514,14.753887 c 0.8571646,0.857237 1.5587886,1.558612 1.5591656,1.558612 3.77e-4,0 1.622035,-1.621385 3.603688,-3.603078 z">
+                            </path>
+                        </svg> ) next to a link within the NHLBI BioData Catalyst ecosystem indicates that the link
+                        leads to another site that is not a federal government website.</p>
+                    <p>NHLBI cannot attest to the accuracy of information provided on external websites.</p>
+                    <p>Linking to a non-federal website does not constitute an endorsement by NHLBI of the sponsors or
+                        of the information and products presented on the website.</p>
+                    <p>You will be subject to the destination's privacy policy when you follow the link.</p>
+                    <p>Are you sure you want to navigate to this site?</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <a href="https://nhlbiwgs.org/" class="btn btn-primary" role="button">Continue</a>
+            </div>
+        </div>
+    </div>
 </div>

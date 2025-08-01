@@ -101,6 +101,8 @@
   </div>
 </nav>
 
+<div style="padding-top: 2rem;"></div>
+
 {{#is(maintenace, true)}}
   <div class="alert alert-danger" style="margin-bottom: 0px;">
     <div class="container">
