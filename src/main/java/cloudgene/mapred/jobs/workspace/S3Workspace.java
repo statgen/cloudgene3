@@ -111,7 +111,7 @@ public class S3Workspace implements IWorkspace {
 
 	@Override
 	public String downloadLog(String name) throws IOException {
-		String fullPath = FileUtil.path(location, LOGS_DIRECTORY, name);
+		String fullPath = FileUtil.path(location, job, LOGS_DIRECTORY, name);
 		String log = FileUtil.readFileAsString(download(fullPath));
 		return log;
 	}
