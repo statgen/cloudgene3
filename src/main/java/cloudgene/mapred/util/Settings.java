@@ -86,7 +86,7 @@ public class Settings {
 
 	private String port = "8082";
 
-	private boolean skipWorkspaceCleanup = false;
+	private boolean workspaceCleanup = true;
 
 	private List<String> counters = new Vector<String>();
 
@@ -429,9 +429,9 @@ public class Settings {
 		return port;
 	}
 
-	public void setSkipWorkspaceCleanup(boolean skipWorkspaceCleanup) { this.skipWorkspaceCleanup = skipWorkspaceCleanup; }
+	public void setWorkspaceCleanup(boolean workspaceCleanup) { this.workspaceCleanup = workspaceCleanup; }
 
-	public boolean getSkipWorkspaceCleanup() { return skipWorkspaceCleanup; }
+	public boolean getWorkspaceCleanup() { return workspaceCleanup; }
 
 	public void setShowLogs(boolean showLogs) {
 		this.showLogs = showLogs;

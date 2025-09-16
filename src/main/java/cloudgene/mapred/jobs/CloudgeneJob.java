@@ -221,8 +221,8 @@ public class CloudgeneJob extends AbstractJob {
 	public boolean cleanUp() {
 
 		Settings settings = getSettings();
-		boolean skipCleanup = settings.getSkipWorkspaceCleanup();
-		if (skipCleanup) {
+		boolean shouldCleanUp = settings.getWorkspaceCleanup();
+		if (!shouldCleanUp) {
 			log.info("[Job {}] Skipping cleanup.", getId());
 			return false;
 		}
