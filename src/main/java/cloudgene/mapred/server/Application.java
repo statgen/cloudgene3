@@ -168,7 +168,12 @@ public class Application {
 		String template = cacheTemplates.get(key);
 
 		if (template != null) {
-			return String.format(template, strings);
+			try {
+				return String.format(template, strings);
+			} catch (IllegalFormatException e) {
+				String msg = String.format("Failed to format template '%s' with arguments: %s", key, Arrays.toString(strings));
+				throw new IllegalArgumentException(msg, e);
+			}
 		} else {
 			return "!" + key;
 		}
