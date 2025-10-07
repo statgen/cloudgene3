@@ -10,33 +10,40 @@ public class UserTest {
 	@Test
 	public void testUsernameRules() {
 
-		assertNotNull(User.checkUsername("user_name"));
+		assertNotNull(User.checkUsername("us"));
+		assertNotNull(User.checkUsername("username_is_taking_too_long"));
 		assertNotNull(User.checkUsername("user#name"));
 		assertNotNull(User.checkUsername("user-name"));
 		assertNotNull(User.checkUsername("user!name"));
+		assertNotNull(User.checkUsername("user\"na'me"));
 		assertNotNull(User.checkUsername("_user name"));
 		assertNotNull(User.checkUsername("user.name"));
 		assertNotNull(User.checkUsername(",user,name"));
+		assertNotNull(User.checkUsername("12username12"));
+		assertNotNull(User.checkUsername("uSeRnAmE"));
 
+		assertNull(User.checkUsername("user_name"));
 		assertNull(User.checkUsername("username"));
 		assertNull(User.checkUsername("username27"));
-		assertNull(User.checkUsername("usernameUsername"));
-		assertNull(User.checkUsername("12username12"));
 		assertNull(User.checkUsername("user12name"));
-		assertNull(User.checkUsername("uSeRnAmE"));
 
 	}
 
 	@Test
 	public void testPasswordRules() {
 
+		assertNotNull(User.checkPassword(null, null));
+		assertNotNull(User.checkPassword("", ""));
 		assertNotNull(User.checkPassword("password1", "password"));
 		assertNotNull(User.checkPassword("pass", "pass"));
 		assertNotNull(User.checkPassword("password", "password"));
 		assertNotNull(User.checkPassword("PassworD", "PassworD"));
 		assertNotNull(User.checkPassword("PassworDpassword", "PassworDpassword"));
 
-		assertNull(User.checkPassword("PassworDpassword2", "PassworDpassword2"));
+		assertNull(User.checkPassword("PassworDpasswor!d2", "PassworDpasswor!d2"));
+		assertNull(User.checkPassword("PassworDpasswor]d2", "PassworDpasswor]d2"));
+		assertNull(User.checkPassword("qwertyASDFGH\"12345", "qwertyASDFGH\"12345"));
+		assertNull(User.checkPassword("0987qwerASDF$%@^", "0987qwerASDF$%@^"));
 
 	}
 
@@ -49,6 +56,7 @@ public class UserTest {
 		assertNotNull(User.checkMail("user#.nameh@.com"));
 
 		assertNull(User.checkMail("user.name@host.com"));
+		assertNull(User.checkMail("username+subuser@host.com"));
 	}
 
 }

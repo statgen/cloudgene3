@@ -5,6 +5,14 @@ import java.util.regex.Pattern;
 
 public class User {
 
+	private static final Pattern DIGIT = Pattern.compile("[0-9]");
+	private static final Pattern LOWERCASE = Pattern.compile("[a-z]");
+	private static final Pattern UPPERCASE = Pattern.compile("[A-Z]");
+	private static final Pattern SPECIAL = Pattern.compile("[\"#$%&'()*+,./:;<=>?@\\[\\]\\\\^_`{|}~!-]");
+	private static final Pattern EMAIL = Pattern.compile("^[_A-Za-z0-9+-]+(\\.[_A-Za-z0-9-]+)*@"
+			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$");
+	private static final Pattern USERNAME = Pattern.compile("^[a-z][a-z0-9_]+[a-z0-9]$");
+
 	private String username;
 
 	private String password;
@@ -190,13 +198,13 @@ public class User {
 			return "The username is required.";
 		}
 
-		if (username.length() < 4) {
-			return "The username must contain at least four characters.";
-
+		if (username.length() < 4 || username.length() > 12) {
+			return "The username must contain between 4 and 12 characters.";
 		}
 
-		if (!Pattern.matches("^[a-zA-Z0-9]+$", username)) {
-			return "Your username is not valid. Only characters A-Z, a-z and digits 0-9 are acceptable.";
+		if (!USERNAME.matcher(username).find()) {
+			return "Your username is not valid. It can only contain lowercase letters a-z, digits 0-9, and " +
+					"underscores _. It must start with a lowercase letter, and cannot end in an underscore.";
 		}
 
 		return null;
@@ -213,32 +221,33 @@ public class User {
 
 	public static String checkPassword(String password, String confirmPassword) {
 
-		if (password == null || confirmPassword == null || password.isEmpty() || !password.equals(confirmPassword)) {
+		if (password == null || password.isEmpty() || !password.equals(confirmPassword)) {
 			return "Please check your passwords.";
 		}
 
-		if (password.length() < 6) {
-			return "Password must contain at least six characters!";
+		if (password.length() < 14) {
+			return "Password must contain at least 14 characters!";
 		}
 
-		if (!Pattern.compile("[0-9]").matcher(password).find()) {
+		if (!DIGIT.matcher(password).find()) {
 			return "Password must contain at least one number (0-9)!";
 		}
 
-		if (!Pattern.compile("[a-z]").matcher(password).find()) {
+		if (!LOWERCASE.matcher(password).find()) {
 			return "Password must contain at least one lowercase letter (a-z)!";
 		}
 
-		if (!Pattern.compile("[A-Z]").matcher(password).find()) {
+		if (!UPPERCASE.matcher(password).find()) {
 			return "Password must contain at least one uppercase letter (A-Z)!";
+		}
+
+		if (!SPECIAL.matcher(password).find()) {
+			return "Password must contain at least one special character: !\"#$%&'()*+,-./:;<=>?@[]\\^_`{|}~";
 		}
 
 		return null;
 
 	}
-
-	private static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
-			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
 
 	public static String checkMail(String mail) {
 
@@ -246,7 +255,7 @@ public class User {
 			return "E-Mail is required.";
 		}
 
-		if (!Pattern.matches(EMAIL_PATTERN, mail)) {
+		if (!EMAIL.matcher(mail).find()) {
 			return "Please enter a valid mail address.";
 		}
 
