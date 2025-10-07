@@ -2,11 +2,8 @@ package cloudgene.mapred.server;
 
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import cloudgene.mapred.jobs.AbstractJob;
 import cloudgene.mapred.jobs.engine.handler.IJobErrorHandler;
 import cloudgene.mapred.jobs.engine.handler.JobErrorHandlerFactory;
 import cloudgene.mapred.util.Configuration;
