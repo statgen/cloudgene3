@@ -198,8 +198,8 @@ public class User {
 			return "The username is required.";
 		}
 
-		if (username.length() < 4 || username.length() > 12) {
-			return "The username must contain between 4 and 12 characters.";
+		if (username.length() < 4 || username.length() > 16) {
+			return "The username must contain between 4 and 16 characters.";
 		}
 
 		if (!USERNAME.matcher(username).find()) {
@@ -226,19 +226,19 @@ public class User {
 		}
 
 		if (password.length() < 14) {
-			return "Password must contain at least 14 characters!";
+			return "Password must contain at least 14 characters.";
 		}
 
 		if (!DIGIT.matcher(password).find()) {
-			return "Password must contain at least one number (0-9)!";
+			return "Password must contain at least one number: 0-9";
 		}
 
 		if (!LOWERCASE.matcher(password).find()) {
-			return "Password must contain at least one lowercase letter (a-z)!";
+			return "Password must contain at least one lowercase letter: a-z";
 		}
 
 		if (!UPPERCASE.matcher(password).find()) {
-			return "Password must contain at least one uppercase letter (A-Z)!";
+			return "Password must contain at least one uppercase letter: A-Z";
 		}
 
 		if (!SPECIAL.matcher(password).find()) {

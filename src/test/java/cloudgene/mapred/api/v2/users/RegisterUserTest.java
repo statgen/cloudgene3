@@ -40,11 +40,11 @@ public class RegisterUserTest {
 
 		// register new user
 		Map<String, String> form = new HashMap<String, String>();
-		form.put("username", "usernameunique");
+		form.put("username", "unique_user");
 		form.put("full-name", "full name");
 		form.put("mail", "test-uniquent@test.com");
-		form.put("new-password", "Password27");
-		form.put("confirm-new-password", "Password27");
+		form.put("new-password", "LongPassword@1714");
+		form.put("confirm-new-password", "LongPassword@1714");
 
 		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
 				.body("success", equalTo(true)).and().body("message", equalTo("User successfully created."));
@@ -60,7 +60,7 @@ public class RegisterUserTest {
 		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 
 		// test with same email but different username
-		form.put("username", "usernameuniqueunique");
+		form.put("username", "unique_again");
 
 		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
 				.body("success", equalTo(false)).and().body("message", equalTo("E-Mail is already registered."));
@@ -69,7 +69,7 @@ public class RegisterUserTest {
 
 		//check role
 		UserDao dao = new UserDao(application.getDatabase());
-		User user = dao.findByUsername("usernameunique");
+		User user = dao.findByUsername("unique_user");
 		assertEquals(1, user.getRoles().length);
 		assertEquals(UserService.DEFAULT_ROLE, user.getRoles()[0]);
 	}
@@ -84,8 +84,8 @@ public class RegisterUserTest {
 		form.put("username", "");
 		form.put("full-name", "full name");
 		form.put("mail", "test@test.com");
-		form.put("new-password", "Password27");
-		form.put("confirm-new-password", "Password27");
+		form.put("new-password", "LongPassword@1714");
+		form.put("confirm-new-password", "LongPassword@1714");
 
 		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
 				.body("success", equalTo(false)).and().body("message", containsString("username is required"));
@@ -104,8 +104,8 @@ public class RegisterUserTest {
 		form.put("username", "username-");
 		form.put("full-name", "full name");
 		form.put("mail", "test@test.com");
-		form.put("new-password", "Password27");
-		form.put("confirm-new-password", "Password27");
+		form.put("new-password", "LongPassword@1714");
+		form.put("confirm-new-password", "LongPassword@1714");
 
 		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
 				.body("success", equalTo(false)).and().body("message", containsString("Your username is not valid"));
@@ -115,8 +115,8 @@ public class RegisterUserTest {
 		form.put("username", "username.");
 		form.put("full-name", "full name");
 		form.put("mail", "test@test.com");
-		form.put("new-password", "Password27");
-		form.put("confirm-new-password", "Password27");
+		form.put("new-password", "LongPassword@1714");
+		form.put("confirm-new-password", "LongPassword@1714");
 
 		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
 				.body("success", equalTo(false)).and().body("message", containsString("Your username is not valid"));
@@ -126,8 +126,8 @@ public class RegisterUserTest {
 		form.put("username", "username#");
 		form.put("full-name", "full name");
 		form.put("mail", "test@test.com");
-		form.put("new-password", "Password27");
-		form.put("confirm-new-password", "Password27");
+		form.put("new-password", "LongPassword@1714");
+		form.put("confirm-new-password", "LongPassword@1714");
 
 		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
 				.body("success", equalTo(false)).and().body("message", containsString("Your username is not valid"));
@@ -145,11 +145,11 @@ public class RegisterUserTest {
 		form.put("username", "abc");
 		form.put("full-name", "full name");
 		form.put("mail", "test@test.com");
-		form.put("new-password", "Password27");
-		form.put("confirm-new-password", "Password27");
+		form.put("new-password", "LongPassword@1714");
+		form.put("confirm-new-password", "LongPassword@1714");
 
 		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", containsString("username must contain at least"));
+				.body("success", equalTo(false)).and().body("message", containsString("username must contain between"));
 		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 
 	}
@@ -164,8 +164,8 @@ public class RegisterUserTest {
 		form.put("username", "abcde");
 		form.put("full-name", "");
 		form.put("mail", "test@test.com");
-		form.put("new-password", "Password27");
-		form.put("confirm-new-password", "Password27");
+		form.put("new-password", "LongPassword@1714");
+		form.put("confirm-new-password", "LongPassword@1714");
 
 		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
 				.body("success", equalTo(false)).and().body("message", containsString("full name is required"));
@@ -183,8 +183,8 @@ public class RegisterUserTest {
 		form.put("username", "abcde");
 		form.put("full-name", "abcdefgh abcgd");
 		form.put("mail", "");
-		form.put("new-password", "Password27");
-		form.put("confirm-new-password", "Password27");
+		form.put("new-password", "LongPassword@1714");
+		form.put("confirm-new-password", "LongPassword@1714");
 
 		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
 				.body("success", equalTo(false)).and().body("message", containsString("E-Mail is required."));
@@ -202,8 +202,8 @@ public class RegisterUserTest {
 		form.put("username", "abcde");
 		form.put("full-name", "abcdefgh abcgd");
 		form.put("mail", "test");
-		form.put("new-password", "Password27");
-		form.put("confirm-new-password", "Password27");
+		form.put("new-password", "LongPassword@1714");
+		form.put("confirm-new-password", "LongPassword@1714");
 
 		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
 				.body("success", equalTo(false)).and().body("message", containsString("a valid mail address"));
@@ -278,8 +278,8 @@ public class RegisterUserTest {
 		form.put("username", "abcde");
 		form.put("full-name", "abcdefgh abcgd");
 		form.put("mail", "test@test.com");
-		form.put("new-password", "PASSWORD2727");
-		form.put("confirm-new-password", "PASSWORD2727");
+		form.put("new-password", "PASSWORD[]2727");
+		form.put("confirm-new-password", "PASSWORD[]2727");
 
 		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
 				.body("success", equalTo(false)).and().body("message", containsString("least one lowercase"));
@@ -320,8 +320,8 @@ public class RegisterUserTest {
 		form.put("username", "abcdefgh");
 		form.put("full-name", "abcdefgh abcgd");
 		form.put("mail", "");
-		form.put("new-password", "Password27");
-		form.put("confirm-new-password", "Password27");
+		form.put("new-password", "LongPassword@1714");
+		form.put("confirm-new-password", "LongPassword@1714");
 
 		// register user
 		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
@@ -351,8 +351,8 @@ public class RegisterUserTest {
 		form.put("username", "abcdefghi");
 		form.put("full-name", "abcdefgh abcgd");
 		form.put("mail", "test-blabla@test.com");
-		form.put("new-password", "Password27");
-		form.put("confirm-new-password", "Password27");
+		form.put("new-password", "LongPassword@1714");
+		form.put("confirm-new-password", "LongPassword@1714");
 
 		// register user
 		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()

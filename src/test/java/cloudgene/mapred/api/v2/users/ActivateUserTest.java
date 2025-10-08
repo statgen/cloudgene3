@@ -45,11 +45,11 @@ public class ActivateUserTest {
 		// form data
 
 		Map<String, String> form = new HashMap<String, String>();
-		form.put("username", "usernameunique5");
-		form.put("full-name", "full name");
+		form.put("username", "unique_name_5");
+		form.put("full-name", "Full Name");
 		form.put("mail", "new.user@test.com");
-		form.put("new-password", "Password27");
-		form.put("confirm-new-password", "Password27");
+		form.put("new-password", "LongPassword@1714");
+		form.put("confirm-new-password", "LongPassword@1714");
 
 		// register user
 		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
@@ -61,7 +61,7 @@ public class ActivateUserTest {
 		// get activation key from database
 		Database database = application.getDatabase();
 		UserDao userDao = new UserDao(database);
-		User user = userDao.findByUsername("usernameunique5");
+		User user = userDao.findByUsername("unique_name_5");
 		assertNotNull(user);
 
 		// check if correct key is in mail
@@ -70,8 +70,8 @@ public class ActivateUserTest {
 
 		// login should not be possible
 		form = new HashMap<String, String>();
-		form.put("username", "usernameunique5");
-		form.put("password", "Password27");
+		form.put("username", "unique_name_5");
+		form.put("password", "LongPassword@1714");
 
 		RestAssured.given().formParams(form).when().post("/login").then().statusCode(401).and()
 				.body("message", equalTo("Login Failed! User account is not activated."));
@@ -86,8 +86,8 @@ public class ActivateUserTest {
 
 		// login should not be possible after wrong activation attempts
 		form = new HashMap<String, String>();
-		form.put("username", "usernameunique5");
-		form.put("password", "Password27");
+		form.put("username", "unique_name_5");
+		form.put("password", "LongPassword@1714");
 
 		RestAssured.given().formParams(form).when().post("/login").then().statusCode(401).and().body("message",
 				equalTo("Login Failed! User account is not activated."));
@@ -99,11 +99,11 @@ public class ActivateUserTest {
 
 		// login should work
 		form = new HashMap<String, String>();
-		form.put("username", "usernameunique5");
-		form.put("password", "Password27");
+		form.put("username", "unique_name_5");
+		form.put("password", "LongPassword@1714");
 
 		RestAssured.given().formParams(form).when().post("/login").then().statusCode(200).and().and()
-				.body("username", equalTo("usernameunique5")).and().body("access_token", notNullValue());
+				.body("username", equalTo("unique_name_5")).and().body("access_token", notNullValue());
 
 	}
 

@@ -74,19 +74,19 @@ public class UpdatePasswordTest {
 		Map<String, String> form = new HashMap<String, String>();
 		form.put("token", "ACTIVATION-CODE-FROM-MAIL-3");
 		form.put("username", "testupdate3");
-		form.put("new-password", "new-password9");
-		form.put("confirm-new-password", "new-password9");
+		form.put("new-password", "new-password-91");
+		form.put("confirm-new-password", "new-password-91");
 
 		RestAssured.given().formParams(form).when().post("/api/v2/users/update-password").then().statusCode(200).and()
 				.body("success", equalTo(false)).and()
-				.body("message", equalTo("Password must contain at least one uppercase letter (A-Z)!"));
+				.body("message", equalTo("Password must contain at least one uppercase letter: A-Z"));
 
 		// try to update password
 		form = new HashMap<String, String>();
 		form.put("token", "ACTIVATION-CODE-FROM-MAIL-3");
 		form.put("username", "testupdate3");
-		form.put("new-password", "New-password9");
-		form.put("confirm-new-password", "New-password9");
+		form.put("new-password", "New-Password-91");
+		form.put("confirm-new-password", "New-Password-91");
 
 		RestAssured.given().formParams(form).when().post("/api/v2/users/update-password").then().statusCode(200).and()
 				.body("success", equalTo(true)).and().body("message", equalTo("Password successfully updated."));
@@ -101,7 +101,7 @@ public class UpdatePasswordTest {
 		// try login with new password
 		form = new HashMap<String, String>();
 		form.put("username", "testupdate3");
-		form.put("password", "New-password9");
+		form.put("password", "New-Password-91");
 		RestAssured.given().formParams(form).when().post("/login").then().statusCode(200).and()
 				.body("username", equalTo("testupdate3")).and().body("access_token", notNullValue());
 

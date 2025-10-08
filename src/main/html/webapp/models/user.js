@@ -4,7 +4,7 @@ export default Model.extend({
   findOne: 'GET api/v2/users/{user}/profile',
   destroy: 'POST api/v2/admin/users/{username}/delete',
   update: 'POST api/v2/admin/users/changegroup',
-  findAll: 'GET api/v2/admin/users'
+  findAll: 'GET api/v2/admin/users',
 }, {
 
   define: {
@@ -18,27 +18,32 @@ export default Model.extend({
 
   'checkPassword': function(password, confirm_password) {
 
-    if (password === "" || password != confirm_password) {
+    if (password === "" || password !== confirm_password) {
       return "Please check your passwords.";
     }
 
-    if (password.length < 6) {
-      return "Password must contain at least six characters!";
+    if (password.length < 14) {
+      return "Password must contain at least 14 characters.";
     }
 
     var re = /[0-9]/;
     if (!re.test(password)) {
-      return "Password must contain at least one number (0-9)!";
+      return "Password must contain at least one number: 0-9";
     }
 
     re = /[a-z]/;
     if (!re.test(password)) {
-      return "Password must contain at least one lowercase letter (a-z)!";
+      return "Password must contain at least one lowercase letter: a-z";
     }
 
     re = /[A-Z]/;
     if (!re.test(password)) {
-      return "Password must contain at least one uppercase letter (A-Z)!";
+      return "Password must contain at least one uppercase letter: A-Z";
+    }
+
+    re = /[!"#$%&'()*+,-./:;<=>?@[\]\\^_`{|}~]/;
+    if (!re.test(password)) {
+      return "Password must contain at least one special character: !\"#$%&'()*+,-./:;<=>?@[]\\^_`{|}~";
     }
   },
 
@@ -47,13 +52,13 @@ export default Model.extend({
       return "The username is required.";
     }
 
-    if (username.length < 4) {
-      return "The username must contain at least four characters.";
+    if (username.length < 4 || username.length > 16) {
+      return "The username must contain between 4 and 16 characters.";
     }
 
-    var pattern = new RegExp(/^[a-zA-Z0-9]+$/);
+    var pattern = new RegExp(/^[a-z][a-z0-9_]+[a-z0-9]$/);
     if (!pattern.test(username)) {
-      return "Your username is not valid. Only characters A-Z, a-z and digits 0-9 are acceptable.";
+      return "Your username is not valid. It can only contain lowercase letters a-z, digits 0-9, and underscores _. It must start with a lowercase letter, and cannot end in an underscore.";
     }
   },
 

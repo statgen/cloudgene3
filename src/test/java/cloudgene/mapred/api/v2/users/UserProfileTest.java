@@ -49,7 +49,7 @@ public class UserProfileTest {
 		testUser1.setRoles(new String[] { "User" });
 		testUser1.setActive(true);
 		testUser1.setActivationCode("");
-		testUser1.setPassword(HashUtil.hashPassword("Test1Password"));
+		testUser1.setPassword(HashUtil.hashPassword("Test1Password!"));
 		userDao.insert(testUser1);
 
 		User testUser2 = new User();
@@ -59,7 +59,7 @@ public class UserProfileTest {
 		testUser2.setRoles(new String[] { "User" });
 		testUser2.setActive(true);
 		testUser2.setActivationCode("");
-		testUser2.setPassword(HashUtil.hashPassword("Test2Password"));
+		testUser2.setPassword(HashUtil.hashPassword("Test2+Passw?rd"));
 		userDao.insert(testUser2);
 
 	}
@@ -76,7 +76,7 @@ public class UserProfileTest {
 		// login as user test1 and get profile. username is ignored, returns
 		// always auth user's profile. just for better urls
 
-		Header accessToken = client.login("test1", "Test1Password");
+		Header accessToken = client.login("test1", "Test1Password!");
 
 		RestAssured.given().header(accessToken).when().get("/api/v2/users/test1/profile").then().statusCode(200).and()
 				.body("username", equalTo("test1")).and().body("mail", equalTo("test1@test.com"))
@@ -88,7 +88,7 @@ public class UserProfileTest {
 	public void testUpdateWithCorrectCredentials() {
 
 		// login as user test1
-		Header accessToken = client.login("test2", "Test2Password");
+		Header accessToken = client.login("test2", "Test2+Passw?rd");
 
 		// try to update password for test2
 		Map<String, String> form = new HashMap<String, String>();
@@ -105,7 +105,7 @@ public class UserProfileTest {
 		// try login with old password
 		form = new HashMap<String, String>();
 		form.put("username", "test2");
-		form.put("password", "old-Test2Password");
+		form.put("password", "old-Test2+Passw?rd");
 		RestAssured.given().formParams(form).when().post("/login").then().statusCode(401).and()
 				.body("message", equalTo("Login Failed! Wrong Username or Password."));
 
@@ -121,7 +121,7 @@ public class UserProfileTest {
 	public void testUpdateWithWrongCredentials() {
 
 		// login as user test1
-		Header accessToken = client.login("test1", "Test1Password");
+		Header accessToken = client.login("test1", "Test1Password!");
 
 		// try to update password for test2
 		Map<String, String> form = new HashMap<String, String>();
@@ -140,7 +140,7 @@ public class UserProfileTest {
 	@Test
 	public void testUpdateWithWrongConfirmPassword() {
 
-		Header accessToken = client.login("test1", "Test1Password");
+		Header accessToken = client.login("test1", "Test1Password!");
 
 		Map<String, String> form = new HashMap<String, String>();
 		form.put("username", "test1");
@@ -157,14 +157,14 @@ public class UserProfileTest {
 	@Test
 	public void testUpdatePasswordWithMissingLowercase() {
 
-		Header accessToken = client.login("test1", "Test1Password");
+		Header accessToken = client.login("test1", "Test1Password!");
 
 		Map<String, String> form = new HashMap<String, String>();
 		form.put("username", "test1");
 		form.put("full-name", "test1 new");
 		form.put("mail", "test1@test.com");
-		form.put("new-password", "PASSWORD2727");
-		form.put("confirm-new-password", "PASSWORD2727");
+		form.put("new-password", "P&SSWORD=3141592");
+		form.put("confirm-new-password", "P&SSWORD=3141592");
 
 		RestAssured.given().header(accessToken).and().formParams(form).when().post("/api/v2/users/test1/profile").then()
 				.statusCode(200).and().body("success", equalTo(false)).and()
@@ -175,7 +175,7 @@ public class UserProfileTest {
 	@Test
 	public void testUpdatePasswordWithMissingNumber() {
 
-		Header accessToken = client.login("test1", "Test1Password");
+		Header accessToken = client.login("test1", "Test1Password!");
 
 		Map<String, String> form = new HashMap<String, String>();
 		form.put("username", "test1");
@@ -193,7 +193,7 @@ public class UserProfileTest {
 	@Test
 	public void testUpdatePasswordWithMissingUppercase() {
 
-		Header accessToken = client.login("test1", "Test1Password");
+		Header accessToken = client.login("test1", "Test1Password!");
 
 		Map<String, String> form = new HashMap<String, String>();
 		form.put("username", "test1");
@@ -211,7 +211,7 @@ public class UserProfileTest {
 	@Test
 	public void testUpdateWithEmptyEmail() {
 
-		Header accessToken = client.login("test1", "Test1Password");
+		Header accessToken = client.login("test1", "Test1Password!");
 
 		Map<String, String> form = new HashMap<String, String>();
 		form.put("username", "test1");
@@ -228,7 +228,7 @@ public class UserProfileTest {
 	public void testDowngradeAndUpgradeAccount()  {
 
 		application.getSettings().setEmailRequired(false);
-		Header accessToken = client.login("test1", "Test1Password");
+		Header accessToken = client.login("test1", "Test1Password!");
 
 		// downgrade by removing email
 		Map<String, String> form = new HashMap<String, String>();
