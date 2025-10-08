@@ -149,7 +149,9 @@ public class NextflowStep extends CloudgeneStep {
 		nextflow.setTrace(workspace.createLogFile(prefix + "trace.csv"));
 		nextflow.setReport(workspace.createLogFile(prefix + "report.html"));
 		nextflow.setTimeline(workspace.createLogFile(prefix + "timeline.html"));
-		nextflow.setLog(workspace.createLogFile(prefix + "nextflow.log"));
+
+		String logPath = job.getLocalWorkspace() + "/" + prefix + "nextflow.log";
+		nextflow.setLog(logPath);
 
 		try {
 
@@ -208,6 +210,12 @@ public class NextflowStep extends CloudgeneStep {
 		} catch (Exception e) {
 			log.error("[Job {}] Running nextflow script failed.", context.getJobId(), e);
 			return false;
+		} finally {
+			try {
+				workspace.uploadLog(new File(logPath));
+			} catch (Exception e) {
+				log.error("[Job {}] Uploading Nextflow logs failed.", context.getJobId(), e);
+			}
 		}
 
 	}
