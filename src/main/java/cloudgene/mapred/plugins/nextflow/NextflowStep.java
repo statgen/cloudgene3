@@ -151,6 +151,7 @@ public class NextflowStep extends CloudgeneStep {
 		nextflow.setTimeline(workspace.createLogFile(prefix + "timeline.html"));
 
 		String logPath = job.getLocalWorkspace() + "/" + prefix + "nextflow.log";
+		logPath = new File(logPath).getAbsolutePath();
 		nextflow.setLog(logPath);
 
 		try {
