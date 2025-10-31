@@ -45,12 +45,7 @@
             <div class="col-md-3 text-center">
                 <p>
                     <span class="lead" style="font-size: 200%;">
-                        {{#sum(counter.running.runs, counter.waiting.runs)}}
-                            {{sum(counter.running.runs, counter.waiting.runs)}}
-                        {{/sum(counter.running.runs, counter.waiting.runs)}}
-                        {{^sum(counter.running.runs, counter.waiting.runs)}}
-                            0
-                        {{/sum(counter.running.runs, counter.waiting.runs)}}
+                        {{counter.queue.size}}
                     </span>
                     <br>Active Jobs
                 </p>
