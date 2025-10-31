@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cloudgene</groupId>
 	<artifactId>cloudgene</artifactId>
-	<version>3.1.4-statgen.4</version>
+	<version>3.1.4-statgen.5</version>
 	<packaging>${packaging}</packaging>
 
 	<parent>
