@@ -10,7 +10,9 @@ micronaut:
       access-logger:
         enabled: true
         logger-name: my-access-logger
-        log-format: common    
+        log-format: common
+    multipart:
+      enabled: true
   security:
       authentication: bearer
       intercept-url-map:
