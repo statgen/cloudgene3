@@ -1,7 +1,10 @@
 <div class="container-fluid" style="background: #f4f4f6;">
     <div class="row alert-warning pt-2 pb-2">
         <div class="col-md-12 text-center">
-            Sep 2025 release: new v2 backend.
+            Users are suggested to use professional email addresses. Email addresses from free mail providers
+            (such as gmail.com) will soon be unable to register for accounts. Some accounts associated with
+            free providers have already been disabled. If you have any questions or need access, please contact
+            us at imputationserver@umich.edu.
         </div>
     </div>
 </div>
@@ -120,9 +123,12 @@
                         <h5 style="padding-top: 10px; padding-bottom: 0px; margin-bottom: 10px;">Latest News</h5>
                         <hr style="padding-top: 0px; margin-top: 0px;">
                         <p>
-                            <small class="text-muted"><i class="far fa-calendar-alt"></i> 32 September 2025</small><br>
-                            We are pleased to announce the release of Version 2 of the Imputation Server. <b>TO DO:</b>
-                            write some nice words here about the new tech.
+                            <small class="text-muted"><i class="far fa-calendar-alt"></i> 01 December 2025</small><br>
+                            We are pleased to announce the release of Version 2 of the TOPMed Imputation Server. Our
+                            improved infrastructure offers more robust performance with minimal changes to the web UI.
+                            If you are accessing the API programmatically, please note that there have been some
+                            changes to the input and output formats. For more details, check out
+                            <a href="https://statgen.github.io/tis-v2-docs/">our new documentation.</a>
                         </p>
                         <p>
                             <small class="text-muted"><i class="far fa-calendar-alt"></i> 11 March 2024</small><br>
@@ -138,7 +144,7 @@
                             TOPMed-r2. The server has been updated to improve security and performance. Additional
                             details about the new panel and updates will be described soon. The TOPMed-r2 panel is no
                             longer available. Automated scripts should be updated to use <i>topmed-r3</i>, as shown in
-                            the latest <a href="https://topmedimpute.readthedocs.io/en/latest/api/">documentation</a>.
+                            the latest <a href="https://statgen.github.io/tis-v2-docs/api/api-overview">documentation</a>.
                         </p>
                         <p>
                             <small class="text-muted"><i class="far fa-calendar-alt"></i> 12 June 2023</small><br>
