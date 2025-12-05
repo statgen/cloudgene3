@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Vector;
 
 import cloudgene.mapred.jobs.Step;
+import cloudgene.mapred.server.services.IpService;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +20,9 @@ public class NextflowCollector {
 	private static final String COLLECTOR_ENDPOINT = "/api/v2/collect/";
 
 	private static NextflowCollector instance;
+
+    @Inject
+    private IpService ipService;
 
 	private Map<String, List<NextflowProcess>> data;
 
@@ -46,7 +51,7 @@ public class NextflowCollector {
 		configs.put(context.getPublicJobId(), config);
 		Settings settings = context.getSettings();
 		log.info("[Job {}] Register collector for public job id '{}'", context.getJobId(), context.getPublicJobId());
-		return settings.getServerUrl() + settings.getBaseUrl() + COLLECTOR_ENDPOINT + context.getPublicJobId();
+        return "http://" + ipService.getServerIp() + ":" + settings.getPort() + settings.getBaseUrl() + COLLECTOR_ENDPOINT + context.getPublicJobId();
 	}
 
 	public void addEvent(String job, Map<String, Object> event) throws IOException {
