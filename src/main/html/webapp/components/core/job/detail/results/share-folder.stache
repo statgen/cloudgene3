@@ -4,10 +4,10 @@
   <div class="card-header">
     <ul class="nav nav-tabs card-header-tabs">
 	<li class="nav-item">
-		<a class="nav-link active" href="#wget" data-toggle="tab">wget ({{files.length}})</a>
+		<a class="nav-link active" href="#wget" data-bs-toggle="tab">wget ({{files.length}})</a>
 	</li>
 	<li class="nav-item">
-		<a class="nav-link" href="#links" data-toggle="tab">URLs ({{files.length}})</a>
+		<a class="nav-link" href="#links" data-bs-toggle="tab">URLs ({{files.length}})</a>
 	</li>
 </ul>
 </div>
@@ -20,7 +20,7 @@
   <div class="input-group mb-3">
     <input id="curl" value="curl -sL {{hostname}}/get/{{hash}} | bash" class="form-control form-control-sm code-font" />
     <div class="input-group-append">
-      <button class="btn btn-outline-secondary btn-sm" id="btn-copy" type="button" data-toggle="tooltip" data-placement="bottom" title="Copy to clipboard"><i class="far fa-copy"></i></button>
+      <button class="btn btn-outline-secondary btn-sm" id="btn-copy" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Copy to clipboard"><i class="far fa-copy"></i></button>
     </div>
   </div>
 </div>

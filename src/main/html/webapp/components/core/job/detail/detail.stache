@@ -23,14 +23,14 @@
 			<div class="ml-auto">
 						{{#is(admin, true)}}
 							{{#is(job.isPending, true)}}
-								<a id="restart-btn" class="btn btn-light" data-toggle="tooltip" data-placement="bottom" title="Restart job"><i class="fas fa-undo"></i></a>
+								<a id="restart-btn" class="btn btn-light" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Restart job"><i class="fas fa-undo"></i></a>
 							{{/is}}
 						{{/is}}
 						{{#job.canCancel}}
-							<a id="cancel-btn" class="btn btn-light" role="button" data-toggle="tooltip" data-placement="bottom" title="Cancel job"><i class="fas fa-times"></i></a>
+							<a id="cancel-btn" class="btn btn-light" role="button" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Cancel job"><i class="fas fa-times"></i></a>
 						{{/job.canCancel}}
 						{{#job.canDelete}}
-							<a id="delete-btn" class="btn btn-light" role="button" data-toggle="tooltip" data-placement="bottom" title="Delete job"><i class="fas fa-trash"></i></a>
+							<a id="delete-btn" class="btn btn-light" role="button" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete job"><i class="fas fa-trash"></i></a>
 						{{/job.canDelete}}
 			</div>
 		</div>

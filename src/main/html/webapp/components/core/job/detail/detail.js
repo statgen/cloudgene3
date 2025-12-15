@@ -59,7 +59,7 @@ export default Control.extend({
         default:
       }
 
-      $('[data-toggle="tooltip"]').tooltip()
+      $('[data-bs-toggle="tooltip"]').tooltip()
 
       that.job = job;
       that.refresh();

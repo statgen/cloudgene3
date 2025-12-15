@@ -3,10 +3,10 @@ The private link for this file is:<br><br>
 
 <ul id="myTab" class="nav nav-tabs">
 	<li class="nav-item">
-		<a class="nav-link active" href="#links" data-toggle="tab">Link to share</a>
+		<a class="nav-link active" href="#links" data-bs-toggle="tab">Link to share</a>
 	</li>
 	<li class="nav-item">
-		<a class="nav-link" href="#wget" data-toggle="tab">wget command</a>
+		<a class="nav-link" href="#wget" data-bs-toggle="tab">wget command</a>
 	</li>
 </ul>
 

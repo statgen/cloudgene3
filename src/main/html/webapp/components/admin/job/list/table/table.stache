@@ -90,7 +90,7 @@
 			<td>
 
 				<div class="dropdown">
-					<button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					<button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				    <i class="fas fa-wrench"></i> Actions
 				  </button>
 

@@ -29,10 +29,10 @@
             </div>
 
             {{#canCancel}}
-              <a class="btn btn-light cancel-btn" role="button" data-toggle="tooltip" data-placement="bottom" title="Cancel job"><i class="fas fa-times"></i></a>
+              <a class="btn btn-light cancel-btn" role="button" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Cancel job"><i class="fas fa-times"></i></a>
             {{/canCancel}}
             {{#canDelete}}
-              <a class="btn btn-light delete-btn" role="button" data-toggle="tooltip" data-placement="bottom" title="Delete job"><i class="fas fa-trash"></i></a>
+              <a class="btn btn-light delete-btn" role="button" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete job"><i class="fas fa-trash"></i></a>
             {{/canDelete}}
 
 

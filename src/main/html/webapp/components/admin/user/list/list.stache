@@ -71,7 +71,7 @@
 					</td>
 					<td>
 						{{#is(readOnly,false)}}
-						<a class="btn btn-sm btn-light delete-user-btn" role="button" data-toggle="tooltip" data-placement="bottom" title="Delete user"><i class="fas fa-trash"></i></a>
+						<a class="btn btn-sm btn-light delete-user-btn" role="button" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete user"><i class="fas fa-trash"></i></a>
 						{{/is}}
 					</td>
 				</tr>
