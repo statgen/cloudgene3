@@ -1,12 +1,13 @@
-<div class="container-fluid" style="background: #f4f4f6;">
-    <div class="row alert-warning pt-2 pb-2">
-        <div class="col-md-12 text-center">
-            Users are suggested to use professional email addresses. Email addresses from free mail providers
-            (such as gmail.com) will soon be unable to register for accounts. Some accounts associated with
-            free providers have already been disabled. If you have any questions or need access, please contact
-            us at imputationserver@umich.edu.
-        </div>
-    </div>
+<div class="alert alert-warning m-0" role="alert">
+    Welcome to Version 2 of the TOPMed Imputation Server! This update is part of our ongoing effort to enhance
+    system performance, improve stability, and streamline the overall user experience. You can find updated
+    docs at <a href="https://statgen.github.io/tis-v2-docs/" target="_blank">this link</a>
+</div>
+<div class="alert alert-warning m-0" role="alert">
+    Users are suggested to use professional email addresses. Email addresses from free mail providers
+    (such as gmail.com) will soon be unable to register for accounts. Some accounts associated with
+    free providers have already been disabled. If you have any questions or need access, please contact
+    us at imputationserver@umich.edu.
 </div>
 
 <div class="jumbotron jumbotron-fluid text-white text-center" style="background: #f4f4f6; margin-bottom: 0px; ">
