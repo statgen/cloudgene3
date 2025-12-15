@@ -10,9 +10,9 @@
     us at imputationserver@umich.edu.
 </div>
 
-<div class="jumbotron jumbotron-fluid text-white text-center" style="background: #f4f4f6; margin-bottom: 0px; ">
-    <div class="container">
-        <h1 class="jumbotron-heading" style="color: #393939;">TOPMed Imputation Server</h1>
+<div class="py-5 text-white text-center m-0" style="background: #f4f4f6; margin-bottom: 0px; ">
+    <div class="container-fluid p-3">
+        <h1 class="display-5 fw-medium" style="color: #393939;">TOPMed Imputation Server</h1>
         <p class="lead text-center" style="color: #393939">
             Free Next-Generation Genotype Imputation Service
         </p>
