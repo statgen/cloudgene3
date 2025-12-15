@@ -45,7 +45,7 @@
 			</td>
 
 			<td>
-				<span class="status-xs badge badge-{{stateAsClass}}"><i class="{{stateAsImage}}"></i></span>
+				<span class="status-xs badge bg-{{stateAsClass}}"><i class="{{stateAsImage}}"></i></span>
 			</td>
 
 			<td>

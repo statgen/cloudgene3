@@ -25,9 +25,9 @@
 		</td>
 		<td>
 			{{#cluster.maintenance}}
-				<span class="badge badge-danger"><i class="fas fa-cogs"></i> Maintenance Mode</span>
+				<span class="badge bg-danger"><i class="fas fa-cogs"></i> Maintenance Mode</span>
 				{{else}}
-					<span class="badge badge-success"><i class="fas fa-flag-checkered"></i> Production Mode</span>
+					<span class="badge bg-success"><i class="fas fa-flag-checkered"></i> Production Mode</span>
 			{{/cluster.maintenance}}
 		</td>
 	</tr>
@@ -38,9 +38,9 @@
 		</td>
 		<td>
 			{{#cluster.blocked}}
-				<span class="badge badge-danger"><i class="fas fa-pause"></i> Blocked</span>
+				<span class="badge bg-danger"><i class="fas fa-pause"></i> Blocked</span>
 				{{else}}
-					<span class="badge badge-success"><i class="fas fa-play"></i> Running</span>
+					<span class="badge bg-success"><i class="fas fa-play"></i> Running</span>
 			{{/cluster.blocked}}
 		</td>
 	</tr>

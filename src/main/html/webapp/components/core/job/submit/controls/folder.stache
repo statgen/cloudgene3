@@ -18,7 +18,7 @@
 			{{#if(accept)}}accept="{{accept}}"{{/if}}
       style="display:none;" multiple
     >
-    <small class="form-text text-muted">Multiple files can be selected by using the  <span class="badge badge-secondary">ctrl</span> /  <span class="badge badge-secondary">cmd</span> or  <span class="badge badge-secondary">shift</span> keys.</small>
+    <small class="form-text text-muted">Multiple files can be selected by using the  <span class="badge bg-secondary">ctrl</span> /  <span class="badge bg-secondary">cmd</span> or  <span class="badge bg-secondary">shift</span> keys.</small>
   <div class="invalid-feedback">
     Please choose one or more files.
   </div>

@@ -18,10 +18,10 @@
 
             <!--
             <div>
-            <span class="status-xs badge badge-{{stateAsClass}}"><i class="{{stateAsImage}}"></i></span> {{stateAsText}}
+            <span class="status-xs badge bg-{{stateAsClass}}"><i class="{{stateAsImage}}"></i></span> {{stateAsText}}
             <div>
             -->
-            <span class="status-xs badge badge-{{stateAsClass}}"><i class="{{stateAsImage}}"></i></span>
+            <span class="status-xs badge bg-{{stateAsClass}}"><i class="{{stateAsImage}}"></i></span>
 
             <div class="flex-grow-1">
               <b><a href="#!jobs/{{id}}">{{name}}</a></b><br>

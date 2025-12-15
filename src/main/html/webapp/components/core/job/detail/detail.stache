@@ -14,7 +14,7 @@
 		</nav>
 		-->
 		<div class="job-header d-flex justify-content-start align-items-center">
-			<span class="status badge badge-{{job.stateAsClass}}"><i class="{{job.stateAsImage}}"></i></span>
+			<span class="status badge bg-{{job.stateAsClass}}"><i class="{{job.stateAsImage}}"></i></span>
 
 			<div>
 				<h2>{{job.longName}}</h2>
