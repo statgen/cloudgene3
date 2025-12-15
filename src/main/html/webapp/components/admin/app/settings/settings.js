@@ -1,7 +1,4 @@
 import Control from 'can-control';
-import domData from 'can-util/dom/data/data';
-import canMap from 'can-map';
-import canRoute from 'can-route';
 
 import 'helpers/helpers';
 import $ from 'jquery';

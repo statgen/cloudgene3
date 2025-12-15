@@ -1,6 +1,5 @@
 import Control from 'can-control';
 import domData from 'can-util/dom/data/data';
-import canMap from 'can-map';
 import canRoute from 'can-route';
 
 import 'helpers/helpers';
@@ -14,7 +13,6 @@ import Group from 'models/group';
 import template from './list.stache';
 import templateInstallGithub from './install-github/install-github.stache';
 import templateInstallUrl from './install-url/install-url.stache';
-import templatePermission from './permission/permission.stache';
 
 export default Control.extend({
 

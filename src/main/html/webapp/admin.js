@@ -1,5 +1,4 @@
 import $ from 'jquery';
-import 'popper.js';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'components/core/layout/layout.css';
