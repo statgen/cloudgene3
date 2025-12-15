@@ -20,7 +20,7 @@
 				<h2>{{job.longName}}</h2>
 				<small class="text-muted"><i class="fas fa-clock"></i> {{prettyDate(job.submittedOn}}&nbsp;&nbsp;<i class="fas fa-hourglass"></i> {{prettyTime(job.executionTime)}}&nbsp;&nbsp;<i class="fas fa-user"></i> {{job.username}}&nbsp;&nbsp;<i class="fas fa-tag"></i> {{job.application}}</small>
 			</div>
-			<div class="ml-auto">
+			<div class="ms-auto">
 						{{#is(admin, true)}}
 							{{#is(job.isPending, true)}}
 								<a id="restart-btn" class="btn btn-light" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Restart job"><i class="fas fa-undo"></i></a>

@@ -8,7 +8,7 @@
    </button>
 
    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-     <ul class="navbar-nav mr-auto">
+     <ul class="navbar-nav me-auto">
        <li class="nav-item">
          <a class="nav-link" href="#!pages/admin-home">Dashboard</a>
        </li>
@@ -54,7 +54,7 @@
 
 <footer class="text-muted">
   <div class="container">
-    <p class="float-right">
+    <p class="float-end">
       <a href="#">Back to top</a>
     </p>
   </div>

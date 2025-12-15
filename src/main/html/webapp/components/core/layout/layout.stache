@@ -7,7 +7,7 @@
     </button>
 
     <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-      <ul class="navbar-nav mr-auto">
+      <ul class="navbar-nav me-auto">
         <li class="nav-item active">
           <a class="nav-link" href="#!pages/home">Home <span class="sr-only">(current)</span></a>
         </li>
@@ -116,7 +116,7 @@
 
 <footer class="text-muted" style="border-top: 1px solid #dee2e6;">
   <div class="container">
-    <p class="float-right" style="padding-left: 1rem;">
+    <p class="float-end" style="padding-left: 1rem;">
       <small><a href="#">Back to top</a></small>
     </p>
     <p>
