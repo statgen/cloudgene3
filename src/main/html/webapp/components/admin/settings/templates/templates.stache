@@ -3,32 +3,32 @@
 <p>Update and customize templates for emails and other text snippets.</p>
 
 <table class="table table-striped table-bordered" id="templates">
-	<thead>
-		<tr>
-			<th style="width: 150px;">Key</th>
-			<th>Text</th>
-			<th style="width: 40px;"></th>
+  <thead>
+    <tr>
+      <th style="width: 150px;">Key</th>
+      <th>Text</th>
+      <th style="width: 40px;"></th>
 
-		</tr>
-	</thead>
-	<tbody>
+    </tr>
+  </thead>
+  <tbody>
 
-		{{#templates}}
+    {{#templates}}
 
-			<tr {{data 'template'}}>
+      <tr {{data 'template'}}>
 
-				<td>
-					{{key}}
-				</td>
-				<td>
-					{{text}}
-				</td>
-				<td>
-					<span class="edit-btn btn btn-sm btn-outline-dark"><i class="fas fa-pencil-alt"></i> Edit</span>
-				</td>
-			</tr>
+        <td>
+          {{key}}
+        </td>
+        <td>
+          {{text}}
+        </td>
+        <td>
+          <span class="edit-btn btn btn-sm btn-outline-dark"><i class="fas fa-pencil-alt"></i> Edit</span>
+        </td>
+      </tr>
 
-		{{/templates}}
+    {{/templates}}
 
-	</tbody>
+  </tbody>
 </table>
