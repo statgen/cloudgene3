@@ -11,6 +11,10 @@ footer p {
   margin-bottom: .25rem;
 }
 
+a {
+  text-decoration: none;
+}
+
 .job-header {
   margin-top: 15px;
 }
