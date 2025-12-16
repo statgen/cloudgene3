@@ -1,7 +1,6 @@
 import Control from 'can-control';
 import $ from 'jquery';
 
-import ErrorPage from 'helpers/error-page';
 import template from './login.stache';
 
 
@@ -40,7 +39,7 @@ export default Control.extend({
       error: function(response) {
         console.log(response);
         password.addClass('is-invalid');
-        password.closest('.form-group').find('.invalid-feedback').html(response.responseJSON.message);
+        $('#invalid-password').html(response.responseJSON.message);
 
       }
     });
