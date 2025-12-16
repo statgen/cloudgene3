@@ -60,34 +60,34 @@
 
 <div class="bg-light py-5" style="margin-top: 0px;">
     <div class="container">
-
-
         <h2 class="text-center pb-3">The easiest way to impute genotypes</h2>
-
-        <!-- Workflow Description -->
-
-        <div class="card-deck text-center ">
-            <div class="card box-shadow">
-                <div class="card-body">
-                    <p><img src="/static/images/up-cloud.png" width="105px" alt="Upload to cloud symbol"></p>
-                    <b>Upload your genotypes to our secured service.</b>
+        <div class="row row-cols-1 row-cols-md-3 g-4 text-center">
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p><img src="/static/images/up-cloud.png" width="105px" alt="Upload to cloud symbol"></p>
+                        <b>Upload your genotypes to our secured service.</b>
+                    </div>
                 </div>
             </div>
-            <div class="card box-shadow">
-                <div class="card-body">
-                    <p><img src="/static/images/impute.png" width="105px" alt="Imputation Symbol"></p>
-                    <b>Choose a reference panel</b>. We will take care of pre-phasing and imputation.
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p><img src="/static/images/impute.png" width="105px" alt="Imputation Symbol"></p>
+                        <b>Choose a reference panel</b>. We will take care of pre-phasing and imputation.
+                    </div>
                 </div>
             </div>
-            <div class="card box-shadow">
-                <div class="card-body">
-                    <p><img src="/static/images/down-cloud.png" width="105px" alt="Download from cloud symbol"></p>
-                    <b>Download the results</b>.<br>All results are encrypted with a one-time password. After 7 days,
-                    all results are deleted from our server.
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <p><img src="/static/images/down-cloud.png" width="105px" alt="Download from cloud symbol"></p>
+                        <b>Download the results</b>.<br>All results are encrypted with a one-time password. After 7 days,
+                        all results are deleted from our server.
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
