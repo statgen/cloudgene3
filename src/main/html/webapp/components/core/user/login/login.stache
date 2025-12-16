@@ -7,7 +7,18 @@
     <label for="username" class="form-label mb-2">Username:</label>
     <div class="row">
       <div class="col-sm-3">
-        <input id="username" name="username" type="text" class="form-control" data-required="true" autocomplete="off" />
+        <input
+          id="username"
+          name="username"
+          type="text"
+          class="form-control"
+          data-required="true"
+          pattern="[a-zA-Z0-9_]+"
+          title="Usernames are at least 4 characters long. They can only contain letters, underscores, and numbers."
+          autocomplete="off"
+          minlength="4"
+          required
+        />
       </div>
     </div>
   </div>
@@ -16,7 +27,17 @@
     <label for="password" class="form-label mb-2">Password:</label>
     <div class="row">
       <div class="col-sm-3">
-        <input id="password" name="password" type="password" class="form-control" autocomplete="off" >
+        <input
+          id="password"
+          name="password"
+          type="password"
+          class="form-control"
+          data-required="true"
+          title="Passwords are at least 6 characters long. They contain letters, numbers, and special characters."
+          autocomplete="off"
+          minlength="6"
+          required
+        />
         <div class="invalid-feedback" id="invalid-password">
           This parameter is required.
         </div>
@@ -29,6 +50,7 @@
   </div>
 </form>
 
+<!--
 <hr>
 
 <p>or sign in with: </p>
@@ -39,7 +61,10 @@
   {{/oauth}}
 </ul>
 
-
 <br>
-<p>New user? <a href="#!pages/register">Sign up for free</a></p>
-<p>Forgotten your password? <a href="#!pages/reset-password">Reset your password</a></p>
+-->
+
+<div class="mt-5">
+  <div class="mb-3">New user? <a href="#!pages/register">Sign up for free</a></div>
+  <div class="mb-3">Forgotten your password? <a href="#!pages/reset-password">Reset your password</a></div>
+</div>
