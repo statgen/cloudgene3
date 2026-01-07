@@ -19,26 +19,28 @@ export default Control.extend({
   },
 
   '.share-file-btn click': function(el) {
-    var tr = $(el).closest('div');
-    var output = domData.get.call(tr[0], 'output');
-    bootbox.alert(templateShareFile({
-      hostname: location.protocol + '//' + location.host,
-      output: output
-    }), function() {
-
+    const tr = $(el).closest('div');
+    const output = domData.get.call(tr[0], 'output');
+    bootbox.alert({
+        title: 'Share Data',
+        message: templateShareFile({
+          hostname: location.protocol + '//' + location.host,
+          output: output,
+        }),
     });
   },
 
   '.share-folder-btn click': function(el) {
-    var tr = $(el).closest('div');
-    var param = domData.get.call(tr[0], 'param');
-    bootbox.alert(templateShareFolder({
-      hostname: location.protocol + '//' + location.host,
-      files: param.attr('files'),
-      hash: param.attr('hash'),
-      id: param.attr('id')
-    }), function() {
-
+    const tr = $(el).closest('div');
+    const param = domData.get.call(tr[0], 'param');
+    bootbox.alert({
+      title: 'Download Data',
+      message: templateShareFolder({
+        hostname: location.protocol + '//' + location.host,
+        files: param.attr('files'),
+        hash: param.attr('hash'),
+        id: param.attr('id'),
+      }),
     });
     new ShareFolder("#card-share-folder");
   },
@@ -69,5 +71,4 @@ export default Control.extend({
       $(item).removeClass('fa-angle-right');
     }
   }
-
 });

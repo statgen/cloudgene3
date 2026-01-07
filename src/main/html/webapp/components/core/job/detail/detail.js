@@ -76,8 +76,11 @@ export default Control.extend({
   '#delete-btn click': function (el, ev) {
     const that = this;
 
-    bootbox.confirm("Are you sure you want to delete <b>" + that.job.attr('name') + "</b>?", function (result) {
-      if (result) {
+    bootbox.confirm({
+      title: 'Delete Job',
+      message: "Are you sure you want to delete <b>" + that.job.attr('name') + "</b>?",
+      callback: function (result) {
+        if (result) {
 
           const okButton = $("button[data-bb-handler='confirm']");
           okButton.prop('disabled', true);
@@ -106,8 +109,11 @@ export default Control.extend({
   '#cancel-btn click': function (el, ev) {
     const that = this;
 
-    bootbox.confirm("Are you sure you want to cancel <b>" + that.job.attr('name') + "</b>?", function (result) {
-      if (result) {
+    bootbox.confirm({
+      title: 'Cancel Job',
+      message: "Are you sure you want to cancel <b>" + that.job.attr('name') + "</b>?",
+      callback: function (result) {
+        if (result) {
 
           const okButton = $("button[data-bb-handler='confirm']");
           okButton.prop('disabled', true);
@@ -128,18 +134,20 @@ export default Control.extend({
             showErrorDialog("Job could not be canceld", response);
           });
 
-        return false;
-
+          return false;
+        }
       }
     });
-
   },
 
   '#restart-btn click': function (el, ev) {
     const that = this;
 
-    bootbox.confirm("Are you sure you want to restart <b>" + that.job.attr('name') + "</b>?", function (result) {
-      if (result) {
+    bootbox.confirm({
+      title: 'Restart Job',
+      message: "Are you sure you want to restart <b>" + that.job.attr('name') + "</b>?",
+      callback: function (result) {
+        if (result) {
 
           const okButton = $("button[data-bb-handler='confirm']");
           okButton.prop('disabled', true);
@@ -159,8 +167,8 @@ export default Control.extend({
             showErrorDialog("Job could not be restarted", response);
           });
 
-        return false;
-
+          return false;
+        }
       }
     });
   },

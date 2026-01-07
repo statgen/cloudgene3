@@ -34,29 +34,31 @@ export default Control.extend({
     const tr = $(el).closest('tr');
     const job = domData.get.call(tr[0], 'job');
 
-    bootbox.confirm("Are you sure you want to delete <b>" + job.attr('id') + "</b>?", function(result) {
-      if (result) {
+    bootbox.confirm({
+      title: 'Delete Job',
+      message: "Are you sure you want to delete <b>" + job.attr('id') + "</b>?",
+      callback: function(result) {
+        if (result) {
 
-        var okButton = $("button[data-bb-handler='confirm']");
-        okButton.prop('disabled', true);
-        okButton.html('Please wait...');
-        var cancelButton = $("button[data-bb-handler='cancel']");
-        cancelButton.hide('hide');
+          const okButton = $("button[data-bb-handler='confirm']");
+          okButton.prop('disabled', true);
+          okButton.html('Please wait...');
+          const cancelButton = $("button[data-bb-handler='cancel']");
+          cancelButton.hide('hide');
 
-        job.destroy(function() {
-          // go to jobs page
-          bootbox.hideAll();
-          window.location.hash = "!pages/jobs";
-        }, function(response) {
-          bootbox.hideAll();
-          showErrorDialog("Job could not be deleted", response);
-        });
+          job.destroy(function() {
+            // go to jobs page
+            bootbox.hideAll();
+            window.location.hash = "!pages/jobs";
+          }, function(response) {
+            bootbox.hideAll();
+            showErrorDialog("Job could not be deleted", response);
+          });
 
-        return false;
-
+          return false;
+        }
       }
     });
-
   },
 
   '.cancel-btn click': function(el, ev) {
@@ -64,29 +66,32 @@ export default Control.extend({
     const tr = $(el).closest('tr');
     const job = domData.get.call(tr[0], 'job');
 
-    bootbox.confirm("Are you sure you want to cancel <b>" + job.attr('id') + "</b>?", function(result) {
-      if (result) {
+    bootbox.confirm({
+      title: 'Cancel Job',
+      message: "Are you sure you want to cancel <b>" + job.attr('id') + "</b>?",
+      callback: function(result) {
+        if (result) {
 
-        var okButton = $("button[data-bb-handler='confirm']");
-        okButton.prop('disabled', true);
-        okButton.html('Please wait...');
-        var cancelButton = $("button[data-bb-handler='cancel']");
-        cancelButton.hide('hide');
+          const okButton = $("button[data-bb-handler='confirm']");
+          okButton.prop('disabled', true);
+          okButton.html('Please wait...');
+          const cancelButton = $("button[data-bb-handler='cancel']");
+          cancelButton.hide('hide');
 
-        var operation = new JobOperation();
-        operation.attr('id', job.attr('id'));
-        operation.attr('action', 'cancel');
-        operation.save(function() {
-          bootbox.hideAll();
-        }, function(response) {
-          bootbox.hideAll();
-          showErrorDialog("Job could not be canceld", response);
-        });
+          const operation = new JobOperation();
+          operation.attr('id', job.attr('id'));
+          operation.attr('action', 'cancel');
+          operation.save(function() {
+            bootbox.hideAll();
+          }, function(response) {
+            bootbox.hideAll();
+            showErrorDialog("Job could not be canceld", response);
+          });
 
-        return false;
+          return false;
+        }
       }
     });
-
   },
 
   '.priority-btn click': function(el, ev) {
@@ -109,16 +114,20 @@ export default Control.extend({
     const job = domData.get.call(tr[0], 'job');
     const that = this;
 
-    bootbox.confirm("Are you sure you want to archive <b>" + job.attr('id') + "</b> now? <b>All results will be deleted!</b>", function(result) {
-      if (result) {
-        $.get('api/v2/admin/jobs/' + job.attr('id') + '/archive').then(
-          function(data) {
-            bootbox.alert(data);
-            that.init(that.element, that.options);
-          },
-          function(response) {
-            showErrorDialog("Operation failed", response);
-          });
+    bootbox.confirm({
+      title: 'Archive Job',
+      message: "Are you sure you want to archive <b>" + job.attr('id') + "</b> now? <b>All results will be deleted!</b>",
+      callback: function(result) {
+        if (result) {
+          $.get('api/v2/admin/jobs/' + job.attr('id') + '/archive').then(
+            function(data) {
+              bootbox.alert(data);
+              that.init(that.element, that.options);
+            },
+            function(response) {
+              showErrorDialog("Operation failed", response);
+            });
+        }
       }
     });
   },
@@ -167,11 +176,12 @@ export default Control.extend({
     const job = domData.get.call(tr[0], 'job');
     const that = this;
 
-    bootbox.confirm(
-      '<h4>Retire Date</h4><p>Please enter the number of days:</p><form><input class="form-control" id="message" name="message" value="1">',
-      function(result) {
+    bootbox.confirm({
+      title: 'Extend Retire Date',
+      message: '<p>Please enter the number of days:</p><form><input class="form-control" id="message" name="message" value="1">',
+      callback: function(result) {
         if (result) {
-          var days = $('#message').val();
+          const days = $('#message').val();
           $.get('api/v2/admin/jobs/' + job.attr('id') + '/change-retire/' + days).then(
             function(data) {
               bootbox.alert(data);
@@ -179,9 +189,10 @@ export default Control.extend({
             },
             function(response) {
               showErrorDialog("Operation failed", response);
-            });
+            }
+          );
         }
       }
-    );
+    });
   }
 });

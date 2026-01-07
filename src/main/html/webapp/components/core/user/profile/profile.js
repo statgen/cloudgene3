@@ -120,7 +120,8 @@ export default Control.extend({
     }, function(template) {
 
       bootbox.confirm({
-        message: '<h4>Terms of Service</h4>' + template.attr('text'),
+        title: 'Terms of Service',
+        message: template.attr('text'),
         buttons: {
           confirm: {
             label: 'I Agree',
@@ -144,12 +145,16 @@ export default Control.extend({
               user.attr('apiTokenValid', true);
               user.attr('apiTokenMessage', "");
               bootbox.alert({
+                title: 'New API Token',
                 message: templateNewTokenDialog({
                   token: responseText.token,
                 })
               });
             }, function(message) {
-              bootbox.alert('<h4>API Token</h4>Error: ' + message);
+              bootbox.alert({
+                title: 'New API Token',
+                message: 'Error: ' + message,
+              });
             });
           }
         }
@@ -161,20 +166,29 @@ export default Control.extend({
 
     const user = this.options.user;
 
-    bootbox.confirm("Are you sure you want to revoke your <b>API Token</b>? All your applications and scripts that are you using this API token have to be changed!", function(result) {
-
-      if (result) {
-        var userToken = new UserToken();
-        userToken.attr('user', user.attr('username'));
-        userToken.attr('id', 'luki');
-        userToken.destroy(function() {
-          user.attr('hasApiToken', false);
-          user.attr('apiTokenValid', true);
-          user.attr('apiTokenMessage', "");
-          bootbox.alert('<h4>API Token</h4>Your token is now inactive.');
-        }, function(response) {
-          bootbox.alert('<h4>API Token</h4>Error: ' + response);
-        });
+    bootbox.confirm({
+      title: 'Revoke API Token',
+      message: "Are you sure you want to revoke your <b>API Token</b>? All your applications and scripts that are you using this API token have to be changed!",
+      callback: function(result) {
+        if (result) {
+          const userToken = new UserToken();
+          userToken.attr('user', user.attr('username'));
+          userToken.attr('id', 'luki');
+          userToken.destroy(function() {
+            user.attr('hasApiToken', false);
+            user.attr('apiTokenValid', true);
+            user.attr('apiTokenMessage', "");
+            bootbox.alert({
+              title: 'Revoke API Token',
+              message: 'Your token is now inactive.',
+            });
+          }, function(response) {
+            bootbox.alert({
+              title: 'API Token',
+              message: 'Error: ' + response,
+            });
+          });
+        }
       }
     });
   },
@@ -193,44 +207,48 @@ export default Control.extend({
 
   '#delete_account click': function() {
 
+    const deleteAcountDialog = bootbox.dialog({
+      title: 'Deleting Account',
+      message: templateDeleteDialog(),
+      buttons: {
+        cancel: {
+          label: "Cancel",
+          class: "btn-default",
+          callback: function() {}
+        },
+        ok: {
+          label: "Delete Account",
+          class: "btn-danger",
+          callback: function() {
 
-    var deleteAcountDialog = bootbox.dialog({
-           message: templateDeleteDialog(),
-           buttons: {
-            cancel: {
-              label: "Cancel",
-              class: "btn-default",
-              callback: function() {}
-            },
-            ok: {
-               label: "Delete Account",
-               class: "btn-danger",
-               callback: function() {
+            // get form parameters
+            const form = deleteAcountDialog.find("form");
+            const values = deparam(form.serialize());
 
-                 // get form parameters
-                 var form = deleteAcountDialog.find("form");
-                 var values = deparam(form.serialize());
-
-                 // create delete request
-                 var userProfile = new UserProfile();
-                 userProfile.attr('user', values['username']);
-                 userProfile.attr('username', values['username']);
-                 userProfile.attr('password', values['password']);
-                 userProfile.attr('id', 'id');
-                 userProfile.destroy(function() {
-                   bootbox.alert('<h4>Account deleted</h4>Your account is now deleted.');
-                   window.location.href = 'logout';
-                   return true;
-                 }, function(message) {
-                   var response = JSON.parse(message.responseText);
-                   bootbox.alert('<h4>Account not deleted</h4>Error: ' + response.message);
-                   return false;
-                 });
-               }
-             }
+            // create delete request
+            const userProfile = new UserProfile();
+            userProfile.attr('user', values['username']);
+            userProfile.attr('username', values['username']);
+            userProfile.attr('password', values['password']);
+            userProfile.attr('id', 'id');
+            userProfile.destroy(function() {
+              bootbox.alert({
+                title: 'Account Deleted',
+                message: 'Your account is now deleted.',
+              });
+              window.location.href = 'logout';
+              return true;
+            }, function(message) {
+              const response = JSON.parse(message.responseText);
+              bootbox.alert({
+                title: 'Account NOT Deleted',
+                message: 'Error: ' + response.message
+              });
+              return false;
+            });
           }
-       });
-
-
+        }
+      }
+    });
   }
 });

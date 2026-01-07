@@ -34,10 +34,11 @@ export default Control.extend({
       key: 'MAINTENANCE_MESSAGE'
     }, function(template) {
 
-      var oldText = template.attr('text');
-      bootbox.confirm(
-        '<h4>Maintenance Message</h4><form><textarea class="form-control span5" id="message" rows="10" name="message" width="30" height="20">' + oldText + '</textarea></form>',
-        function(result) {
+      const oldText = template.attr('text');
+      bootbox.confirm({
+        title: 'Maintenance Message',
+        message: '<form><textarea class="form-control span5" id="message" rows="10" name="message" width="30" height="20">' + oldText + '</textarea></form>',
+        callback: function(result) {
           if (result) {
             const text = $('#message').val();
             template.attr('text', text);
@@ -49,9 +50,9 @@ export default Control.extend({
             }, function(response) {
               showErrorDialog("Operation failed", response);
             });
-
           }
-        });
+        }
+      });
 
     }, function(response) {
       new ErrorPage(element, response);

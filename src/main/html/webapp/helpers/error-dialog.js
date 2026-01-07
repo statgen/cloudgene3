@@ -16,6 +16,8 @@ export default function(title, response) {
     };
   }
 
-  bootbox.alert('<h5 class="text-danger">Error: ' + title + '</h5><p>' + error.responseText + '</p>');
-
+  bootbox.alert({
+    title: '<span class="text-danger">Error: ' + title + '</span>',
+    message: error.responseText,
+  });
 }

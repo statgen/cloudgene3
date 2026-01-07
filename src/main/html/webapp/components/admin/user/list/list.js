@@ -47,12 +47,16 @@ export default Control.extend({
     const tr = $(el).closest('tr');
     const user = domData.get.call(tr[0], 'user');
 
-    bootbox.confirm("Are you sure you want to delete <b>" + user.attr('username') + "</b>?", function(result) {
-      if (result) {
-        user.destroy(function(data) {}, function(response) {
-          showErrorDialog("User not deleted", response);
-        });
-      }
+    bootbox.confirm({
+      title: 'Delete User',
+      message: "Are you sure you want to delete <b>" + user.attr('username') + "</b>?",
+      callback: function(result) {
+        if (result) {
+          user.destroy(function(data) {}, function(response) {
+            showErrorDialog("User not deleted", response);
+          });
+        }
+      },
     });
 
   },
@@ -79,32 +83,32 @@ export default Control.extend({
           options = options + ' <b>' + group.attr('name') + '</b><br><small class="text-muted">Access to: ' + group.attr('apps').join(', ') + '</small></label><br>';
         });
 
-        bootbox.confirm(
-          '<h4>Edit roles of user ' + user.attr('username') + '</h4><hr><form id="role-form">' + options + '</form>',
-          function(result) {
+        bootbox.confirm({
+          title: 'Edit User Roles',
+          message:
+            '<p>Editing user roles for user: <b>' + user.attr('username') + '</b></p>' +
+            '<form id="role-form">' + options + '</form>',
+          callback: function(result) {
             if (result) {
 
-              var boxes = $('#role-form input:checkbox');
-              var checked = [];
-              for (var i = 0; boxes[i]; ++i) {
+              const boxes = $('#role-form input:checkbox');
+              const checked = [];
+              for (let i = 0; boxes[i]; ++i) {
                 if (boxes[i].checked) {
                   checked.push(boxes[i].value);
                 }
               }
 
-              var text = checked.join(',');
-              user.attr('role',
-                text);
-              user.save(function(data) {
-
-                },
+              const text = checked.join(',');
+              user.attr('role', text);
+              user.save(
+                function(data) {},
                 function(response) {
                   showErrorDialog("User not deleted", response);
                 });
             }
           }
-        );
-
+        });
       },
       function(response) {
         new ErrorPage(element, response);

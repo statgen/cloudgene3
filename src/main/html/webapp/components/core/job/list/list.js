@@ -48,8 +48,11 @@ export default Control.extend({
     const card = $(el).closest('.card');
     const job = domData.get.call(card[0], 'job');
 
-    bootbox.confirm("Are you sure you want to delete <b>" + job.attr('name') + "</b>?", function(result) {
-      if (result) {
+    bootbox.confirm({
+      title: 'Delete Job',
+      message: "Are you sure you want to delete <b>" + job.attr('name') + "</b>?",
+      callback: function(result) {
+        if (result) {
 
           const okButton = $("button[data-bb-handler='confirm']");
           okButton.prop('disabled', true);
@@ -58,15 +61,15 @@ export default Control.extend({
           const cancelButton = $("button[data-bb-handler='cancel']");
           cancelButton.hide('hide');
 
-        job.destroy(function() {
-          bootbox.hideAll();
-        }, function(response) {
-          bootbox.hideAll();
-          showErrorDialog("Job could not be deleted", response);
-        });
+          job.destroy(function() {
+            bootbox.hideAll();
+          }, function(response) {
+            bootbox.hideAll();
+            showErrorDialog("Job could not be deleted", response);
+          });
 
-        return false;
-
+          return false;
+        }
       }
     });
   },
@@ -76,8 +79,11 @@ export default Control.extend({
     const card = $(el).closest('.card');
     const job = domData.get.call(card[0], 'job');
 
-    bootbox.confirm("Are you sure you want to cancel <b>" + job.attr('name') + "</b>?", function(result) {
-      if (result) {
+    bootbox.confirm({
+      title: 'Cancel Job',
+      message: "Are you sure you want to cancel <b>" + job.attr('name') + "</b>?",
+      callback: function(result) {
+        if (result) {
 
           const okButton = $("button[data-bb-handler='confirm']");
           okButton.prop('disabled', true);
@@ -97,15 +103,13 @@ export default Control.extend({
             showErrorDialog("Job could not be canceld", response);
           });
 
-        return false;
-
+          return false;
+        }
       }
     });
-
   },
 
   destroy: function() {
-
     // stops all job refreshers!
     $.each(this.options.refreshers, function(key, refresher) {
       refresher.stop();
@@ -113,7 +117,6 @@ export default Control.extend({
 
     Control.prototype.destroy.call(this);
   }
-
 });
 
 const JobRefresher = Control({

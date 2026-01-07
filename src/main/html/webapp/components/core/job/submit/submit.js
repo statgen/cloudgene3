@@ -67,7 +67,8 @@ export default Control.extend({
     }
 
     //show upload dialog
-    var uploadDialog = bootbox.dialog({
+    const uploadDialog = bootbox.dialog({
+      title: 'Uploading Data...',
       message: templateUploadingDialog(),
       closeButton: false,
       className: 'upload-dialog',
