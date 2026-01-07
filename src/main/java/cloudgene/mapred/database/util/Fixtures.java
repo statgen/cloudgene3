@@ -1,64 +1,75 @@
 package cloudgene.mapred.database.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cloudgene.mapred.core.Template;
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.database.TemplateDao;
 import cloudgene.mapred.database.UserDao;
 import cloudgene.mapred.util.HashUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
 
 public class Fixtures {
 
-	private static final Logger log = LoggerFactory.getLogger(Fixtures.class);
+    private static final Logger log = LoggerFactory.getLogger(Fixtures.class);
 
-	public static String USERNAME = "admin";
+    public static void insert(Database database) {
+        insertUser(database, "admin", "admin1978", null, null, true, true);
+        insertUser(database, "foobar", "foobarBAZ+42!", "Foo Bar", "foo@bar.com", false, true);
+        insertUser(database, "snorlax", "Isnooze&12PM", "Snorlax", "snor@lax.jp", false, false);
+    }
 
-	public static String PASSWORD = "admin1978";
+    private static void insertUser(Database database, String username, String password, String fullName, String mail, boolean isAdmin, boolean isActive) {
 
-	public static void insert(Database database) {
+        // insert user
+        UserDao dao = new UserDao(database);
+        User user = dao.findByUsername(username);
 
-		// insert user
-		UserDao dao = new UserDao(database);
-		User user = dao.findByUsername(USERNAME);
-		if (user == null) {
-			user = new User();
-			user.setUsername(USERNAME);
-			PASSWORD = HashUtil.hashPassword(PASSWORD);
-			user.setPassword(PASSWORD);
-			user.makeAdmin();
+        if (user == null) {
+            user = new User();
+            user.setUsername(username);
+            String passwordHash = HashUtil.hashPassword(password);
+            user.setPassword(passwordHash);
+            user.setRoles(new String[]{User.ROLE_USER});
+            user.setActive(isActive);
 
-			dao.insert(user);
-			log.info("User " + USERNAME + " created.");
-		} else {	
-			
-			log.info("User " + USERNAME + " already exists.");
-			
-			if (!user.isAdmin()){
-				user.makeAdmin();
-				dao.update(user);
-				log.info("User " + USERNAME + " has admin rights now.");
-			}
-		}
+            if (fullName != null) user.setFullName(fullName);
+            if (mail != null) user.setMail(mail);
 
-		// insert template messages
-		TemplateDao htmlSnippetDao = new TemplateDao(database);
+            if (isAdmin) {
+                user.setRoles(new String[]{User.ROLE_ADMIN, User.ROLE_USER});
+            } else {
+                user.setRoles(new String[]{User.ROLE_USER});
+            }
 
-		for (Template defaultSnippet : Template.SNIPPETS) {
+            dao.insert(user);
+            log.info("User {} created.", username);
+        } else {
+            log.info("User {} already exists.", username);
 
-			Template snippet = htmlSnippetDao
-					.findByKey(defaultSnippet.getKey());
-			if (snippet == null) {
-				htmlSnippetDao.insert(defaultSnippet);
-				log.info("Template " + defaultSnippet.getKey() + " created.");
-			} else {
-				log.info("Template " + defaultSnippet.getKey()
-						+ " already exists.");
-			}
+            if (isAdmin && !user.isAdmin()) {
+                String[] oldRoles = user.getRoles();
+                String[] newRoles = Arrays.copyOf(oldRoles, oldRoles.length + 1);
+                newRoles[newRoles.length - 1] = User.ROLE_ADMIN;
+                user.setRoles(newRoles);
 
-		}
+                dao.update(user);
+                log.info("User {} has admin rights now.", username);
+            }
+        }
 
-	}
+        // insert template messages
+        TemplateDao htmlSnippetDao = new TemplateDao(database);
 
+        for (Template defaultSnippet : Template.SNIPPETS) {
+            Template snippet = htmlSnippetDao.findByKey(defaultSnippet.getKey());
+            if (snippet == null) {
+                htmlSnippetDao.insert(defaultSnippet);
+                log.info("Template {} created.", defaultSnippet.getKey());
+            } else {
+                log.info("Template {} already exists.", defaultSnippet.getKey());
+            }
+        }
+    }
 }
