@@ -69,10 +69,6 @@ export default Control.extend({
     });
   },
 
-  "#hadoop-details-btn click": function() {
-    bootbox.alert('<pre>' + this.cluster.attr('hadoop_details') + '</pre>');
-  },
-
   "#queue-block-btn click": function() {
     const that = this;
     $.get('api/v2/admin/server/queue/block').then(function(data) {
