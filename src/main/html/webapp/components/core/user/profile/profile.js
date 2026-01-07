@@ -19,9 +19,12 @@ export default Control.extend({
   "init": function(element, options) {
 
     this.emailRequired = options.appState.attr('emailRequired');
+    const username = options.appState.attr('user').attr('username');
+
     $(element).hide();
+
     User.findOne({
-      user: 'me'
+      user: username
     }, function(user) {
       $(element).html(template({
         user: user,
