@@ -33,7 +33,7 @@ export default Control.extend({
         } else {
           // shows error
           username.addClass('is-invalid');
-          username.closest('.form-group').find('.invalid-feedback').html(data.message);
+          username.closest('.mb-3').find('.invalid-feedback').html(data.message);
         }
       },
       error: function(message) {

@@ -30,12 +30,12 @@ export default Control.extend({
     if (error) {
       confirmNewPassword.removeClass('is-valid');
       confirmNewPassword.addClass('is-invalid');
-      confirmNewPassword.closest('.form-group').find('.invalid-feedback').html(error);
+      confirmNewPassword.closest('.mb-3').find('.invalid-feedback').html(error);
       return false;
     } else {
       confirmNewPassword.removeClass('is-invalid');
       confirmNewPassword.addClass('is-valid');
-      confirmNewPassword.closest('.form-group').find('.invalid-feedback').html('');
+      confirmNewPassword.closest('.mb-3').find('.invalid-feedback').html('');
     }
 
 

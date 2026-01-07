@@ -200,11 +200,11 @@ export default Control.extend({
     if (error) {
       control.removeClass('is-valid');
       control.addClass('is-invalid');
-      control.closest('.form-group').find('.invalid-feedback').html(error);
+      control.closest('.mb-3').find('.invalid-feedback').html(error);
     } else {
       control.removeClass('is-invalid');
       control.addClass('is-valid');
-      control.closest('.form-group').find('.invalid-feedback').html('');
+      control.closest('.mb-3').find('.invalid-feedback').html('');
     }
   },
 

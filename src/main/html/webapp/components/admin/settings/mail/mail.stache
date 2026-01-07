@@ -6,18 +6,18 @@
 
 <form id="settings-form">
 
-    <div class="form-check">
-      <input
-        name="mail"
-        id="mail"
-        value="true"
-        type ="checkbox"
-        class="form-check-input"
-        {{#settings.mail}}checked{{/settings.mail}}
-      />
-      <label class="form-check-label" for="mail">E-Mail Notifications</label>
-      <small class="form-text text-muted">Send users an activation code and notification about their job status.</small>
-    </div>
+  <div class="form-check">
+    <input
+      name="mail"
+      id="mail"
+      value="true"
+      type ="checkbox"
+      class="form-check-input"
+      {{#settings.mail}}checked{{/settings.mail}}
+    />
+    <label class="form-check-label" for="mail">E-Mail Notifications</label>
+    <small class="form-text text-muted">Send users an activation code and notification about their job status.</small>
+  </div>
 
   <div class="mb-3">
     <label for="mail-smtp" {{^settings.mail}}disabled{{/settings.mail}}>Server:</label>

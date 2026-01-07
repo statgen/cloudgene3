@@ -207,6 +207,10 @@ a {
   font-size: 12px !important;
 }
 
+.nobr {
+  white-space: nowrap;
+}
+
 .tomorrow-night-eighties-ansi-theme{
   background-color: #393939;
   color: #EFEFEF;

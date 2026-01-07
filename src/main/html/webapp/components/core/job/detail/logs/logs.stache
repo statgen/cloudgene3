@@ -1,5 +1,4 @@
-<div class="list-group">
-
+<div class="list-group mb-3">
   <div class="list-group-item bg-light  flex-column align-items-start">
     <div class="d-flex w-100 justify-content-between" {{data 'param'}}>
       <span>Logs</span>
@@ -11,4 +10,3 @@
     <pre class="tomorrow-night-eighties-ansi-theme">{{{ansiToHtml(content)}}}</pre>
   </div>
 </div>
-<br>

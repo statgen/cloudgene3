@@ -1,157 +1,145 @@
-<h2>Server</h2>
-
-<p>
-	This page shows server states and provides administrative tasks.<br>
-	<br>
-
-</p>
-
-<h3>Status</h3>
-
-<table class="table table-bordered">
-
-	<tr>
-		<td>
-			<b>Version:</b>
-		</td>
-		<td>
-			{{cluster.version}} (built by {{cluster.built_by}} on {{cluster.built_time}})
-		</td>
-	</tr>
-
-	<tr>
-		<td>
-			<b>Mode:</b>
-		</td>
-		<td>
-			{{#cluster.maintenance}}
-				<span class="badge bg-danger"><i class="fas fa-cogs"></i> Maintenance Mode</span>
-				{{else}}
-					<span class="badge bg-success"><i class="fas fa-flag-checkered"></i> Production Mode</span>
-			{{/cluster.maintenance}}
-		</td>
-	</tr>
-
-	<tr>
-		<td>
-			<b>Queue:</b>
-		</td>
-		<td>
-			{{#cluster.blocked}}
-				<span class="badge bg-danger"><i class="fas fa-pause"></i> Blocked</span>
-				{{else}}
-					<span class="badge bg-success"><i class="fas fa-play"></i> Running</span>
-			{{/cluster.blocked}}
-		</td>
-	</tr>
-
-	<tr>
-		<td>
-			<b>Threads Queue:</b>
-		</td>
-		<td>
-			{{cluster.threads}}
-		</td>
-	</tr>
-
-	<tr>
-		<td>
-			<b>Max Jobs per User:</b>
-		</td>
-		<td>{{cluster.max_jobs_user}}</td>
-	</tr>
-
-	<tr>
-		<td>
-			<b>Disk Usage:</b>
-		</td>
-		<td>
-			<div class="progress">
-				<div class="progress-bar bg-danger" role="progressbar" style="width: {{percentage(cluster.used_disc_space,cluster.total_disc_space)}}%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-				<div class="progress-bar bg-success" role="progressbar" style="width:{{percentage(cluster.free_disc_space,cluster.total_disc_space)}}%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-			</div>
-
-			{{cluster.used_disc_space}} GB used, <b>{{cluster.free_disc_space')}}	GB free</b>
-		</td>
-
-	</tr>
-
-</table>
-<br>
-<h3>Resources</h3>
-
-<div class="container">
-	<div class="row">
-
-		{{#cluster.plugins}}
-
-		<div class="col-md-12 mt-2">
-			<div class="card mb-12 box-shadow">
-				<div class="card-body">
-					{{#enabled}}
-						<h5 class="card-title"><i class="fas fa-check-circle text-success"></i> {{name}}</h5>
-						<div class="log-pane">
-							<pre>{{details}}</pre>
-						</div>
-					{{else}}
-						<h5 class="card-title"><i class="fas fa-times-circle text-danger"></i> {{name}}</h5>
-						<div class="log-pane">
-							<pre>{{error}}</pre>
-						</div>
-					{{/enabled}}
-				</div>
-			</div>
-		</div>
-
-		<br>
-
-		{{/cluster.plugins}}
-
-	</div>
+<div class="mb-5">
+  <h2>Server</h2>
+  <p>
+    This page shows server states and provides administrative tasks.
+  </p>
 </div>
 
-<br>
+<div class="mb-5">
+  <h3>Status</h3>
 
-<br>
+  <table class="table table-bordered">
+    <tbody>
+      <tr>
+        <th scope="row">Version:</th>
+        <td>
+          {{cluster.version}} (built by {{cluster.built_by}} on {{cluster.built_time}})
+        </td>
+      </tr>
 
-<h3>Maintenance Mode</h3>
-<p>Maintenance mode is for preventing any users other than administrators from submitting jobs. The front page will appear as normal when your site is in maintenance mode. Users will only see the maintenance mode message when they attempt to submit
-	a job.</p>
-<p>
-	<i>Note: You can create a customized maintenance mode message by change the MAINTENANCE_MESSAGE variable (see Settings).</i>
-</p>
-<br>
-<p>
-	{{#cluster.maintenance}}
-		<span class="btn btn-success" id="maintenance-exit-btn"><i class="fas fa-flag-checkered"></i> Exit Maintenance Mode</span>
-		{{else}}
-			<span class="btn btn-danger" id="maintenance-enter-btn"><i class="fas fa-cogs"></i> Enter Maintenance Mode</span>
-	{{/cluster.maintenance}}
+      <tr>
+        <th scope="row">Mode:</th>
+        <td>
+          {{#cluster.maintenance}}
+            <span class="badge text-bg-danger"><i class="fas fa-cogs"></i> Maintenance Mode</span>
+          {{else}}
+            <span class="badge text-bg-success"><i class="fas fa-flag-checkered"></i> Production Mode</span>
+          {{/cluster.maintenance}}
+        </td>
+      </tr>
 
-</p>
+      <tr>
+        <th scope="row">Queue:</th>
+        <td>
+          {{#cluster.blocked}}
+            <span class="badge text-bg-danger"><i class="fas fa-pause"></i> Blocked</span>
+          {{else}}
+            <span class="badge text-bg-success"><i class="fas fa-play"></i> Running</span>
+          {{/cluster.blocked}}
+        </td>
+      </tr>
 
-<br>
+      <tr>
+        <th scope="row">Threads Queue:</th>
+        <td>
+          {{cluster.threads}}
+        </td>
+      </tr>
 
-<br>
+      <tr>
+        <th scope="row">Max Jobs per User:</th>
+        <td>
+          {{cluster.max_jobs_user}}
+        </td>
+      </tr>
 
-<h3>Queue</h3>
-<p>Blocks the queue. All running jobs are executed and all other jobs are waiting until the queue is manually opened.</p>
-<br>
-<p>
-	{{#cluster.blocked}}
-		<span class="btn btn-success" id ="queue-open-btn"><i class="fas fa-play"></i> Open Queue</span>
-		{{else}}
-			<span class="btn btn-danger" id ="queue-block-btn"><i class="fas fa-pause"></i> Block Queue</span>
-	{{/cluster.blocked}}
-</p>
+      <tr>
+        <th scope="row">Disk Usage:</th>
+        <td>
+          <div class="progress bg-success">
+            <div class="progress-bar bg-danger"  role="progressbar" aria-label="used disk space percent" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{percentage(cluster.used_disc_space,cluster.total_disc_space)}}" style="width: {{percentage(cluster.used_disc_space,cluster.total_disc_space)}}%">
+              {{floor(percentage(cluster.used_disc_space,cluster.total_disc_space))}}%
+            </div>
+          </div>
+          <div>
+            {{cluster.used_disc_space}} GB used, <b>{{cluster.free_disc_space}}	GB free</b>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
-<br>
+<div class="mb-5">
+  <h3>Resources</h3>
 
-<br>
+  <div class="container">
+    <div class="row">
 
-<h3>Auto Retire</h3>
-<p>Retires old jobs and send notifications.</p>
-<br>
-<p>
-	<span class="btn btn-primary" id="retire-btn"><i class="fas fa-trash"></i> Start Retire</span>
-</p>
+      {{#cluster.plugins}}
+
+        <div class="col-md-12 mb-3">
+          <div class="card mb-12 box-shadow">
+            <div class="card-body">
+              {{#enabled}}
+                <h5 class="card-title"><i class="fas fa-check-circle text-success"></i> {{name}}</h5>
+                <div class="log-pane">
+                  <pre>{{details}}</pre>
+                </div>
+              {{else}}
+                <h5 class="card-title"><i class="fas fa-times-circle text-danger"></i> {{name}}</h5>
+                <div class="log-pane">
+                  <pre>{{error}}</pre>
+                </div>
+              {{/enabled}}
+            </div>
+          </div>
+        </div>
+
+      {{/cluster.plugins}}
+
+    </div>
+  </div>
+</div>
+
+<div class="mb-5">
+  <h3>Maintenance Mode</h3>
+  <p>
+    Maintenance mode is for preventing any users other than administrators from submitting jobs.
+    The front page will appear as normal when your site is in maintenance mode. Users will only see the maintenance mode message when they attempt to submit a job.
+  </p>
+  <p>
+    <i>Note: You can create a customized maintenance mode message by change the MAINTENANCE_MESSAGE variable (see Settings).</i>
+  </p>
+  <p>
+    {{#cluster.maintenance}}
+      <span class="btn btn-success" id="maintenance-exit-btn"><i class="fas fa-flag-checkered"></i> Exit Maintenance Mode</span>
+      {{else}}
+        <span class="btn btn-danger" id="maintenance-enter-btn"><i class="fas fa-cogs"></i> Enter Maintenance Mode</span>
+    {{/cluster.maintenance}}
+  </p>
+</div>
+
+<div class="mb-5">
+  <h3>Queue</h3>
+  <p>
+    Blocks the queue. All running jobs are executed and all other jobs are waiting until the queue is manually opened.
+  </p>
+  <p>
+    {{#cluster.blocked}}
+      <span class="btn btn-success" id ="queue-open-btn"><i class="fas fa-play"></i> Open Queue</span>
+    {{else}}
+      <span class="btn btn-danger" id ="queue-block-btn"><i class="fas fa-pause"></i> Block Queue</span>
+    {{/cluster.blocked}}
+  </p>
+</div>
+
+<div class="mb-5">
+  <h3>Auto Retire</h3>
+  <p>
+    Retires old jobs and send notifications.
+  </p>
+  <p>
+    <span class="btn btn-primary" id="retire-btn"><i class="fas fa-trash"></i> Start Retire</span>
+  </p>
+</div>
