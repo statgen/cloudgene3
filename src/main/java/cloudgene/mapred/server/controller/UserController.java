@@ -3,6 +3,7 @@ package cloudgene.mapred.server.controller;
 import java.util.List;
 
 import io.micronaut.context.annotation.Parameter;
+import io.micronaut.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,17 +88,23 @@ public class UserController {
 		return UserResponse.build(user);
 	}
 
-	@Get("/api/v2/users/{user2}/profile")
+	@Get("/api/v2/users/{username}/profile")
 	@Secured(SecurityRule.IS_AUTHENTICATED)
-	public UserResponse get(Authentication authentication, String user2) {
+	public HttpResponse<UserResponse> get(Authentication authentication, String username) {
 
-		User user = authenticationService.getUserByAuthentication(authentication, AuthenticationType.ALL_TOKENS);
+		User inquirer = authenticationService.getUserByAuthentication(authentication, AuthenticationType.ALL_TOKENS);
+
+        if (!inquirer.isAdmin() && !inquirer.getUsername().equals(username)) {
+            return HttpResponse.status(HttpStatus.FORBIDDEN);
+        }
+
+        User subject = userService.getByUsername(username);
 
 		UserDao dao = new UserDao(application.getDatabase());
-		User updatedUser = dao.findByUsername(user.getUsername());
+		User updatedSubject = dao.findByUsername(subject.getUsername());
 
-		return UserResponse.build(updatedUser);
-
+        UserResponse response = UserResponse.build(updatedSubject);
+		return HttpResponse.ok(response);
 	}
 
 	@Post("/api/v2/users/{user2}/profile")
