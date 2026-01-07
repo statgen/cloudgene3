@@ -25,11 +25,6 @@ stache.registerHelper('truncate', function(str, len) {
   return str;
 });
 
-String.prototype.replaceAll = function(search, replacement) {
-  var target = this;
-  return target.replace(new RegExp(search, 'g'), replacement);
-};
-
 function renderTreeItem(jobId, items, level) {
   let html = '<ul class="folder ' + (level > 0 ? 'sub-folder' : 'root-folder') + '">';
   for (let i = 0; i < items.length; i++) {
@@ -62,6 +57,9 @@ stache.registerHelper('percentage', function(value, total) {
   return (value / total) * 100;
 });
 
+stache.registerHelper('floor', function(value) {
+  return Math.floor(value);
+});
 
 stache.registerHelper('prettyTime', function(executionTime) {
   if (!executionTime || executionTime <= 0) {
@@ -78,10 +76,6 @@ stache.registerHelper('prettyTime', function(executionTime) {
 
   }
 });
-
-String.prototype.endsWith = function(s) {
-  return this.length >= s.length && this.substr(this.length - s.length) == s;
-};
 
 stache.registerHelper('prettyDate', function(unixTimestamp) {
   if (unixTimestamp > 0) {
