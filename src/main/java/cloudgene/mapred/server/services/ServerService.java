@@ -1,32 +1,30 @@
 package cloudgene.mapred.server.services;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.*;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
-
-import cloudgene.mapred.plugins.nextflow.NextflowPlugin;
-import cloudgene.mapred.util.command.Command;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import cloudgene.mapred.apps.ApplicationRepository;
 import cloudgene.mapred.core.Template;
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.plugins.IPlugin;
 import cloudgene.mapred.plugins.PluginManager;
+import cloudgene.mapred.plugins.nextflow.NextflowPlugin;
 import cloudgene.mapred.server.Application;
-import cloudgene.mapred.server.controller.ServerAdminController;
 import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.command.Command;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import genepi.io.FileUtil;
 import io.micronaut.security.oauth2.configuration.OauthClientConfigurationProperties;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.*;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 @Singleton
 public class ServerService {
@@ -167,10 +165,9 @@ public class ServerService {
 		object.put("threads", application.getSettings().getThreadsQueue());
 		object.put("max_jobs_user", application.getSettings().getMaxRunningJobsPerUser());
 		try {
-			URL url = ServerAdminController.class.getClassLoader().getResource("META-INF/MANIFEST.MF");
+			URL url = ServerService.class.getClassLoader().getResource("META-INF/MANIFEST.MF");
 			Manifest manifest = new Manifest(url.openStream());
 			Attributes attr = manifest.getMainAttributes();
-			String buildVesion = attr.getValue("Version");
 			String buildTime = attr.getValue("Build-Time");
 			String builtBy = attr.getValue("Built-By");
 			object.put("built_by", builtBy);
