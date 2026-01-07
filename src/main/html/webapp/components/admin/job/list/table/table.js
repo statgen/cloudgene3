@@ -9,6 +9,7 @@ import ErrorPage from 'helpers/error-page';
 import showErrorDialog from 'helpers/error-dialog';
 import 'helpers/helpers';
 import JobAdminDetails from 'models/job-admin-details';
+import JobAdminUserDetails from 'models/job-admin-user-details';
 import JobOperation from 'models/job-operation';
 
 import template from './table.stache';
@@ -16,9 +17,16 @@ import template from './table.stache';
 export default Control.extend({
 
   "init": function(element, options) {
-    JobAdminDetails.findAll({
-      state: options.state
-    }, function(jobs) {
+    let JobDetails = JobAdminDetails;
+    let params = { state: options.state };
+
+    if(options.user) {
+      JobDetails = JobAdminUserDetails;
+      params = { user: options.user };
+    }
+
+    JobDetails.findAll(params,
+    function(jobs) {
       $.each(jobs, function(key, job) {
         job.syncTime();
       });

@@ -11,6 +11,7 @@ import LayoutControl from 'components/admin/layout/';
 import RouterControl from 'helpers/router';
 import DashboardControl from 'components/admin/dashboard/';
 import UserListControl from 'components/admin/user/list/';
+import UserDetailControl from 'components/admin/user/detail/';
 import JobListControl from 'components/admin/job/list/';
 import JobDetailControl from 'components/core/job/detail/';
 import AppListControl from 'components/admin/app/list/';
@@ -59,6 +60,10 @@ const routes = [{
 }, {
   path: 'pages/users/search/{query}',
   control: UserListControl,
+  guard: adminGuard
+}, {
+  path: 'pages/users/{user}',
+  control: UserDetailControl,
   guard: adminGuard
 }, {
   path: 'pages/admin-apps',

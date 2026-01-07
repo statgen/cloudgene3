@@ -2,6 +2,8 @@ package cloudgene.mapred.server.controller;
 
 import java.util.List;
 
+import cloudgene.mapred.server.services.UserService;
+import cloudgene.mapred.util.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +29,6 @@ import jakarta.inject.Inject;
 
 @Controller("/api/v2/admin/jobs")
 @Secured(User.ROLE_ADMIN)
-
 public class JobAdminController {
 
 	private static Logger log = LoggerFactory.getLogger(JobAdminController.class);
@@ -41,6 +42,9 @@ public class JobAdminController {
 
 	@Inject
 	protected JobService jobService;
+
+    @Inject
+    protected UserService userService;
 
 	@Inject
 	protected AuthenticationService authenticationService;
@@ -159,11 +163,24 @@ public class JobAdminController {
 		List<JobResponse> responses = JobResponse.build(jobs, admin);
 		String workspace = application.getSettings().getLocalWorkspace();
 
-		log.info(String.format("Job: list all jobs of of all users (by ADMIN user ID %s - email %s)", admin.getId(),
-				admin.getMail()));
+		log.info("Job: list all jobs from all users (by ADMIN user ID {} - email {})", admin.getId(), admin.getMail());
 		
 		return JobAdminResponse.build(responses, workspace);
 
 	}
 
+    @Get("/user/{username}")
+    public JobAdminResponse getUserJobs(Authentication authentication, String username, @QueryValue @Nullable Integer page) {
+
+        User admin = authenticationService.getUserByAuthentication(authentication);
+        User user = userService.getByUsername(username);
+
+        Page<AbstractJob> jobs = jobService.getAllByUserAndPage(user, page, DEFAULT_PAGE_SIZE);
+        List<JobResponse> responses = JobResponse.build(jobs.getData(), admin);
+        String workspace = application.getSettings().getLocalWorkspace();
+
+        log.info("Job: list all jobs from user ID {} (by ADMIN user ID {} - email {})", user.getId(), admin.getId(), admin.getMail());
+
+        return JobAdminResponse.build(responses, workspace);
+    }
 }
