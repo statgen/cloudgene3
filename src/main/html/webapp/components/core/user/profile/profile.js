@@ -37,9 +37,10 @@ export default Control.extend({
 
   "#anonymous click" : function(){
     if (!this.emailRequired){
-      var anonymousControl = $(this.element).find("[name='anonymous']");
-      var anonymous = !anonymousControl.is(':checked');
-      var mail = $(this.element).find("[name='mail']");
+      const anonymousControl = $(this.element).find("[name='anonymous']");
+      const anonymous = !anonymousControl.is(':checked');
+      const mail = $(this.element).find("[name='mail']");
+
       if (anonymous){
         mail.attr('disabled','disabled');
       } else {
@@ -51,33 +52,33 @@ export default Control.extend({
 
   'submit': function(element, event) {
     event.preventDefault();
-    var user = new User();
+    const user = new User();
 
     // fullname
-    var fullname = $(element).find("[name='full-name']");
-    var fullnameError = user.checkName(fullname.val());
+    const fullname = $(element).find("[name='full-name']");
+    const fullnameError = user.checkName(fullname.val());
     this.updateControl(fullname, fullnameError);
 
-    var anonymous = false;
+    let anonymous = false;
     if (!this.emailRequired){
-      var anonymousControl = $(this.element).find("[name='anonymous']");
+      const anonymousControl = $(this.element).find("[name='anonymous']");
       anonymous = !anonymousControl.is(':checked');
     }
 
     // mail
-    var mail = $(element).find("[name='mail']");
+    const mail = $(element).find("[name='mail']");
     if (!anonymous){
-      var mailError = user.checkMail(mail.val());
+      const mailError = user.checkMail(mail.val());
       this.updateControl(mail, mailError);
     } else {
       this.updateControl(mail, undefined);
     }
 
     // password if password is not empty. else no password update on server side
-    var newPassword = $(element).find("[name='new-password']");
-    var newPasswordError = undefined;
+    const newPassword = $(element).find("[name='new-password']");
+    let newPasswordError = undefined;
     if (newPassword.val() !== "") {
-      var confirmNewPassword = $(element).find("[name='confirm-new-password']");
+      const confirmNewPassword = $(element).find("[name='confirm-new-password']");
       newPasswordError = user.checkPassword(newPassword.val(), confirmNewPassword.val());
       this.updateControl(confirmNewPassword, newPasswordError);
     }
@@ -113,7 +114,7 @@ export default Control.extend({
   '#create_token click': function() {
 
     //load template
-    var that = this;
+    const that = this;
     Template.findOne({
       key: 'TERMS'
     }, function(template) {
@@ -129,11 +130,11 @@ export default Control.extend({
         callback: function(result) {
           if (result) {
 
-            var token_expiration = $('#token_expiration').val();
+            const token_expiration = $('#token_expiration').val();
 
-            var user = that.options.user;
+            const user = that.options.user;
 
-            var userToken = new UserToken();
+            const userToken = new UserToken();
             userToken.attr('user', user.attr('username'));
             userToken.attr('expiration', token_expiration);
 
@@ -144,7 +145,7 @@ export default Control.extend({
               user.attr('apiTokenMessage', "");
               bootbox.alert({
                 message: templateNewTokenDialog({
-                  token: responseText.token
+                  token: responseText.token,
                 })
               });
             }, function(message) {
@@ -158,7 +159,7 @@ export default Control.extend({
 
   '#revoke_token click': function() {
 
-    var user = this.options.user;
+    const user = this.options.user;
 
     bootbox.confirm("Are you sure you want to revoke your <b>API Token</b>? All your applications and scripts that are you using this API token have to be changed!", function(result) {
 
@@ -232,5 +233,4 @@ export default Control.extend({
 
 
   }
-
 });

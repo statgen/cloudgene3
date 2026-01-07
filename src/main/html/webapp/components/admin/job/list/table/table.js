@@ -31,8 +31,8 @@ export default Control.extend({
   },
 
   '.delete-btn click': function(el, ev) {
-    var tr = $(el).closest('tr');
-    var job = domData.get.call(tr[0], 'job');
+    const tr = $(el).closest('tr');
+    const job = domData.get.call(tr[0], 'job');
 
     bootbox.confirm("Are you sure you want to delete <b>" + job.attr('id') + "</b>?", function(result) {
       if (result) {
@@ -61,8 +61,8 @@ export default Control.extend({
 
   '.cancel-btn click': function(el, ev) {
 
-    var tr = $(el).closest('tr');
-    var job = domData.get.call(tr[0], 'job');
+    const tr = $(el).closest('tr');
+    const job = domData.get.call(tr[0], 'job');
 
     bootbox.confirm("Are you sure you want to cancel <b>" + job.attr('id') + "</b>?", function(result) {
       if (result) {
@@ -91,9 +91,9 @@ export default Control.extend({
 
   '.priority-btn click': function(el, ev) {
 
-    var tr = $(el).closest('tr');
-    var job = domData.get.call(tr[0], 'job');
-    var that = this;
+    const tr = $(el).closest('tr');
+    const job = domData.get.call(tr[0], 'job');
+    const that = this;
     $.get('api/v2/admin/jobs/' + job.attr('id') + '/priority').then(
       function(data) {
         bootbox.alert(data);
@@ -105,9 +105,9 @@ export default Control.extend({
   },
 
   '.archive-btn click': function(el, ev) {
-    var tr = $(el).closest('tr');
-    var job = domData.get.call(tr[0], 'job');
-    var that = this;
+    const tr = $(el).closest('tr');
+    const job = domData.get.call(tr[0], 'job');
+    const that = this;
 
     bootbox.confirm("Are you sure you want to archive <b>" + job.attr('id') + "</b> now? <b>All results will be deleted!</b>", function(result) {
       if (result) {
@@ -124,8 +124,8 @@ export default Control.extend({
   },
 
   '.reset-downloads-btn click': function(el, ev) {
-    var tr = $(el).closest('tr');
-    var job = domData.get.call(tr[0], 'job');
+    const tr = $(el).closest('tr');
+    const job = domData.get.call(tr[0], 'job');
     $.get('api/v2/admin/jobs/' + job.attr('id') + '/reset').then(
       function(data) {
         bootbox.alert(data);
@@ -136,8 +136,8 @@ export default Control.extend({
   },
 
   '.unlimited-downloads-btn click': function(el, ev) {
-    var tr = $(el).closest('tr');
-    var job = domData.get.call(tr[0], 'job');
+    const tr = $(el).closest('tr');
+    const job = domData.get.call(tr[0], 'job');
     $.get('api/v2/admin/jobs/' + job.attr('id') + '/reset?max=-1').then(
       function(data) {
         bootbox.alert(data);
@@ -149,9 +149,9 @@ export default Control.extend({
 
 
   '.retire-btn click': function(el, ev) {
-    var tr = $(el).closest('tr');
-    var job = domData.get.call(tr[0], 'job');
-    var that = this;
+    const tr = $(el).closest('tr');
+    const job = domData.get.call(tr[0], 'job');
+    const that = this;
     $.get('api/v2/admin/jobs/' + job.attr('id') + '/retire').then(
       function(data) {
         bootbox.alert(data);
@@ -163,9 +163,9 @@ export default Control.extend({
   },
 
   '.change-retire-date-btn click': function(el, ev) {
-    var tr = $(el).closest('tr');
-    var job = domData.get.call(tr[0], 'job');
-    var that = this;
+    const tr = $(el).closest('tr');
+    const job = domData.get.call(tr[0], 'job');
+    const that = this;
 
     bootbox.confirm(
       '<h4>Retire Date</h4><p>Please enter the number of days:</p><form><input class="form-control" id="message" name="message" value="1">',
@@ -184,5 +184,4 @@ export default Control.extend({
       }
     );
   }
-
 });

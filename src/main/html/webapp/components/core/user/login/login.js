@@ -17,7 +17,7 @@ export default Control.extend({
   'submit': function(element, event) {
     event.preventDefault();
 
-    var password = $(element).find("[name='password']");
+    const password = $(element).find("[name='password']");
 
     $.ajax({
       url: "login",
@@ -26,24 +26,20 @@ export default Control.extend({
       dataType: 'json',
       success: function(response) {
 
-          var dataToken = {
+          const dataToken = {
             csrf: response.csrf,
             token: response.access_token
           };
           localStorage.setItem('cloudgene', JSON.stringify(dataToken));
 
-          var redirect = './';
-          window.location = redirect;
+          window.location = './';
 
       },
       error: function(response) {
-        console.log(response);
         password.addClass('is-invalid');
         $('#invalid-password').html(response.responseJSON.message);
 
       }
     });
-
   }
-
 });

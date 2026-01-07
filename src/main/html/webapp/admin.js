@@ -24,12 +24,11 @@ import SettingsMailControl from 'components/admin/settings/mail/';
 import SettingsTemplatesControl from 'components/admin/settings/templates/';
 import SettingsLogsControl from 'components/admin/settings/logs/';
 
-
 $(document.links).filter(function () {
   return this.hostname != window.location.hostname;
 }).attr('target', '_blank');
 
-var routes = [{
+const routes = [{
   path: '',
   control: DashboardControl,
   options: {
@@ -122,7 +121,7 @@ $.ajaxPrefilter(function (options, orig, xhr) {
       if (localStorage.getItem("cloudgene")) {
         try {
           // get data
-          var data = JSON.parse(localStorage.getItem("cloudgene"));
+          const data = JSON.parse(localStorage.getItem("cloudgene"));
           xhr.setRequestHeader("X-CSRF-Token", data.csrf);
           xhr.setRequestHeader("X-Auth-Token", data.token);
         } catch (e) {
@@ -139,16 +138,12 @@ $.ajaxPrefilter(function (options, orig, xhr) {
     options.data = JSON.stringify(orig.data);
     options.processData = false;
   }
-
 });
 
-
 Server.findOne({}, function (server) {
-
   new LayoutControl("#main", {
     appState: server
   });
-
 
   new RouterControl("#content", {
     routes: routes,
@@ -161,5 +156,4 @@ Server.findOne({}, function (server) {
       }
     }
   });
-
 });

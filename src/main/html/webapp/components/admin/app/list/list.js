@@ -17,13 +17,12 @@ import templateInstallUrl from './install-url/install-url.stache';
 export default Control.extend({
 
   "init": function (element, options) {
-    var that = this;
 
     Application.findAll({}, function (applications) {
 
-      var grouped = {};
+      const grouped = {};
       applications.forEach(function(item) {
-        var category = item.category;
+        let category = item.category;
         if (category == undefined) {
           category = "Application";
         }
@@ -33,7 +32,7 @@ export default Control.extend({
         grouped[category].push(item);
       });
 
-      var categories = Object.keys(grouped).map(category => {
+      const categories = Object.keys(grouped).map(category => {
         return {
           name: category,
           applications: grouped[category].map(app => {
@@ -67,8 +66,8 @@ export default Control.extend({
     bootbox.confirm(templateInstallUrl(),
       function (result) {
         if (result) {
-          var url = $('#url').val();
-          var app = new Application();
+          const url = $('#url').val();
+          const app = new Application();
           app.attr('url', url);
 
           var waitingDialog = bootbox.dialog({
@@ -104,8 +103,8 @@ export default Control.extend({
       function (result) {
         if (result) {
 
-          var url = 'github://' + $('#url').val();
-          var app = new Application();
+          const url = 'github://' + $('#url').val();
+          const app = new Application();
           app.attr('url', url);
 
           var waitingDialog = bootbox.dialog({
@@ -139,15 +138,15 @@ export default Control.extend({
   },
 
   '#reload-apps-btn click': function (el, ev) {
-    var element = this.element;
+    const element = this.element;
 
     Application.findAll({
       reload: 'true'
     }, function (applications) {
 
-      var grouped = {};
+      const grouped = {};
       applications.forEach(function(item) {
-        var category = item.category;
+        let category = item.category;
         if (category == undfined) {
           category = "Application";
         }
@@ -157,7 +156,7 @@ export default Control.extend({
         grouped[category].push(item);
       });
 
-      var categories = Object.keys(grouped).map(category => {
+      const categories = Object.keys(grouped).map(category => {
         return {
           name: category,
           applications: grouped[category].map(app => {
@@ -186,8 +185,8 @@ export default Control.extend({
   },
 
   '.enable-disable-btn click': function (el, ev) {
-    var card = $(el).closest('tr');
-    var application = domData.get.call(card[0], 'application');
+    const card = $(el).closest('tr');
+    const application = domData.get.call(card[0], 'application');
 
     var enabled = !application.attr('enabled')
     bootbox.confirm("Are you sure you want to " + (enabled ? "enable" : "disable") + " application <b>" + application.attr('id') + "</b>?", function (result) {
@@ -221,8 +220,8 @@ export default Control.extend({
 
   '.delete-app-btn click': function (el, ev) {
 
-    var card = $(el).closest('tr');
-    var application = domData.get.call(card[0], 'application');
+    const card = $(el).closest('tr');
+    const application = domData.get.call(card[0], 'application');
 
     bootbox.confirm("Are you sure you want to delete <b>" + application.attr('id') + "</b>?", function (result) {
       if (result) {
@@ -257,15 +256,15 @@ export default Control.extend({
 
   '.edit-permission-btn click': function(el, ev) {
 
-    var card = $(el).closest('tr');
-    var application = domData.get.call(card[0], 'application');
+    const card = $(el).closest('tr');
+    const application = domData.get.call(card[0], 'application');
 
     Group.findAll({},
       function(groups) {
 
-        var roles = application.attr('permission').split(',');
+        const roles = application.attr('permission').split(',');
 
-        var options = '';
+        let options = '';
         groups.forEach(function(group, index) {
           if ($.inArray(group.attr('name'), roles) >= 0) {
             options = options + '<label class="checkbox"><input type="checkbox" name="role-select" value="' + group.attr('name') + '" checked />';
@@ -278,7 +277,7 @@ export default Control.extend({
         });
 
       // Add input field for creating a new group
-      var newGroupSection = `
+      const newGroupSection = `
         <hr>
         <label for="new-group-name">New Group Name:</label>
         <input type="text" id="new-group-name" class="form-control" placeholder="Enter new group name">
@@ -289,20 +288,20 @@ export default Control.extend({
           function(result) {
             if (result) {
 
-              var boxes = $('#role-form input:checkbox');
-              var checked = [];
-              for (var i = 0; boxes[i]; ++i) {
+              const boxes = $('#role-form input:checkbox');
+              const checked = [];
+              for (let i = 0; boxes[i]; ++i) {
                 if (boxes[i].checked) {
                   checked.push(boxes[i].value);
                 }
               }
 
-               var newGroupName = $('#new-group-name').val().trim();
+               const newGroupName = $('#new-group-name').val().trim();
               if (newGroupName) {
                 checked.push(newGroupName);
               }
 
-              var text = checked.join(',');
+              const text = checked.join(',');
               application.attr('permission', text);
               application.save(function(data) {},
                 function(response) {
@@ -322,12 +321,11 @@ export default Control.extend({
 
   '.view-source-btn click': function(el, ev) {
 
-    var card = $(el).closest('tr');
-    var application = domData.get.call(card[0], 'application');
+    const card = $(el).closest('tr');
+    const application = domData.get.call(card[0], 'application');
     bootbox.alert({
       message: '<div style="overflow: auto; height: 600px; width: 100%"><h5>File</h5><p>' + application.attr('filename') + '</p>' + '<h5>Source</h5><small><p><pre><code>' + application.attr('source') + '</code></pre></small></p></div>',
       className: 'w-100'
     });
   }
-
 });

@@ -30,9 +30,9 @@ export default Control.extend({
 
   "updateEmailControl": function() {
       if (!this.emailRequired){
-        var anonymousControl = $(this.element).find("[name='anonymous']:checked");
-        var anonymous = (anonymousControl.val() == "1");
-        var mail = $(this.element).find("[name='mail']");
+        const anonymousControl = $(this.element).find("[name='anonymous']:checked");
+        const anonymous = (anonymousControl.val() == "1");
+        const mail = $(this.element).find("[name='mail']");
         if (anonymous){
           mail.attr('disabled','disabled');
         } else {
@@ -44,40 +44,40 @@ export default Control.extend({
   'submit': function(element, event) {
     event.preventDefault();
 
-    var that = this;
-    var user = new User();
+    const that = this;
+    const user = new User();
 
     // anonymous radiobutton
-    var anonymous = false;
+    let anonymous = false;
 
     if (!this.emailRequired){
-      var anonymousControl = $(element).find("[name='anonymous']:checked");
+      const anonymousControl = $(element).find("[name='anonymous']:checked");
       anonymous = (anonymousControl.val() == "1");
     }
 
     // username
-    var username = $(element).find("[name='username']");
-    var usernameError = user.checkUsername(username.val());
+    let username = $(element).find("[name='username']");
+    const usernameError = user.checkUsername(username.val());
     this.updateControl(username, usernameError);
 
     // fullname
-    var fullname = $(element).find("[name='full-name']");
-    var fullnameError = user.checkName(fullname.val());
+    const fullname = $(element).find("[name='full-name']");
+    const fullnameError = user.checkName(fullname.val());
     this.updateControl(fullname, fullnameError);
 
     // mail
-    var mail = $(element).find("[name='mail']");
+    const mail = $(element).find("[name='mail']");
     if (!anonymous){
-      var mailError = user.checkMail(mail.val());
+      const mailError = user.checkMail(mail.val());
       this.updateControl(mail, mailError);
     } else {
       this.updateControl(mail, undefined);
     }
 
     // password
-    var newPassword = $(element).find("[name='new-password']");
-    var confirmNewPassword = $(element).find("[name='confirm-new-password']");
-    var passwordError = user.checkPassword(newPassword.val(), confirmNewPassword.val());
+    const newPassword = $(element).find("[name='new-password']");
+    const confirmNewPassword = $(element).find("[name='confirm-new-password']");
+    const passwordError = user.checkPassword(newPassword.val(), confirmNewPassword.val());
     this.updateControl(newPassword, passwordError);
 
     if (usernameError || fullnameError || mailError || passwordError) {
@@ -94,7 +94,7 @@ export default Control.extend({
       success: function(data) {
         if (data.success == true) {
           // shows success
-          var message = "";
+          let message = "";
           if (!anonymous){
             message = "Well done!</b> An email including the activation code has been sent to your address."
           } else {

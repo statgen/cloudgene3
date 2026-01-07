@@ -10,7 +10,7 @@ import showErrorDialog from 'helpers/error-dialog';
 export default Control.extend({
 
   "init": function (element, options) {
-    var that = this;
+    const that = this;
 
     Settings.findOne({},
       function (settings) {
@@ -36,13 +36,11 @@ export default Control.extend({
     this.settings.attr('googleAnalytics', $(form).find("[name='google-analytics']").val());
     this.settings.attr('workspaceType', $(form).find("[name='workspaceType']").val());
     this.settings.attr('workspaceLocation', $(form).find("[name='workspaceLocation']").val());
+
     this.settings.save(function (data) {
       bootbox.alert("Settings updated.");
     }, function (response) {
       showErrorDialog("Settings not updated", response);
     });
-
-
   }
-
 });

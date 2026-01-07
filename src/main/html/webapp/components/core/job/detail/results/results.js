@@ -46,7 +46,7 @@ export default Control.extend({
   // file tree (collapsible folders)
 
   '.folder-item click': function(el) {
-    var ul = $(el).parent().children('UL');
+    const ul = $(el).parent().children('UL');
     ul.slideToggle();
     if ($(el).hasClass('fa-angle-down')) {
       $(el).addClass('fa-angle-right ');
@@ -58,8 +58,8 @@ export default Control.extend({
   },
 
   '.folder-item-text click': function(el) {
-    var item = $(el).parent().children('i')
-    var ul = $(el).parent().children('UL');
+    const item = $(el).parent().children('i')
+    const ul = $(el).parent().children('UL');
     ul.slideToggle();
     if ($(item).hasClass('fa-angle-down')) {
       $(item).addClass('fa-angle-right ');

@@ -20,8 +20,8 @@ export default Control.extend({
     this.element = $(element);
     canRoute.data = options.routingMap;
     options.routesByPath = {};
-    for (var i = 0; i < options.routes.length; i++) {
-      var route = options.routes[i];
+    for (let i = 0; i < options.routes.length; i++) {
+      const route = options.routes[i];
       canRoute(route.path, {
         path: route.path
       });
@@ -34,26 +34,28 @@ export default Control.extend({
   },
 
   'check': function(ev, attr, how) {
-    var router = canRoute.router;
+    const router = canRoute.router;
     if ((router.lastBatchNum == undefined || router.lastBatchNum != ev.batchNum) && (canRoute.data.attr('path') != undefined && canRoute.data.attr('path') == canRoute.matched())) {
       router.lastBatchNum = ev.batchNum;
-      var path = canRoute.data.attr('path');
-      console.log('[Router] Found control for ' + path);
-      var route = router.options.routesByPath[path];
-      var control = route.control;
-      console.log('[Router] Parameters: ');
-      console.log(canRoute.data.attr());
-      var data = new canMap();
+
+      const path = canRoute.data.attr('path');
+
+      const route = router.options.routesByPath[path];
+      let control = route.control;
+
+      const data = new canMap();
       data.attr(canRoute.data);
       data.attr(route.options);
       data.attr('appState', router.options.appState);
+
       if (route.guard) {
-        var allowed = route.guard(router.options.appState);
+        const allowed = route.guard(router.options.appState);
         if (allowed == false) {
           control = router.options.forbidden.control;
           data.attr(router.options.forbidden.options);
         }
       }
+
       router.activeControl = {
         control: control,
         data: data,
@@ -66,25 +68,25 @@ export default Control.extend({
 
   activate: function(options) {
 
-    var Control = options.control;
-    var data = options.data;
-    var id = options.id;
+    const Control = options.control;
+    const data = options.data;
+    const id = options.id;
 
     $(window).scrollTop(0);
 
     // TODO: activated li --> layout --> navigation
     this.element.find('li').each(function() {
-      var li = $(this);
+      const li = $(this);
       li.removeClass('active', '');
       $(this).find('a').each(function() {
-        if ($(this).attr('id') == id) {
+        if ($(this).attr('id') === id) {
           li.addClass('active');
         }
       });
     });
 
     this.element.empty();
-    var view = $('<div>');
+    const view = $('<div>');
     if (options.classes) {
       view.addClass(options.classes);
     } else {
@@ -93,11 +95,10 @@ export default Control.extend({
     view.html('');
     this.element.append(view);
     new Control(view[0], data);
-
   },
 
   'reload': function() {
-    var router = canRoute.router;
+    const router = canRoute.router;
     if (router.activeControl) {
       router.activate(router.activeControl);
     }
@@ -111,7 +112,7 @@ export default Control.extend({
           if (localStorage.getItem("cloudgene")) {
             try {
               // get data
-              var data = JSON.parse(localStorage.getItem("cloudgene"));
+              const data = JSON.parse(localStorage.getItem("cloudgene"));
               xhr.setRequestHeader("X-CSRF-Token", data.csrf);
               xhr.setRequestHeader("X-Auth-Token", data.token);
             } catch (e) {
@@ -129,11 +130,6 @@ export default Control.extend({
         options.data = JSON.stringify(orig.data);
         options.processData = false;
       }
-
     });
-
-
   }
-
-
 });

@@ -1,5 +1,4 @@
 import Control from 'can-control';
-import domData from 'can-util/dom/data/data';
 import $ from 'jquery';
 import bootbox from 'bootbox';
 import 'jquery-form';
@@ -27,7 +26,7 @@ export default Control.extend({
 
   "init": function(element, options) {
 
-    var that = this;
+    const that = this;
 
     Application.findOne({
       tool: options.app
@@ -55,8 +54,6 @@ export default Control.extend({
       new ErrorPage(element, response);
     });
 
-
-
   },
 
   '#parameters submit': function(form, event) {
@@ -80,13 +77,13 @@ export default Control.extend({
     //start uploading when dialog is shown
     uploadDialog.on('shown.bs.modal', function() {
 
-      var csrfToken;
-      var accessToken;
+      let csrfToken;
+      let accessToken;
       if (localStorage.getItem("cloudgene")) {
         try {
 
           // get data
-          var data = JSON.parse(localStorage.getItem("cloudgene"));
+          const data = JSON.parse(localStorage.getItem("cloudgene"));
           csrfToken = data.csrf;
           accessToken = data.token;
 
@@ -149,12 +146,12 @@ export default Control.extend({
 
   '#select-single-file-btn click': function(button) {
     // trigger click to open file dialog
-    var fileUpload = $(button).closest('.col-sm-3').find(":file");
+    const fileUpload = $(button).closest('.col-sm-3').find(":file");
     fileUpload.trigger("click");
   },
 
   '.file-upload-field-single change': function(fileUpload) {
-    var filenameControl = $(fileUpload).parent().find(".file-name-control");
+    const filenameControl = $(fileUpload).parent().find(".file-name-control");
     if (fileUpload.files.length > 0) {
       filenameControl.val(fileUpload.files[0].name);
     } else {
@@ -166,19 +163,19 @@ export default Control.extend({
 
   '#select-files-btn click': function(button) {
     // trigger click to open file dialog
-    var fileUpload = $(button).parent().find(":file");
+    const fileUpload = $(button).parent().find(":file");
     fileUpload.trigger("click");
   },
 
   '.file-upload-field-multiple change': function(fileUpload) {
     //update list of files
-    var fileList = $(fileUpload).parent().find(".file-list");
+    const fileList = $(fileUpload).parent().find(".file-list");
     fileList.empty();
-    for (var i = 0; i < fileUpload.files.length; i++) {
+    for (let i = 0; i < fileUpload.files.length; i++) {
       fileList.append('<li><span class="fa-li"><i class="fas fa-file"></i></span>' + fileUpload.files[i].name + '</li>');
     }
 
-    var files = $(fileUpload).prop('files');
+    const files = $(fileUpload).prop('files');
 
     if (files.length > 0) {
       $(fileUpload).parent().find("#select-files-btn").hide();
@@ -193,21 +190,21 @@ export default Control.extend({
 
   '#change-files-btn click': function(button) {
     // trigger click to open file dialog
-    var fileUpload = $(button).parent().find(":file");
+    const fileUpload = $(button).parent().find(":file");
     fileUpload.trigger("click");
   },
 
   '#remove-all-files-btn click': function(button) {
     //clear hidden file upload field
-    var fileUpload = $(button).parent().find(":file");
+    const fileUpload = $(button).parent().find(":file");
     fileUpload.val('');
+
     //clear list of files
-    var fileList = $(button).parent().find(".file-list");
+    const fileList = $(button).parent().find(".file-list");
     fileList.empty();
+
     fileUpload.parent().find("#select-files").show();
     fileUpload.parent().find("#change-files").hide();
     fileUpload.parent().find("#remove-all-files").hide();
- 
   }
-
 });

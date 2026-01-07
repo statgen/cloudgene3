@@ -28,15 +28,15 @@ export default Model.extend({
 
     'executionTime': {
       get: function () {
-        var start = this.attr('startTime');
-        var end = this.attr('endTime');
-        var current = this.attr('currentTime');
+        const start = this.attr('startTime');
+        const end = this.attr('endTime');
+        const current = this.attr('currentTime');
 
         if (start === 0 && end === 0) {
           return undefined;
         }
 
-        var executionTime = 0;
+        let executionTime = 0;
         if (start > 0 && end === 0) {
           executionTime = current - start;
         } else {

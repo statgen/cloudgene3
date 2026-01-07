@@ -17,7 +17,7 @@ export default Control.extend({
 
     this.options.refreshers = [];
 
-    var that = this;
+    const that = this;
     Job.findAll({
       page: options.page
     }, function(jobs) {
@@ -26,7 +26,7 @@ export default Control.extend({
           job.syncTime();
         });
         if (JobRefresher.needsUpdate(job)) {
-          var refresher = new JobRefresher(element);
+          const refresher = new JobRefresher(element);
           refresher.setJob(job);
           that.options.refreshers.push(refresher);
         }
@@ -45,18 +45,18 @@ export default Control.extend({
 
   '.delete-btn click': function(el, ev) {
 
-    var card = $(el).closest('.card');
-    var job = domData.get.call(card[0], 'job');
+    const card = $(el).closest('.card');
+    const job = domData.get.call(card[0], 'job');
 
     bootbox.confirm("Are you sure you want to delete <b>" + job.attr('name') + "</b>?", function(result) {
       if (result) {
 
-        var okButton = $("button[data-bb-handler='confirm']");
-        okButton.prop('disabled', true);
-        okButton.html('Please wait...');
+          const okButton = $("button[data-bb-handler='confirm']");
+          okButton.prop('disabled', true);
+          okButton.html('Please wait...');
 
-        var cancelButton = $("button[data-bb-handler='cancel']");
-        cancelButton.hide('hide');
+          const cancelButton = $("button[data-bb-handler='cancel']");
+          cancelButton.hide('hide');
 
         job.destroy(function() {
           bootbox.hideAll();
@@ -68,34 +68,34 @@ export default Control.extend({
         return false;
 
       }
-
     });
-
   },
 
   '.cancel-btn click': function(el, ev) {
 
-    var card = $(el).closest('.card');
-    var job = domData.get.call(card[0], 'job');
+    const card = $(el).closest('.card');
+    const job = domData.get.call(card[0], 'job');
 
     bootbox.confirm("Are you sure you want to cancel <b>" + job.attr('name') + "</b>?", function(result) {
       if (result) {
 
-        var okButton = $("button[data-bb-handler='confirm']");
-        okButton.prop('disabled', true);
-        okButton.html('Please wait...');
-        var cancelButton = $("button[data-bb-handler='cancel']");
-        cancelButton.hide('hide');
+          const okButton = $("button[data-bb-handler='confirm']");
+          okButton.prop('disabled', true);
+          okButton.html('Please wait...');
 
-        var operation = new JobOperation();
-        operation.attr('id', job.attr('id'));
-        operation.attr('action', 'cancel');
-        operation.save(function() {
-          bootbox.hideAll();
-        }, function(response) {
-          bootbox.hideAll();
-          showErrorDialog("Job could not be canceld", response);
-        });
+          const cancelButton = $("button[data-bb-handler='cancel']");
+          cancelButton.hide('hide');
+
+          const operation = new JobOperation();
+          operation.attr('id', job.attr('id'));
+          operation.attr('action', 'cancel');
+
+          operation.save(function() {
+            bootbox.hideAll();
+          }, function(response) {
+            bootbox.hideAll();
+            showErrorDialog("Job could not be canceld", response);
+          });
 
         return false;
 
@@ -116,7 +116,7 @@ export default Control.extend({
 
 });
 
-var JobRefresher = Control({
+const JobRefresher = Control({
 
   setJob: function(job) {
     this.job = job;
@@ -125,7 +125,7 @@ var JobRefresher = Control({
   },
 
   refresh: function() {
-    var that = this;
+    const that = this;
     Job.findOne({
       id: that.job.id
     }, function(currentJob) {

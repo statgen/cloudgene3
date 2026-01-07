@@ -7,11 +7,10 @@ import Counter from 'models/counter';
 export default Control.extend({
 
   "init": function(element, options) {
-    var url = 'static/home.stache';
-    $.get(url,
+    $.get('static/home.stache',
       function(data) {
 
-        var template = stache(data);
+        const template = stache(data);
 
         Counter.findOne({}, function(counter) {
           $(element).html(template({
@@ -24,7 +23,7 @@ export default Control.extend({
             loggedIn: options.loggedIn
           }));
         });
-
-      });
+      }
+    );
   }
 });

@@ -10,14 +10,14 @@ export default Model.extend({
 
   'updateBinding': function() {
 
-    var that = this;
+    const that = this;
 
     this.params.each(function(param) {
       if (param.attr('type') === 'binded_list') {
-        var bindInput = param.attr('bind');
-        var bindParam = that.getParamById(bindInput);
+        const bindInput = param.attr('bind');
+        const bindParam = that.getParamById(bindInput);
         param.attr('values').each(function(value) {
-          var enabled = (value.attr('key') == bindParam.attr('value'));
+          const enabled = (value.attr('key') == bindParam.attr('value'));
           value.attr('enabled', enabled);
         });
       }
@@ -25,7 +25,7 @@ export default Model.extend({
   },
 
   'getParamById': function(id) {
-    var paramFound = undefined;
+    let paramFound = undefined;
     this.params.each(function(param) {
       if (param.attr('id') === id) {
         paramFound = param;

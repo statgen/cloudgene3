@@ -10,7 +10,7 @@ import showErrorDialog from 'helpers/error-dialog';
 export default Control.extend({
 
   "init": function (element, options) {
-    var that = this;
+    const that = this;
 
     NextflowConfig.findOne({},
       function (nextflowConfig) {

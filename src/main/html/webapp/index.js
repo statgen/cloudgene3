@@ -25,7 +25,7 @@ $(document.links).filter(function() {
   return this.hostname != window.location.hostname;
 }).attr('target', '_blank');
 
-var routes = [{
+const routes = [{
   path: '',
   control: DashboardControl,
   classes: 'fullsize-container'
@@ -104,7 +104,7 @@ $.ajaxPrefilter(function(options, orig, xhr) {
       if (localStorage.getItem("cloudgene")) {
         try {
           // get data
-          var data = JSON.parse(localStorage.getItem("cloudgene"));
+          const data = JSON.parse(localStorage.getItem("cloudgene"));
           xhr.setRequestHeader("X-CSRF-Token", data.csrf);
           xhr.setRequestHeader("X-Auth-Token", data.token);
         } catch (e) {

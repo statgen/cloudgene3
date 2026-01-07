@@ -15,7 +15,7 @@ export default Control.extend({
   'submit': function(element, event) {
     event.preventDefault();
 
-    var username = $(element).find("[name='username']");
+    const username = $(element).find("[name='username']");
 
     $.ajax({
       url: "api/v2/users/reset",

@@ -11,15 +11,15 @@ export default Control.extend({
   },
 
   '#btn-copy click': function(el) {
-    var copyTest = document.queryCommandSupported('copy');
-    var elOriginalText = $(el).attr('data-original-title');
-    var copyTextArea = $('#curl');
+    const copyTest = document.queryCommandSupported('copy');
+    const elOriginalText = $(el).attr('data-original-title');
+    const copyTextArea = $('#curl');
 
     if (copyTest === true) {
       copyTextArea.select();
       try {
-        var successful = document.execCommand('copy');
-        var msg = successful ? 'Copied!' : 'Whoops, not copied!';
+        const successful = document.execCommand('copy');
+        const msg = successful ? 'Copied!' : 'Whoops, not copied!';
         $(el).attr('data-original-title', msg).tooltip('show');
       } catch (err) {
         console.log('Oops, unable to copy');
@@ -30,6 +30,4 @@ export default Control.extend({
       window.prompt("Copy to clipboard: Ctrl+C or Command+C, Enter", copyTextArea.val());
     }
   }
-
-
 });

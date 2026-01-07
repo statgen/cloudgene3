@@ -15,7 +15,7 @@ export default Control.extend({
 
       $.get(options.template,
         function(data) {
-          var view = stache(data);
+          const view = stache(data);
           if (view) {
             $(element).html(view());
           } else {
