@@ -1,4 +1,4 @@
-package cloudgene.mapred.server.services;
+package cloudgene.mapred.util;
 
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
@@ -9,15 +9,13 @@ import java.util.regex.Pattern;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @MicronautTest
-public class IpServiceTest {
+public class IpFetcherTest {
 
     @Test
-    public void testGetServerIpReturnsIpV4() {
-        IpService ipService = new IpService();
-
+    public void testFetchServerIpReturnsIpV4() {
         Pattern regex = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
 
-        String serverIp = ipService.getServerIp();
+        String serverIp = IpFetcher.fetchServerIp();
         Matcher matcher = regex.matcher(serverIp);
 
         assertTrue(matcher.find());

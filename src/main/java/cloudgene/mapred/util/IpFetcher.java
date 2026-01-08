@@ -1,31 +1,29 @@
-package cloudgene.mapred.server.services;
+package cloudgene.mapred.util;
 
 import com.amazonaws.util.EC2MetadataUtils;
-import io.micronaut.runtime.server.EmbeddedServer;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 
-@Singleton
-public class IpService {
+/**
+ * Provides the static method fetchServerIp(), which returns this server's IP.
+ */
+public final class IpFetcher {
 
-    @Inject
-    private EmbeddedServer embeddedServer;
+    private IpFetcher() {}
 
-    private String serverIp = null;
+    private static String serverIp = null;
 
     /**
      * Loops through the system's reported IP addresses and returns the first IPv4 external address. If anything goes
-     * wrong, returns `null`.
+     * wrong, returns null.
      *
-     * Note that the returned IP is not guaranteed to be visible outside the local network link. E.g., a router in the
+     * Note that the returned IP is only guaranteed to be visible in the local network link. E.g., a router in the
      * way could map this IP to a different one.
      */
-    private String fetchLocalIp() {
+    private static String fetchSystemIpV4() {
         try {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
@@ -51,28 +49,31 @@ public class IpService {
     }
 
     /**
-     * Does the actual IP fetching work behind `getServerIp()`, see comments there.
+     * Does the actual IP fetching work behind fetchServerIp(), see comments there.
      */
-    private String fetchServerIp() {
+    private static String actuallyFetchTheIp() {
         String ec2Ip = EC2MetadataUtils.getPrivateIpAddress();
         if (ec2Ip != null) return ec2Ip;
 
-        String localIp = fetchLocalIp();
+        String localIp = fetchSystemIpV4();
         if (localIp != null) return localIp;
 
-        return embeddedServer.getHost();
+        throw new IllegalStateException("Failed to obtain a valid server IPv4 address from available metadata.");
     }
 
     /**
-     * Attempts to return this server's IPv4, as visible from its local network.
-     * Due to fallback on `EmbeddedServer.getHost()`, might return aliases such as `localhost`.
+     * Fetches this server's IPv4, as visible from its local network.
+     * In an AWS environment, it uses the EC2 metadata service to get the "private IP" that is valid in the local VPC.
+     * Otherwise, attempts to get the address from the system.
+     * Raises an IllegalStateException if no valid IPv4 can be obtained.
+     *
      * Results are cached for the lifetime of the application.
      *
-     * @return This server's IP.
+     * @return This server's IPv4, as visible from its local network.
      */
-    public String getServerIp() {
+    public static String fetchServerIp() {
         if (serverIp == null) {
-            serverIp = fetchServerIp();
+            serverIp = actuallyFetchTheIp();
         }
         return serverIp;
     }
