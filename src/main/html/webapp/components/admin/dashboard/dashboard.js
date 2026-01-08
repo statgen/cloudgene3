@@ -13,7 +13,7 @@ export default Control.extend({
   "init": function(element, options) {
 
     $(element).hide();
-    var that = this;
+    const that = this;
 
     window.Raphael = Raphael;
 
@@ -60,8 +60,8 @@ export default Control.extend({
 
   '#day_combo change': function() {
 
-    var days = $("#day_combo").val();
-    var that = this;
+    const days = $("#day_combo").val();
+    const that = this;
     $.getJSON("api/v2/admin/server/statistics", {
       days: days
     }, function(mydata) {
@@ -73,9 +73,6 @@ export default Control.extend({
       $("#total_jobs").html(mydata[0].completeJobs);
 
       that.options.running.setData(mydata);
-      //that.options.jobs.setData(mydata);
-      //that.options.users.setData(mydata);
     });
   }
-
 });

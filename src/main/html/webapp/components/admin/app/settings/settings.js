@@ -1,7 +1,4 @@
 import Control from 'can-control';
-import domData from 'can-util/dom/data/data';
-import canMap from 'can-map';
-import canRoute from 'can-route';
 
 import 'helpers/helpers';
 import $ from 'jquery';
@@ -14,7 +11,7 @@ import template from './settings.stache';
 export default Control.extend({
 
   "init": function (element, options) {
-    var that = this;
+    const that = this;
 
     ApplicationSettings.findOne({ id: options.app }, function (application) {
       that.application = application;
@@ -25,18 +22,15 @@ export default Control.extend({
       $(element).fadeIn();
 
     });
-
   },
-
 
   'submit': function (form, event) {
     event.preventDefault();
 
-    var nextflowProfile = $('#nextflow-profile').val();
-    var nextflowConfig = $('#nextflow-config').val();
-    var nextflowWork = $('#nextflow-work').val();
-    var nextflowEnv = $('#nextflow-env').val();
-
+    const nextflowProfile = $('#nextflow-profile').val();
+    const nextflowConfig = $('#nextflow-config').val();
+    const nextflowWork = $('#nextflow-work').val();
+    const nextflowEnv = $('#nextflow-env').val();
 
     this.application.attr('config').attr('nextflow.profile', nextflowProfile);
     this.application.attr('config').attr('nextflow.config', nextflowConfig);
@@ -49,6 +43,4 @@ export default Control.extend({
         showErrorDialog("Operation failed", response);
       });
   }
-
-
 });

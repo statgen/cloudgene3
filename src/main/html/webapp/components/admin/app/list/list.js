@@ -1,6 +1,5 @@
 import Control from 'can-control';
 import domData from 'can-util/dom/data/data';
-import canMap from 'can-map';
 import canRoute from 'can-route';
 
 import 'helpers/helpers';
@@ -14,18 +13,16 @@ import Group from 'models/group';
 import template from './list.stache';
 import templateInstallGithub from './install-github/install-github.stache';
 import templateInstallUrl from './install-url/install-url.stache';
-import templatePermission from './permission/permission.stache';
 
 export default Control.extend({
 
   "init": function (element, options) {
-    var that = this;
 
     Application.findAll({}, function (applications) {
 
-      var grouped = {};
+      const grouped = {};
       applications.forEach(function(item) {
-        var category = item.category;
+        let category = item.category;
         if (category == undefined) {
           category = "Application";
         }
@@ -35,7 +32,7 @@ export default Control.extend({
         grouped[category].push(item);
       });
 
-      var categories = Object.keys(grouped).map(category => {
+      const categories = Object.keys(grouped).map(category => {
         return {
           name: category,
           applications: grouped[category].map(app => {
@@ -66,27 +63,34 @@ export default Control.extend({
 
   '#install-app-url-btn click': function (el, ev) {
 
-    bootbox.confirm(templateInstallUrl(),
-      function (result) {
+    bootbox.confirm({
+      title: 'Install App from URL',
+      message: templateInstallUrl(),
+      callback: function (result) {
         if (result) {
-          var url = $('#url').val();
-          var app = new Application();
+          const url = $('#url').val();
+          const app = new Application();
           app.attr('url', url);
 
-          var waitingDialog = bootbox.dialog({
-            message: '<h4>Install application</h4>' +
+          const waitingDialog = bootbox.dialog({
+            title: 'Install application',
+            message:
               '<p>Please wait while the application is configured.</p>' +
               '<div class="progress progress-striped active">' +
-              '<div id="waiting-progress" class="bar" style="width: 100%;"></div>' +
+              '    <div id="waiting-progress" class="bar" style="width: 100%;"></div>' +
               '</div>',
-            show: false
+            show: false,
           });
           waitingDialog.on('shown.bs.modal', function () {
             app.save(function (application) {
               waitingDialog.modal('hide');
-              bootbox.alert('<h4>Congratulations</h4><p>The application installation was successful.</p>', function () {
-                var router = canRoute.router;
-                router.reload();
+              bootbox.alert({
+                title: 'Congratulations',
+                message: '<p>The application installation was successful.</p>',
+                callback: function () {
+                  const router = canRoute.router;
+                  router.reload();
+                },
               });
 
             }, function (response) {
@@ -97,59 +101,71 @@ export default Control.extend({
 
           waitingDialog.modal('show');
         }
-      });
+      }
+    });
   },
 
   '#install-app-github-btn click': function (el, ev) {
 
-    bootbox.confirm(templateInstallGithub(),
-      function (result) {
+    bootbox.confirm({
+      title: 'Install App from GitHub repository',
+      message: templateInstallGithub(),
+      callback: function (result) {
         if (result) {
 
-          var url = 'github://' + $('#url').val();
-          var app = new Application();
+          const url = 'github://' + $('#url').val();
+          const app = new Application();
           app.attr('url', url);
 
-          var waitingDialog = bootbox.dialog({
-            message: '<h4>Install application</h4>' +
+          const waitingDialog = bootbox.dialog({
+            title: 'Installing Application',
+            message:
               '<p>Please wait while the application is configured.</p>' +
               '<div class="progress progress-striped active">' +
               '<div id="waiting-progress" class="bar" style="width: 100%;"></div>' +
               '</div>',
-            show: false
+            show: false,
           });
 
-          waitingDialog.on('shown.bs.modal', function () {
-
-            app.save(function (application) {
-              waitingDialog.modal('hide');
-              bootbox.alert('<h4>Congratulations</h4><p>The application installation was successful.</p>', function () {
-                var router = canRoute.router;
-                router.reload();
-              });
-
-            }, function (response) {
-              waitingDialog.modal('hide');
-              showErrorDialog("Operation failed", response);
-            });
-          });
+          waitingDialog.on(
+            'shown.bs.modal',
+            function () {
+              app.save(
+                function (application) {
+                  waitingDialog.modal('hide');
+                  bootbox.alert({
+                    title: 'Congratulations',
+                    message: '<p>The application installation was successful.</p>',
+                    callback: function () {
+                      const router = canRoute.router;
+                      router.reload();
+                    },
+                  });
+                },
+                function (response) {
+                  waitingDialog.modal('hide');
+                  showErrorDialog("Operation failed", response);
+                }
+              );
+            }
+          );
 
           waitingDialog.modal('show');
         }
-      });
-
+      }
+    });
   },
 
   '#reload-apps-btn click': function (el, ev) {
-    var element = this.element;
+    const element = this.element;
 
     Application.findAll({
       reload: 'true'
     }, function (applications) {
 
-      var grouped = {};
+      const grouped = {};
       applications.forEach(function(item) {
-        var category = item.category;
+        let category = item.category;
         if (category == undfined) {
           category = "Application";
         }
@@ -159,7 +175,7 @@ export default Control.extend({
         grouped[category].push(item);
       });
 
-      var categories = Object.keys(grouped).map(category => {
+      const categories = Object.keys(grouped).map(category => {
         return {
           name: category,
           applications: grouped[category].map(app => {
@@ -188,86 +204,106 @@ export default Control.extend({
   },
 
   '.enable-disable-btn click': function (el, ev) {
-    var card = $(el).closest('tr');
-    var application = domData.get.call(card[0], 'application');
+    const card = $(el).closest('tr');
+    const application = domData.get.call(card[0], 'application');
 
-    var enabled = !application.attr('enabled')
-    bootbox.confirm("Are you sure you want to " + (enabled ? "enable" : "disable") + " application <b>" + application.attr('id') + "</b>?", function (result) {
-      if (result) {
-        application.attr('enabled', enabled);
+    const enabled = !application.attr('enabled')
+    bootbox.confirm({
+      title: (enabled ? "Enable" : "Disable") + ' Application',
+      message: "Are you sure you want to " + (enabled ? "enable" : "disable") + " <b>" + application.attr('id') + "</b>?",
+      callback: function (result) {
+        if (result) {
+          application.attr('enabled', enabled);
 
-        var waitingDialog = bootbox.dialog({
-          message: (enabled ? '<h4>Enable application</h4>' : '<h4>Disable application</h4>') +
-            '<p>Please wait while the application is configured.</p>' +
-            '<div class="progress progress-striped active">' +
-            '<div id="waiting-progress" class="bar" style="width: 100%;"></div>' +
-            '</div>',
-          show: false
-        });
-        waitingDialog.on('shown.bs.modal', function () {
-
-          application.save(function (application) {
-            waitingDialog.modal('hide');
-            bootbox.alert('<h4>Congratulations</h4><p>The application has been successfully ' + (enabled ? 'enabled' : 'disabled') + '.</p>');
-
-          }, function (response) {
-            waitingDialog.modal('hide');
-            showErrorDialog("Operation failed", response);
+          const waitingDialog = bootbox.dialog({
+            title: (enabled ? "Enabling..." : "Disabling..."),
+            message:
+              '<p>Please wait while the application is configured.</p>' +
+              '<div class="progress progress-striped active">' +
+              '<div id="waiting-progress" class="bar" style="width: 100%;"></div>' +
+              '</div>',
+            show: false
           });
-        });
-        waitingDialog.modal('show');
-
+          waitingDialog.on(
+            'shown.bs.modal',
+            function () {
+              application.save(
+                function (application) {
+                  waitingDialog.modal('hide');
+                  bootbox.alert({
+                    title: 'Congratulations',
+                    message: '<p>The application has been successfully ' + (enabled ? 'enabled' : 'disabled') + '.</p>'
+                  });
+                },
+                function (response) {
+                  waitingDialog.modal('hide');
+                  showErrorDialog("Operation failed", response);
+                }
+              );
+            }
+          );
+          waitingDialog.modal('show');
+        }
       }
     });
   },
 
   '.delete-app-btn click': function (el, ev) {
 
-    var card = $(el).closest('tr');
-    var application = domData.get.call(card[0], 'application');
+    const card = $(el).closest('tr');
+    const application = domData.get.call(card[0], 'application');
 
-    bootbox.confirm("Are you sure you want to delete <b>" + application.attr('id') + "</b>?", function (result) {
-      if (result) {
+    bootbox.confirm({
+      title: 'Delete Application',
+      message: "Are you sure you want to delete <b>" + application.attr('id') + "</b>?",
+      callback: function (result) {
+        if (result) {
 
-        var waitingDialog = bootbox.dialog({
-          message: '<h4>Uninstall application</h4>' +
-            '<p>Please wait while the application is configured.</p>' +
-            '<div class="progress progress-striped active">' +
-            '<div id="waiting-progress" class="bar" style="width: 100%;"></div>' +
-            '</div>',
-          show: false
-        });
-
-        waitingDialog.on('shown.bs.modal', function () {
-
-          application.destroy(function (application) {
-            waitingDialog.modal('hide');
-            bootbox.alert('<h4>Congratulations</h4><p>The application has been successfully removed.</p>');
-
-          }, function (response) {
-            waitingDialog.modal('hide');
-            showErrorDialog("Operation failed", response);
+          const waitingDialog = bootbox.dialog({
+            title: 'Uninstalling...',
+            message:
+              '<p>Please wait while the application is configured.</p>' +
+              '<div class="progress progress-striped active">' +
+              '<div id="waiting-progress" class="bar" style="width: 100%;"></div>' +
+              '</div>',
+            show: false,
           });
 
-        });
+          waitingDialog.on(
+            'shown.bs.modal',
+            function () {
+              application.destroy(function (application) {
+                waitingDialog.modal('hide');
+                bootbox.alert({
+                  title: 'Congratulations',
+                  message: '<p>The application has been successfully removed.</p>',
+                });
 
-        waitingDialog.modal('show');
-      }
+              }, function (response) {
+                waitingDialog.modal('hide');
+                showErrorDialog("Operation failed", response);
+              });
+            }
+          );
+
+          waitingDialog.modal('show');
+        }
+      },
     });
 
   },
 
   '.edit-permission-btn click': function(el, ev) {
 
-    var card = $(el).closest('tr');
-    var application = domData.get.call(card[0], 'application');
+    const card = $(el).closest('tr');
+    const application = domData.get.call(card[0], 'application');
 
     Group.findAll({},
       function(groups) {
 
-        var roles = application.attr('permission').split(',');
+        const roles = application.attr('permission').split(',');
 
-        var options = '';
+        let options = '';
         groups.forEach(function(group, index) {
           if ($.inArray(group.attr('name'), roles) >= 0) {
             options = options + '<label class="checkbox"><input type="checkbox" name="role-select" value="' + group.attr('name') + '" checked />';
@@ -280,31 +316,32 @@ export default Control.extend({
         });
 
       // Add input field for creating a new group
-      var newGroupSection = `
+      const newGroupSection = `
         <hr>
         <label for="new-group-name">New Group Name:</label>
         <input type="text" id="new-group-name" class="form-control" placeholder="Enter new group name">
       `;
 
-        bootbox.confirm(
-          '<h4>Edit permission of ' + application.attr('name') + '</h4><hr><form id="role-form">' + options + newGroupSection + '</form>',
-          function(result) {
+        bootbox.confirm({
+          title: 'Edit Permission for ' + application.attr('name'),
+          message: '<form id="role-form">' + options + newGroupSection + '</form>',
+          callback: function(result) {
             if (result) {
 
-              var boxes = $('#role-form input:checkbox');
-              var checked = [];
-              for (var i = 0; boxes[i]; ++i) {
+              const boxes = $('#role-form input:checkbox');
+              const checked = [];
+              for (let i = 0; boxes[i]; ++i) {
                 if (boxes[i].checked) {
                   checked.push(boxes[i].value);
                 }
               }
 
-               var newGroupName = $('#new-group-name').val().trim();
+               const newGroupName = $('#new-group-name').val().trim();
               if (newGroupName) {
                 checked.push(newGroupName);
               }
 
-              var text = checked.join(',');
+              const text = checked.join(',');
               application.attr('permission', text);
               application.save(function(data) {},
                 function(response) {
@@ -313,7 +350,7 @@ export default Control.extend({
 
             }
           }
-        );
+        });
 
       },
       function(response) {
@@ -324,12 +361,12 @@ export default Control.extend({
 
   '.view-source-btn click': function(el, ev) {
 
-    var card = $(el).closest('tr');
-    var application = domData.get.call(card[0], 'application');
+    const card = $(el).closest('tr');
+    const application = domData.get.call(card[0], 'application');
     bootbox.alert({
+      title: 'View Source',
       message: '<div style="overflow: auto; height: 600px; width: 100%"><h5>File</h5><p>' + application.attr('filename') + '</p>' + '<h5>Source</h5><small><p><pre><code>' + application.attr('source') + '</code></pre></small></p></div>',
-      className: 'w-100'
+      className: 'w-100',
     });
   }
-
 });

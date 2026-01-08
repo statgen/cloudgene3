@@ -10,7 +10,7 @@ import 'helpers/helpers';
 import template from './detail.stache';
 import JobDetails from 'models/job-details';
 
-var jobs = [{
+const jobs = [{
     name: "Header Success",
     data: {
       "app": null,
@@ -284,8 +284,8 @@ var jobs = [{
 ];
 
 
-for (var i = 0; i < jobs.length; i++) {
-  var job = new JobDetails(jobs[i].data);
+for (let i = 0; i < jobs.length; i++) {
+  const job = new JobDetails(jobs[i].data);
   job.syncTime();
   $("#test-container").append("<h3>Test: " + jobs[i].name + "</h3>");
   $("#test-container").append(template({

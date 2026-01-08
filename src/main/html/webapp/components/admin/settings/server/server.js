@@ -13,7 +13,7 @@ import showErrorDialog from 'helpers/error-dialog';
 export default Control.extend({
 
   "init": function(element, options) {
-    var that = this;
+    const that = this;
     $(element).hide();
     Cluster.findOne({},
       function(cluster) {
@@ -27,19 +27,20 @@ export default Control.extend({
   },
 
   "#maintenance-enter-btn click": function() {
-    var that = this;
-    var element = this.element;
+    const that = this;
+    const element = this.element;
 
     Template.findOne({
       key: 'MAINTENANCE_MESSAGE'
     }, function(template) {
 
-      var oldText = template.attr('text');
-      bootbox.confirm(
-        '<h4>Maintenance Message</h4><form><textarea class="form-control span5" id="message" rows="10" name="message" width="30" height="20">' + oldText + '</textarea></form>',
-        function(result) {
+      const oldText = template.attr('text');
+      bootbox.confirm({
+        title: 'Maintenance Message',
+        message: '<form><textarea class="form-control span5" id="message" rows="10" name="message" width="30" height="20">' + oldText + '</textarea></form>',
+        callback: function(result) {
           if (result) {
-            var text = $('#message').val();
+            const text = $('#message').val();
             template.attr('text', text);
             template.save();
 
@@ -49,9 +50,9 @@ export default Control.extend({
             }, function(response) {
               showErrorDialog("Operation failed", response);
             });
-
           }
-        });
+        }
+      });
 
     }, function(response) {
       new ErrorPage(element, response);
@@ -60,7 +61,7 @@ export default Control.extend({
   },
 
   "#maintenance-exit-btn click": function() {
-    var that = this;
+    const that = this;
     $.get('api/v2/admin/server/maintenance/exit').then(function(data) {
       bootbox.alert(data);
       that.init(that.element, that.options);
@@ -69,12 +70,8 @@ export default Control.extend({
     });
   },
 
-  "#hadoop-details-btn click": function() {
-    bootbox.alert('<pre>' + this.cluster.attr('hadoop_details') + '</pre>');
-  },
-
   "#queue-block-btn click": function() {
-    var that = this;
+    const that = this;
     $.get('api/v2/admin/server/queue/block').then(function(data) {
       bootbox.alert(data);
       that.init(that.element, that.options);
@@ -84,7 +81,7 @@ export default Control.extend({
   },
 
   "#queue-open-btn click": function() {
-    var that = this;
+    const that = this;
     $.get('api/v2/admin/server/queue/open').then(function(data) {
       bootbox.alert(data);
       that.init(that.element, that.options);
@@ -94,7 +91,7 @@ export default Control.extend({
   },
 
   "#retire-btn click": function() {
-    var that = this;
+    const that = this;
     $.get('api/v2/admin/jobs/retire').then(function(data) {
       bootbox.alert(data);
       that.init(that.element, that.options);

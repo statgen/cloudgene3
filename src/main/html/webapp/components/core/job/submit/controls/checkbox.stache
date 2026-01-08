@@ -2,9 +2,17 @@
 </div>
 
 <div class="col-sm-7">
-  <div class="custom-control custom-checkbox">
-    <input name="{{id}}" id="{{id}}" type ="checkbox" class="custom-control-input" {{#isParamChecked(.)}}checked{{/isParamChecked}} value="{{getParamTrueValue(.)}}" data-unchecked-value="{{getParamFalseValue(.)}}" >
-    <label class="custom-control-label" for="{{id}}">{{description}}</label>
+  <div class="form-check">
+    <input
+      name="{{id}}"
+      id="{{id}}"
+      type ="checkbox"
+      class="form-check-input"
+      {{#isParamChecked(.)}}checked{{/isParamChecked}}
+      value="{{getParamTrueValue(.)}}"
+      data-unchecked-value="{{getParamFalseValue(.)}}"
+    >
+    <label class="form-check-label" for="{{id}}">{{description}}</label>
   </div>
   {{#if(details)}}
     <small class="form-text text-muted">{{details}}</small>

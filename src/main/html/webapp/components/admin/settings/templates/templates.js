@@ -27,21 +27,25 @@ export default Control.extend({
 
   '.edit-btn click': function(el, ev) {
 
-    var tr = $(el).closest('tr');
-    var template = domData.get.call(tr[0], 'template');
-    var oldText = template.attr('text');
-    bootbox.confirm(
-      '<h4>' + template.attr('key') + '</h4><form><textarea class="form-control span5" id="message" rows="10" name="message" width="30" height="20">' + oldText + '</textarea></form>',
-      function(result) {
+    const tr = $(el).closest('tr');
+    const template = domData.get.call(tr[0], 'template');
+    const oldText = template.attr('text');
+    bootbox.confirm({
+      title: template.attr('key'),
+      message: '<form><textarea class="form-control span5" id="message" rows="10" name="message" width="30" height="20">' + oldText + '</textarea></form>',
+      callback: function(result) {
         if (result) {
-          var text = $('#message').val();
+          const text = $('#message').val();
           template.attr('text', text);
-          template.save(function(data) {}, function(response) {
-            showErrorDialog("Operation failed", response);
-          });
+          template.save(
+            function(data) {},
+            function(response) {
+              showErrorDialog("Operation failed", response);
+            },
+          );
         }
-      });
-
+      }
+    });
   }
 
 });

@@ -1,8 +1,6 @@
 package cloudgene.mapred.server.controller;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +13,6 @@ import cloudgene.mapred.server.responses.ServerResponse;
 import cloudgene.mapred.server.responses.StatisticsResponse;
 import cloudgene.mapred.server.services.ServerService;
 import cloudgene.mapred.util.TextUtil;
-import genepi.io.FileUtil;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Controller;
@@ -29,12 +26,9 @@ import jakarta.inject.Inject;
 
 @Controller("/api/v2/admin/server")
 @Secured(User.ROLE_ADMIN)
-
 public class ServerAdminController {
 
 	private static final String LOG_FILENAME = "logs/cloudgene.log";
-
-	public static String CLOUDGENE_APPS_ENDPOINT = "http://apps.cloudgene.io/api/apps.json";
 
 	@Inject
 	protected Application application;
@@ -80,9 +74,7 @@ public class ServerAdminController {
 
 	@Get("/cluster")
 	public String getDetails() {
-
 		return serverService.getClusterDetails();
-
 	}
 
 	@Get("/logs/cloudgene.log")
@@ -93,14 +85,11 @@ public class ServerAdminController {
 		} else {
 			return "No log file available.";
 		}
-
 	}
 
 	@Get("/settings")
 	public ServerResponse getSettings() {
-
 		return ServerResponse.build(application.getSettings());
-
 	}
 
 	@Post("/settings/update")
@@ -119,29 +108,16 @@ public class ServerAdminController {
 
 	@Get("/nextflow/config")
 	public NextflowConfigResponse getNextflowConfig() {
-
 		return NextflowConfigResponse.build(application.getSettings());
-
 	}
 
 	@Post("/nextflow/config/update")
 	public NextflowConfigResponse updateNextflowConfig(String config, String env) {
-
 		serverService.updateNextflowConfig(config);
 		serverService.updateNextflowEnv(env);
 
 		return NextflowConfigResponse.build(application.getSettings());
-
 	}
-
-	@Get("/cloudgene-apps")
-	public String list() throws IOException {
-		URL url = new URL(CLOUDGENE_APPS_ENDPOINT);
-		String content = FileUtil.readFileAsString(url.openStream());
-		return content;
-	}
-
-	public String[] counters = new String[] { "runningJobs", "waitingJobs", "completeJobs", "users" };
 
 	@Get("/statistics")
 	public List<Map<String, String>> getStatistics(@Nullable @QueryValue("days") Integer days) {

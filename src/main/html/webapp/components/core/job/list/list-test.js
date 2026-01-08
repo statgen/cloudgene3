@@ -11,7 +11,7 @@ import 'helpers/helpers';
 import template from './list.stache';
 import JobDetails from 'models/job-details';
 
-var jobs = {
+const jobs = {
   "count": 131,
   "page": 1,
   "next": 2,
@@ -218,13 +218,14 @@ var jobs = {
 };
 
 
-var list = new List();
+const list = new List();
 list.attr('count', jobs.count);
 list.attr('page', jobs.page);
 list.attr('pages', jobs.pages);
 list.attr('next', jobs.next);
-for (var i = 0; i < jobs.data.length; i++) {
-  var job = new JobDetails(jobs.data[i]);
+
+for (let i = 0; i < jobs.data.length; i++) {
+  const job = new JobDetails(jobs.data[i]);
   job.syncTime();
   list.push(job);
 }

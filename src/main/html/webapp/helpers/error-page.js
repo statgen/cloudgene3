@@ -8,7 +8,7 @@ export default Control.extend({
 
   "init": function(element, options) {
     // check if response
-    var error = {};
+    let error = {};
     bootbox.hideAll();
 
     if (options.status == 0) {

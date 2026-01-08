@@ -15,7 +15,7 @@ export default Control.extend({
   'submit': function(element, event) {
     event.preventDefault();
 
-    var username = $(element).find("[name='username']");
+    const username = $(element).find("[name='username']");
 
     $.ajax({
       url: "api/v2/users/reset",
@@ -33,7 +33,7 @@ export default Control.extend({
         } else {
           // shows error
           username.addClass('is-invalid');
-          username.closest('.form-group').find('.invalid-feedback').html(data.message);
+          username.closest('.mb-3').find('.invalid-feedback').html(data.message);
         }
       },
       error: function(message) {

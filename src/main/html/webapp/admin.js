@@ -1,5 +1,4 @@
 import $ from 'jquery';
-import 'popper.js';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'components/core/layout/layout.css';
@@ -12,12 +11,12 @@ import LayoutControl from 'components/admin/layout/';
 import RouterControl from 'helpers/router';
 import DashboardControl from 'components/admin/dashboard/';
 import UserListControl from 'components/admin/user/list/';
+import UserDetailControl from 'components/admin/user/detail/';
 import JobListControl from 'components/admin/job/list/';
 import JobDetailControl from 'components/core/job/detail/';
 import AppListControl from 'components/admin/app/list/';
 import AppSettingsControl from 'components/admin/app/settings/';
 
-import AppRepositoryControl from 'components/admin/app/repository/';
 import SettingsGeneralControl from 'components/admin/settings/general/';
 import SettingsNextflowControl from 'components/admin/settings/nextflow/';
 import SettingsServerControl from 'components/admin/settings/server/';
@@ -25,12 +24,11 @@ import SettingsMailControl from 'components/admin/settings/mail/';
 import SettingsTemplatesControl from 'components/admin/settings/templates/';
 import SettingsLogsControl from 'components/admin/settings/logs/';
 
-
 $(document.links).filter(function () {
   return this.hostname != window.location.hostname;
 }).attr('target', '_blank');
 
-var routes = [{
+const routes = [{
   path: '',
   control: DashboardControl,
   options: {
@@ -64,16 +62,16 @@ var routes = [{
   control: UserListControl,
   guard: adminGuard
 }, {
+  path: 'pages/users/{user}',
+  control: UserDetailControl,
+  guard: adminGuard
+}, {
   path: 'pages/admin-apps',
   control: AppListControl,
   guard: adminGuard
 }, {
   path: 'pages/admin-apps/{app}',
   control: AppSettingsControl,
-  guard: adminGuard
-}, {
-  path: 'pages/admin-apps-repository',
-  control: AppRepositoryControl,
   guard: adminGuard
 }, {
   path: 'pages/admin-server',
@@ -123,7 +121,7 @@ $.ajaxPrefilter(function (options, orig, xhr) {
       if (localStorage.getItem("cloudgene")) {
         try {
           // get data
-          var data = JSON.parse(localStorage.getItem("cloudgene"));
+          const data = JSON.parse(localStorage.getItem("cloudgene"));
           xhr.setRequestHeader("X-CSRF-Token", data.csrf);
           xhr.setRequestHeader("X-Auth-Token", data.token);
         } catch (e) {
@@ -140,16 +138,12 @@ $.ajaxPrefilter(function (options, orig, xhr) {
     options.data = JSON.stringify(orig.data);
     options.processData = false;
   }
-
 });
 
-
 Server.findOne({}, function (server) {
-
   new LayoutControl("#main", {
     appState: server
   });
-
 
   new RouterControl("#content", {
     routes: routes,
@@ -162,5 +156,4 @@ Server.findOne({}, function (server) {
       }
     }
   });
-
 });

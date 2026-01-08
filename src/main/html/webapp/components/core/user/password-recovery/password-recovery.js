@@ -20,22 +20,22 @@ export default Control.extend({
   'submit': function(element, event) {
     event.preventDefault();
 
-    var user = new User();
+    const user = new User();
 
     // password
-    var newPassword = $(element).find("[name='new-password']");
-    var confirmNewPassword = $(element).find("[name='confirm-new-password']");
-    var error = user.checkPassword(newPassword.val(), confirmNewPassword.val());
+    const newPassword = $(element).find("[name='new-password']");
+    const confirmNewPassword = $(element).find("[name='confirm-new-password']");
+    const error = user.checkPassword(newPassword.val(), confirmNewPassword.val());
 
     if (error) {
       confirmNewPassword.removeClass('is-valid');
       confirmNewPassword.addClass('is-invalid');
-      confirmNewPassword.closest('.form-group').find('.invalid-feedback').html(error);
+      confirmNewPassword.closest('.mb-3').find('.invalid-feedback').html(error);
       return false;
     } else {
       confirmNewPassword.removeClass('is-invalid');
       confirmNewPassword.addClass('is-valid');
-      confirmNewPassword.closest('.form-group').find('.invalid-feedback').html('');
+      confirmNewPassword.closest('.mb-3').find('.invalid-feedback').html('');
     }
 
 

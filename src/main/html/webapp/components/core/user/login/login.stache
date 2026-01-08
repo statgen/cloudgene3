@@ -1,26 +1,57 @@
-<h2>Sign in</h2>
-<br>
+<div class="mb-4">
+  <h2>Sign in</h2>
+</div>
 
-<form class="form-horizontal" id="signin-form" autocomplete="off">
+<form id="signin-form" autocomplete="off">
 
-  <div class="form-group">
-    <label for="username" class="control-label">Username:</label>
-    <input id="username" name="username" type="text" class="form-control col-sm-3" data-required="true" autocomplete="off" />
-  </div>
-
-  <div class="form-group">
-    <label for="password" class="control-label">Password:</label>
-    <input id="password" name="password" type="password" class="form-control col-sm-3" autocomplete="off" >
-    <div class="invalid-feedback">
-      This parameter is required.
+  <div class="mb-3">
+    <label for="username" class="form-label">Username:</label>
+    <div class="row">
+      <div class="col-sm-3">
+        <input
+          id="username"
+          name="username"
+          type="text"
+          class="form-control"
+          data-required="true"
+          pattern="[a-zA-Z0-9_]+"
+          title="Usernames are at least 4 characters long. They can only contain letters, underscores, and numbers."
+          autocomplete="off"
+          minlength="4"
+          required
+        />
+      </div>
     </div>
   </div>
 
-  <div class="form-group">
+  <div class="mb-3">
+    <label for="password" class="form-label">Password:</label>
+    <div class="row">
+      <div class="col-sm-3">
+        <input
+          id="password"
+          name="password"
+          type="password"
+          class="form-control"
+          data-required="true"
+          title="Passwords are at least 6 characters long. They contain letters, numbers, and special characters."
+          autocomplete="off"
+          minlength="6"
+          required
+        />
+        <div class="invalid-feedback" id="invalid-password">
+          This parameter is required.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-3">
     <button class="btn  btn-primary" type="submit">Sign in</button>
   </div>
 </form>
 
+<!--
 <hr>
 
 <p>or sign in with: </p>
@@ -31,7 +62,10 @@
   {{/oauth}}
 </ul>
 
-
 <br>
-<p>New user? <a href="#!pages/register">Sign up for free</a></p>
-<p>Forgotten your password? <a href="#!pages/reset-password">Reset your password</a></p>
+-->
+
+<div class="mt-5">
+  <div class="mb-3">New user? <a href="#!pages/register">Sign up for free</a></div>
+  <div class="mb-3">Forgotten your password? <a href="#!pages/reset-password">Reset your password</a></div>
+</div>

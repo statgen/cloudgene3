@@ -16,7 +16,7 @@ export default Control.extend({
 
   "init": function(element, options) {
 
-    var params = {};
+    let params = {};
     if (options.query) {
       params = {
         query: options.query
@@ -44,30 +44,34 @@ export default Control.extend({
   },
 
   '.delete-user-btn click': function(el, ev) {
-    var tr = $(el).closest('tr');
-    var user = domData.get.call(tr[0], 'user');
+    const tr = $(el).closest('tr');
+    const user = domData.get.call(tr[0], 'user');
 
-    bootbox.confirm("Are you sure you want to delete <b>" + user.attr('username') + "</b>?", function(result) {
-      if (result) {
-        user.destroy(function(data) {}, function(response) {
-          showErrorDialog("User not deleted", response);
-        });
-      }
+    bootbox.confirm({
+      title: 'Delete User',
+      message: "Are you sure you want to delete <b>" + user.attr('username') + "</b>?",
+      callback: function(result) {
+        if (result) {
+          user.destroy(function(data) {}, function(response) {
+            showErrorDialog("User not deleted", response);
+          });
+        }
+      },
     });
 
   },
 
   '.edit-role-btn click': function(el, ev) {
-    var tr = $(el).closest('tr');
-    var user = domData.get.call(tr[0], 'user');
-    var element = this.element;
+    const tr = $(el).closest('tr');
+    const user = domData.get.call(tr[0], 'user');
+    const element = this.element;
 
     Group.findAll({},
       function(groups) {
 
-        var roles = user.attr('role').split(',');
+        const roles = user.attr('role').split(',');
 
-        var options = '';
+        let options = '';
         groups.forEach(function(group, index) {
           if ($.inArray(group.attr('name'), roles) >= 0) {
             options = options + '<label class="checkbox"><input type="checkbox" name="role-select" value="' + group.attr('name') + '" checked />';
@@ -79,32 +83,32 @@ export default Control.extend({
           options = options + ' <b>' + group.attr('name') + '</b><br><small class="text-muted">Access to: ' + group.attr('apps').join(', ') + '</small></label><br>';
         });
 
-        bootbox.confirm(
-          '<h4>Edit roles of user ' + user.attr('username') + '</h4><hr><form id="role-form">' + options + '</form>',
-          function(result) {
+        bootbox.confirm({
+          title: 'Edit User Roles',
+          message:
+            '<p>Editing user roles for user: <b>' + user.attr('username') + '</b></p>' +
+            '<form id="role-form">' + options + '</form>',
+          callback: function(result) {
             if (result) {
 
-              var boxes = $('#role-form input:checkbox');
-              var checked = [];
-              for (var i = 0; boxes[i]; ++i) {
+              const boxes = $('#role-form input:checkbox');
+              const checked = [];
+              for (let i = 0; boxes[i]; ++i) {
                 if (boxes[i].checked) {
                   checked.push(boxes[i].value);
                 }
               }
 
-              var text = checked.join(',');
-              user.attr('role',
-                text);
-              user.save(function(data) {
-
-                },
+              const text = checked.join(',');
+              user.attr('role', text);
+              user.save(
+                function(data) {},
                 function(response) {
                   showErrorDialog("User not deleted", response);
                 });
             }
           }
-        );
-
+        });
       },
       function(response) {
         new ErrorPage(element, response);
@@ -116,7 +120,7 @@ export default Control.extend({
 
     event.preventDefault();
 
-    var query = $(this.element).find('#query');
+    const query = $(this.element).find('#query');
     if (query.val() != '') {
       window.location.href = "#!pages/users/search/" + query.val();
     } else {

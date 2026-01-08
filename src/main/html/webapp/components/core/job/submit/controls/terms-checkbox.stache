@@ -1,7 +1,7 @@
 <div class="col-sm-10">
-  <div class="custom-control custom-checkbox">
-    <input name="{{id}}" id="{{id}}" type ="checkbox" class="agb custom-control-input" required value="accepted" >
-    <label class="custom-control-label" for="{{id}}">{{description}}</label>
+  <div class="form-check">
+    <input name="{{id}}" id="{{id}}" type ="checkbox" class="agb form-check-input" required value="accepted" >
+    <label class="form-check-label" for="{{id}}">{{description}}</label>
     {{#if(details)}}
       <small class="form-text text-muted">{{details}}</small>
     {{/if}}

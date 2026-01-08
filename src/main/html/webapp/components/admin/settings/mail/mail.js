@@ -11,7 +11,7 @@ import showErrorDialog from 'helpers/error-dialog';
 export default Control.extend({
 
   "init": function(element, options) {
-    var that = this;
+    const that = this;
 
     Settings.findOne({},
       function(settings) {
@@ -21,7 +21,6 @@ export default Control.extend({
         that.settings = settings;
         $(element).fadeIn();
       });
-
   },
 
   '#mail change': function(e) {
@@ -42,8 +41,5 @@ export default Control.extend({
     }, function(response) {
       showErrorDialog("E-Mail configuration not updated", response);
     });
-
-
   }
-
 });

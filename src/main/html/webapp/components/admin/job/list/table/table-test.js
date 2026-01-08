@@ -11,7 +11,7 @@ import 'helpers/helpers';
 import template from './table.stache';
 import JobDetails from 'models/job-details';
 
-var jobs1 = {
+const jobs1 = {
   "count": 8,
   "success": 1,
   "failed": 0,
@@ -432,7 +432,8 @@ var jobs1 = {
   ]
 };
 
-var list = new List();
+const list = new List();
+
 list.attr('count', jobs1.count);
 list.attr('success', jobs1.success);
 list.attr('failed', jobs1.failed);
@@ -440,13 +441,12 @@ list.attr('pending', jobs1.pending);
 list.attr('waiting', jobs1.waiting);
 list.attr('running', jobs1.running);
 list.attr('canceld', jobs1.canceld);
-for (var i = 0; i < jobs1.data.length; i++) {
-  var job = new JobDetails(jobs1.data[i]);
+
+for (let i = 0; i < jobs1.data.length; i++) {
+  const job = new JobDetails(jobs1.data[i]);
   job.syncTime();
   list.push(job);
 }
 
-$("#test-container").append(template({
-  jobs: list
-}));
+$("#test-container").append(template({ jobs: list }));
 $("#test-container").append("<br><br><br>");
