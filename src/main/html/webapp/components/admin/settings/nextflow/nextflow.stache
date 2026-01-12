@@ -19,9 +19,7 @@
         id="config"
         name="config"
         style="height: 550px; font-size: 14px; font-family: SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;"
-      >
-        {{nextflowConfig.attr('config')}}
-      </textarea>
+      >{{nextflowConfig.attr('config')}}</textarea>
 
       <div class="mb-3">
         <p class="mb-0">Custom Environment:</p>
@@ -33,9 +31,7 @@
         id="env"
         name="env"
         style="height: 550px; font-size: 14px; font-family: SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;"
-      >
-        {{nextflowConfig.attr('env')}}
-      </textarea>
+      >{{nextflowConfig.attr('env')}}</textarea>
 
     </div>
 

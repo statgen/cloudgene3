@@ -12,9 +12,7 @@
     rows="6"
     class="form-control"
     {{#is(required, true)}}required{{/is}}
-  >
-    {{value}}
-  </textarea>
+  >{{value}}</textarea>
 
   {{#if(details)}}
     <small class="form-text text-muted">{{details}}</small>

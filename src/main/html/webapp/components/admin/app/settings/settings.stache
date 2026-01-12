@@ -48,9 +48,7 @@
         id="nextflow-config"
         name="nextflow-config"
         style="height: 550px; font-size: 14px; font-family: SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;"
-      >
-        {{application.config.attr('nextflow.config')}}
-      </textarea>
+      >{{application.config.attr('nextflow.config')}}</textarea>
 
       <div class="mb-3">
         <p class="mb-0">Custom Environment:</p>
@@ -62,9 +60,7 @@
         id="nextflow-env"
         name="nextflow-env"
         style="height: 550px; font-size: 14px; font-family: SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;"
-      >
-        {{application.config.attr('nextflow.env')}}
-      </textarea>
+      >{{application.config.attr('nextflow.env')}}</textarea>
 
       <div class="mb-3">
         <button id="save" class="btn btn-primary" data-loading-text="please wait...">

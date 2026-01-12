@@ -17,11 +17,8 @@
   <div class="card-body">
     <div id="myTabContent" class="tab-content">
       <div class="tab-pane active" id="wget">
-        <textarea class="form-control form-control-sm code-font" id="message" rows="5" wrap="off">
-          {{#files}}
-            wget {{../hostname}}/share/results/{{hash}}/{{name}}
-          {{/files}}
-        </textarea>
+        <textarea class="form-control form-control-sm code-font" id="message" rows="5" wrap="off">{{#files}}wget {{../hostname}}/share/results/{{hash}}/{{name}}
+{{/files}}</textarea>
 
         <br>
 
@@ -36,11 +33,8 @@
       </div>
 
       <div class="tab-pane" id="links">
-        <textarea class="form-control form-control-sm code-font" id="message" rows="8" wrap="off">
-          {{#files}}
-            {{../hostname}}/share/results/{{hash}}/{{name}}
-          {{/files}}
-        </textarea>
+        <textarea class="form-control form-control-sm code-font" id="message" rows="8" wrap="off">{{#files}}{{../hostname}}/share/results/{{hash}}/{{name}}
+{{/files}}</textarea>
       </div>
     </div>
   </div>
