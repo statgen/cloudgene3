@@ -1,8 +1,8 @@
 🧬 Cloudgene 3
 ================
 
-[![Tests](https://github.com/genepi/cloudgene3/actions/workflows/maven-test.yml/badge.svg?branch=main)](https://github.com/genepi/cloudgene3/actions/workflows/maven-test.yml)
-[![GitHub release](https://img.shields.io/github/release/genepi/cloudgene3.svg)](https://GitHub.com/genepi/cloudgene3/releases/)
+[![Tests](https://github.com/statgen/cloudgene3/actions/workflows/maven-test.yml/badge.svg)](https://github.com/statgen/cloudgene3/actions/workflows/maven-test.yml)
+[![GitHub release](https://img.shields.io/github/release/statgen/cloudgene3.svg)](https://GitHub.com/statgen/cloudgene3/releases/)
 
 
 A framework to build Software As A Service (SaaS) platforms for data analysis pipelines.
