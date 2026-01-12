@@ -14,38 +14,36 @@ micronaut:
     multipart:
       enabled: true
   security:
-      authentication: bearer
-      intercept-url-map:
-        - pattern : /api/**
-          access:
-            - isAuthenticated()
-        - pattern : /static/**
-          access:
-            - isAnonymous()
-        - pattern : /**
-          access:
-            - isAnonymous()
-      token:
-        bearer:
-          header-name: "X-Auth-Token"
-          prefix: ""
-        generator:
-          access-token:
-            expiration: 86400
-        jwt:
-          signatures:
-            secret:
-              generator:
-                secret: '"${JWT_GENERATOR_SIGNATURE_SECRET:pleaseChangeThisSecretForANewOne}"'
-      redirect:
+    authentication: bearer
+    intercept-url-map:
+      - pattern: /api/**
+        access:
+          - isAuthenticated()
+      - pattern: /static/**
+        access:
+          - isAnonymous()
+      - pattern: /**
+        access:
+          - isAnonymous()
+    token:
+      bearer:
+        header-name: "X-Auth-Token"
+        prefix: ""
+      generator:
+        access-token:
+          expiration: 86400
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: '"${JWT_GENERATOR_SIGNATURE_SECRET:pleaseChangeThisSecretForANewOne}"'
+    redirect:
+      enabled: false
+    endpoints:
+      login:
         enabled: false
-
-      endpoints:
-        login:
-           enabled: false
-        logout:
-           get-allowed: true
-
+      logout:
+        get-allowed: true
   router:
     static-resources:
       webapp:
