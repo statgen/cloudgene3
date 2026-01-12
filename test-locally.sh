@@ -10,7 +10,7 @@ set -m # Sets JOB CONTROL mode, needed for fg
 rm -rf target && mvn install -DskipTests
 
 # Set Cloudgene up
-cd target/cloudgene-3.1.4-statgen.7
+cd target/cloudgene-*-statgen.*/
 
 ./cloudgene install lukfor/cg-fetchngs
 # ./cloudgene install statgen/imputationserver2
