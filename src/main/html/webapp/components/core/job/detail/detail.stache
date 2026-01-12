@@ -7,10 +7,25 @@
       <div>
         <h2>{{job.longName}}</h2>
         <small class="text-muted">
-          <i class="fas fa-clock"></i> {{prettyDate(job.submittedOn}}
-          <i class="fas fa-hourglass"></i> {{prettyTime(job.executionTime)}}
-          <i class="fas fa-user"></i> {{job.username}}
-          <i class="fas fa-tag"></i> {{job.application}}
+          <span class="me-2">
+            <i class="fas fa-clock"></i> {{prettyDate(job.submittedOn}}
+          </span>
+          <span class="me-2">
+            <i class="fas fa-hourglass"></i> {{prettyTime(job.executionTime)}}
+          </span>
+          <span class="me-2">
+            <i class="fas fa-user"></i>
+            {{#is(admin, true)}}
+              <a href="#!pages/users/{{job.username}}" aria-label="User Page">
+                {{job.username}}
+              </a>
+            {{else}}
+              {{job.username}}
+            {{/is}}
+          </span>
+          <span class="me-2">
+            <i class="fas fa-tag"></i> {{job.application}}
+          </span>
         </small>
       </div>
 
