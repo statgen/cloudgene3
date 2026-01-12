@@ -40,13 +40,13 @@
             <td>
               {{#if workflow}}
                 <i class="fas fa-rocket"></i>
+                <a href="#!pages/admin-apps/{{id}}">
+                  {{name}}
+                </a>
               {{else}}
                 <i class="fas fa-table"></i>
-              {{/if}}
-
-              <a href="#!pages/admin-apps/{{id}}">
                 {{name}}
-              </a>
+              {{/if}}
 
               <br>
 
