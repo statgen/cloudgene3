@@ -20,11 +20,11 @@ export default Control.extend({
   },
 
 
-  "#anonymous1 click" : function(){
+  "#anonymous1 click" : function() {
     this.updateEmailControl();
   },
 
-  "#anonymous2 click" : function(){
+  "#anonymous2 click" : function() {
     this.updateEmailControl();
   },
 
@@ -50,7 +50,7 @@ export default Control.extend({
     // anonymous radiobutton
     let anonymous = false;
 
-    if (!this.emailRequired){
+    if (!this.emailRequired) {
       const anonymousControl = $(element).find("[name='anonymous']:checked");
       anonymous = (anonymousControl.val() == "1");
     }
@@ -95,7 +95,7 @@ export default Control.extend({
         if (data.success == true) {
           // shows success
           let message = "";
-          if (!anonymous){
+          if (!anonymous) {
             message = "Well done!</b> An email including the activation code has been sent to your address."
           } else {
             message = "<b>Well done!</b> Your account is now active. <a href=\"/\">Login now</a>."
