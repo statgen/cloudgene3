@@ -17,7 +17,7 @@ import templateInstallUrl from './install-url/install-url.stache';
 
 export default Control.extend({
 
-  "init": function (element, options) {
+  "init": function (element) {
 
     Application.findAll({}, function (applications) {
 
@@ -62,7 +62,7 @@ export default Control.extend({
 
   },
 
-  '#install-app-url-btn click': function (el, ev) {
+  '#install-app-url-btn click': function () {
 
     bootbox.confirm({
       title: 'Install App from URL',
@@ -83,21 +83,24 @@ export default Control.extend({
             show: false,
           });
           waitingDialog.on('shown.bs.modal', function () {
-            app.save(function (application) {
-              waitingDialog.modal('hide');
-              bootbox.alert({
-                title: 'Congratulations',
-                message: '<p>The application installation was successful.</p>',
-                callback: function () {
-                  const router = canRoute.router;
-                  router.reload();
-                },
-              });
+            app.save(
+              function () {
+                waitingDialog.modal('hide');
+                bootbox.alert({
+                  title: 'Congratulations',
+                  message: '<p>The application installation was successful.</p>',
+                  callback: function () {
+                    const router = canRoute.router;
+                    router.reload();
+                  },
+                });
 
-            }, function (response) {
-              waitingDialog.modal('hide');
-              showErrorDialog("Operation failed", response);
-            });
+              },
+              function (response) {
+                waitingDialog.modal('hide');
+                showErrorDialog("Operation failed", response);
+              }
+            );
           });
 
           waitingDialog.modal('show');
@@ -106,7 +109,7 @@ export default Control.extend({
     });
   },
 
-  '#install-app-github-btn click': function (el, ev) {
+  '#install-app-github-btn click': function () {
 
     bootbox.confirm({
       title: 'Install App from GitHub repository',
@@ -132,7 +135,7 @@ export default Control.extend({
             'shown.bs.modal',
             function () {
               app.save(
-                function (application) {
+                function () {
                   waitingDialog.modal('hide');
                   bootbox.alert({
                     title: 'Congratulations',
@@ -157,7 +160,7 @@ export default Control.extend({
     });
   },
 
-  '#reload-apps-btn click': function (el, ev) {
+  '#reload-apps-btn click': function () {
     const element = this.element;
 
     Application.findAll({
@@ -204,7 +207,7 @@ export default Control.extend({
     });
   },
 
-  '.enable-disable-btn click': function (el, ev) {
+  '.enable-disable-btn click': function (el) {
     const card = $(el).closest('tr');
     const application = domData.get.call(card[0], 'application');
 
@@ -229,7 +232,7 @@ export default Control.extend({
             'shown.bs.modal',
             function () {
               application.save(
-                function (application) {
+                function () {
                   waitingDialog.modal('hide');
                   bootbox.alert({
                     title: 'Congratulations',
@@ -249,7 +252,7 @@ export default Control.extend({
     });
   },
 
-  '.delete-app-btn click': function (el, ev) {
+  '.delete-app-btn click': function (el) {
 
     const card = $(el).closest('tr');
     const application = domData.get.call(card[0], 'application');
@@ -273,17 +276,19 @@ export default Control.extend({
           waitingDialog.on(
             'shown.bs.modal',
             function () {
-              application.destroy(function (application) {
-                waitingDialog.modal('hide');
-                bootbox.alert({
-                  title: 'Congratulations',
-                  message: '<p>The application has been successfully removed.</p>',
-                });
-
-              }, function (response) {
-                waitingDialog.modal('hide');
-                showErrorDialog("Operation failed", response);
-              });
+              application.destroy(
+                function () {
+                  waitingDialog.modal('hide');
+                  bootbox.alert({
+                    title: 'Congratulations',
+                    message: '<p>The application has been successfully removed.</p>',
+                  });
+                },
+                function (response) {
+                  waitingDialog.modal('hide');
+                  showErrorDialog("Operation failed", response);
+                }
+              );
             }
           );
 
@@ -294,7 +299,7 @@ export default Control.extend({
 
   },
 
-  '.edit-permission-btn click': function(el, ev) {
+  '.edit-permission-btn click': function(el) {
 
     const card = $(el).closest('tr');
     const application = domData.get.call(card[0], 'application');
@@ -305,7 +310,7 @@ export default Control.extend({
         const roles = application.attr('permission').split(',');
 
         let options = '';
-        groups.forEach(function(group, index) {
+        groups.forEach(function(group) {
           if ($.inArray(group.attr('name'), roles) >= 0) {
             options = options + '<label class="checkbox"><input type="checkbox" name="role-select" value="' + group.attr('name') + '" checked />';
           } else {
@@ -342,11 +347,12 @@ export default Control.extend({
 
               const text = checked.join(',');
               application.attr('permission', text);
-              application.save(function(data) {},
+              application.save(
+                function() {},
                 function(response) {
                   showErrorDialog("Operation failed", response);
-                });
-
+                }
+              );
             }
           }
         });
@@ -358,7 +364,7 @@ export default Control.extend({
 
   },
 
-  '.view-source-btn click': function(el, ev) {
+  '.view-source-btn click': function(el) {
 
     const card = $(el).closest('tr');
     const application = domData.get.call(card[0], 'application');
