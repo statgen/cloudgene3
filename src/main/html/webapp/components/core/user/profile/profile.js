@@ -70,8 +70,10 @@ export default Control.extend({
 
     // mail
     const mail = $(element).find("[name='mail']");
+    let mailError = undefined;
+
     if (!anonymous){
-      const mailError = user.checkMail(mail.val());
+      mailError = user.checkMail(mail.val());
       this.updateControl(mail, mailError);
     } else {
       this.updateControl(mail, undefined);
