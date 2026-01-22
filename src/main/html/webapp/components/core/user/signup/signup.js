@@ -74,7 +74,6 @@ export default Control.extend({
     const passwordFeedback = document.getElementById("password-feedback");
 
     const confirmPassword = document.getElementById("confirm-password");
-    // const confirmPasswordFeedback = document.getElementById("confirm-password-feedback");
 
     const user = new User();
 
@@ -95,7 +94,6 @@ export default Control.extend({
     updateControl(fullName, fullNameFeedback, fullnameError);
 
     // mail
-    // const mail = $(element).find("[name='mail']");
     let mailError = undefined;
 
     if (!anonymous) {
@@ -122,10 +120,9 @@ export default Control.extend({
       dataType: 'json',
       success: function(data) {
         if (data.success) {
-          // shows success
           let message = '';
           if (!anonymous) {
-            message = 'Well done!</b> An email including the activation code has been sent to your address.'
+            message = '<b>Well done!</b> An email including the activation code has been sent to your address.'
           } else {
             message = '<b>Well done!</b> Your account is now active. <a href="/">Login now</a>.'
           }
@@ -134,10 +131,8 @@ export default Control.extend({
           $('#success-message').html(message);
           $('#success-message').show();
         } else {
-          // shows error msg
           updateControl(username, usernameFeedback, data.message);
           $('#save').button('reset');
-
         }
       },
       error: function(message) {
