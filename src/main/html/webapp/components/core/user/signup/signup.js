@@ -5,6 +5,26 @@ import User from 'models/user';
 
 import template from './signup.stache';
 
+  /**
+   * Updates the provided input and its feedback field based on the provided error.
+   *
+   * @param {HTMLInputElement} input The form control to update.
+   * @param {HTMLElement} feedback The Bootstrap feedback field for this input.
+   * @param {string | undefined} error An error string if validation failed, otherwise a falsy value.
+   */
+  function updateControl(input, feedback, error) {
+    console.log("components/core/user/signup :: updateControl() called");
+
+    error = error || '';
+
+    input.setCustomValidity(error);
+    input.reportValidity();
+
+    input.classList.toggle('is-valid', !error);
+    input.classList.toggle('is-invalid', !!error);
+
+    feedback.textContent = error;
+  }
 
 export default Control.extend({
 
@@ -32,55 +52,65 @@ export default Control.extend({
       if (!this.emailRequired){
         const anonymousControl = $(this.element).find("[name='anonymous']:checked");
         const anonymous = (anonymousControl.val() == "1");
-        const mail = $(this.element).find("[name='mail']");
         if (anonymous){
-          mail.attr('disabled','disabled');
+          this.mail.attr('disabled','disabled');
         } else {
-          mail.removeAttr('disabled');
+          this.mail.removeAttr('disabled');
         }
       }
    },
 
   'submit': function(element, event) {
+    console.log("components/core/user/signup :: Control.submit() called");
     event.preventDefault();
 
-    const that = this;
+    const username = document.getElementById("username");
+    const usernameFeedback = document.getElementById("username-feedback");
+
+    const fullName = document.getElementById("full-name");
+    const fullNameFeedback = document.getElementById("full-name-feedback");
+
+    const mail = document.getElementById("mail");
+    const mailFeedback = document.getElementById("mail-feedback");
+
+    const password = document.getElementById("password");
+    const passwordFeedback = document.getElementById("password-feedback");
+
+    const confirmPassword = document.getElementById("confirm-password");
+    // const confirmPasswordFeedback = document.getElementById("confirm-password-feedback");
+
     const user = new User();
 
     // anonymous radiobutton
     let anonymous = false;
 
     if (!this.emailRequired) {
-      const anonymousControl = $(element).find("[name='anonymous']:checked");
+      const anonymousControl = $(element).find("[name='anonymous']:checked"); // TODO(Marc): Also incorporate this one!
       anonymous = (anonymousControl.val() == "1");
     }
 
     // username
-    let username = $(element).find("[name='username']");
-    const usernameError = user.checkUsername(username.val());
-    this.updateControl(username, usernameError);
+    const usernameError = user.checkUsername(username.value);
+    updateControl(username, usernameFeedback, usernameError);
 
     // fullname
-    const fullname = $(element).find("[name='full-name']");
-    const fullnameError = user.checkName(fullname.val());
-    this.updateControl(fullname, fullnameError);
+    const fullnameError = user.checkName(fullName.value);
+    updateControl(fullName, fullNameFeedback, fullnameError);
 
     // mail
-    const mail = $(element).find("[name='mail']");
+    // const mail = $(element).find("[name='mail']");
     let mailError = undefined;
 
     if (!anonymous) {
-      mailError = user.checkMail(mail.val());
-      this.updateControl(mail, mailError);
+      mailError = user.checkMail(mail.value);
+      updateControl(mail, mailFeedback, mailError);
     } else {
-      this.updateControl(mail, undefined);
+      updateControl(mail, mailFeedback, undefined);
     }
 
     // password
-    const newPassword = $(element).find("[name='new-password']");
-    const confirmNewPassword = $(element).find("[name='confirm-new-password']");
-    const passwordError = user.checkPassword(newPassword.val(), confirmNewPassword.val());
-    this.updateControl(newPassword, passwordError);
+    const passwordError = user.checkPassword(password.value, confirmPassword.value);
+    updateControl(password, passwordFeedback, passwordError);
 
     if (usernameError || fullnameError || mailError || passwordError) {
       return false;
@@ -108,8 +138,7 @@ export default Control.extend({
           $('#success-message').show();
         } else {
           // shows error msg
-          username = $('#signon-form').find("[name='username']");
-          that.updateControl(username, data.message);
+          updateControl(username, usernameFeedback, data.message);
           $('#save').button('reset');
 
         }
@@ -121,17 +150,4 @@ export default Control.extend({
     });
 
   },
-
-  updateControl: function(control, error) {
-    if (error) {
-      control.removeClass('is-valid');
-      control.addClass('is-invalid');
-      control.closest('.mb-3').find('.invalid-feedback').html(error);
-    } else {
-      control.removeClass('is-invalid');
-      control.addClass('is-valid');
-      control.closest('.mb-3').find('.invalid-feedback').html('');
-    }
-  }
-
 });
