@@ -5,10 +5,13 @@ import 'components/core/layout/layout.css';
 import '@fortawesome/fontawesome-free/css/all.css';
 import 'can-map-define';
 
-import Server from 'models/server';
 import ErrorPage from 'helpers/error-page';
-import LayoutControl from 'components/admin/layout/';
 import RouterControl from 'helpers/router';
+import { addBeforeSendHook } from './helpers/before-send';
+
+import Server from 'models/server';
+
+import LayoutControl from 'components/admin/layout/';
 import DashboardControl from 'components/admin/dashboard/';
 import UserListControl from 'components/admin/user/list/';
 import UserDetailControl from 'components/admin/user/detail/';
@@ -114,30 +117,7 @@ function adminGuard(appState) {
   }
 }
 
-$.ajaxPrefilter(function (options, originalOptions) {
-  if (!options.beforeSend) {
-    options.beforeSend = function (xhr) {
-      if (localStorage.getItem("cloudgene")) {
-        try {
-          // get data
-          const data = JSON.parse(localStorage.getItem("cloudgene"));
-          xhr.setRequestHeader("X-CSRF-Token", data.csrf);
-          xhr.setRequestHeader("X-Auth-Token", data.token);
-        } catch (e) {
-          // do nothing
-        }
-      }
-    }
-  }
-  //canjs has an bug while sending data in json format: data is not in json format, so we need to fix it convert it manually to JSON
-  if (options.processData &&
-    /^application\/json((\+|;).+)?$/i.test(options.contentType) &&
-    /^(post|put|delete)$/i.test(options.type)
-  ) {
-    options.data = JSON.stringify(originalOptions.data);
-    options.processData = false;
-  }
-});
+addBeforeSendHook();
 
 Server.findOne({}, function (server) {
   new LayoutControl("#main", {

@@ -3,11 +3,14 @@ import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import '@fortawesome/fontawesome-free/css/all.css';
 
-import Server from 'models/server';
-import ErrorPage from 'helpers/error-page';
-import LayoutControl from 'components/core/layout/';
 import RouterControl from 'helpers/router';
+import ErrorPage from 'helpers/error-page';
 import StaticPage from 'helpers/static-page';
+import { addBeforeSendHook } from 'helpers/before-send';
+
+import Server from 'models/server';
+
+import LayoutControl from 'components/core/layout/';
 import DashboardControl from 'components/core/dashboard/';
 import UserLoginControl from 'components/core/user/login/';
 import UserLogoutControl from 'components/core/user/logout/';
@@ -98,33 +101,7 @@ function loggedInGuard(appState) {
   return appState.attr('loggedIn');
 }
 
-$.ajaxPrefilter(function(options, orig, xhr) {
-  if (!options.beforeSend) {
-    options.beforeSend = function(xhr) {
-      if (localStorage.getItem("cloudgene")) {
-        try {
-          // get data
-          const data = JSON.parse(localStorage.getItem("cloudgene"));
-          xhr.setRequestHeader("X-CSRF-Token", data.csrf);
-          xhr.setRequestHeader("X-Auth-Token", data.token);
-        } catch (e) {
-          // do nothing
-        }
-      }
-    }
-  }
-  //canjs has an bug while sending data in json format: data is not in json format, so we need to fix it convert it manually to JSON
-  if (options.processData &&
-    /^application\/json((\+|;).+)?$/i.test(options.contentType) &&
-    /^(post|put|delete)$/i.test(options.type)
-  ) {
-    options.data = JSON.stringify(orig.data);
-    options.processData = false;
-  }
-
-});
-
-
+addBeforeSendHook();
 
 Server.findOne({}, function(server) {
 

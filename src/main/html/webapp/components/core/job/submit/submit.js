@@ -2,10 +2,11 @@ import Control from 'can-control';
 import $ from 'jquery';
 import bootbox from 'bootbox';
 import 'jquery-form';
-import 'helpers/helpers';
 
+import 'helpers/helpers';
 import ErrorPage from 'helpers/error-page';
 import Application from 'models/application';
+import { getLocalCloudgeneData } from 'helpers/before-send';
 
 import template from './submit.stache';
 import templateUploadingDialog from './dialogs/uploading.stache';
@@ -20,7 +21,6 @@ import templateFolderPattern from './controls/folder-pattern.stache';
 import templateTermsCheckbox from './controls/terms-checkbox.stache';
 import templateText from './controls/text.stache';
 import templateTextarea from './controls/textarea.stache';
-
 
 export default Control.extend({
 
@@ -77,29 +77,15 @@ export default Control.extend({
 
     //start uploading when dialog is shown
     uploadDialog.on('shown.bs.modal', function() {
-
-      let csrfToken;
-      let accessToken;
-      if (localStorage.getItem("cloudgene")) {
-        try {
-
-          // get data
-          const data = JSON.parse(localStorage.getItem("cloudgene"));
-          csrfToken = data.csrf;
-          accessToken = data.token;
-
-        } catch (e) {
-          //do nothing.
-        }
-      }
+      const { csrf, token } = getLocalCloudgeneData();
 
       //submit form and upload files
       $(form).ajaxSubmit({
         dataType: 'json',
 
         headers: {
-          "X-CSRF-Token": csrfToken,
-          "X-Auth-Token": accessToken,
+          'X-CSRF-Token': csrf,
+          'X-Auth-Token': token,
         },
 
         success: function(answer) {

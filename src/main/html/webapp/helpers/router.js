@@ -4,6 +4,8 @@ import canMap from 'can-map';
 import 'can-ajax';
 import $ from 'jquery';
 
+import { addBeforeSendHook } from './before-send';
+
 
 export default Control.extend({
   defaults: {
@@ -110,31 +112,6 @@ export default Control.extend({
   },
 
   'setupAuthentication': function() {
-
-    $.ajaxPrefilter(function(options, orig, xhr) {
-      if (!options.beforeSend) {
-        options.beforeSend = function(xhr) {
-          if (localStorage.getItem("cloudgene")) {
-            try {
-              // get data
-              const data = JSON.parse(localStorage.getItem("cloudgene"));
-              xhr.setRequestHeader("X-CSRF-Token", data.csrf);
-              xhr.setRequestHeader("X-Auth-Token", data.token);
-            } catch (e) {
-              // do nothing
-            }
-          }
-        }
-      }
-
-      //canjs has an bug while sending data in json format: data is not in json format, so we need to fix it convert it manually to JSON
-      if (options.processData &&
-        /^application\/json((\+|;).+)?$/i.test(options.contentType) &&
-        /^(post|put|delete)$/i.test(options.type)
-      ) {
-        options.data = JSON.stringify(orig.data);
-        options.processData = false;
-      }
-    });
+    addBeforeSendHook();
   }
 });
