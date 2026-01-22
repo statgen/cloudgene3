@@ -72,9 +72,10 @@
     <hr>
 
     <div class="mb-3">
-      <input type="radio" id="anonymous1" name="anonymous" value="0" checked>
-      <label for="anonymous1" class="form-label">E-Mail Address</label>
-      <div class="mb-3" style="margin-left: 30px;">
+      <!-- Radio button + email field: I want to give an address (gets validated) -->
+      <input type="radio" id="optional-mail-accept" name="anonymous" value="0" checked>
+      <label for="optional-mail-accept" class="form-label">I will provide an E-Mail Address</label>
+      <div class="mb-3 ms-3">
         <p>
           {{{userEmailDescription}}}
         </p>
@@ -88,13 +89,15 @@
               class="form-control"
               autocomplete="off"
             />
-            <div class="invalid-feedback"></div>
+            <div id="mail-feedback" class="invalid-feedback"></div>
           </div>
         </div>
       </div>
-      <input type="radio" id="anonymous2" name="anonymous" value="1">
-      <label for="anonymous2" class="form-label">I don't want to provide my email address</label>
-      <div class="mb-3" style="margin-left: 30px;">
+
+      <!-- Only radio button: I don't want to give an address (no validation) -->
+      <input type="radio" id="optional-mail-reject" name="anonymous" value="1">
+      <label for="optional-mail-reject" class="form-label">I don't want to provide an E-Mail address</label>
+      <div class="mb-3 ms-3">
         <p>
           {{{userWithoutEmailDescription}}}
         </p>

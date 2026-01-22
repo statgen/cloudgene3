@@ -81,7 +81,7 @@ export default Control.extend({
     let anonymous = false;
 
     if (!this.emailRequired) {
-      const anonymousControl = $(element).find("[name='anonymous']:checked"); // TODO(Marc): Also incorporate this one!
+      const anonymousControl = $(element).find("[name='anonymous']:checked");
       anonymous = (anonymousControl.val() == "1");
     }
 
