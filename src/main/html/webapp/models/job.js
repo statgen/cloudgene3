@@ -1,7 +1,16 @@
 import 'can-map-define';
 import Model from 'can-connect/can/model/model';
 
-
+const STATE_DEAD                         = -1;
+const STATE_WAITING                      =  1;
+const STATE_RUNNING                      =  2;
+const STATE_EXPORTING                    =  3;
+const STATE_SUCCESS                      =  4;
+const STATE_FAILED                       =  5;
+const STATE_CANCELED                     =  6;
+const STATE_RETIRED                      =  7;
+const STATE_SUCESS_AND_NOTIFICATION_SEND =  8;
+const STATE_FAILED_AND_NOTIFICATION_SEND =  9;
 
 export default Model.extend({
   findAll: 'GET api/v2/jobs',
@@ -13,13 +22,12 @@ export default Model.extend({
     if (this.attr('startTime') > 0 && this.attr('endTime') === 0) {
       this.attr('endTime', this.attr('currentTime'));
     } else {
+      // TODO(Marc): This else branch is likely doing nothing. Delete and check!
       this.attr('endTime', this.attr('endTime'));
     }
   },
 
-
   define: {
-
     'longName': {
       get: function () {
         return this.attr('name');
@@ -44,179 +52,193 @@ export default Model.extend({
         }
 
         if (executionTime <= 0) {
-
           return undefined;
-
         } else {
           return executionTime;
         }
-
       }
     },
 
     'stateAsText': {
       get: function () {
-        if (this.attr('state') == 1) {
-          return 'Waiting';
-        } else if (this.attr('state') == 2) {
-          return 'Running';
-        } else if (this.attr('state') == 3) {
-          return 'Exporting Data';
-        } else if (this.attr('state') == 4 || this.attr('state') == '8') {
-          return 'Complete';
-        } else if (this.attr('state') == 5 || this.attr('state') == '9') {
-          return 'Error';
-        } else if (this.attr('state') == 6) {
-          return 'Canceled';
-        } else if (this.attr('state') == 7) {
-          return 'Retired';
-        } else if (this.attr('state') == -1) {
-          return 'Pending';
-        } else {
-          return 'Error';
+        switch (this.attr('state')) {
+          case STATE_DEAD:
+            return 'Pending';
+          case STATE_WAITING:
+            return 'Waiting';
+          case STATE_RUNNING:
+            return 'Running';
+          case STATE_EXPORTING:
+            return 'Exporting Data';
+          case STATE_SUCCESS:
+          case STATE_SUCESS_AND_NOTIFICATION_SEND:
+            return 'Complete';
+          case STATE_CANCELED:
+            return 'Canceled';
+          case STATE_RETIRED:
+            return 'Retired';
+          case STATE_FAILED:
+          case STATE_FAILED_AND_NOTIFICATION_SEND:
+          default:
+            return 'Error';
         }
       }
     },
 
     'stateAsClass': {
       get: function () {
-
-        if (this.attr('state') == '-1') {
-          return 'dark';
-        }
-        if (this.attr('state') == '1') {
-          if (this.attr('setupRunning')) {
+        switch (this.attr('state')) {
+          case STATE_DEAD:
+            return 'dark';
+          case STATE_WAITING:
+          case STATE_RETIRED:
             return 'secondary';
-          } else {
-            return 'secondary';
-          }
-        }
-        if (this.attr('state') == '2') {
-          return 'primary';
-        }
-        if (this.attr('state') == '3') {
-          return 'primary';
-        }
-        if (this.attr('state') == '4' || this.attr('state') == '8') {
-          return 'success';
-        }
-        if (this.attr('state') == '5' || this.attr('state') == '9') {
-          return 'danger';
-        }
-        if (this.attr('state') == '6') {
-          return 'danger';
-        }
-        if (this.attr('state') == '7') {
-          return 'secondary';
+          case STATE_RUNNING:
+          case STATE_EXPORTING:
+            return 'primary';
+          case STATE_SUCCESS:
+          case STATE_SUCESS_AND_NOTIFICATION_SEND:
+            return 'success';
+          case STATE_FAILED:
+          case STATE_CANCELED:
+          case STATE_FAILED_AND_NOTIFICATION_SEND:
+          default:
+            return 'danger';
         }
       }
     },
 
     'stateAsImage': {
       get: function () {
-
-        if (this.attr('state') == '-1') {
-          return "fas fa-moon";
+        switch (this.attr('state')) {
+          case STATE_DEAD:
+            return "fas fa-moon";
+          case STATE_WAITING:
+            if (this.attr('setupRunning')) {
+              return 'fas fa-cog fa-spin';
+            } else {
+              return 'far fa-pause-circle';
+            }
+          case STATE_RUNNING:
+          case STATE_EXPORTING:
+            return "fas fa-circle-notch fa-spin";
+          case  STATE_SUCCESS:
+          case STATE_SUCESS_AND_NOTIFICATION_SEND:
+            return "fas fa-check";
+          case STATE_FAILED:
+          case STATE_FAILED_AND_NOTIFICATION_SEND:
+            return "fas fa-exclamation";
+          case STATE_CANCELED:
+            return "fas fa-times";
+          case STATE_RETIRED:
+            return "fas fa-archive";
+          default:
+            return "fas fa-triangle-exclamation";
         }
-        if (this.attr('state') == '1') {
-          if (this.attr('setupRunning')) {
-            return 'fas fa-cog fa-spin';
-          } else {
-            return 'far fa-pause-circle';
-          }
-        }
-        if (this.attr('state') == '2') {
-          return "fas fa-circle-notch fa-spin";
-        }
-        if (this.attr('state') == '3') {
-          return "fas fa-circle-notch fa-spin";
-        }
-        if (this.attr('state') == '4' || this.attr('state') == '8') {
-          return "fas fa-check";
-        }
-        if (this.attr('state') == '5' || this.attr('state') == '9') {
-          return "fas fa-exclamation";
-        }
-        if (this.attr('state') == '6') {
-          return "fas fa-times";
-        }
-        if (this.attr('state') == '7') {
-          return "fas fa-archive";
-        }
-
-        return
       }
     },
 
     'isInQueue': {
       get: function () {
-        return this.attr('state') == 1 && this.attr('positionInQueue') != -1;
+        return this.attr('state') === STATE_WAITING && this.attr('positionInQueue') !== -1;
       }
     },
 
     'isPending': {
       get: function () {
-        return this.attr('state') == '-1';
+        return this.attr('state') === STATE_DEAD;
       }
     },
 
     'isRetired': {
       get: function () {
-        return this.attr('state') == '7';
+        return this.attr('state') === STATE_RETIRED;
       }
     },
 
     'isRunning': {
       get: function () {
-        return this.attr('state') == '2' || this.attr('state') == '3';
+        return (
+          this.attr('state') === STATE_RUNNING ||
+          this.attr('state') === STATE_EXPORTING
+        );
       }
     },
 
     'willBeRetired': {
+      // NOTE(Marc): Semantically closer to "has the user been notified of impending job retirement?"
       get: function () {
-        return this.attr('state') == 8 || this.attr('state') == 9;
+        return (
+          this.attr('state') === STATE_SUCESS_AND_NOTIFICATION_SEND ||
+          this.attr('state') === STATE_FAILED_AND_NOTIFICATION_SEND
+        );
       }
     },
 
     'canResetCounters': {
       get: function () {
-        return this.attr('state') > 3;
+        // NOTE(Marc): Semantically closer to "has the job finished? (including errors)"
+        return this.attr('state') > STATE_EXPORTING;
       }
     },
 
     'canSendRetireNotification': {
       get: function () {
-        return this.attr('state') > 3 && this.attr('state') != '8' && this.attr('state') != '9';
+        // NOTE(Marc): Equivalent to canResetCounters() && willBeRetired()
+        return (
+          this.attr('state') > STATE_EXPORTING &&
+          this.attr('state') !== STATE_SUCESS_AND_NOTIFICATION_SEND &&
+          this.attr('state') !== STATE_FAILED_AND_NOTIFICATION_SEND
+        );
       }
     },
 
     'canIncreaseRetireDate': {
       get: function () {
-        return this.attr('state') == '8' || this.attr('state') == '9';
+        // NOTE(Marc): Identical to willBeRetired().
+        return (
+          this.attr('state') === STATE_SUCESS_AND_NOTIFICATION_SEND ||
+          this.attr('state') === STATE_FAILED_AND_NOTIFICATION_SEND
+        );
       }
     },
 
     'canShowLog': {
       get: function () {
-        return this.attr('logs') != undefined && this.attr('logs') != '';
+        // NOTE(Marc): Double-negation !! casts to boolean based on truthy-ness (length > 0 strings are truthy).
+        //             So this is better described as "are there logs?"
+        return !!this.attr('logs');
       }
     },
 
     'canCancel': {
       get: function () {
-        return this.attr('state') <= '3' && this.attr('state') != '-1';
+        // NOTE(Marc): Semantically, "is this still running?"
+        return (
+          this.attr('state') <= STATE_EXPORTING &&
+          this.attr('state') !== STATE_DEAD
+        );
       }
     },
 
     'canRetireJob': {
       get: function () {
-        return this.attr('state') > '3' && (this.attr('state') == '4' || this.attr('state') != '5' || this.attr('state') != '6');
+        // NOTE(Marc): Original logic was wrong. This is taken from backend JobService.archive(job)
+        return (
+          this.attr('state') === STATE_SUCCESS ||
+          this.attr('state') === STATE_FAILED ||
+          this.attr('state') === STATE_CANCELED
+        );
       }
     },
 
     'canDelete': {
       get: function () {
-        return this.attr('state') > '3' || this.attr('state') == '-1';
+        // NOTE(Marc): Equivalent to !canCancel()
+        return (
+          this.attr('state') > STATE_EXPORTING ||
+          this.attr('state') === STATE_DEAD
+        );
       }
     }
   }
