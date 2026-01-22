@@ -4,7 +4,7 @@ import canMap from 'can-map';
 import 'can-ajax';
 import $ from 'jquery';
 
-import { addBeforeSendHook } from './before-send';
+import { addBeforeSendHook } from 'helpers/before-send';
 
 
 export default Control.extend({

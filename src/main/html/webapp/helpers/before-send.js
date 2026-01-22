@@ -4,27 +4,35 @@ export function getLocalCloudgeneData() {
   let csrf = undefined;
   let token = undefined;
 
-  if (localStorage.getItem('cloudgene')) {
-    try {
-      // get data
-      const data = JSON.parse(localStorage.getItem('cloudgene'));
-      csrf = data.csrf;
-      token = data.token;
-    } catch (error) {
-      console.log('Failed to parse local Cloudgene data', error);
-    }
-
-    return { csrf, token };
+  try {
+    const raw = localStorage.getItem('cloudgene');
+    const data = JSON.parse(raw);
+    csrf = data.csrf;
+    token = data.token;
+  } catch (error) {
+    console.log('Failed to parse local Cloudgene data', error);
   }
+
+  return { csrf, token };
 }
 
 export function addBeforeSendHook() {
   $.ajaxPrefilter(function (options, originalOptions) {
     if (!options.beforeSend) {
       options.beforeSend = function (xhr) {
-        const { csrf, token } = getLocalCloudgeneData();
-        xhr.setRequestHeader('X-CSRF-Token', csrf);
-        xhr.setRequestHeader('X-Auth-Token', token);
+        try {
+          const { csrf, token } = getLocalCloudgeneData();
+
+          if (csrf) {
+            xhr.setRequestHeader('X-CSRF-Token', csrf);
+          }
+
+          if (token) {
+            xhr.setRequestHeader('X-Auth-Token', token);
+          }
+        } catch (error) {
+          console.log('Failed to set request headers', error);
+        }
       }
     }
 

@@ -7,7 +7,7 @@ import 'can-map-define';
 
 import ErrorPage from 'helpers/error-page';
 import RouterControl from 'helpers/router';
-import { addBeforeSendHook } from './helpers/before-send';
+import { addBeforeSendHook } from 'helpers/before-send';
 
 import Server from 'models/server';
 
