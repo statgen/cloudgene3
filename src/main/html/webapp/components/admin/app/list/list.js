@@ -1,11 +1,12 @@
 import Control from 'can-control';
 import domData from 'can-util/dom/data/data';
 import canRoute from 'can-route';
-
-import 'helpers/helpers';
 import $ from 'jquery';
 import bootbox from 'bootbox';
+
+import 'helpers/helpers';
 import showErrorDialog from 'helpers/error-dialog';
+import ErrorPage from 'helpers/error-page';
 
 import Application from 'models/application';
 import Group from 'models/group';
@@ -23,7 +24,7 @@ export default Control.extend({
       const grouped = {};
       applications.forEach(function(item) {
         let category = item.category;
-        if (category == undefined) {
+        if (category === undefined) {
           category = "Application";
         }
         if (!grouped[category]) {
@@ -166,7 +167,7 @@ export default Control.extend({
       const grouped = {};
       applications.forEach(function(item) {
         let category = item.category;
-        if (category == undfined) {
+        if (category === undefined) {
           category = "Application";
         }
         if (!grouped[category]) {
@@ -307,20 +308,18 @@ export default Control.extend({
         groups.forEach(function(group, index) {
           if ($.inArray(group.attr('name'), roles) >= 0) {
             options = options + '<label class="checkbox"><input type="checkbox" name="role-select" value="' + group.attr('name') + '" checked />';
-            //options = options + '<option selected>' + group.attr('name') + '</option>';
           } else {
-            //options = options + '<option>' + group.attr('name') + '</option>';
             options = options + '<label class="checkbox"><input type="checkbox" name="role-select" value="' + group.attr('name') + '" />';
           }
           options = options + ' <b>' + group.attr('name') + '</b></label><br>';
         });
 
-      // Add input field for creating a new group
-      const newGroupSection = `
-        <hr>
-        <label for="new-group-name">New Group Name:</label>
-        <input type="text" id="new-group-name" class="form-control" placeholder="Enter new group name">
-      `;
+        // Add input field for creating a new group
+        const newGroupSection = `
+          <hr>
+          <label for="new-group-name">New Group Name:</label>
+          <input type="text" id="new-group-name" class="form-control" placeholder="Enter new group name">
+        `;
 
         bootbox.confirm({
           title: 'Edit Permission for ' + application.attr('name'),

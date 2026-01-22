@@ -47,7 +47,7 @@ export default Control.extend({
       dataType: 'json',
       success: function(response) {
 
-        if (response.success == true) {
+        if (response.success) {
 
           // shows okey
           $("#update-page").hide();

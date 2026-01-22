@@ -11,7 +11,7 @@ export default Control.extend({
     let error = {};
     bootbox.hideAll();
 
-    if (options.status == 0) {
+    if (options.status === 0) {
       error = {
         statusText: 'Error',
         responseText: 'Could not establish connection to server'

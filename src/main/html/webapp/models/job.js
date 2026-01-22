@@ -22,7 +22,7 @@ export default Model.extend({
 
     'longName': {
       get: function () {
-        return this.attr('id') != this.attr('name') ? this.attr('name') : this.attr('id');
+        return this.attr('name');
       }
     },
 
@@ -36,7 +36,7 @@ export default Model.extend({
           return undefined;
         }
 
-        let executionTime = 0;
+        let executionTime;
         if (start > 0 && end === 0) {
           executionTime = current - start;
         } else {

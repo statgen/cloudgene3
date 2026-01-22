@@ -121,7 +121,7 @@ export default Control.extend({
     event.preventDefault();
 
     const query = $(this.element).find('#query');
-    if (query.val() != '') {
+    if (query.val() !== '') {
       window.location.href = "#!pages/users/search/" + query.val();
     } else {
       window.location.href = "#!pages/users";

@@ -2,6 +2,9 @@ import $ from 'jquery';
 import Control from 'can-control';
 import bootbox from 'bootbox';
 
+import showErrorDialog from 'helpers/error-dialog';
+import ErrorPage from 'helpers/error-page';
+
 import User from 'models/user';
 import Group from 'models/group';
 

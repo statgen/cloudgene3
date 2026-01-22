@@ -17,7 +17,7 @@ export default Model.extend({
         const bindInput = param.attr('bind');
         const bindParam = that.getParamById(bindInput);
         param.attr('values').each(function(value) {
-          const enabled = (value.attr('key') == bindParam.attr('value'));
+          const enabled = (value.attr('key') === bindParam.attr('value'));
           value.attr('enabled', enabled);
         });
       }

@@ -25,7 +25,7 @@ import SettingsTemplatesControl from 'components/admin/settings/templates/';
 import SettingsLogsControl from 'components/admin/settings/logs/';
 
 $(document.links).filter(function () {
-  return this.hostname != window.location.hostname;
+  return this.hostname !== window.location.hostname;
 }).attr('target', '_blank');
 
 const routes = [{
@@ -115,7 +115,7 @@ function adminGuard(appState) {
   }
 }
 
-$.ajaxPrefilter(function (options, orig, xhr) {
+$.ajaxPrefilter(function (options, originalOptions) {
   if (!options.beforeSend) {
     options.beforeSend = function (xhr) {
       if (localStorage.getItem("cloudgene")) {
@@ -135,7 +135,7 @@ $.ajaxPrefilter(function (options, orig, xhr) {
     /^application\/json((\+|;).+)?$/i.test(options.contentType) &&
     /^(post|put|delete)$/i.test(options.type)
   ) {
-    options.data = JSON.stringify(orig.data);
+    options.data = JSON.stringify(originalOptions.data);
     options.processData = false;
   }
 });

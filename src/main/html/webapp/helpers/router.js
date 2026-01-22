@@ -35,7 +35,11 @@ export default Control.extend({
 
   'check': function(ev, attr, how) {
     const router = canRoute.router;
-    if ((router.lastBatchNum == undefined || router.lastBatchNum != ev.batchNum) && (canRoute.data.attr('path') != undefined && canRoute.data.attr('path') == canRoute.matched())) {
+
+    if (
+      (router.lastBatchNum === undefined || router.lastBatchNum !== ev.batchNum) &&
+      (canRoute.data.attr('path') !== undefined && canRoute.data.attr('path') === canRoute.matched())
+    ) {
       router.lastBatchNum = ev.batchNum;
 
       const path = canRoute.data.attr('path');
@@ -50,7 +54,8 @@ export default Control.extend({
 
       if (route.guard) {
         const allowed = route.guard(router.options.appState);
-        if (allowed == false) {
+
+        if (!allowed) {
           control = router.options.forbidden.control;
           data.attr(router.options.forbidden.options);
         }

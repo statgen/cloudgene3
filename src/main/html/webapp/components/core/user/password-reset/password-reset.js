@@ -23,7 +23,7 @@ export default Control.extend({
       data: $(element).find("#reset-form").serialize(),
       dataType: 'json',
       success: function(data) {
-        if (data.success == true) {
+        if (data.success) {
 
           // show okey
           $("#reset-page").hide();

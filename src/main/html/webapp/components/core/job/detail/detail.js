@@ -208,20 +208,15 @@ export default Control.extend({
 
         }, function (response) {
           new ErrorPage(that.element, response);
-
         });
-
       }
-
     });
-
   },
 
   destroy: function () {
     this.active = false;
     Control.prototype.destroy.call(this);
   }
-
 });
 
 const JobRefresher = {};

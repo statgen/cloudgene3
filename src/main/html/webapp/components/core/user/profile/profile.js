@@ -29,7 +29,7 @@ export default Control.extend({
       $(element).html(template({
         user: user,
         anonymousAccount: (!options.appState.attr('emailRequired')),
-        emailProvided: (user.attr('mail') != "" && user.attr('mail') != undefined),
+        emailProvided: !!user.attr('mail'),
         userEmailDescription: options.appState.attr('userEmailDescription'),
         userWithoutEmailDescription: options.appState.attr('userWithoutEmailDescription')
       }));
@@ -80,11 +80,13 @@ export default Control.extend({
     // password if password is not empty. else no password update on server side
     const newPassword = $(element).find("[name='new-password']");
     let newPasswordError = undefined;
+
     if (newPassword.val() !== "") {
       const confirmNewPassword = $(element).find("[name='confirm-new-password']");
       newPasswordError = user.checkPassword(newPassword.val(), confirmNewPassword.val());
       this.updateControl(confirmNewPassword, newPasswordError);
     }
+
     if (fullnameError || mailError || newPasswordError) {
       return false;
     }
@@ -95,17 +97,7 @@ export default Control.extend({
       data: $(element).find("#account-form").serialize(),
       dataType: 'json',
       success: function(data) {
-
-        if (data.success == true) {
-
-          // shows okey
-          bootbox.alert(data.message);
-
-        } else {
-          // shows error
-          bootbox.alert(data.message);
-
-        }
+        bootbox.alert(data.message);
       },
       error: function(response) {
         new ErrorPage(element, response);

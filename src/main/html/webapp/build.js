@@ -8,4 +8,4 @@ stealTools.build(
     bundleAssets: true,
     bundleSteal: true,
   }
-).then(function(buildResult) {});
+);

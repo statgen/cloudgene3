@@ -89,18 +89,18 @@ export default Control.extend({
     $('#save').button('loading');
 
     $.ajax({
-      url: "api/v2/users/register",
-      type: "POST",
-      data: $(element).find("#signon-form").serialize(),
+      url: 'api/v2/users/register',
+      type: 'POST',
+      data: $(element).find('#signon-form').serialize(),
       dataType: 'json',
       success: function(data) {
-        if (data.success == true) {
+        if (data.success) {
           // shows success
-          let message = "";
+          let message = '';
           if (!anonymous) {
-            message = "Well done!</b> An email including the activation code has been sent to your address."
+            message = 'Well done!</b> An email including the activation code has been sent to your address.'
           } else {
-            message = "<b>Well done!</b> Your account is now active. <a href=\"/\">Login now</a>."
+            message = '<b>Well done!</b> Your account is now active. <a href="/">Login now</a>.'
           }
 
           $('#signon-form').hide();

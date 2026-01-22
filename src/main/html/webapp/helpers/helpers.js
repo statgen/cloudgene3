@@ -7,7 +7,7 @@ stache.registerHelper('truncate', function(str, len) {
   if (str.length > len) {
     let truncated = str.substr(0, len + 1);
 
-    while (truncated.length) {
+    while (truncated.length > 0) {
       const ch = truncated.substr(-1);
       truncated = truncated.substr(0, -1);
 
@@ -16,7 +16,7 @@ stache.registerHelper('truncate', function(str, len) {
       }
     }
 
-    if (truncated == '') {
+    if (truncated === '') {
       truncated = str.substr(0, len);
     }
 
@@ -29,7 +29,7 @@ function renderTreeItem(jobId, items, level) {
   let html = '<ul class="folder ' + (level > 0 ? 'sub-folder' : 'root-folder') + '">';
   for (let i = 0; i < items.length; i++) {
     html += '<li>';
-    if (items[i].folder == true) {
+    if (items[i].folder) {
       html += '<i class="fas fa-angle-right folder-item text-muted fa-fw"></i>&nbsp;';
       html += '<span class="folder-item-text fa-fw"><i class="fas fa-folder text-muted"></i>&nbsp' + items[i].name + '</span>';
       html += renderTreeItem(jobId, items[i].childs, level + 1);
@@ -48,7 +48,7 @@ stache.registerHelper('renderTree', function(jobId, item) {
   return renderTreeItem(jobId, item, 0);
 });
 
-stache.registerHelper('replaceNL', function(value, total) {
+stache.registerHelper('replaceNL', function(value) {
   return value.replaceAll('\n', '<br>');
 });
 
@@ -127,7 +127,7 @@ stache.registerHelper('isParamChecked', function(param, options) {
   return result;
 });
 
-stache.registerHelper('getParamTrueValue', function(param, options) {
+stache.registerHelper('getParamTrueValue', function(param) {
   let result = '??';
   param.attr('values').each(function(item) {
     if (item.attr('key') === 'true') {
@@ -138,7 +138,7 @@ stache.registerHelper('getParamTrueValue', function(param, options) {
   return result;
 });
 
-stache.registerHelper('getParamFalseValue', function(param, options) {
+stache.registerHelper('getParamFalseValue', function(param) {
   let result = '??';
   param.attr('values').each(function(item) {
     if (item.attr('key') === 'false') {
@@ -150,7 +150,7 @@ stache.registerHelper('getParamFalseValue', function(param, options) {
 });
 
 
-stache.registerHelper('div', function(a, b, options) {
+stache.registerHelper('div', function(a, b) {
   if (a) {
     return Math.round(a / b * 10) / 10;
   } else {
