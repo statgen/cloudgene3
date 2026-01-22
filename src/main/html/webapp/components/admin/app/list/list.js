@@ -82,6 +82,7 @@ export default Control.extend({
               '</div>',
             show: false,
           });
+
           waitingDialog.on('shown.bs.modal', function () {
             app.save(
               function () {
@@ -303,6 +304,7 @@ export default Control.extend({
 
     const card = $(el).closest('tr');
     const application = domData.get.call(card[0], 'application');
+    const element = this.element;
 
     Group.findAll({},
       function(groups) {
