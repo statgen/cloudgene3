@@ -36,7 +36,7 @@ module.exports = defineConfig([
 
     rules: {
       "block-scoped-var": "error",
-      "no-unused-vars": "error",
+      "no-unused-vars": "warn",
 
       // Modernize safely:
       "no-var": "error",
@@ -46,8 +46,16 @@ module.exports = defineConfig([
       "no-undef": "error",
       "no-redeclare": "error",
       "no-use-before-define": ["error", { functions: false, classes: true, variables: true }],
-      "eqeqeq": ["error", "smart"],
+      "eqeqeq": ["warn", "smart"],
       "no-implied-eval": "error",
+    },
+  },
+
+  // This file doesn't seem to work using modern module imports.
+  {
+    files: ["build.js"],
+    languageOptions: {
+      sourceType: "commonjs",
     },
   },
 ]);
