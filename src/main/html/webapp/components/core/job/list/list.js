@@ -11,6 +11,37 @@ import JobOperation from 'models/job-operation';
 
 import template from './list.stache';
 
+const JobRefresher = Control({
+  setJob: function(job) {
+    this.job = job;
+    this.active = true;
+    this.refresh();
+  },
+
+  refresh: function() {
+    const that = this;
+    Job.findOne({
+      id: that.job.id
+    }, function(currentJob) {
+
+      currentJob.syncTime();
+
+      if (JobRefresher.needsUpdate(currentJob) && that.active) {
+        setTimeout(function() {
+          that.refresh();
+        }, 20000);
+      }
+    }, function(response) {
+      new ErrorPage(that.element, response);
+    });
+
+  },
+
+  stop: function() {
+    this.active = false;
+  }
+});
+
 export default Control.extend({
 
   "init": function(element, options) {
@@ -25,7 +56,8 @@ export default Control.extend({
         $.each(jobs, function(key, job) {
           job.syncTime();
         });
-        if (JobRefresher.needsUpdate(job)) {
+
+        if (job.canCancel) {
           const refresher = new JobRefresher(element);
           refresher.setJob(job);
           that.options.refreshers.push(refresher);
@@ -118,40 +150,3 @@ export default Control.extend({
     Control.prototype.destroy.call(this);
   }
 });
-
-const JobRefresher = Control({
-
-  setJob: function(job) {
-    this.job = job;
-    this.active = true;
-    this.refresh();
-  },
-
-  refresh: function() {
-    const that = this;
-    Job.findOne({
-      id: that.job.id
-    }, function(currentJob) {
-
-      currentJob.syncTime();
-
-      if (JobRefresher.needsUpdate(currentJob) && that.active) {
-        setTimeout(function() {
-          that.refresh();
-        }, 20000);
-      }
-    }, function(response) {
-      new ErrorPage(that.element, response);
-    });
-
-  },
-
-  stop: function() {
-    this.active = false;
-  }
-
-});
-
-JobRefresher.needsUpdate = function(job) {
-  return job.attr("state") == 1 || job.attr("state") == 2 || job.attr("state") == 3;
-};

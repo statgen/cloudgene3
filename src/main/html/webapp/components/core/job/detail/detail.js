@@ -177,9 +177,11 @@ export default Control.extend({
 
   refresh: function () {
     const that = this;
-    if (!JobRefresher.needsUpdate(that.job)) {
+
+    if (!that.job.canCancel) {
       return;
     }
+
     Job.findOne({
       id: that.job.id
     }, function (currentJob) {
@@ -191,7 +193,7 @@ export default Control.extend({
       that.job.attr('positionInQueue', currentJob.attr('positionInQueue'));
 
       // needs refresh
-      if (JobRefresher.needsUpdate(currentJob) && that.active) {
+      if (currentJob.canCancel && that.active) {
         setTimeout(function () {
           that.refresh();
         }, 20000);
@@ -218,9 +220,3 @@ export default Control.extend({
     Control.prototype.destroy.call(this);
   }
 });
-
-const JobRefresher = {};
-
-JobRefresher.needsUpdate = function (job) {
-  return job.attr("state") == 1 || job.attr("state") == 2 || job.attr("state") == 3;
-};

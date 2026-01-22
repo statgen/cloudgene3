@@ -213,7 +213,7 @@ export default Model.extend({
 
     'canCancel': {
       get: function () {
-        // NOTE(Marc): Semantically, "is this still running?"
+        // NOTE(Marc): Semantically, "is this waiting or running?"
         return (
           this.attr('state') <= STATE_EXPORTING &&
           this.attr('state') !== STATE_DEAD

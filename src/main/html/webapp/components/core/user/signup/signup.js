@@ -13,8 +13,6 @@ import template from './signup.stache';
    * @param {string | undefined} error An error string if validation failed, otherwise a falsy value.
    */
   function updateControl(input, feedback, error) {
-    console.log("components/core/user/signup :: updateControl() called");
-
     error = error || '';
 
     input.setCustomValidity(error);
@@ -61,7 +59,6 @@ export default Control.extend({
    },
 
   'submit': function(element, event) {
-    console.log("components/core/user/signup :: Control.submit() called");
     event.preventDefault();
 
     const username = document.getElementById("username");
