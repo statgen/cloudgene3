@@ -37,8 +37,8 @@
 	</developers>
 
 	<properties>
-		<node.version>v10.4.0</node.version>
-		<npm.version>6.4.1</npm.version>
+		<node.version>v25.3.0</node.version>
+		<npm.version>11.6.2</npm.version>
 		<webapp>${basedir}/src/main/html/webapp</webapp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
