@@ -9,24 +9,22 @@ import Template from 'models/template';
 import template from './templates.stache';
 import showErrorDialog from 'helpers/error-dialog';
 
-
 export default Control.extend({
 
-  "init": function(element, options) {
+  'init': function(element) {
     Template.findAll({},
       function(templates) {
         $(element).html(template({
           templates: templates,
         }));
-        $("#content").fadeIn();
+        $('#content').fadeIn();
       },
       function(response) {
         new ErrorPage(element, response);
       });
   },
 
-  '.edit-btn click': function(el, ev) {
-
+  '.edit-btn click': function(el) {
     const tr = $(el).closest('tr');
     const template = domData.get.call(tr[0], 'template');
     const oldText = template.attr('text');
@@ -38,14 +36,13 @@ export default Control.extend({
           const text = $('#message').val();
           template.attr('text', text);
           template.save(
-            function(data) {},
+            function() {},
             function(response) {
-              showErrorDialog("Operation failed", response);
+              showErrorDialog('Operation failed', response);
             },
           );
         }
       }
     });
   }
-
 });

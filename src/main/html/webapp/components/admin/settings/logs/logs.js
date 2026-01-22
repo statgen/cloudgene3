@@ -3,15 +3,12 @@ import $ from 'jquery';
 
 import template from './logs.stache';
 
-
 export default Control.extend({
 
-  "init": function(element, options) {
-
-
+  'init': function(element) {
     $(element).hide();
     $(element).html(template());
     $(element).fadeIn();
-    $("#log-cloudgene").load("api/v2/admin/server/logs/cloudgene.log");
+    $('#log-cloudgene').load('api/v2/admin/server/logs/cloudgene.log');
   }
 });

@@ -10,7 +10,7 @@ import template from './dashboard.stache';
 
 export default Control.extend({
 
-  "init": function(element, options) {
+  'init': function(element) {
 
     $(element).hide();
     const that = this;
@@ -26,15 +26,15 @@ export default Control.extend({
         }));
         $(element).fadeIn();
 
-        $.getJSON("api/v2/admin/server/statistics", {
+        $.getJSON('api/v2/admin/server/statistics', {
           days: 1
         }, function(mydata) {
 
-          $("#new_users").html(mydata[0].users - mydata[mydata.length - 1].users);
-          $("#total_users").html(mydata[0].users);
+          $('#new_users').html(mydata[0].users - mydata[mydata.length - 1].users);
+          $('#total_users').html(mydata[0].users);
 
-          $("#new_jobs").html(mydata[0].completeJobs - mydata[mydata.length - 1].completeJobs);
-          $("#total_jobs").html(mydata[0].completeJobs);
+          $('#new_jobs').html(mydata[0].completeJobs - mydata[mydata.length - 1].completeJobs);
+          $('#total_jobs').html(mydata[0].completeJobs);
 
           that.options.running = Morris.Area({
             element: 'morris-area-chart',
@@ -47,30 +47,28 @@ export default Control.extend({
             smooth: 'false',
             resize: true
           });
-
-
         });
-      }, function(message) {
-
+      }, function() {
+        // Counter.findOne() error handler (noop)
       });
-    }, function(message) {
-
+    }, function() {
+      // JobValue.findAll() error handler (noop)
     });
   },
 
   '#day_combo change': function() {
 
-    const days = $("#day_combo").val();
+    const days = $('#day_combo').val();
     const that = this;
-    $.getJSON("api/v2/admin/server/statistics", {
+    $.getJSON('api/v2/admin/server/statistics', {
       days: days
     }, function(mydata) {
 
-      $("#new_users").html(mydata[0].users - mydata[mydata.length - 1].users);
-      $("#total_users").html(mydata[0].users);
+      $('#new_users').html(mydata[0].users - mydata[mydata.length - 1].users);
+      $('#total_users').html(mydata[0].users);
 
-      $("#new_jobs").html(mydata[0].completeJobs - mydata[mydata.length - 1].completeJobs);
-      $("#total_jobs").html(mydata[0].completeJobs);
+      $('#new_jobs').html(mydata[0].completeJobs - mydata[mydata.length - 1].completeJobs);
+      $('#total_jobs').html(mydata[0].completeJobs);
 
       that.options.running.setData(mydata);
     });

@@ -10,7 +10,7 @@ import template from './settings.stache';
 
 export default Control.extend({
 
-  "init": function (element, options) {
+  'init': function (element, options) {
     const that = this;
 
     ApplicationSettings.findOne({ id: options.app }, function (application) {
@@ -36,11 +36,14 @@ export default Control.extend({
     this.application.attr('config').attr('nextflow.config', nextflowConfig);
     this.application.attr('config').attr('nextflow.work', nextflowWork);
     this.application.attr('config').attr('nextflow.env', nextflowEnv);
-    this.application.save(function (data) {
-      bootbox.alert("Application settings updated.");
-    },
+
+    this.application.save(
+      function () {
+        bootbox.alert('Application settings updated.');
+      },
       function (response) {
-        showErrorDialog("Operation failed", response);
-      });
+        showErrorDialog('Operation failed', response);
+      }
+    );
   }
 });

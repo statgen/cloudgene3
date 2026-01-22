@@ -6,11 +6,11 @@ import ErrorPage from 'helpers/error-page';
 
 export default Control.extend({
 
-  "init": function(element, options) {
+  'init': function(element, options) {
     try {
 
       if (options.page) {
-        options.template = "static/" + options.page + ".stache";
+        options.template = 'static/' + options.page + '.stache';
       }
 
       $.get(options.template,
@@ -20,18 +20,19 @@ export default Control.extend({
             $(element).html(view());
           } else {
             new ErrorPage(element, {
-              status: "404",
+              status: '404',
               message: "Oops, Sorry We Can't Find That Page!"
             });
           }
         });
 
-    } catch (e) {
+    } catch (error) {
+      console.log(error);
+
       new ErrorPage(element, {
-        status: "404",
+        status: '404',
         message: "Oops, Sorry We Can't Find That Page!"
       });
     }
   }
-
 });

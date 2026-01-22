@@ -33,7 +33,7 @@ export default Control.extend({
     canRoute.start();
   },
 
-  'check': function(ev, attr, how) {
+  'check': function(ev) {
     const router = canRoute.router;
 
     if (

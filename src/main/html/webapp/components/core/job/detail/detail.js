@@ -19,7 +19,7 @@ import template from './detail.stache';
 
 export default Control.extend({
 
-  "init": function (element, options) {
+  'init': function (element, options) {
     const that = this;
     this.active = true;
 
@@ -39,19 +39,19 @@ export default Control.extend({
 
       switch (options.tab) {
         case 'results':
-          new ResultsControl("#tab-results", {
+          new ResultsControl('#tab-results', {
             job: job
           });
           break;
 
         case 'steps':
-          new StepsControl("#tab-steps", {
+          new StepsControl('#tab-steps', {
             job: job
           });
           break;
 
         case 'logs':
-          new LogsControl("#tab-logs", {
+          new LogsControl('#tab-logs', {
             job: job
           });
           break;
@@ -59,26 +59,24 @@ export default Control.extend({
         default:
       }
 
-      $('[data-bs-toggle="tooltip"]').tooltip()
+      $('[data-bs-toggle="tooltip"]').tooltip();
 
       that.job = job;
       that.refresh();
 
     }, function (response) {
       new ErrorPage(that.element, response);
-    }
-
-    );
+    });
   },
 
   // delete job
 
-  '#delete-btn click': function (el, ev) {
+  '#delete-btn click': function () {
     const that = this;
 
     bootbox.confirm({
       title: 'Delete Job',
-      message: "Are you sure you want to delete <b>" + that.job.attr('name') + "</b>?",
+      message: 'Are you sure you want to delete <b>' + that.job.attr('name') + '</b>?',
       callback: function (result) {
         if (result) {
 
@@ -92,10 +90,10 @@ export default Control.extend({
           that.job.destroy(function () {
             // go to jobs page
             bootbox.hideAll();
-            window.location.hash = "!pages/jobs";
+            window.location.hash = '!pages/jobs';
           }, function (response) {
             bootbox.hideAll();
-            showErrorDialog("Job could not be deleted", response);
+            showErrorDialog('Job could not be deleted', response);
           });
 
           return false;
@@ -106,12 +104,12 @@ export default Control.extend({
 
   // cancel job
 
-  '#cancel-btn click': function (el, ev) {
+  '#cancel-btn click': function () {
     const that = this;
 
     bootbox.confirm({
       title: 'Cancel Job',
-      message: "Are you sure you want to cancel <b>" + that.job.attr('name') + "</b>?",
+      message: 'Are you sure you want to cancel <b>' + that.job.attr('name') + '</b>?',
       callback: function (result) {
         if (result) {
 
@@ -131,7 +129,7 @@ export default Control.extend({
             that.refresh();
           }, function (response) {
             bootbox.hideAll();
-            showErrorDialog("Job could not be canceld", response);
+            showErrorDialog('Job could not be canceled', response);
           });
 
           return false;
@@ -140,12 +138,12 @@ export default Control.extend({
     });
   },
 
-  '#restart-btn click': function (el, ev) {
+  '#restart-btn click': function () {
     const that = this;
 
     bootbox.confirm({
       title: 'Restart Job',
-      message: "Are you sure you want to restart <b>" + that.job.attr('name') + "</b>?",
+      message: 'Are you sure you want to restart <b>' + that.job.attr('name') + '</b>?',
       callback: function (result) {
         if (result) {
 
@@ -161,10 +159,10 @@ export default Control.extend({
           operation.attr('action', 'restart');
           operation.save(function () {
             bootbox.hideAll();
-            window.location.hash = "#!pages/jobs";
+            window.location.hash = '#!pages/jobs';
           }, function (response) {
             bootbox.hideAll();
-            showErrorDialog("Job could not be restarted", response);
+            showErrorDialog('Job could not be restarted', response);
           });
 
           return false;
@@ -201,7 +199,7 @@ export default Control.extend({
         // updates details (results, startTime, endTime, ...)
         JobDetails.findOne({
           id: that.job.id
-        }, function (job) {
+        }, function () {
 
           if (that.active) {
             const router = canRoute.router;

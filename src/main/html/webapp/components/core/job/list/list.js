@@ -44,7 +44,7 @@ const JobRefresher = Control({
 
 export default Control.extend({
 
-  "init": function(element, options) {
+  'init': function(element, options) {
 
     this.options.refreshers = [];
 
@@ -75,14 +75,14 @@ export default Control.extend({
 
   },
 
-  '.delete-btn click': function(el, ev) {
+  '.delete-btn click': function(el) {
 
     const card = $(el).closest('.card');
     const job = domData.get.call(card[0], 'job');
 
     bootbox.confirm({
       title: 'Delete Job',
-      message: "Are you sure you want to delete <b>" + job.attr('name') + "</b>?",
+      message: 'Are you sure you want to delete <b>' + job.attr('name') + '</b>?',
       callback: function(result) {
         if (result) {
 
@@ -97,7 +97,7 @@ export default Control.extend({
             bootbox.hideAll();
           }, function(response) {
             bootbox.hideAll();
-            showErrorDialog("Job could not be deleted", response);
+            showErrorDialog('Job could not be deleted', response);
           });
 
           return false;
@@ -106,14 +106,14 @@ export default Control.extend({
     });
   },
 
-  '.cancel-btn click': function(el, ev) {
+  '.cancel-btn click': function(el) {
 
     const card = $(el).closest('.card');
     const job = domData.get.call(card[0], 'job');
 
     bootbox.confirm({
       title: 'Cancel Job',
-      message: "Are you sure you want to cancel <b>" + job.attr('name') + "</b>?",
+      message: 'Are you sure you want to cancel <b>' + job.attr('name') + '</b>?',
       callback: function(result) {
         if (result) {
 
@@ -132,7 +132,7 @@ export default Control.extend({
             bootbox.hideAll();
           }, function(response) {
             bootbox.hideAll();
-            showErrorDialog("Job could not be canceld", response);
+            showErrorDialog('Job could not be canceled', response);
           });
 
           return false;

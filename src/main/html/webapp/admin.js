@@ -16,7 +16,6 @@ import JobListControl from 'components/admin/job/list/';
 import JobDetailControl from 'components/core/job/detail/';
 import AppListControl from 'components/admin/app/list/';
 import AppSettingsControl from 'components/admin/app/settings/';
-
 import SettingsGeneralControl from 'components/admin/settings/general/';
 import SettingsNextflowControl from 'components/admin/settings/nextflow/';
 import SettingsServerControl from 'components/admin/settings/server/';

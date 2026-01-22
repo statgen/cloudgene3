@@ -7,10 +7,9 @@ import Settings from 'models/settings';
 import template from './mail.stache';
 import showErrorDialog from 'helpers/error-dialog';
 
-
 export default Control.extend({
 
-  "init": function(element, options) {
+  'init': function(element) {
     const that = this;
 
     Settings.findOne({},
@@ -36,10 +35,10 @@ export default Control.extend({
     this.settings.attr('mailPassword', $(form).find("[name='mail-password']").val());
     this.settings.attr('mailName', $(form).find("[name='mail-name']").val());
     this.settings.attr('piggene', $(form).find("[name='piggene']").val());
-    this.settings.save(function(data) {
-      bootbox.alert("E-Mail configuration updated.");
+    this.settings.save(function() {
+      bootbox.alert('E-Mail configuration updated.');
     }, function(response) {
-      showErrorDialog("E-Mail configuration not updated", response);
+      showErrorDialog('E-Mail configuration not updated', response);
     });
   }
 });

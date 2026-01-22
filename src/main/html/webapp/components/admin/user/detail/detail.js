@@ -31,27 +31,27 @@ export default Control.extend({
     );
   },
 
-  '#delete-user-btn click': function(el, ev) {
+  '#delete-user-btn click': function() {
     const user = this.user;
 
     bootbox.confirm({
       title: 'Delete User',
-      message: "Are you sure you want to delete <b>" + user.attr('username') + "</b>?",
+      message: 'Are you sure you want to delete <b>' + user.attr('username') + '</b>?',
       callback: function(result) {
         if (result) {
           user.destroy(
-            function(data) {
-              window.location.hash = "#!pages/users";
+            function() {
+              window.location.hash = '#!pages/users';
             },
             function(response) {
-              showErrorDialog("User not deleted", response);
+              showErrorDialog('User not deleted', response);
           });
         }
       },
     });
   },
 
-  '.edit-role-btn click': function(el, ev) {
+  '.edit-role-btn click': function() {
     const user = this.user;
     const element = this.element;
 
@@ -61,7 +61,7 @@ export default Control.extend({
         const roles = user.attr('role').split(',');
 
         let options = '';
-        groups.forEach(function(group, index) {
+        groups.forEach(function(group) {
           if ($.inArray(group.attr('name'), roles) >= 0) {
             options += '<label class="checkbox"><input type="checkbox" name="role-select" value="' + group.attr('name') + '" checked />';
           } else {
@@ -87,9 +87,9 @@ export default Control.extend({
               const text = checked.join(',');
               user.attr('role', text);
               user.save(
-                function(data) {},
+                function() {},
                 function(response) {
-                  showErrorDialog("User not deleted", response);
+                  showErrorDialog('User not deleted', response);
                 }
               );
             }
@@ -100,5 +100,4 @@ export default Control.extend({
         new ErrorPage(element, response);
       });
   },
-
 });

@@ -38,7 +38,7 @@ export default Control.extend({
     });
   },
 
-  '.delete-btn click': function(el, ev) {
+  '.delete-btn click': function(el) {
     const tr = $(el).closest('tr');
     const job = domData.get.call(tr[0], 'job');
 
@@ -69,7 +69,7 @@ export default Control.extend({
     });
   },
 
-  '.cancel-btn click': function(el, ev) {
+  '.cancel-btn click': function(el) {
 
     const tr = $(el).closest('tr');
     const job = domData.get.call(tr[0], 'job');
@@ -102,7 +102,7 @@ export default Control.extend({
     });
   },
 
-  '.priority-btn click': function(el, ev) {
+  '.priority-btn click': function(el) {
 
     const tr = $(el).closest('tr');
     const job = domData.get.call(tr[0], 'job');
@@ -117,7 +117,7 @@ export default Control.extend({
       });
   },
 
-  '.archive-btn click': function(el, ev) {
+  '.archive-btn click': function(el) {
     const tr = $(el).closest('tr');
     const job = domData.get.call(tr[0], 'job');
     const that = this;
@@ -140,7 +140,7 @@ export default Control.extend({
     });
   },
 
-  '.reset-downloads-btn click': function(el, ev) {
+  '.reset-downloads-btn click': function(el) {
     const tr = $(el).closest('tr');
     const job = domData.get.call(tr[0], 'job');
     $.get('api/v2/admin/jobs/' + job.attr('id') + '/reset').then(
@@ -152,7 +152,7 @@ export default Control.extend({
       });
   },
 
-  '.unlimited-downloads-btn click': function(el, ev) {
+  '.unlimited-downloads-btn click': function(el) {
     const tr = $(el).closest('tr');
     const job = domData.get.call(tr[0], 'job');
     $.get('api/v2/admin/jobs/' + job.attr('id') + '/reset?max=-1').then(
@@ -165,7 +165,7 @@ export default Control.extend({
   },
 
 
-  '.retire-btn click': function(el, ev) {
+  '.retire-btn click': function(el) {
     const tr = $(el).closest('tr');
     const job = domData.get.call(tr[0], 'job');
     const that = this;
@@ -179,7 +179,7 @@ export default Control.extend({
       });
   },
 
-  '.change-retire-date-btn click': function(el, ev) {
+  '.change-retire-date-btn click': function(el) {
     const tr = $(el).closest('tr');
     const job = domData.get.call(tr[0], 'job');
     const that = this;

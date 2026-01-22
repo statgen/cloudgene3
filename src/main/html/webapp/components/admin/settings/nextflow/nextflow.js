@@ -9,7 +9,7 @@ import showErrorDialog from 'helpers/error-dialog';
 
 export default Control.extend({
 
-  "init": function (element, options) {
+  'init': function (element) {
     const that = this;
 
     NextflowConfig.findOne({},
@@ -20,7 +20,6 @@ export default Control.extend({
         that.nextflowConfig = nextflowConfig;
         $(element).fadeIn();
       });
-
   },
 
   'submit': function (form, event) {
@@ -28,13 +27,10 @@ export default Control.extend({
 
     this.nextflowConfig.attr('config', $(form).find("[name='config']").val());
     this.nextflowConfig.attr('env', $(form).find("[name='env']").val());
-    this.nextflowConfig.save(function (data) {
-      bootbox.alert("Nextflow configuration updated.");
+    this.nextflowConfig.save(function () {
+      bootbox.alert('Nextflow configuration updated.');
     }, function (response) {
-      showErrorDialog("Nextflow configuration not updated", response);
+      showErrorDialog('Nextflow configuration not updated', response);
     });
-
-
   }
-
 });

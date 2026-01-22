@@ -9,7 +9,7 @@ import showErrorDialog from 'helpers/error-dialog';
 
 export default Control.extend({
 
-  "init": function (element, options) {
+  'init': function (element) {
     const that = this;
 
     Settings.findOne({},
@@ -37,10 +37,10 @@ export default Control.extend({
     this.settings.attr('workspaceType', $(form).find("[name='workspaceType']").val());
     this.settings.attr('workspaceLocation', $(form).find("[name='workspaceLocation']").val());
 
-    this.settings.save(function (data) {
-      bootbox.alert("Settings updated.");
+    this.settings.save(function () {
+      bootbox.alert('Settings updated.');
     }, function (response) {
-      showErrorDialog("Settings not updated", response);
+      showErrorDialog('Settings not updated', response);
     });
   }
 });

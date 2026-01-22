@@ -6,7 +6,7 @@ import template from './password-reset.stache';
 
 export default Control.extend({
 
-  "init": function(element, options) {
+  'init': function(element) {
     $(element).hide();
     $(element).html(template());
     $(element).fadeIn();
@@ -18,17 +18,17 @@ export default Control.extend({
     const username = $(element).find("[name='username']");
 
     $.ajax({
-      url: "api/v2/users/reset",
-      type: "POST",
-      data: $(element).find("#reset-form").serialize(),
+      url: 'api/v2/users/reset',
+      type: 'POST',
+      data: $(element).find('#reset-form').serialize(),
       dataType: 'json',
       success: function(data) {
         if (data.success) {
 
           // show okey
-          $("#reset-page").hide();
-          $("#success-message").show();
-          $("#success-message").html(data.message);
+          $('#reset-page').hide();
+          $('#success-message').show();
+          $('#success-message').html(data.message);
 
         } else {
           // shows error
@@ -40,7 +40,5 @@ export default Control.extend({
         alert('failure: ' + message);
       }
     });
-
   }
-
 });

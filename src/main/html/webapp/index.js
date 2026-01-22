@@ -144,5 +144,4 @@ Server.findOne({}, function(server) {
       }
     }
   });
-
 });

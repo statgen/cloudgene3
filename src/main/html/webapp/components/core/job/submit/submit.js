@@ -24,7 +24,7 @@ import templateTextarea from './controls/textarea.stache';
 
 export default Control.extend({
 
-  "init": function(element, options) {
+  'init': function(element, options) {
 
     const that = this;
 
@@ -48,7 +48,7 @@ export default Control.extend({
         controls_select_binded: templateSelectBinded
       }));
       $(element).fadeIn();
-      $("select").change();
+      $('select').change();
 
     }, function(response) {
       new ErrorPage(element, response);
@@ -111,8 +111,8 @@ export default Control.extend({
             window.location.href = '#!jobs/' + answer.id;
 
           } else {
-            new ErrorPage("#content", {
-              status: "",
+            new ErrorPage('#content', {
+              status: '',
               message: answer.message
             });
 
@@ -121,13 +121,13 @@ export default Control.extend({
 
         error: function(response) {
           uploadDialog.modal('hide');
-          new ErrorPage("#content", response);
+          new ErrorPage('#content', response);
 
         },
 
         //upade progress bar
         uploadProgress: function(event, position, total, percentComplete) {
-          $("#waiting-progress").css("width", percentComplete + "%");
+          $('#waiting-progress').css('width', percentComplete + '%');
         }
 
       });
@@ -147,12 +147,12 @@ export default Control.extend({
 
   '#select-single-file-btn click': function(button) {
     // trigger click to open file dialog
-    const fileUpload = $(button).closest('.col-sm-3').find(":file");
-    fileUpload.trigger("click");
+    const fileUpload = $(button).closest('.col-sm-3').find(':file');
+    fileUpload.trigger('click');
   },
 
   '.file-upload-field-single change': function(fileUpload) {
-    const filenameControl = $(fileUpload).parent().find(".file-name-control");
+    const filenameControl = $(fileUpload).parent().find('.file-name-control');
     if (fileUpload.files.length > 0) {
       filenameControl.val(fileUpload.files[0].name);
     } else {
@@ -164,13 +164,13 @@ export default Control.extend({
 
   '#select-files-btn click': function(button) {
     // trigger click to open file dialog
-    const fileUpload = $(button).parent().find(":file");
-    fileUpload.trigger("click");
+    const fileUpload = $(button).parent().find(':file');
+    fileUpload.trigger('click');
   },
 
   '.file-upload-field-multiple change': function(fileUpload) {
     //update list of files
-    const fileList = $(fileUpload).parent().find(".file-list");
+    const fileList = $(fileUpload).parent().find('.file-list');
     fileList.empty();
     for (let i = 0; i < fileUpload.files.length; i++) {
       fileList.append('<li><span class="fa-li"><i class="fas fa-file"></i></span>' + fileUpload.files[i].name + '</li>');
@@ -179,33 +179,33 @@ export default Control.extend({
     const files = $(fileUpload).prop('files');
 
     if (files.length > 0) {
-      $(fileUpload).parent().find("#select-files-btn").hide();
-      $(fileUpload).parent().find("#change-files-btn").show();
-      $(fileUpload).parent().find("#remove-all-files-btn").show();
+      $(fileUpload).parent().find('#select-files-btn').hide();
+      $(fileUpload).parent().find('#change-files-btn').show();
+      $(fileUpload).parent().find('#remove-all-files-btn').show();
     } else {
-      $(fileUpload).parent().find("#select-files-btn").show();
-      $(fileUpload).parent().find("#change-files-btn").hide();
-      $(fileUpload).parent().find("#remove-all-files-btn").hide();
+      $(fileUpload).parent().find('#select-files-btn').show();
+      $(fileUpload).parent().find('#change-files-btn').hide();
+      $(fileUpload).parent().find('#remove-all-files-btn').hide();
     }
   },
 
   '#change-files-btn click': function(button) {
     // trigger click to open file dialog
-    const fileUpload = $(button).parent().find(":file");
-    fileUpload.trigger("click");
+    const fileUpload = $(button).parent().find(':file');
+    fileUpload.trigger('click');
   },
 
   '#remove-all-files-btn click': function(button) {
     //clear hidden file upload field
-    const fileUpload = $(button).parent().find(":file");
+    const fileUpload = $(button).parent().find(':file');
     fileUpload.val('');
 
     //clear list of files
-    const fileList = $(button).parent().find(".file-list");
+    const fileList = $(button).parent().find('.file-list');
     fileList.empty();
 
-    fileUpload.parent().find("#select-files").show();
-    fileUpload.parent().find("#change-files").hide();
-    fileUpload.parent().find("#remove-all-files").hide();
+    fileUpload.parent().find('#select-files').show();
+    fileUpload.parent().find('#change-files').hide();
+    fileUpload.parent().find('#remove-all-files').hide();
   }
 });

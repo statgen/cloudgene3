@@ -11,13 +11,11 @@ import template from './list.stache';
 
 export default Control.extend({
 
-  "init": function (element, options) {
+  'init': function (element) {
     $(element).html(template());
     $(element).fadeIn();
 
-    new JobTable("#job-list-running-ltq", { state: "running-ltq" });
-    new JobTable("#job-list-current", { state: "current" });
-
+    new JobTable('#job-list-running-ltq', { state: 'running-ltq' });
+    new JobTable('#job-list-current', { state: 'current' });
   }
-
 });
