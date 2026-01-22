@@ -17,9 +17,16 @@ export default Model.extend({
   },
 
   'checkPassword': function(password, confirm_password) {
+    if (!password) {
+      return 'Please provide a password.';
+    }
 
-    if (password === "" || password !== confirm_password) {
-      return "Please check your passwords.";
+    if (!confirm_password) {
+      return 'Please confirm your password.';
+    }
+
+    if (password !== confirm_password) {
+      return 'Please make sure the passwords match.';
     }
 
     if (password.length < 14) {
@@ -58,7 +65,7 @@ export default Model.extend({
 
     const pattern = new RegExp(/^[a-z][a-z0-9_]+[a-z0-9]$/);
     if (!pattern.test(username)) {
-      return "Your username is not valid. It can only contain lowercase letters a-z, digits 0-9, and underscores _. It must start with a lowercase letter, and cannot end in an underscore.";
+      return 'Username can only contain lowercase letters a-z, digits 0-9, and underscores _. It must start with a lowercase letter, and cannot end in an underscore.';
     }
   },
 
