@@ -16,7 +16,7 @@
           <span class="me-2">
             <i class="fas fa-user"></i>
             {{#is(admin, true)}}
-              <a href="#!pages/users/{{job.username}}" aria-label="User Page">
+              <a href="admin.html#!pages/users/{{job.username}}" aria-label="User Page">
                 {{job.username}}
               </a>
             {{else}}
