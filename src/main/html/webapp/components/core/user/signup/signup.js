@@ -5,24 +5,6 @@ import User from 'models/user';
 
 import template from './signup.stache';
 
-  /**
-   * Updates the provided input and its feedback field based on the provided error.
-   *
-   * @param {HTMLInputElement} input The form control to update.
-   * @param {HTMLElement} feedback The Bootstrap feedback field for this input.
-   * @param {string | undefined} error An error string if validation failed, otherwise a falsy value.
-   */
-  function updateControl(input, feedback, error) {
-    error = error || '';
-
-    input.setCustomValidity(error);
-    input.reportValidity();
-
-    input.classList.toggle('is-valid', !error);
-    input.classList.toggle('is-invalid', !!error);
-
-    feedback.textContent = error;
-  }
 
 export default Control.extend({
 
@@ -38,11 +20,11 @@ export default Control.extend({
   },
 
 
-  "#anonymous1 click" : function() {
+  "#anonymous1 click" : function(){
     this.updateEmailControl();
   },
 
-  "#anonymous2 click" : function() {
+  "#anonymous2 click" : function(){
     this.updateEmailControl();
   },
 
@@ -50,10 +32,11 @@ export default Control.extend({
       if (!this.emailRequired){
         const anonymousControl = $(this.element).find("[name='anonymous']:checked");
         const anonymous = (anonymousControl.val() == "1");
+        const mail = $(this.element).find("[name='mail']");
         if (anonymous){
-          this.mail.attr('disabled','disabled');
+          mail.attr('disabled','disabled');
         } else {
-          this.mail.removeAttr('disabled');
+          mail.removeAttr('disabled');
         }
       }
    },
@@ -61,51 +44,42 @@ export default Control.extend({
   'submit': function(element, event) {
     event.preventDefault();
 
-    const username = document.getElementById("username");
-    const usernameFeedback = document.getElementById("username-feedback");
-
-    const fullName = document.getElementById("full-name");
-    const fullNameFeedback = document.getElementById("full-name-feedback");
-
-    const mail = document.getElementById("mail");
-    const mailFeedback = document.getElementById("mail-feedback");
-
-    const password = document.getElementById("password");
-    const passwordFeedback = document.getElementById("password-feedback");
-
-    const confirmPassword = document.getElementById("confirm-password");
-
+    const that = this;
     const user = new User();
 
     // anonymous radiobutton
     let anonymous = false;
 
-    if (!this.emailRequired) {
+    if (!this.emailRequired){
       const anonymousControl = $(element).find("[name='anonymous']:checked");
       anonymous = (anonymousControl.val() == "1");
     }
 
     // username
-    const usernameError = user.checkUsername(username.value);
-    updateControl(username, usernameFeedback, usernameError);
+    let username = $(element).find("[name='username']");
+    const usernameError = user.checkUsername(username.val());
+    this.updateControl(username, usernameError);
 
     // fullname
-    const fullnameError = user.checkName(fullName.value);
-    updateControl(fullName, fullNameFeedback, fullnameError);
+    const fullname = $(element).find("[name='full-name']");
+    const fullnameError = user.checkName(fullname.val());
+    this.updateControl(fullname, fullnameError);
 
     // mail
     let mailError = undefined;
-
-    if (!anonymous) {
-      mailError = user.checkMail(mail.value);
-      updateControl(mail, mailFeedback, mailError);
+    const mail = $(element).find("[name='mail']");
+    if (!anonymous){
+      mailError = user.checkMail(mail.val());
+      this.updateControl(mail, mailError);
     } else {
-      updateControl(mail, mailFeedback, undefined);
+      this.updateControl(mail, undefined);
     }
 
     // password
-    const passwordError = user.checkPassword(password.value, confirmPassword.value);
-    updateControl(password, passwordFeedback, passwordError);
+    const newPassword = $(element).find("[name='new-password']");
+    const confirmNewPassword = $(element).find("[name='confirm-new-password']");
+    const passwordError = user.checkPassword(newPassword.val(), confirmNewPassword.val());
+    this.updateControl(newPassword, passwordError);
 
     if (usernameError || fullnameError || mailError || passwordError) {
       return false;
@@ -114,25 +88,29 @@ export default Control.extend({
     $('#save').button('loading');
 
     $.ajax({
-      url: 'api/v2/users/register',
-      type: 'POST',
-      data: $(element).find('#signon-form').serialize(),
+      url: "api/v2/users/register",
+      type: "POST",
+      data: $(element).find("#signon-form").serialize(),
       dataType: 'json',
       success: function(data) {
-        if (data.success) {
-          let message = '';
-          if (!anonymous) {
-            message = '<b>Well done!</b> An email including the activation code has been sent to your address.'
+        if (data.success == true) {
+          // shows success
+          let message = "";
+          if (!anonymous){
+            message = "Well done!</b> An email including the activation code has been sent to your address."
           } else {
-            message = '<b>Well done!</b> Your account is now active. <a href="/">Login now</a>.'
+            message = "<b>Well done!</b> Your account is now active. <a href=\"/\">Login now</a>."
           }
 
           $('#signon-form').hide();
           $('#success-message').html(message);
           $('#success-message').show();
         } else {
-          updateControl(username, usernameFeedback, data.message);
+          // shows error msg
+          username = $('#signon-form').find("[name='username']");
+          that.updateControl(username, data.message);
           $('#save').button('reset');
+
         }
       },
       error: function(message) {
@@ -142,4 +120,17 @@ export default Control.extend({
     });
 
   },
+
+  updateControl: function(control, error) {
+    if (error) {
+      control.removeClass('is-valid');
+      control.addClass('is-invalid');
+      control.closest('.mb-3').find('.invalid-feedback').html(error);
+    } else {
+      control.removeClass('is-invalid');
+      control.addClass('is-valid');
+      control.closest('.mb-3').find('.invalid-feedback').html('');
+    }
+  }
+
 });
