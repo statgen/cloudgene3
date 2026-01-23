@@ -16,7 +16,6 @@ import LogsControl from './logs/';
 
 import template from './detail.stache';
 
-
 export default Control.extend({
 
   'init': function (element, options) {
@@ -28,31 +27,30 @@ export default Control.extend({
     }
 
     JobDetails.findOne({
-      id: options.job
+      id: options.job,
     }, function (job) {
-
       $(element).html(template({
         job: job,
         tab: options.tab,
-        admin: options.appState.attr('user').attr('admin')
+        admin: options.appState.attr('user').attr('admin'),
       }));
 
       switch (options.tab) {
         case 'results':
           new ResultsControl('#tab-results', {
-            job: job
+            job: job,
           });
           break;
 
         case 'steps':
           new StepsControl('#tab-steps', {
-            job: job
+            job: job,
           });
           break;
 
         case 'logs':
           new LogsControl('#tab-logs', {
-            job: job
+            job: job,
           });
           break;
 
@@ -63,7 +61,6 @@ export default Control.extend({
 
       that.job = job;
       that.refresh();
-
     }, function (response) {
       new ErrorPage(that.element, response);
     });
@@ -79,12 +76,11 @@ export default Control.extend({
       message: 'Are you sure you want to delete <b>' + that.job.attr('name') + '</b>?',
       callback: function (result) {
         if (result) {
-
-          const okButton = $("button[data-bb-handler='confirm']");
+          const okButton = $('button[data-bb-handler="confirm"]');
           okButton.prop('disabled', true);
           okButton.html('Please wait...');
 
-          const cancelButton = $("button[data-bb-handler='cancel']");
+          const cancelButton = $('button[data-bb-handler="cancel"]');
           cancelButton.hide('hide');
 
           that.job.destroy(function () {
@@ -98,7 +94,7 @@ export default Control.extend({
 
           return false;
         }
-      }
+      },
     });
   },
 
@@ -112,12 +108,11 @@ export default Control.extend({
       message: 'Are you sure you want to cancel <b>' + that.job.attr('name') + '</b>?',
       callback: function (result) {
         if (result) {
-
-          const okButton = $("button[data-bb-handler='confirm']");
+          const okButton = $('button[data-bb-handler="confirm"]');
           okButton.prop('disabled', true);
           okButton.html('Please wait...');
 
-          const cancelButton = $("button[data-bb-handler='cancel']");
+          const cancelButton = $('button[data-bb-handler="cancel"]');
           cancelButton.hide('hide');
 
           const operation = new JobOperation();
@@ -134,7 +129,7 @@ export default Control.extend({
 
           return false;
         }
-      }
+      },
     });
   },
 
@@ -146,12 +141,11 @@ export default Control.extend({
       message: 'Are you sure you want to restart <b>' + that.job.attr('name') + '</b>?',
       callback: function (result) {
         if (result) {
-
-          const okButton = $("button[data-bb-handler='confirm']");
+          const okButton = $('button[data-bb-handler="confirm"]');
           okButton.prop('disabled', true);
           okButton.html('Please wait...');
 
-          const cancelButton = $("button[data-bb-handler='cancel']");
+          const cancelButton = $('button[data-bb-handler="cancel"]');
           cancelButton.hide('hide');
 
           const operation = new JobOperation();
@@ -167,13 +161,13 @@ export default Control.extend({
 
           return false;
         }
-      }
+      },
     });
   },
 
   // refresh if job is running
 
-  refresh: function () {
+  'refresh': function () {
     const that = this;
 
     if (!that.job.canCancel) {
@@ -181,7 +175,7 @@ export default Control.extend({
     }
 
     Job.findOne({
-      id: that.job.id
+      id: that.job.id,
     }, function (currentJob) {
       currentJob.syncTime();
       that.job.attr('state', currentJob.attr('state'));
@@ -198,14 +192,12 @@ export default Control.extend({
       } else {
         // updates details (results, startTime, endTime, ...)
         JobDetails.findOne({
-          id: that.job.id
+          id: that.job.id,
         }, function () {
-
           if (that.active) {
             const router = canRoute.router;
             router.reload();
           }
-
         }, function (response) {
           new ErrorPage(that.element, response);
         });
@@ -213,8 +205,8 @@ export default Control.extend({
     });
   },
 
-  destroy: function () {
+  'destroy': function () {
     this.active = false;
     Control.prototype.destroy.call(this);
-  }
+  },
 });

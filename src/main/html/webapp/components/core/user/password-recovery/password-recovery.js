@@ -5,26 +5,25 @@ import User from 'models/user';
 
 import template from './password-recovery.stache';
 
-
 export default Control.extend({
 
-  "init": function(element, options) {
+  init: function (element, options) {
     $(element).hide();
     $(element).html(template({
       user: options.user,
-      key: options.key
+      key: options.key,
     }));
     $(element).fadeIn();
   },
 
-  'submit': function(element, event) {
+  submit: function (element, event) {
     event.preventDefault();
 
     const user = new User();
 
     // password
-    const newPassword = $(element).find("[name='new-password']");
-    const confirmNewPassword = $(element).find("[name='confirm-new-password']");
+    const newPassword = $(element).find('[name="new-password"]');
+    const confirmNewPassword = $(element).find('[name="confirm-new-password"]');
     const error = user.checkPassword(newPassword.val(), confirmNewPassword.val());
 
     if (error) {
@@ -38,41 +37,34 @@ export default Control.extend({
       confirmNewPassword.closest('.mb-3').find('.invalid-feedback').html('');
     }
 
-
     $.ajax({
-      url: "api/v2/users/update-password",
-      type: "POST",
-      data: $(element).find("#update-password-form")
+      url: 'api/v2/users/update-password',
+      type: 'POST',
+      data: $(element).find('#update-password-form')
         .serialize(),
       dataType: 'json',
-      success: function(response) {
-
+      success: function (response) {
         if (response.success) {
-
           // shows okey
-          $("#update-page").hide();
-          $("#error-message").hide();
-          $("#success-message").show();
-          $("#success-message").html(response.message);
-
+          $('#update-page').hide();
+          $('#error-message').hide();
+          $('#success-message').show();
+          $('#success-message').html(response.message);
         } else {
           // shows error
-          $("#update-page").hide();
-          $("#error-message").show();
-          $("#success-message").hide();
-          $("#error-message").html(response.message);
-
+          $('#update-page').hide();
+          $('#error-message').show();
+          $('#success-message').hide();
+          $('#error-message').html(response.message);
         }
       },
-      error: function(response) {
+      error: function (response) {
         // shows error
-        $("#error-message").show();
-        $("#success-message").hide();
-        $("#error-message").html(response.status + ": " + response.statusText);
-
-      }
+        $('#error-message').show();
+        $('#success-message').hide();
+        $('#error-message').html(response.status + ': ' + response.statusText);
+      },
     });
-
-  }
+  },
 
 });

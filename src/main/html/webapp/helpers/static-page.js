@@ -5,34 +5,31 @@ import stache from 'can-stache';
 import ErrorPage from 'helpers/error-page';
 
 export default Control.extend({
-
-  'init': function(element, options) {
+  init: function (element, options) {
     try {
-
       if (options.page) {
         options.template = 'static/' + options.page + '.stache';
       }
 
       $.get(options.template,
-        function(data) {
+        function (data) {
           const view = stache(data);
           if (view) {
             $(element).html(view());
           } else {
             new ErrorPage(element, {
               status: '404',
-              message: "Oops, Sorry We Can't Find That Page!"
+              message: 'Oops, Sorry We Can\'t Find That Page!',
             });
           }
         });
-
     } catch (error) {
       console.log(error);
 
       new ErrorPage(element, {
         status: '404',
-        message: "Oops, Sorry We Can't Find That Page!"
+        message: 'Oops, Sorry We Can\'t Find That Page!',
       });
     }
-  }
+  },
 });

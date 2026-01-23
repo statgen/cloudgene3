@@ -9,28 +9,27 @@ import templateShareFile from './share-file.stache';
 import './results.css';
 import ShareFolder from './share-folder';
 
-
 export default Control.extend({
 
-  "init": function(element, options) {
+  'init': function (element, options) {
     $(element).html(template({
-      job: options.job
+      job: options.job,
     }));
   },
 
-  '.share-file-btn click': function(el) {
+  '.share-file-btn click': function (el) {
     const tr = $(el).closest('div');
     const output = domData.get.call(tr[0], 'output');
     bootbox.alert({
-        title: 'Share Data',
-        message: templateShareFile({
-          hostname: location.protocol + '//' + location.host,
-          output: output,
-        }),
+      title: 'Share Data',
+      message: templateShareFile({
+        hostname: location.protocol + '//' + location.host,
+        output: output,
+      }),
     });
   },
 
-  '.share-folder-btn click': function(el) {
+  '.share-folder-btn click': function (el) {
     const tr = $(el).closest('div');
     const param = domData.get.call(tr[0], 'param');
     bootbox.alert({
@@ -42,12 +41,12 @@ export default Control.extend({
         id: param.attr('id'),
       }),
     });
-    new ShareFolder("#card-share-folder");
+    new ShareFolder('#card-share-folder');
   },
 
   // file tree (collapsible folders)
 
-  '.folder-item click': function(el) {
+  '.folder-item click': function (el) {
     const ul = $(el).parent().children('UL');
     ul.slideToggle();
     if ($(el).hasClass('fa-angle-down')) {
@@ -59,8 +58,8 @@ export default Control.extend({
     }
   },
 
-  '.folder-item-text click': function(el) {
-    const item = $(el).parent().children('i')
+  '.folder-item-text click': function (el) {
+    const item = $(el).parent().children('i');
     const ul = $(el).parent().children('UL');
     ul.slideToggle();
     if ($(item).hasClass('fa-angle-down')) {
@@ -70,5 +69,5 @@ export default Control.extend({
       $(item).addClass('fa-angle-down');
       $(item).removeClass('fa-angle-right');
     }
-  }
+  },
 });

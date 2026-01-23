@@ -5,25 +5,22 @@ import ErrorPage from 'helpers/error-page';
 import template from './activate.stache';
 
 export default Control.extend({
-
-  "init": function(element, options) {
-
+  init: function (element, options) {
     $.ajax({
-      url: "users/activate/" + options.user + "/" + options.key,
-      type: "GET",
+      url: 'users/activate/' + options.user + '/' + options.key,
+      type: 'GET',
       data: $(this).serialize(),
       dataType: 'json',
-      success: function(response) {
+      success: function (response) {
         $(element).hide();
         $(element).html(template({
-          data: response
+          data: response,
         }));
         $(element).fadeIn();
       },
-      error: function(response) {
+      error: function (response) {
         new ErrorPage(element, response);
-      }
+      },
     });
-  }
-
+  },
 });

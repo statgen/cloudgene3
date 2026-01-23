@@ -11,68 +11,66 @@ import UserProfile from 'models/user-profile';
 
 import template from './profile.stache';
 import templateDeleteDialog from './dialogs/delete.stache';
-import templateNewTokenDialog from './dialogs/new.stache'
-
+import templateNewTokenDialog from './dialogs/new.stache';
 
 export default Control.extend({
 
-  "init": function(element, options) {
-
+  'init': function (element, options) {
     this.emailRequired = options.appState.attr('emailRequired');
     const username = options.appState.attr('user').attr('username');
 
     $(element).hide();
 
     User.findOne({
-      user: username
-    }, function(user) {
+      user: username,
+    }, function (user) {
       $(element).html(template({
         user: user,
         anonymousAccount: (!options.appState.attr('emailRequired')),
         emailProvided: !!user.attr('mail'),
         userEmailDescription: options.appState.attr('userEmailDescription'),
-        userWithoutEmailDescription: options.appState.attr('userWithoutEmailDescription')
+        userWithoutEmailDescription: options.appState.attr('userWithoutEmailDescription'),
       }));
       options.user = user;
       $(element).fadeIn();
     });
   },
 
-  "#anonymous click" : function(){
-    if (!this.emailRequired){
-      const anonymousControl = $(this.element).find("[name='anonymous']");
+  '#anonymous click': function () {
+    if (!this.emailRequired) {
+      const anonymousControl = $(this.element).find('[name="anonymous"]');
       const anonymous = !anonymousControl.is(':checked');
-      const mail = $(this.element).find("[name='mail']");
+      const mail = $(this.element).find('[name="mail"]');
 
-      if (anonymous){
-        mail.attr('disabled','disabled');
+      if (anonymous) {
+        mail.attr('disabled', 'disabled');
       } else {
         mail.removeAttr('disabled');
       }
-      mail.val("");
+      mail.val('');
     }
   },
 
-  'submit': function(element, event) {
+  'submit': function (element, event) {
     event.preventDefault();
     const user = new User();
 
     // fullname
-    const fullname = $(element).find("[name='full-name']");
+    const fullname = $(element).find('[name="full-name"]');
     const fullnameError = user.checkName(fullname.val());
     this.updateControl(fullname, fullnameError);
 
     let anonymous = false;
-    if (!this.emailRequired){
-      const anonymousControl = $(this.element).find("[name='anonymous']");
+    if (!this.emailRequired) {
+      const anonymousControl = $(this.element).find('[name="anonymous"]');
       anonymous = !anonymousControl.is(':checked');
     }
 
     // mail
-    const mail = $(element).find("[name='mail']");
+    const mail = $(element).find('[name="mail"]');
     let mailError = undefined;
 
-    if (!anonymous){
+    if (!anonymous) {
       mailError = user.checkMail(mail.val());
       this.updateControl(mail, mailError);
     } else {
@@ -80,11 +78,11 @@ export default Control.extend({
     }
 
     // password if password is not empty. else no password update on server side
-    const newPassword = $(element).find("[name='new-password']");
+    const newPassword = $(element).find('[name="new-password"]');
     let newPasswordError = undefined;
 
-    if (newPassword.val() !== "") {
-      const confirmNewPassword = $(element).find("[name='confirm-new-password']");
+    if (newPassword.val() !== '') {
+      const confirmNewPassword = $(element).find('[name="confirm-new-password"]');
       newPasswordError = user.checkPassword(newPassword.val(), confirmNewPassword.val());
       this.updateControl(confirmNewPassword, newPasswordError);
     }
@@ -94,40 +92,36 @@ export default Control.extend({
     }
 
     $.ajax({
-      url: "api/v2/users/me/profile",
-      type: "POST",
-      data: $(element).find("#account-form").serialize(),
+      url: 'api/v2/users/me/profile',
+      type: 'POST',
+      data: $(element).find('#account-form').serialize(),
       dataType: 'json',
-      success: function(data) {
+      success: function (data) {
         bootbox.alert(data.message);
       },
-      error: function(response) {
+      error: function (response) {
         new ErrorPage(element, response);
-      }
+      },
     });
-
   },
 
-  '#create_token click': function() {
-
-    //load template
+  '#create_token click': function () {
+    // load template
     const that = this;
     Template.findOne({
-      key: 'TERMS'
-    }, function(template) {
-
+      key: 'TERMS',
+    }, function (template) {
       bootbox.confirm({
         title: 'Terms of Service',
         message: template.attr('text'),
         buttons: {
           confirm: {
             label: 'I Agree',
-            className: 'btn-success'
-          }
+            className: 'btn-success',
+          },
         },
-        callback: function(result) {
+        callback: function (result) {
           if (result) {
-
             const token_expiration = $('#token_expiration').val();
 
             const user = that.options.user;
@@ -136,61 +130,59 @@ export default Control.extend({
             userToken.attr('user', user.attr('username'));
             userToken.attr('expiration', token_expiration);
 
-
-            userToken.save(function(responseText) {
+            userToken.save(function (responseText) {
               user.attr('hasApiToken', true);
               user.attr('apiTokenValid', true);
-              user.attr('apiTokenMessage', "");
+              user.attr('apiTokenMessage', '');
               bootbox.alert({
                 title: 'New API Token',
                 message: templateNewTokenDialog({
                   token: responseText.token,
-                })
+                }),
               });
-            }, function(message) {
+            }, function (message) {
               bootbox.alert({
                 title: 'New API Token',
                 message: 'Error: ' + message,
               });
             });
           }
-        }
-      })
+        },
+      });
     });
   },
 
-  '#revoke_token click': function() {
-
+  '#revoke_token click': function () {
     const user = this.options.user;
 
     bootbox.confirm({
       title: 'Revoke API Token',
-      message: "Are you sure you want to revoke your <b>API Token</b>? All your applications and scripts that are you using this API token have to be changed!",
-      callback: function(result) {
+      message: 'Are you sure you want to revoke your <b>API Token</b>? All your applications and scripts that are you using this API token have to be changed!',
+      callback: function (result) {
         if (result) {
           const userToken = new UserToken();
           userToken.attr('user', user.attr('username'));
           userToken.attr('id', 'luki');
-          userToken.destroy(function() {
+          userToken.destroy(function () {
             user.attr('hasApiToken', false);
             user.attr('apiTokenValid', true);
-            user.attr('apiTokenMessage', "");
+            user.attr('apiTokenMessage', '');
             bootbox.alert({
               title: 'Revoke API Token',
               message: 'Your token is now inactive.',
             });
-          }, function(response) {
+          }, function (response) {
             bootbox.alert({
               title: 'API Token',
               message: 'Error: ' + response,
             });
           });
         }
-      }
+      },
     });
   },
 
-  updateControl: function(control, error) {
+  'updateControl': function (control, error) {
     if (error) {
       control.removeClass('is-valid');
       control.addClass('is-invalid');
@@ -202,24 +194,22 @@ export default Control.extend({
     }
   },
 
-  '#delete_account click': function() {
-
+  '#delete_account click': function () {
     const deleteAcountDialog = bootbox.dialog({
       title: 'Deleting Account',
       message: templateDeleteDialog(),
       buttons: {
         cancel: {
-          label: "Cancel",
-          class: "btn-default",
-          callback: function() {}
+          label: 'Cancel',
+          class: 'btn-default',
+          callback: function () {},
         },
         ok: {
-          label: "Delete Account",
-          class: "btn-danger",
-          callback: function() {
-
+          label: 'Delete Account',
+          class: 'btn-danger',
+          callback: function () {
             // get form parameters
-            const form = deleteAcountDialog.find("form");
+            const form = deleteAcountDialog.find('form');
             const values = deparam(form.serialize());
 
             // create delete request
@@ -228,24 +218,24 @@ export default Control.extend({
             userProfile.attr('username', values['username']);
             userProfile.attr('password', values['password']);
             userProfile.attr('id', 'id');
-            userProfile.destroy(function() {
+            userProfile.destroy(function () {
               bootbox.alert({
                 title: 'Account Deleted',
                 message: 'Your account is now deleted.',
               });
               window.location.href = 'logout';
               return true;
-            }, function(message) {
+            }, function (message) {
               const response = JSON.parse(message.responseText);
               bootbox.alert({
                 title: 'Account NOT Deleted',
-                message: 'Error: ' + response.message
+                message: 'Error: ' + response.message,
               });
               return false;
             });
-          }
-        }
-      }
+          },
+        },
+      },
     });
-  }
+  },
 });

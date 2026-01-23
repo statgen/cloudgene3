@@ -17,15 +17,13 @@ import templateInstallUrl from './install-url/install-url.stache';
 
 export default Control.extend({
 
-  "init": function (element) {
-
+  'init': function (element) {
     Application.findAll({}, function (applications) {
-
       const grouped = {};
-      applications.forEach(function(item) {
+      applications.forEach(function (item) {
         let category = item.category;
         if (category === undefined) {
-          category = "Application";
+          category = 'Application';
         }
         if (!grouped[category]) {
           grouped[category] = [];
@@ -33,37 +31,32 @@ export default Control.extend({
         grouped[category].push(item);
       });
 
-      const categories = Object.keys(grouped).map(category => {
+      const categories = Object.keys(grouped).map((category) => {
         return {
           name: category,
-          applications: grouped[category].map(app => {
+          applications: grouped[category].map((app) => {
             return app;
-          })
+          }),
         };
       });
 
-      // Sort the categories array
-      categories.sort(function(a, b) {
+      categories.sort(function (a, b) {
         // Place "Application" at the beginning
-        if (a.name.toLowerCase() === "application") return -1;
-        if (b.name.toLowerCase() === "application") return 1;
+        if (a.name.toLowerCase() === 'application') return -1;
+        if (b.name.toLowerCase() === 'application') return 1;
 
         // Compare other categories alphabetically
         return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
       });
 
-
       $(element).html(template({
-        categories: categories
+        categories: categories,
       }));
       $(element).fadeIn();
-
     });
-
   },
 
   '#install-app-url-btn click': function () {
-
     bootbox.confirm({
       title: 'Install App from URL',
       message: templateInstallUrl(),
@@ -76,10 +69,10 @@ export default Control.extend({
           const waitingDialog = bootbox.dialog({
             title: 'Install application',
             message:
-              '<p>Please wait while the application is configured.</p>' +
-              '<div class="progress progress-striped active">' +
-              '    <div id="waiting-progress" class="bar" style="width: 100%;"></div>' +
-              '</div>',
+              '<p>Please wait while the application is configured.</p>'
+              + '<div class="progress progress-striped active">'
+              + '    <div id="waiting-progress" class="bar" style="width: 100%;"></div>'
+              + '</div>',
             show: false,
           });
 
@@ -95,29 +88,26 @@ export default Control.extend({
                     router.reload();
                   },
                 });
-
               },
               function (response) {
                 waitingDialog.modal('hide');
-                showErrorDialog("Operation failed", response);
-              }
+                showErrorDialog('Operation failed', response);
+              },
             );
           });
 
           waitingDialog.modal('show');
         }
-      }
+      },
     });
   },
 
   '#install-app-github-btn click': function () {
-
     bootbox.confirm({
       title: 'Install App from GitHub repository',
       message: templateInstallGithub(),
       callback: function (result) {
         if (result) {
-
           const url = 'github://' + $('#url').val();
           const app = new Application();
           app.attr('url', url);
@@ -125,10 +115,10 @@ export default Control.extend({
           const waitingDialog = bootbox.dialog({
             title: 'Installing Application',
             message:
-              '<p>Please wait while the application is configured.</p>' +
-              '<div class="progress progress-striped active">' +
-              '<div id="waiting-progress" class="bar" style="width: 100%;"></div>' +
-              '</div>',
+              '<p>Please wait while the application is configured.</p>'
+              + '<div class="progress progress-striped active">'
+              + '<div id="waiting-progress" class="bar" style="width: 100%;"></div>'
+              + '</div>',
             show: false,
           });
 
@@ -149,15 +139,15 @@ export default Control.extend({
                 },
                 function (response) {
                   waitingDialog.modal('hide');
-                  showErrorDialog("Operation failed", response);
-                }
+                  showErrorDialog('Operation failed', response);
+                },
               );
-            }
+            },
           );
 
           waitingDialog.modal('show');
         }
-      }
+      },
     });
   },
 
@@ -165,14 +155,13 @@ export default Control.extend({
     const element = this.element;
 
     Application.findAll({
-      reload: 'true'
+      reload: 'true',
     }, function (applications) {
-
       const grouped = {};
-      applications.forEach(function(item) {
+      applications.forEach(function (item) {
         let category = item.category;
         if (category === undefined) {
-          category = "Application";
+          category = 'Application';
         }
         if (!grouped[category]) {
           grouped[category] = [];
@@ -180,31 +169,28 @@ export default Control.extend({
         grouped[category].push(item);
       });
 
-      const categories = Object.keys(grouped).map(category => {
+      const categories = Object.keys(grouped).map((category) => {
         return {
           name: category,
-          applications: grouped[category].map(app => {
+          applications: grouped[category].map((app) => {
             return app;
-          })
+          }),
         };
       });
 
-     // Sort the categories array
-      categories.sort(function(a, b) {
+      categories.sort(function (a, b) {
         // Place "Application" at the beginning
-        if (a.name.toLowerCase() === "application") return -1;
-        if (b.name.toLowerCase() === "application") return 1;
+        if (a.name.toLowerCase() === 'application') return -1;
+        if (b.name.toLowerCase() === 'application') return 1;
 
         // Compare other categories alphabetically
         return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
       });
 
-
       $(element).html(template({
-        categories: categories
+        categories: categories,
       }));
-      $("#content").fadeIn();
-
+      $('#content').fadeIn();
     });
   },
 
@@ -212,22 +198,22 @@ export default Control.extend({
     const card = $(el).closest('tr');
     const application = domData.get.call(card[0], 'application');
 
-    const enabled = !application.attr('enabled')
+    const enabled = !application.attr('enabled');
     bootbox.confirm({
-      title: (enabled ? "Enable" : "Disable") + ' Application',
-      message: "Are you sure you want to " + (enabled ? "enable" : "disable") + " <b>" + application.attr('id') + "</b>?",
+      title: (enabled ? 'Enable' : 'Disable') + ' Application',
+      message: 'Are you sure you want to ' + (enabled ? 'enable' : 'disable') + ' <b>' + application.attr('id') + '</b>?',
       callback: function (result) {
         if (result) {
           application.attr('enabled', enabled);
 
           const waitingDialog = bootbox.dialog({
-            title: (enabled ? "Enabling..." : "Disabling..."),
+            title: (enabled ? 'Enabling...' : 'Disabling...'),
             message:
-              '<p>Please wait while the application is configured.</p>' +
-              '<div class="progress progress-striped active">' +
-              '<div id="waiting-progress" class="bar" style="width: 100%;"></div>' +
-              '</div>',
-            show: false
+              '<p>Please wait while the application is configured.</p>'
+              + '<div class="progress progress-striped active">'
+              + '<div id="waiting-progress" class="bar" style="width: 100%;"></div>'
+              + '</div>',
+            show: false,
           });
           waitingDialog.on(
             'shown.bs.modal',
@@ -237,40 +223,38 @@ export default Control.extend({
                   waitingDialog.modal('hide');
                   bootbox.alert({
                     title: 'Congratulations',
-                    message: '<p>The application has been successfully ' + (enabled ? 'enabled' : 'disabled') + '.</p>'
+                    message: '<p>The application has been successfully ' + (enabled ? 'enabled' : 'disabled') + '.</p>',
                   });
                 },
                 function (response) {
                   waitingDialog.modal('hide');
-                  showErrorDialog("Operation failed", response);
-                }
+                  showErrorDialog('Operation failed', response);
+                },
               );
-            }
+            },
           );
           waitingDialog.modal('show');
         }
-      }
+      },
     });
   },
 
   '.delete-app-btn click': function (el) {
-
     const card = $(el).closest('tr');
     const application = domData.get.call(card[0], 'application');
 
     bootbox.confirm({
       title: 'Delete Application',
-      message: "Are you sure you want to delete <b>" + application.attr('id') + "</b>?",
+      message: 'Are you sure you want to delete <b>' + application.attr('id') + '</b>?',
       callback: function (result) {
         if (result) {
-
           const waitingDialog = bootbox.dialog({
             title: 'Uninstalling...',
             message:
-              '<p>Please wait while the application is configured.</p>' +
-              '<div class="progress progress-striped active">' +
-              '<div id="waiting-progress" class="bar" style="width: 100%;"></div>' +
-              '</div>',
+              '<p>Please wait while the application is configured.</p>'
+              + '<div class="progress progress-striped active">'
+              + '<div id="waiting-progress" class="bar" style="width: 100%;"></div>'
+              + '</div>',
             show: false,
           });
 
@@ -287,32 +271,29 @@ export default Control.extend({
                 },
                 function (response) {
                   waitingDialog.modal('hide');
-                  showErrorDialog("Operation failed", response);
-                }
+                  showErrorDialog('Operation failed', response);
+                },
               );
-            }
+            },
           );
 
           waitingDialog.modal('show');
         }
       },
     });
-
   },
 
-  '.edit-permission-btn click': function(el) {
-
+  '.edit-permission-btn click': function (el) {
     const card = $(el).closest('tr');
     const application = domData.get.call(card[0], 'application');
     const element = this.element;
 
     Group.findAll({},
-      function(groups) {
-
+      function (groups) {
         const roles = application.attr('permission').split(',');
 
         let options = '';
-        groups.forEach(function(group) {
+        groups.forEach(function (group) {
           if ($.inArray(group.attr('name'), roles) >= 0) {
             options = options + '<label class="checkbox"><input type="checkbox" name="role-select" value="' + group.attr('name') + '" checked />';
           } else {
@@ -331,9 +312,8 @@ export default Control.extend({
         bootbox.confirm({
           title: 'Edit Permission for ' + application.attr('name'),
           message: '<form id="role-form">' + options + newGroupSection + '</form>',
-          callback: function(result) {
+          callback: function (result) {
             if (result) {
-
               const boxes = $('#role-form input:checkbox');
               const checked = [];
               for (let i = 0; boxes[i]; ++i) {
@@ -342,7 +322,7 @@ export default Control.extend({
                 }
               }
 
-               const newGroupName = $('#new-group-name').val().trim();
+              const newGroupName = $('#new-group-name').val().trim();
               if (newGroupName) {
                 checked.push(newGroupName);
               }
@@ -350,24 +330,21 @@ export default Control.extend({
               const text = checked.join(',');
               application.attr('permission', text);
               application.save(
-                function() {},
-                function(response) {
-                  showErrorDialog("Operation failed", response);
-                }
+                function () {},
+                function (response) {
+                  showErrorDialog('Operation failed', response);
+                },
               );
             }
-          }
+          },
         });
-
       },
-      function(response) {
+      function (response) {
         new ErrorPage(element, response);
       });
-
   },
 
-  '.view-source-btn click': function(el) {
-
+  '.view-source-btn click': function (el) {
     const card = $(el).closest('tr');
     const application = domData.get.call(card[0], 'application');
     bootbox.alert({
@@ -375,5 +352,5 @@ export default Control.extend({
       message: '<div style="overflow: auto; height: 600px; width: 100%"><h5>File</h5><p>' + application.attr('filename') + '</p>' + '<h5>Source</h5><small><p><pre><code>' + application.attr('source') + '</code></pre></small></p></div>',
       className: 'w-100',
     });
-  }
+  },
 });

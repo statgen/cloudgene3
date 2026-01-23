@@ -1,8 +1,8 @@
 // eslint.config.js
-const { defineConfig } = require("eslint/config");
-const js = require("@eslint/js");
-const globals = require("globals");
-const importPlugin = require("eslint-plugin-import");
+const { defineConfig } = require('eslint/config');
+const js = require('@eslint/js');
+const globals = require('globals');
+const importPlugin = require('eslint-plugin-import');
 const stylistic = require('@stylistic/eslint-plugin');
 
 module.exports = defineConfig([
@@ -11,45 +11,45 @@ module.exports = defineConfig([
 
   // Global ignores (replaces .eslintignore in flat-config world)
   {
-    ignores: ["node_modules/**", "dist/**", "build/**", "**/*.min.js"],
+    ignores: ['node_modules/**', 'dist/**', 'build/**', '**/*.min.js'],
   },
 
   // Your project-specific settings/rules
   {
-    files: ["**/*.js"],
+    files: ['**/*.js'],
     languageOptions: {
       ecmaVersion: 2021,
-      sourceType: "module",
+      sourceType: 'module',
       globals: {
         ...globals.browser,
 
         // If your app uses these as globals (common with Steal/global-format libs):
-        $: "readonly",
-        jQuery: "readonly",
-        Raphael: "readonly",
-        bootbox: "readonly",
+        $: 'readonly',
+        jQuery: 'readonly',
+        Raphael: 'readonly',
+        bootbox: 'readonly',
       },
     },
 
     plugins: {
       import: importPlugin,
-      "@stylistic": stylistic,
+      '@stylistic': stylistic,
     },
 
     rules: {
-      "block-scoped-var": "error",
-      "no-unused-vars": "warn",
+      'block-scoped-var': 'error',
+      'no-unused-vars': 'warn',
 
       // Modernize safely:
-      "no-var": "error",
-      "prefer-const": "warn",
+      'no-var': 'error',
+      'prefer-const': 'warn',
 
       // Useful bug-catchers:
-      "no-undef": "error",
-      "no-redeclare": "error",
-      "no-use-before-define": ["error", { functions: false, classes: true, variables: true }],
-      "eqeqeq": ["warn", "smart"],
-      "no-implied-eval": "error",
+      'no-undef': 'error',
+      'no-redeclare': 'error',
+      'no-use-before-define': ['error', { functions: false, classes: true, variables: true }],
+      'eqeqeq': ['warn', 'smart'],
+      'no-implied-eval': 'error',
 
       ...stylistic.configs.customize({
         indent: 2,
@@ -62,9 +62,9 @@ module.exports = defineConfig([
 
   // This file doesn't seem to work using modern module imports.
   {
-    files: ["build.js"],
+    files: ['build.js'],
     languageOptions: {
-      sourceType: "commonjs",
+      sourceType: 'commonjs',
     },
   },
 ]);

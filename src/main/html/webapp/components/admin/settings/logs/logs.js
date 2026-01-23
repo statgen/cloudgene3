@@ -4,11 +4,10 @@ import $ from 'jquery';
 import template from './logs.stache';
 
 export default Control.extend({
-
-  'init': function(element) {
+  init: function (element) {
     $(element).hide();
     $(element).html(template());
     $(element).fadeIn();
     $('#log-cloudgene').load('api/v2/admin/server/logs/cloudgene.log');
-  }
+  },
 });

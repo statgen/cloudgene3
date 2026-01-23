@@ -9,28 +9,28 @@ import showErrorDialog from 'helpers/error-dialog';
 
 export default Control.extend({
 
-  'init': function (element) {
+  init: function (element) {
     const that = this;
 
     NextflowConfig.findOne({},
       function (nextflowConfig) {
         $(element).html(template({
-          nextflowConfig: nextflowConfig
+          nextflowConfig: nextflowConfig,
         }));
         that.nextflowConfig = nextflowConfig;
         $(element).fadeIn();
       });
   },
 
-  'submit': function (form, event) {
+  submit: function (form, event) {
     event.preventDefault();
 
-    this.nextflowConfig.attr('config', $(form).find("[name='config']").val());
-    this.nextflowConfig.attr('env', $(form).find("[name='env']").val());
+    this.nextflowConfig.attr('config', $(form).find('[name="config"]').val());
+    this.nextflowConfig.attr('env', $(form).find('[name="env"]').val());
     this.nextflowConfig.save(function () {
       bootbox.alert('Nextflow configuration updated.');
     }, function (response) {
       showErrorDialog('Nextflow configuration not updated', response);
     });
-  }
+  },
 });

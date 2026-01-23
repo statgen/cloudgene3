@@ -13,7 +13,7 @@ import template from './detail.stache';
 
 export default Control.extend({
 
-  'init': function(element, options) {
+  'init': function (element, options) {
     this.user = null;
 
     User.findOne(
@@ -27,41 +27,40 @@ export default Control.extend({
         $(element).fadeIn();
 
         new JobTable('#job-list', { user: user.username });
-      }
+      },
     );
   },
 
-  '#delete-user-btn click': function() {
+  '#delete-user-btn click': function () {
     const user = this.user;
 
     bootbox.confirm({
       title: 'Delete User',
       message: 'Are you sure you want to delete <b>' + user.attr('username') + '</b>?',
-      callback: function(result) {
+      callback: function (result) {
         if (result) {
           user.destroy(
-            function() {
+            function () {
               window.location.hash = '#!pages/users';
             },
-            function(response) {
+            function (response) {
               showErrorDialog('User not deleted', response);
-          });
+            });
         }
       },
     });
   },
 
-  '.edit-role-btn click': function() {
+  '.edit-role-btn click': function () {
     const user = this.user;
     const element = this.element;
 
     Group.findAll({},
-      function(groups) {
-
+      function (groups) {
         const roles = user.attr('role').split(',');
 
         let options = '';
-        groups.forEach(function(group) {
+        groups.forEach(function (group) {
           if ($.inArray(group.attr('name'), roles) >= 0) {
             options += '<label class="checkbox"><input type="checkbox" name="role-select" value="' + group.attr('name') + '" checked />';
           } else {
@@ -73,9 +72,8 @@ export default Control.extend({
         bootbox.confirm({
           title: 'Edit User Roles',
           message: '<form id="role-form">' + options + '</form>',
-          callback: function(result) {
+          callback: function (result) {
             if (result) {
-
               const boxes = $('#role-form input:checkbox');
               const checked = [];
               for (let i = 0; boxes[i]; ++i) {
@@ -87,16 +85,16 @@ export default Control.extend({
               const text = checked.join(',');
               user.attr('role', text);
               user.save(
-                function() {},
-                function(response) {
+                function () {},
+                function (response) {
                   showErrorDialog('User not deleted', response);
-                }
+                },
               );
             }
-          }
+          },
         });
       },
-      function(response) {
+      function (response) {
         new ErrorPage(element, response);
       });
   },

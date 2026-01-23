@@ -2,9 +2,7 @@ import Control from 'can-control';
 import $ from 'jquery';
 
 import User from 'models/user';
-
 import template from './signup.stache';
-
 
 const DUMMY_USER = new User();
 
@@ -43,7 +41,7 @@ function validateUsername() {
   const error = DUMMY_USER.checkUsername(value);
 
   updateControl(input, feedback, error);
-  return {value, error};
+  return { value, error };
 }
 
 /**
@@ -57,7 +55,7 @@ function validateFullName() {
   const error = DUMMY_USER.checkName(value);
 
   updateControl(input, feedback, error);
-  return {value, error};
+  return { value, error };
 }
 
 /**
@@ -86,7 +84,7 @@ function validateMail(emailRequired) {
   const error = anonymous ? undefined : DUMMY_USER.checkMail(value);
 
   updateControl(input, feedback, error);
-  return {value, error};
+  return { value, error };
 }
 
 /**
@@ -102,12 +100,12 @@ function validatePassword() {
   const error = DUMMY_USER.checkPassword(password, confirm);
 
   updateControl(passwordInput, feedback, error);
-  return {value: password, error: error};
+  return { value: password, error: error };
 }
 
 export default Control.extend({
 
-  'init': function(element, options) {
+  'init': function (element, options) {
     this.emailRequired = options.appState.attr('emailRequired');
 
     $(element).hide();
@@ -126,23 +124,22 @@ export default Control.extend({
     $(element).fadeIn();
   },
 
-
-  '#optional-mail-accept click': function() {
+  '#optional-mail-accept click': function () {
     this.updateEmailControl();
   },
 
-  '#optional-mail-reject click': function() {
+  '#optional-mail-reject click': function () {
     this.updateEmailControl();
   },
 
-  'updateEmailControl': function() {
-      if (!this.emailRequired) {
-        const mailInput = document.getElementById("mail");
-        mailInput.disabled = isAnonymous(this.emailRequired);
-      }
-   },
+  'updateEmailControl': function () {
+    if (!this.emailRequired) {
+      const mailInput = document.getElementById('mail');
+      mailInput.disabled = isAnonymous(this.emailRequired);
+    }
+  },
 
-  'submit': function(element, event) {
+  'submit': function (element, event) {
     event.preventDefault();
 
     const emailRequired = this.emailRequired;
@@ -164,7 +161,7 @@ export default Control.extend({
       type: 'POST',
       data: $(element).find('#signup-form').serialize(),
       dataType: 'json',
-      success: function(data) {
+      success: function (data) {
         if (data.success) {
           let message = '';
           if (!anonymous) {
@@ -175,17 +172,16 @@ export default Control.extend({
 
           $('#signup-form').hide();
           $('#success-message').html(message);
-          $('#success-message').removeClass('d-none')
+          $('#success-message').removeClass('d-none');
         } else {
           updateControl(document.getElementById('username'), document.getElementById('username-feedback'), data.message);
           $('#save').button('reset');
-
         }
       },
-      error: function(message) {
+      error: function (message) {
         alert('failure: ' + message);
         $('#save').button('reset');
-      }
+      },
     });
   },
 });

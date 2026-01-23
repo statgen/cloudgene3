@@ -8,15 +8,17 @@ export default Model.extend({
 }, {
 
   define: {
-
-    'readOnly': {
-      get: function() {
-        return this.attr('username') === 'admin' || this.attr('username') === 'public';
-      }
-    }
+    readOnly: {
+      get: function () {
+        return (
+          this.attr('username') === 'admin'
+          || this.attr('username') === 'public'
+        );
+      },
+    },
   },
 
-  'checkPassword': function(password, confirm_password) {
+  checkPassword: function (password, confirm_password) {
     if (!password) {
       return 'Please provide a password.';
     }
@@ -54,7 +56,7 @@ export default Model.extend({
     }
   },
 
-  'checkUsername': function(username) {
+  checkUsername: function (username) {
     if (!username) {
       return 'The username is required.';
     }
@@ -69,13 +71,13 @@ export default Model.extend({
     }
   },
 
-  'checkName': function(name) {
+  checkName: function (name) {
     if (!name) {
       return 'The full name is required.';
     }
   },
 
-  'checkMail': function(mail) {
+  checkMail: function (mail) {
     if (!mail) {
       return 'E-Mail is required.';
     }
@@ -86,5 +88,5 @@ export default Model.extend({
     if (!pattern.test(mail)) {
       return 'Please enter a valid mail address.';
     }
-  }
+  },
 });

@@ -34,79 +34,79 @@ const routes = [{
   path: '',
   control: DashboardControl,
   options: {
-    login: false
+    login: false,
   },
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'pages/admin-home',
   control: DashboardControl,
   options: {
-    login: false
+    login: false,
   },
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'pages/jobs',
   control: JobListControl,
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'pages/users',
   control: UserListControl,
   options: {
-    page: 1
+    page: 1,
   },
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'pages/users/pages/{page}',
   control: UserListControl,
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'pages/users/search/{query}',
   control: UserListControl,
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'pages/users/{user}',
   control: UserDetailControl,
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'pages/admin-apps',
   control: AppListControl,
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'pages/admin-apps/{app}',
   control: AppSettingsControl,
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'pages/admin-server',
   control: SettingsServerControl,
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'pages/admin-settings-general',
   control: SettingsGeneralControl,
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'pages/admin-settings-nextflow',
   control: SettingsNextflowControl,
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'pages/admin-settings-mail',
   control: SettingsMailControl,
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'pages/admin-settings-templates',
   control: SettingsTemplatesControl,
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'pages/admin-logs',
   control: SettingsLogsControl,
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'jobs/{job}',
   control: JobDetailControl,
-  guard: adminGuard
+  guard: adminGuard,
 }, {
   path: 'jobs/{job}/{tab}',
   control: JobDetailControl,
-  guard: adminGuard
+  guard: adminGuard,
 }];
 
 function adminGuard(appState) {
@@ -120,19 +120,19 @@ function adminGuard(appState) {
 addBeforeSendHook();
 
 Server.findOne({}, function (server) {
-  new LayoutControl("#main", {
-    appState: server
+  new LayoutControl('#main', {
+    appState: server,
   });
 
-  new RouterControl("#content", {
+  new RouterControl('#content', {
     routes: routes,
     appState: server,
     forbidden: {
       control: ErrorPage,
       options: {
         status: '403',
-        responseText: 'Oops, you are not allowed to view this content.'
-      }
-    }
+        responseText: 'Oops, you are not allowed to view this content.',
+      },
+    },
   });
 });

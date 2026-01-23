@@ -12,48 +12,45 @@ import JobOperation from 'models/job-operation';
 import template from './list.stache';
 
 const JobRefresher = Control({
-  setJob: function(job) {
+  setJob: function (job) {
     this.job = job;
     this.active = true;
     this.refresh();
   },
 
-  refresh: function() {
+  refresh: function () {
     const that = this;
     Job.findOne({
-      id: that.job.id
-    }, function(currentJob) {
-
+      id: that.job.id,
+    }, function (currentJob) {
       currentJob.syncTime();
 
       if (JobRefresher.needsUpdate(currentJob) && that.active) {
-        setTimeout(function() {
+        setTimeout(function () {
           that.refresh();
         }, 20000);
       }
-    }, function(response) {
+    }, function (response) {
       new ErrorPage(that.element, response);
     });
-
   },
 
-  stop: function() {
+  stop: function () {
     this.active = false;
-  }
+  },
 });
 
 export default Control.extend({
 
-  'init': function(element, options) {
-
+  'init': function (element, options) {
     this.options.refreshers = [];
 
     const that = this;
     Job.findAll({
-      page: options.page
-    }, function(jobs) {
-      $.each(jobs, function(key, job) {
-        $.each(jobs, function(key, job) {
+      page: options.page,
+    }, function (jobs) {
+      $.each(jobs, function (key, job) {
+        $.each(jobs, function (key, job) {
           job.syncTime();
         });
 
@@ -64,89 +61,84 @@ export default Control.extend({
         }
       });
       $(element).html(template({
-        jobs: jobs
+        jobs: jobs,
       }));
-      $('[data-bs-toggle="tooltip"]').tooltip()
+      $('[data-bs-toggle="tooltip"]').tooltip();
 
       $(element).fadeIn();
-    }, function(response) {
+    }, function (response) {
       new ErrorPage(element, response);
     });
-
   },
 
-  '.delete-btn click': function(el) {
-
+  '.delete-btn click': function (el) {
     const card = $(el).closest('.card');
     const job = domData.get.call(card[0], 'job');
 
     bootbox.confirm({
       title: 'Delete Job',
       message: 'Are you sure you want to delete <b>' + job.attr('name') + '</b>?',
-      callback: function(result) {
+      callback: function (result) {
         if (result) {
-
-          const okButton = $("button[data-bb-handler='confirm']");
+          const okButton = $('button[data-bb-handler="confirm"]');
           okButton.prop('disabled', true);
           okButton.html('Please wait...');
 
-          const cancelButton = $("button[data-bb-handler='cancel']");
+          const cancelButton = $('button[data-bb-handler="cancel"]');
           cancelButton.hide('hide');
 
-          job.destroy(function() {
+          job.destroy(function () {
             bootbox.hideAll();
-          }, function(response) {
+          }, function (response) {
             bootbox.hideAll();
             showErrorDialog('Job could not be deleted', response);
           });
 
           return false;
         }
-      }
+      },
     });
   },
 
-  '.cancel-btn click': function(el) {
-
+  '.cancel-btn click': function (el) {
     const card = $(el).closest('.card');
     const job = domData.get.call(card[0], 'job');
 
     bootbox.confirm({
       title: 'Cancel Job',
       message: 'Are you sure you want to cancel <b>' + job.attr('name') + '</b>?',
-      callback: function(result) {
+      callback: function (result) {
         if (result) {
-
-          const okButton = $("button[data-bb-handler='confirm']");
+          const okButton = $('button[data-bb-handler="confirm"]');
           okButton.prop('disabled', true);
           okButton.html('Please wait...');
 
-          const cancelButton = $("button[data-bb-handler='cancel']");
+          const cancelButton = $('button[data-bb-handler="cancel"]');
           cancelButton.hide('hide');
 
           const operation = new JobOperation();
           operation.attr('id', job.attr('id'));
           operation.attr('action', 'cancel');
 
-          operation.save(function() {
+          operation.save(function () {
             bootbox.hideAll();
-          }, function(response) {
+          }, function (response) {
             bootbox.hideAll();
             showErrorDialog('Job could not be canceled', response);
           });
 
           return false;
         }
-      }
+      },
     });
   },
 
-  destroy: function() {
+  'destroy': function () {
     // stops all job refreshers!
-    $.each(this.options.refreshers, function(key, refresher) {
+    $.each(this.options.refreshers, function (key, refresher) {
       refresher.stop();
     });
 
     Control.prototype.destroy.call(this);
-  }
+  },
 });

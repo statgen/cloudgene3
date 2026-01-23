@@ -1,11 +1,11 @@
-const stealTools = require("steal-tools");
+const stealTools = require('steal-tools');
 
 stealTools.build(
   {
-    main: ["cloudgene/index", "cloudgene/admin"],
+    main: ['cloudgene/index', 'cloudgene/admin'],
   },
   {
     bundleAssets: true,
     bundleSteal: true,
-  }
+  },
 );

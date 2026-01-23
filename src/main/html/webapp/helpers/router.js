@@ -6,17 +6,15 @@ import $ from 'jquery';
 
 import { addBeforeSendHook } from 'helpers/before-send';
 
-
 export default Control.extend({
   defaults: {
     routingMap: new canMap({}),
     lastBatchNum: undefined,
     appState: new canMap(),
-    timeoutMin: 60
-  }
+    timeoutMin: 60,
+  },
 }, {
-
-  'init': function(element, options) {
+  init: function (element, options) {
     this.setupAuthentication();
 
     this.element = $(element);
@@ -25,22 +23,22 @@ export default Control.extend({
     for (let i = 0; i < options.routes.length; i++) {
       const route = options.routes[i];
       canRoute(route.path, {
-        path: route.path
+        path: route.path,
       });
       options.routesByPath[route.path] = route;
     }
 
-    canRoute.bind('change', this.check)
+    canRoute.bind('change', this.check);
     canRoute.router = this;
     canRoute.start();
   },
 
-  'check': function(ev) {
+  check: function (ev) {
     const router = canRoute.router;
 
     if (
-      (router.lastBatchNum === undefined || router.lastBatchNum !== ev.batchNum) &&
-      (canRoute.data.attr('path') !== undefined && canRoute.data.attr('path') === canRoute.matched())
+      (router.lastBatchNum === undefined || router.lastBatchNum !== ev.batchNum)
+      && (canRoute.data.attr('path') !== undefined && canRoute.data.attr('path') === canRoute.matched())
     ) {
       router.lastBatchNum = ev.batchNum;
 
@@ -67,14 +65,13 @@ export default Control.extend({
         control: control,
         data: data,
         id: '',
-        classes: route.classes
+        classes: route.classes,
       };
       router.activate(router.activeControl);
     }
   },
 
-  activate: function(options) {
-
+  activate: function (options) {
     const Control = options.control;
     const data = options.data;
     const id = options.id;
@@ -82,10 +79,10 @@ export default Control.extend({
     $(window).scrollTop(0);
 
     // TODO: activated li --> layout --> navigation
-    this.element.find('li').each(function() {
+    this.element.find('li').each(function () {
       const li = $(this);
       li.removeClass('active', '');
-      $(this).find('a').each(function() {
+      $(this).find('a').each(function () {
         if ($(this).attr('id') === id) {
           li.addClass('active');
         }
@@ -104,14 +101,14 @@ export default Control.extend({
     new Control(view[0], data);
   },
 
-  'reload': function() {
+  reload: function () {
     const router = canRoute.router;
     if (router.activeControl) {
       router.activate(router.activeControl);
     }
   },
 
-  'setupAuthentication': function() {
+  setupAuthentication: function () {
     addBeforeSendHook();
-  }
+  },
 });

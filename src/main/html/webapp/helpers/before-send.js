@@ -33,13 +33,14 @@ export function addBeforeSendHook() {
         } catch (error) {
           console.log('Failed to set request headers', error);
         }
-      }
+      };
     }
 
-    //canjs has an bug while sending data in json format: data is not in json format, so we need to fix it convert it manually to JSON
-    if (options.processData &&
-      /^application\/json((\+|;).+)?$/i.test(options.contentType) &&
-      /^(post|put|delete)$/i.test(options.type)
+    // canjs has an bug while sending data in json format: data is not in json format, so we need to fix it convert it manually to JSON
+    if (
+      options.processData
+      && /^application\/json((\+|;).+)?$/i.test(options.contentType)
+      && /^(post|put|delete)$/i.test(options.type)
     ) {
       options.data = JSON.stringify(originalOptions.data);
       options.processData = false;

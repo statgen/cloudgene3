@@ -10,21 +10,20 @@ import template from './settings.stache';
 
 export default Control.extend({
 
-  'init': function (element, options) {
+  init: function (element, options) {
     const that = this;
 
     ApplicationSettings.findOne({ id: options.app }, function (application) {
       that.application = application;
       $(element).html(template({
-        application: application
+        application: application,
 
       }));
       $(element).fadeIn();
-
     });
   },
 
-  'submit': function (form, event) {
+  submit: function (form, event) {
     event.preventDefault();
 
     const nextflowProfile = $('#nextflow-profile').val();
@@ -43,7 +42,7 @@ export default Control.extend({
       },
       function (response) {
         showErrorDialog('Operation failed', response);
-      }
+      },
     );
-  }
+  },
 });
