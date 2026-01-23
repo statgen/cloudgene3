@@ -55,7 +55,7 @@ export default Model.extend({
   },
 
   'checkUsername': function(username) {
-    if (username === '') {
+    if (!username) {
       return 'The username is required.';
     }
 

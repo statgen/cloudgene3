@@ -3,7 +3,7 @@
 <div class="alert alert-success d-none" id="success-message">
 </div>
 
-<form id="signon-form" class="form-horizontal needs-validation" autocomplete="off">
+<form id="signup-form" class="form-horizontal needs-validation" autocomplete="off">
 
   <div class="mb-3">
     <label for="username" class="form-label">Username:</label>
