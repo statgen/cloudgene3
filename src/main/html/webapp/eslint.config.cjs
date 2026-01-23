@@ -55,6 +55,7 @@ module.exports = defineConfig([
         indent: 2,
         quotes: 'single',
         semi: true,
+        braceStyle: '1tbs',
       }).rules,
     },
   },
