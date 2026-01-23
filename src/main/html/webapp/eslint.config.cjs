@@ -3,6 +3,7 @@ const { defineConfig } = require("eslint/config");
 const js = require("@eslint/js");
 const globals = require("globals");
 const importPlugin = require("eslint-plugin-import");
+const stylistic = require('@stylistic/eslint-plugin');
 
 module.exports = defineConfig([
   // “eslint:recommended” equivalent in ESLint v9 flat config
@@ -30,9 +31,10 @@ module.exports = defineConfig([
       },
     },
 
-    ...(importPlugin
-      ? { plugins: { import: importPlugin } }
-      : {}),
+    plugins: {
+      import: importPlugin,
+      "@stylistic": stylistic,
+    },
 
     rules: {
       "block-scoped-var": "error",
@@ -48,6 +50,12 @@ module.exports = defineConfig([
       "no-use-before-define": ["error", { functions: false, classes: true, variables: true }],
       "eqeqeq": ["warn", "smart"],
       "no-implied-eval": "error",
+
+      ...stylistic.configs.customize({
+        indent: 2,
+        quotes: 'single',
+        semi: true,
+      }).rules,
     },
   },
 
