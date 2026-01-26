@@ -6,6 +6,8 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Provides the static method fetchServerIp(), which returns this server's IP.
@@ -52,6 +54,7 @@ public final class IpFetcher {
      * Does the actual IP fetching work behind fetchServerIp(), see comments there.
      */
     private static String actuallyFetchTheIp() {
+        Logger.getLogger("com.amazonaws").setLevel(Level.SEVERE); // Avoid warning dumps if we're not in AWS
         String ec2Ip = EC2MetadataUtils.getPrivateIpAddress();
         if (ec2Ip != null) return ec2Ip;
 
