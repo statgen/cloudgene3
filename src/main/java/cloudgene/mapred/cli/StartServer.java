@@ -4,11 +4,11 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import ch.qos.logback.classic.ClassicConstants;
 import cloudgene.mapred.util.Configuration;
 import genepi.io.FileUtil;
 import org.apache.commons.lang.RandomStringUtils;
 
-import ch.qos.logback.classic.util.ContextInitializer;
 import cloudgene.mapred.server.Application;
 import cloudgene.mapred.util.Settings;
 import genepi.base.Tool;
@@ -39,13 +39,12 @@ public class StartServer extends Tool {
 	public int run() {
 
 		if (isFlagSet("verbose")) {
-			System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "logback-verbose.xml");
+			System.setProperty(ClassicConstants.CONFIG_FILE_PROPERTY, "logback-verbose.xml");
 		} else if (new File("webapp").exists()) {
-			System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "logback.xml");
+			System.setProperty(ClassicConstants.CONFIG_FILE_PROPERTY, "logback.xml");
 		} else {
-			System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "logback-dev.xml");
+			System.setProperty(ClassicConstants.CONFIG_FILE_PROPERTY, "logback-dev.xml");
 		}
-
 
 		try {
 
