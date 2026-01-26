@@ -14,8 +14,6 @@ export default Control.extend({
   submit: function (element, event) {
     event.preventDefault();
 
-    const username = $(element).find('[name="username"]');
-
     $.ajax({
       url: 'api/v2/users/reset',
       type: 'POST',
@@ -25,12 +23,12 @@ export default Control.extend({
         if (data.success) {
           // show okey
           $('#reset-page').hide();
-          $('#success-message').show();
           $('#success-message').html(data.message);
+          $('#success-message').toggleClass('d-none', false);
         } else {
           // shows error
-          username.addClass('is-invalid');
-          username.closest('.mb-3').find('.invalid-feedback').html(data.message);
+          $('#username-input').addClass('is-invalid');
+          $('#username-feedback').html(data.message);
         }
       },
       error: function (message) {

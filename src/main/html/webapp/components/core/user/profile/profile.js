@@ -186,11 +186,11 @@ export default Control.extend({
     if (error) {
       control.removeClass('is-valid');
       control.addClass('is-invalid');
-      control.closest('.mb-3').find('.invalid-feedback').html(error);
+      control.siblings('.invalid-feedback').first().html(error);
     } else {
       control.removeClass('is-invalid');
       control.addClass('is-valid');
-      control.closest('.mb-3').find('.invalid-feedback').html('');
+      control.siblings('.invalid-feedback').first().html('');
     }
   },
 

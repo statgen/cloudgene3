@@ -19,12 +19,12 @@ export default Control.extend({
   submit: function (element, event) {
     event.preventDefault();
 
-    const user = new User();
+    const dummyUser = new User();
 
     // password
     const newPassword = $(element).find('[name="new-password"]');
     const confirmNewPassword = $(element).find('[name="confirm-new-password"]');
-    const error = user.checkPassword(newPassword.val(), confirmNewPassword.val());
+    const error = dummyUser.checkPassword(newPassword.val(), confirmNewPassword.val());
 
     if (error) {
       confirmNewPassword.removeClass('is-valid');
@@ -47,21 +47,21 @@ export default Control.extend({
         if (response.success) {
           // shows okey
           $('#update-page').hide();
-          $('#error-message').hide();
-          $('#success-message').show();
+          $('#error-message').toggleClass('d-none', true); // Hide element
+          $('#success-message').toggleClass('d-none', false); // Reveal element
           $('#success-message').html(response.message);
         } else {
           // shows error
           $('#update-page').hide();
-          $('#error-message').show();
-          $('#success-message').hide();
+          $('#error-message').toggleClass('d-none', false); // Reveal element
+          $('#success-message').toggleClass('d-none', true); // Hide element
           $('#error-message').html(response.message);
         }
       },
       error: function (response) {
         // shows error
-        $('#error-message').show();
-        $('#success-message').hide();
+        $('#error-message').toggleClass('d-none', false); // Reveal element
+        $('#success-message').toggleClass('d-none', true); // Hide element
         $('#error-message').html(response.status + ': ' + response.statusText);
       },
     });
