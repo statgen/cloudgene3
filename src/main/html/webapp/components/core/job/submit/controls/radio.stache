@@ -7,24 +7,27 @@
 
 <div class="col-sm-3">
   {{#values}}
-      <div class="form-check">
-        <input
-          class="form-check-input"
-          type="radio"
-          name="{{../id}}"
-          id="{{../id}}_{{scope.index}}"
-          value="{{key}}"
-          {{#is(../required, true)}}required{{/is}}
-          {{#is(key, ../value}}checked{{/is}}
-        >
-        <label class="form-check-label" for="{{../id}}_{{scope.index}}">
-          {{value}}
-        </label>
-      </div>
+    <div class="form-check">
+      <input
+        class="form-check-input"
+        type="radio"
+        name="{{../id}}"
+        id="{{../id}}_{{scope.index}}"
+        value="{{key}}"
+        {{#is(../required, true)}}required{{/is}}
+        {{#is(key, ../value}}checked{{/is}}
+      >
+      <label class="form-check-label" for="{{../id}}_{{scope.index}}">
+        {{value}}
+      </label>
+    </div>
   {{/values}}
+
   {{#if(details)}}
     <small class="form-text text-muted">{{details}}</small>
   {{/if}}
+
+  <!-- TODO(Marc): This invalid-feedback element will not render correctly (not a sibling) -->
   <div class="invalid-feedback">
     This parameter is required.
   </div>
