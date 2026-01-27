@@ -7,7 +7,7 @@ import java.util.Map;
 import ch.qos.logback.classic.ClassicConstants;
 import cloudgene.mapred.util.Configuration;
 import genepi.io.FileUtil;
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import cloudgene.mapred.server.Application;
 import cloudgene.mapred.util.Settings;
@@ -23,7 +23,7 @@ public class StartServer extends Tool {
 
 	public static final String SERVER_FILENAME = FileUtil.path(CONFIG_DIRECTORY, "server.yaml");
 
-	private String[] args;
+	private final String[] args;
 
 	public StartServer(String[] args) {
 		super(args);
@@ -36,8 +36,10 @@ public class StartServer extends Tool {
 	}
 
 	@Override
-	public int run() {
+	public void init() {}
 
+	@Override
+	public int run() {
 		if (isFlagSet("verbose")) {
 			System.setProperty(ClassicConstants.CONFIG_FILE_PROPERTY, "logback-verbose.xml");
 		} else if (new File("webapp").exists()) {
@@ -61,7 +63,7 @@ public class StartServer extends Tool {
 
 			String secretKey = Application.settings.getSecretKey();
 			if (secretKey == null || secretKey.isEmpty() || secretKey.equals(Settings.DEFAULT_SECURITY_KEY)) {
-				secretKey = RandomStringUtils.randomAlphabetic(64);
+				secretKey = RandomStringUtils.secureStrong().nextAlphabetic(64);
 				Application.settings.setSecretKey(secretKey);
 				Application.settings.save();
 			}
@@ -90,47 +92,36 @@ public class StartServer extends Tool {
 				System.setProperty("micronaut.config.files", customConfigurationFiles);
 			}
 
-
-			String baseUrl = Application.settings.getBaseUrl();
-			if (!baseUrl.trim().isEmpty()) {
-				if (!baseUrl.startsWith("/") || baseUrl.endsWith("/")){
+			String baseUrl = Application.settings.getBaseUrl().trim();
+			if (!baseUrl.isEmpty()) {
+				if (!baseUrl.startsWith("/") || baseUrl.endsWith("/")) {
 					System.out.println("Error: baseUrl has wrong format. Example: \"/path\" or \"/path/subpath\".");
 					System.exit(1);
 				}
 				properties.put("micronaut.server.context-path", baseUrl);
-			} else {
-
 			}
 
 			if (new File("webapp").exists()) {
-
 				Micronaut.build(args).mainClass(Application.class).properties(properties).start();
-
 			} else {
-
 				System.out.println("Start in DEVELOPMENT mode");
 
 				Micronaut.build(args).mainClass(Application.class).properties(properties)
 						.defaultEnvironments(Environment.DEVELOPMENT).start();
-
 			}
 
 			System.out.println();
 			System.out.println("Server is running on port " + port);
 			System.out.println();
 			System.out.println("Please press ctrl-c to stop.");
+
 			while (true) {
 				Thread.sleep(5000000);
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			return 1;
 		}
 	}
-
-	@Override
-	public void init() {
-
-	}
-
 }
