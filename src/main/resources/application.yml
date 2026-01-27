@@ -57,8 +57,6 @@ micronaut:
         paths:
           - file:pages
           - classpath:/pages
-  views:
-    folder: webapp
   serde:
     serialization:
       inclusion: ALWAYS
