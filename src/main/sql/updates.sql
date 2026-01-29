@@ -1,192 +1,198 @@
 -- 0.0.1
 
-create table `user`( 
-	id          integer not null auto_increment primary key,
-	username	varchar(100) not null,
-	password	varchar(100) not null,
-	full_name	varchar(100) null,
-	mail		varchar(100) null,
-	role		varchar(100) null,
-	aws_key	varchar(200) null,
-	aws_secret_key	varchar(200) null,
-	save_keys boolean,
-	export_to_s3 boolean,
-	s3_bucket	varchar(200) null,
-	export_input_to_s3 boolean,
-	activation_code	varchar(200) null,
-	active boolean
+CREATE TABLE `user` (
+    id                 INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    username           VARCHAR(100) NOT NULL,
+    password           VARCHAR(100) NOT NULL,
+    full_name          VARCHAR(100) NULL,
+    mail               VARCHAR(100) NULL,
+    role               VARCHAR(100) NULL,
+    aws_key            VARCHAR(200) NULL,
+    aws_secret_key     VARCHAR(200) NULL,
+    save_keys          BOOLEAN,
+    export_to_s3       BOOLEAN,
+    s3_bucket          VARCHAR(200) NULL,
+    export_input_to_s3 BOOLEAN,
+    activation_code    VARCHAR(200) NULL,
+    active             BOOLEAN
 );
 
-create table job( 
-	id		varchar(100) not null primary key,
-	state		integer not null,
-	start_time	bigint not null,
-	end_time	bigint not null,
-	name 		varchar(300),
-	s3_url		varchar(300),
-	type		integer,
-	user_id integer not null references `user`(id) on delete cascade
+CREATE TABLE job (
+    id         VARCHAR(100) NOT NULL PRIMARY KEY,
+    state      INTEGER NOT NULL,
+    start_time BIGINT NOT NULL,
+    end_time   BIGINT NOT NULL,
+    name       VARCHAR(300),
+    s3_url     VARCHAR(300),
+    type       INTEGER,
+    user_id    INTEGER NOT NULL REFERENCES `user`(id) ON DELETE CASCADE
 );
 
-create table parameter( 
-	id			integer not null auto_increment primary key,
-	name		varchar(100) not null,
-	`value`		varchar(200) not null,
-	type		varchar(25) not null,
-	format		varchar(25) null,
-	input		boolean,
-	download	boolean,
-	variable	varchar(100) not null,
-	job_id		varchar(100) not null references job(id) on delete cascade
+CREATE TABLE parameter (
+    id       INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name     VARCHAR(100) NOT NULL,
+    `value`  VARCHAR(200) NOT NULL,
+    type     VARCHAR(25) NOT NULL,
+    format   VARCHAR(25) NULL,
+    input    BOOLEAN,
+    download BOOLEAN,
+    variable VARCHAR(100) NOT NULL,
+    job_id   VARCHAR(100) NOT NULL REFERENCES job(id) ON DELETE CASCADE
 );
 
-create table steps ( 
-	id	    	integer not null auto_increment primary key,
-	state		integer not null,
-	name	    varchar(300),
-	start_time	bigint not null,
-	end_time	bigint not null,
-	job_id		varchar(100) not null
+CREATE TABLE steps (
+    id         INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    state      INTEGER NOT NULL,
+    name       VARCHAR(300),
+    start_time BIGINT NOT NULL,
+    end_time   BIGINT NOT NULL,
+    job_id     VARCHAR(100) NOT NULL
 );
 
-create table log_messages(
- 	id			integer not null auto_increment primary key, 
-	time	    bigint not null,
-	type		integer not null,
-	message	    varchar(1000),
-	step_id		integer not null references steps(id) on delete cascade
+CREATE TABLE log_messages (
+    id      INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    time    BIGINT NOT NULL,
+    type    INTEGER NOT NULL,
+    message VARCHAR(1000),
+    step_id INTEGER NOT NULL REFERENCES steps(id) ON DELETE CASCADE
 );
 
 
 -- 1.0.3
 
-create table downloads(
- 	id			  integer not null auto_increment primary key,
- 	parameter_id  varchar(200) not null,
- 	job_id  varchar(100) not null,
- 	name		  varchar(200) null,
- 	path		  varchar(200) null,
- 	hash          varchar(200) null,		   
-	count	      integer not null,
-	size		  varchar(200) null
-); 
+CREATE TABLE downloads (
+    id           INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    parameter_id VARCHAR(200) NOT NULL,
+    job_id       VARCHAR(100) NOT NULL,
+    name         VARCHAR(200) NULL,
+    path         VARCHAR(200) NULL,
+    hash         VARCHAR(200) NULL,
+    count        INTEGER NOT NULL,
+    size         VARCHAR(200) NULL
+);
 
 -- 1.0.5
 
-create table cache_entries ( 
-	id	    	integer not null auto_increment primary key,
-	signature	    varchar(300),
-	used		integer not null,
-	last_used_on	bigint not null,
-	created_on	bigint not null,
-	execution_time	bigint not null,
-	size	        bigint not null,
-	user_id		varchar(100) null,
-	job_id		varchar(100) null,
-	output          varchar(1000)
+CREATE TABLE cache_entries (
+    id             INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    signature      VARCHAR(300),
+    used           INTEGER NOT NULL,
+    last_used_on   BIGINT NOT NULL,
+    created_on     BIGINT NOT NULL,
+    execution_time BIGINT NOT NULL,
+    size           BIGINT NOT NULL,
+    user_id        VARCHAR(100) NULL,
+    job_id         VARCHAR(100) NULL,
+    output         VARCHAR(1000)
 );
 
 -- 1.0.7
 
-create table counters ( 
-	id	    	integer not null auto_increment primary key,
-	name		varchar(300),
-	job_id		varchar(100) null,
-	`value`		bigint not null
+CREATE TABLE counters (
+    id      INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name    VARCHAR(300),
+    job_id  VARCHAR(100) NULL,
+    `value` BIGINT NOT NULL
 );
 
 
 -- 1.9.0
 
-create table counters_history ( 
-	id	    	integer not null auto_increment primary key,
-	time_stamp	bigint not null,
-	name		varchar(300),
-	`value`		bigint not null	
+CREATE TABLE counters_history (
+    id         INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    time_stamp BIGINT NOT NULL,
+    name       VARCHAR(300),
+    `value`    BIGINT NOT NULL
 );
 
 -- 1.9.1
 
-create table html_snippets ( 
-	id	    	integer not null auto_increment primary key,
-	`key`	     	varchar(300),
-	text		varchar(1000)	
+CREATE TABLE html_snippets (
+    id    INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `key` VARCHAR(300),
+    text  VARCHAR(1000)
 );
 
 -- 1.9.2
 
-alter table job add column deleted_on bigint null default null;
+ALTER TABLE job ADD COLUMN deleted_on BIGINT NULL DEFAULT NULL;
 
 -- 1.9.3
 
-alter table parameter add column admin_only boolean not null default false;
-
+ALTER TABLE parameter ADD COLUMN admin_only BOOLEAN NOT NULL DEFAULT false;
 
 -- 1.9.6
-alter table job add column application varchar(300) null default null;
+
+ALTER TABLE job ADD COLUMN application VARCHAR(300) NULL DEFAULT NULL;
 
 -- 1.9.8
-alter table job add column application_id varchar(300) null default null;
 
+ALTER TABLE job ADD COLUMN application_id VARCHAR(300) NULL DEFAULT NULL;
 
 -- 1.16.0
 
-alter table `user` add column api_token varchar(300) null default null;
+ALTER TABLE `user` ADD COLUMN api_token VARCHAR(300) NULL DEFAULT NULL;
 
 -- 1.19.0
 
-alter table `user` add column login_attempts integer null default 0;
-alter table `user` add column locked_until timestamp null default null;
-alter table `user` add column last_login timestamp null default null;
+ALTER TABLE `user` ADD COLUMN login_attempts INTEGER NULL DEFAULT 0;
+ALTER TABLE `user` ADD COLUMN locked_until   TIMESTAMP NULL DEFAULT NULL;
+ALTER TABLE `user` ADD COLUMN last_login     TIMESTAMP NULL DEFAULT NULL;
 
 -- 1.26.0
 
-alter table job add column submitted_on bigint not null default 0;
-alter table job add column finished_on bigint not null default 0;
-alter table job add column setup_start_time bigint not null default 0;
-alter table job add column setup_end_time bigint not null default 0;
+ALTER TABLE job ADD COLUMN submitted_on     BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE job ADD COLUMN finished_on      BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE job ADD COLUMN setup_start_time BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE job ADD COLUMN setup_end_time   BIGINT NOT NULL DEFAULT 0;
 
 -- 2.0.0-rc3
 
-alter table downloads modify parameter_id INTEGER;
-create index idx_downloads_parameter_id on downloads(parameter_id);
-create index idx_parameter_job_id on parameter(job_id,input);
-create index idx_steps_job_id on steps(job_id);
-create index idx_log_messages_step_id on log_messages(step_id);
-create index idx_job_user_id on job(user_id,state);
+ALTER TABLE downloads MODIFY parameter_id INTEGER;
+
+CREATE INDEX idx_downloads_parameter_id ON downloads(parameter_id);
+CREATE INDEX idx_parameter_job_id       ON parameter(job_id,input);
+CREATE INDEX idx_steps_job_id           ON steps(job_id);
+CREATE INDEX idx_log_messages_step_id   ON log_messages(step_id);
+CREATE INDEX idx_job_user_id            ON job(user_id,state);
 
 -- 2.0.0
+
 ALTER TABLE log_messages MODIFY COLUMN message TEXT;
 
--- 2.3.0
-
 -- 2.3.4
-ALTER TABLE html_snippets MODIFY COLUMN text VARCHAR (8000);
+
+ALTER TABLE html_snippets MODIFY COLUMN text VARCHAR(8000);
 
 -- 2.3.7
-alter table job add column user_agent VARCHAR (400);
+
+ALTER TABLE job ADD COLUMN user_agent VARCHAR(400);
 
 -- 2.6.0
-alter table `user` add column api_token_expires_on timestamp null default null;
+
+ALTER TABLE `user` ADD COLUMN api_token_expires_on TIMESTAMP NULL DEFAULT NULL;
 
 -- 2.8.1
+
 CREATE INDEX idx_downloads_hash ON downloads(hash);
 CREATE INDEX idx_downloads_path ON downloads(path);
-CREATE INDEX idx_user_username ON `user`(username);
-CREATE INDEX idx_user_mail ON `user`(mail);
-CREATE INDEX idx_user_fullname ON `user`(full_name);
+CREATE INDEX idx_user_username  ON `user`(username);
+CREATE INDEX idx_user_mail      ON `user`(mail);
+CREATE INDEX idx_user_fullname  ON `user`(full_name);
 
 -- 3.0.0-beta5
-alter table `parameter` add column hash varchar(300) null default null;
 
+ALTER TABLE `parameter` ADD COLUMN hash VARCHAR(300) NULL DEFAULT NULL;
 
 -- 3.0.0-rc2
-create table job_values (
-	id	    	integer not null auto_increment primary key,
-	name		varchar(300),
-	job_id		varchar(100) null,
-	`value`		varchar(300) not null
+
+CREATE TABLE job_values (
+    id      INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name    VARCHAR(300),
+    job_id  VARCHAR(100) NULL,
+    `value` VARCHAR(300) NOT NULL
 );
 
 -- 3.0.1
-ALTER TABLE parameter modify `value` varchar(200) NULL;
+
+ALTER TABLE parameter MODIFY `value` VARCHAR(200) NULL;

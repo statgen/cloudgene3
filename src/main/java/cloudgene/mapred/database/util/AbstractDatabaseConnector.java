@@ -32,7 +32,6 @@ public abstract class AbstractDatabaseConnector implements DatabaseConnector {
 		dataSource.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
 
 		return dataSource;
-
 	}
 
 	public int getMaxActive() {
@@ -82,5 +81,4 @@ public abstract class AbstractDatabaseConnector implements DatabaseConnector {
 	public void setTimeBetweenEvictionRunsMillis(int timeBetweenEvictionRunsMillis) {
 		this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
 	}
-
 }

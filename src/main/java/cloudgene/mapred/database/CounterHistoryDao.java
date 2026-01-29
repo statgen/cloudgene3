@@ -5,11 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,102 +17,113 @@ public class CounterHistoryDao extends JdbcDataAccessObject {
 
 	private static final Logger log = LoggerFactory.getLogger(CounterHistoryDao.class);
 
-	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
-			"yy-MM-dd HH:mm");
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yy-MM-dd HH:mm");
 
 	public CounterHistoryDao(Database database) {
 		super(database);
 	}
 
 	public boolean insert(long timestamp, String name, long value) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("insert into counters_history (time_stamp, name, `value`) ");
-		sql.append("values (?,?,?)");
+		String sql = "INSERT INTO counters_history (time_stamp, name, `value`) VALUES (?,?,?)";
 
 		try {
-
 			Object[] params = new Object[3];
 			params[0] = timestamp;
 			params[1] = name;
 			params[2] = value;
 
-			update(sql.toString(), params);
-
+			update(sql, params);
 			log.debug("insert counter history successful.");
-
+			return true;
 		} catch (SQLException e) {
 			log.error("insert counter history failed.", e);
 			return false;
 		}
-
-		return true;
 	}
 
 	public List<Map<String, String>> getAll(int limit) {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select time_stamp, name, `value` ");
-		sql.append("from counters_history ");
-		sql.append("order by time_stamp desc, name ");
-		sql.append("limit " + limit);
-
-		List<Map<String, String>> result = new Vector<Map<String, String>>();
+		String sql = "SELECT time_stamp, name, `value` "
+				+ "FROM counters_history "
+				+ "ORDER BY time_stamp DESC, name "
+				+ "LIMIT ?";
 
 		try {
-
+			List<Map<String, String>> result = new ArrayList<>();
+			Map<String, String> counters = new HashMap<>();
 			String old = "";
-			Map<String, String> counters = null;
 
 			Connection connection = database.getDataSource().getConnection();
-			PreparedStatement statement = connection.prepareStatement(sql.toString());
-			ResultSet rs = statement.executeQuery();
-			while (rs.next()) {
 
-				if (!old.equals(rs.getString(1))) {
-					counters = new HashMap<String, String>();
+			PreparedStatement statement = connection.prepareStatement(sql);
+			statement.setInt(1, limit);
+
+			ResultSet rs = statement.executeQuery();
+
+			// NOTE(Marc): This whole thing is convoluted, so I'm leaving some notes behind.
+			//
+			// This method grabs the last `limit` entries in `counters_history`, which has
+			// time series of the total value of each tracked counter (counters sum up values
+			// from all jobs).
+			//
+			// It then iterates over the list, and merges data with the same timestamp
+			// (allegedly different counters at the same sample point) into a single `counters`
+			// object.
+			//
+			// So basically we're going from long form to wide form.
+			//
+			// On failure it returns an empty collection, which is different behavior from
+			// other DAOs (they return `null` even if we're querying a collection).
+
+			while (rs.next()) {
+				String timestamp = rs.getString(1);
+				if (!old.equals(timestamp)) {
+					counters = new HashMap<>();
 					result.add(counters);
-					counters.put("timestamp",
-							DATE_FORMAT.format(new Date(rs.getLong(1))));
+
+					Date date = new Date(rs.getLong(1));
+					counters.put("timestamp", DATE_FORMAT.format(date));
+
 					old = rs.getString(1);
 				}
-				counters.put(rs.getString(2), rs.getString(3));
+
+				String name = rs.getString(2);
+				String value = rs.getString(3);
+				counters.put(name, value);
 			}
+
 			rs.close();
 			connection.close();
 
-			log.debug("find counter history successful. results: "
-					+ result.size());
-
+			log.debug("find counter history successful. results: " + result.size());
 			return result;
 		} catch (SQLException e) {
 			log.error("find all counter history failed", e);
+			return new ArrayList<>();
 		}
-
-		return result;
 	}
 
 	public List<Map<String, String>> getAllBeetween(long start, long end) {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select time_stamp, name, `value` ");
-		sql.append("from counters_history ");
-		sql.append("where time_stamp > " + start + " and time_stamp < " + end
-				+ " ");
-		sql.append("order by time_stamp desc, name ");
-
-		List<Map<String, String>> result = new Vector<Map<String, String>>();
+		String sql = "SELECT time_stamp, name, `value` FROM counters_history "
+				+ "WHERE time_stamp > ? AND time_stamp < ? ORDER BY time_stamp DESC, name";
 
 		try {
-
+			List<Map<String, String>> result = new ArrayList<>();
+			Map<String, String> counters = new HashMap<>();
 			String old = "";
-			Map<String, String> counters = null;
+
 			Connection connection = database.getDataSource().getConnection();
-			PreparedStatement statement = connection.prepareStatement(sql.toString());
+
+			PreparedStatement statement = connection.prepareStatement(sql);
+			statement.setLong(1, start);
+			statement.setLong(2, end);
+
 			ResultSet rs = statement.executeQuery();
+
 			while (rs.next()) {
+				// NOTE(Marc): See explainer in the other method.
 
 				if (!old.equals(rs.getString(1))) {
-					counters = new HashMap<String, String>();
+					counters = new HashMap<>();
 					result.add(counters);
 					counters.put("timestamp",
 							DATE_FORMAT.format(new Date(rs.getLong(1))));
@@ -124,18 +131,15 @@ public class CounterHistoryDao extends JdbcDataAccessObject {
 				}
 				counters.put(rs.getString(2), rs.getString(3));
 			}
+
 			rs.close();
 			connection.close();
 
-			log.debug("find counter history successful. results: "
-					+ result.size());
-
+			log.debug("find counter history successful. results: " + result.size());
 			return result;
 		} catch (SQLException e) {
 			log.error("find all counter history failed", e);
+			return new ArrayList<>();
 		}
-
-		return result;
 	}
-
 }

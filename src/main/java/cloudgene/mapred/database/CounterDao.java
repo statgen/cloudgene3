@@ -22,54 +22,38 @@ public class CounterDao extends JdbcDataAccessObject {
 	}
 
 	public boolean insert(String name, int value, AbstractJob job) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("insert into counters (name, job_id, `value`) ");
-		sql.append("values (?,?,?)");
+		String sql = "INSERT INTO counters (name, job_id, `value`) VALUES (?,?,?)";
 
 		try {
-
 			Object[] params = new Object[3];
 			params[0] = name;
 			params[1] = job.getId();
 			params[2] = value;
 
-			update(sql.toString(), params);
-
+			update(sql, params);
 			log.debug("insert counter successful.");
-
+			return true;
 		} catch (SQLException e) {
 			log.error("insert counter failed.", e);
 			return false;
 		}
-
-		return true;
 	}
 
 	@SuppressWarnings("unchecked")
 	public Map<String, Long> getAll() {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select name, sum(`value`) ");
-		sql.append("from counters ");
-		sql.append("group by name");
-
-		Map<String, Long> result = new HashMap<String, Long>();
+		String sql = "SELECT name, SUM(`value`) FROM counters GROUP BY name";
 
 		try {
-
-			result = queryForMap(sql.toString(), new CounterMapper());
-
+			Map<String, Long> result = queryForMap(sql, new CounterMapper());
 			log.debug("find counters successful. results: " + result);
-
 			return result;
 		} catch (SQLException e) {
 			log.error("find all counters failed", e);
+			return new HashMap<>();
 		}
-
-		return result;
 	}
 
-	class CounterMapper implements IRowMapMapper {
+	static class CounterMapper implements IRowMapMapper {
 
 		@Override
 		public Object getRowKey(ResultSet rs, int row) throws SQLException {
@@ -80,7 +64,5 @@ public class CounterDao extends JdbcDataAccessObject {
 		public Object getRowValue(ResultSet rs, int row) throws SQLException {
 			return rs.getLong(2);
 		}
-
 	}
-
 }

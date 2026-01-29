@@ -3,7 +3,6 @@ package cloudgene.mapred.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,18 +26,19 @@ public class ParameterDao extends JdbcDataAccessObject {
 	}
 
 	public boolean insert(CloudgeneParameterInput parameter) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("insert into parameter (name, `value`, input, job_id, type, variable, download, format, admin_only, hash) ");
-		sql.append("values (?,?,?,?,?,?,?,?,?,?)");
+		String sql = "INSERT INTO parameter "
+				+ "(name, `value`, input, job_id, type, variable, download, format, admin_only, hash) "
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?)";
 
 		try {
-
 			Object[] params = new Object[10];
+
 			if (parameter.getDescription() != null) {
 				params[0] = parameter.getDescription().substring(0, Math.min(parameter.getDescription().length(), 100));
 			} else {
 				params[0] = "";
 			}
+
 			params[1] = parameter.getValue();
 			params[2] = true;
 			params[3] = parameter.getJob().getId();
@@ -49,7 +49,7 @@ public class ParameterDao extends JdbcDataAccessObject {
 			params[8] = parameter.isAdminOnly();
 			params[9] = parameter.getHash();
 
-			int paramId = insert(sql.toString(), params);
+			int paramId = insert(sql, params);
 			parameter.setId(paramId);
 
 			log.debug("insert parameter '" + parameter.getId() + "' successful.");
@@ -63,12 +63,11 @@ public class ParameterDao extends JdbcDataAccessObject {
 	}
 
 	public boolean insert(CloudgeneParameterOutput parameter) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("insert into parameter (name, `value`, input, job_id, type, variable, download, format, admin_only, hash) ");
-		sql.append("values (?,?,?,?,?,?,?,?,?,?)");
+		String sql = "INSERT INTO parameter "
+				+ "(name, `value`, input, job_id, type, variable, download, format, admin_only, hash) "
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?)";
 
 		try {
-
 			Object[] params = new Object[10];
 			params[0] = parameter.getDescription().substring(0, Math.min(parameter.getDescription().length(), 100));
 			params[1] = parameter.getValue();
@@ -81,7 +80,7 @@ public class ParameterDao extends JdbcDataAccessObject {
 			params[8] = parameter.isAdminOnly();
 			params[9] = parameter.getHash();
 
-			int paramId = insert(sql.toString(), params);
+			int paramId = insert(sql, params);
 			parameter.setId(paramId);
 
 			log.debug("insert parameter '" + parameter.getId() + "' successful.");
@@ -96,23 +95,14 @@ public class ParameterDao extends JdbcDataAccessObject {
 
 	@SuppressWarnings("unchecked")
 	public List<CloudgeneParameterInput> findAllInputByJob(AbstractJob job) {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from parameter ");
-		sql.append("where job_id = ? and input = true");
+		String sql = "SELECT * FROM parameter WHERE job_id = ? AND input = true";
 
 		Object[] params = new Object[1];
 		params[0] = job.getId();
 
-		List<CloudgeneParameterInput> result = new Vector<CloudgeneParameterInput>();
-
 		try {
-
-			result = query(sql.toString(), params, new ParameterInputMapper());
-
+			List<CloudgeneParameterInput> result = query(sql, params, new ParameterInputMapper());
 			log.debug("find all input parameters for job '" + job.getId() + "' successful. results: " + result.size());
-
 			return result;
 		} catch (SQLException e) {
 			log.error("find all input parameters for job '" + job.getId() + "' failed.", e);
@@ -122,20 +112,13 @@ public class ParameterDao extends JdbcDataAccessObject {
 
 	@SuppressWarnings("unchecked")
 	public List<CloudgeneParameterOutput> findAllOutputByJob(AbstractJob job) {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from parameter ");
-		sql.append("where job_id = ? and input = false");
+		String sql = "SELECT * FROM parameter WHERE job_id = ? AND input = false";
 
 		Object[] params = new Object[1];
 		params[0] = job.getId();
 
-		List<CloudgeneParameterOutput> result = new Vector<CloudgeneParameterOutput>();
-
 		try {
-
-			result = query(sql.toString(), params, new ParameterOutputMapper());
+			List<CloudgeneParameterOutput> result = query(sql, params, new ParameterOutputMapper());
 
 			DownloadDao downloadDao = new DownloadDao(database);
 			for (CloudgeneParameterOutput parameter : result) {
@@ -152,22 +135,15 @@ public class ParameterDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public CloudgeneParameterOutput findById(int id) {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from parameter ");
-		sql.append("where id = ?");
+		String sql = "SELECT * FROM parameter WHERE id = ?";
 
 		Object[] params = new Object[1];
 		params[0] = id;
 
-		CloudgeneParameterOutput result = null;
-
 		try {
-
-			result = (CloudgeneParameterOutput) queryForObject(sql.toString(), params, new ParameterOutputMapper());
+			CloudgeneParameterOutput result = (CloudgeneParameterOutput) queryForObject(sql, params,
+					new ParameterOutputMapper());
 
 			DownloadDao downloadDao = new DownloadDao(database);
 			List<Download> downloads = downloadDao.findAllByParameter(result);
@@ -182,20 +158,15 @@ public class ParameterDao extends JdbcDataAccessObject {
 		}
 	}
 
-    public CloudgeneParameterOutput findByHash(String hash) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from parameter ");
-		sql.append("where hash = ?");
+	public CloudgeneParameterOutput findByHash(String hash) {
+		String sql = "SELECT * FROM parameter WHERE hash = ?";
 
 		Object[] params = new Object[1];
 		params[0] = hash;
 
-		CloudgeneParameterOutput result = null;
-
 		try {
-
-			result = (CloudgeneParameterOutput) queryForObject(sql.toString(), params, new ParameterOutputMapper());
+			CloudgeneParameterOutput result = (CloudgeneParameterOutput) queryForObject(sql.toString(), params,
+					new ParameterOutputMapper());
 
 			DownloadDao downloadDao = new DownloadDao(database);
 			List<Download> downloads = downloadDao.findAllByParameter(result);
@@ -208,19 +179,13 @@ public class ParameterDao extends JdbcDataAccessObject {
 			log.error("find parameter by hash '" + hash + "' failed.", e);
 			return null;
 		}
-    }
+	}
 
 	public List<CloudgeneParameterOutput> findAllOutput() {
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from parameter ");
-		sql.append("where input = false");
-
-		List<CloudgeneParameterOutput> result = new Vector<CloudgeneParameterOutput>();
+		String sql = "SELECT * FROM parameter WHERE input = false";
 
 		try {
-
-			result = query(sql.toString(), new ParameterOutputMapper());
+			List<CloudgeneParameterOutput> result = query(sql, new ParameterOutputMapper());
 
 			DownloadDao downloadDao = new DownloadDao(database);
 			for (CloudgeneParameterOutput parameter : result) {
@@ -241,20 +206,15 @@ public class ParameterDao extends JdbcDataAccessObject {
 		// FIXME: Automate/generalize in the future
 		// Fully remove any parameters that may contain sensitive information, but only once job is completed.
 		// The existing workflow schema (yml file) does not have a flag for "sensitive" parameters. A future fix would
-		//   automate management of such data by understanding which workflow params are sensitive; this hardcoded list
-		//   is a temporary workaround based on existing workflows.
+		// automate management of such data by understanding which workflow params are sensitive; this hardcoded list
+		// is a temporary workaround based on existing workflows.
 		try {
-
-			StringBuilder sql = new StringBuilder();
-			sql.append("delete ");
-			sql.append("from parameter ");
-			sql.append("where job_id = ?");
-			sql.append("AND name LIKE '%password%'");
+			String sql = "DELETE FROM parameter WHERE job_id = ? AND name LIKE '%password%'";
 
 			Object[] params = new Object[1];
 			params[0] = job.getId();
 
-			update(sql.toString(), params);
+			update(sql, params);
 
 			log.info("Job: Succesfully deleted sensitive parameters for job_id '" + job.getId());
 
@@ -266,11 +226,12 @@ public class ParameterDao extends JdbcDataAccessObject {
 		}
 	}
 
-	class ParameterInputMapper implements IRowMapper {
+	static class ParameterInputMapper implements IRowMapper {
 
 		@Override
 		public Object mapRow(ResultSet rs, int row) throws SQLException {
 			CloudgeneParameterInput parameter = new CloudgeneParameterInput();
+
 			parameter.setDescription(rs.getString("name"));
 			parameter.setValue(rs.getString("value"));
 			parameter.setName(rs.getString("variable"));
@@ -279,17 +240,17 @@ public class ParameterDao extends JdbcDataAccessObject {
 			parameter.setId(rs.getInt("id"));
 			parameter.setAdminOnly(rs.getBoolean("admin_only"));
 			parameter.setHash(rs.getString("hash"));
+
 			return parameter;
-
 		}
-
 	}
 
-	class ParameterOutputMapper implements IRowMapper {
+	static class ParameterOutputMapper implements IRowMapper {
 
 		@Override
 		public Object mapRow(ResultSet rs, int row) throws SQLException {
 			CloudgeneParameterOutput parameter = new CloudgeneParameterOutput();
+
 			parameter.setDescription(rs.getString("name"));
 			parameter.setValue(rs.getString("value"));
 			parameter.setName(rs.getString("variable"));
@@ -299,10 +260,8 @@ public class ParameterDao extends JdbcDataAccessObject {
 			parameter.setId(rs.getInt("id"));
 			parameter.setAdminOnly(rs.getBoolean("admin_only"));
 			parameter.setHash(rs.getString("hash"));
+
 			return parameter;
-
 		}
-
 	}
-
 }

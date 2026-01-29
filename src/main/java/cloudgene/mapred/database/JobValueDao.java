@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class JobValueDao extends JdbcDataAccessObject {
 
@@ -21,55 +21,40 @@ public class JobValueDao extends JdbcDataAccessObject {
 	}
 
 	public boolean insert(String name, String value, AbstractJob job) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("insert into job_values (name, job_id, `value`) ");
-		sql.append("values (?,?,?)");
+		String sql = "INSERT INTO job_values (name, job_id, `value`) VALUES (?,?,?)";
 
 		try {
-
 			Object[] params = new Object[3];
 			params[0] = name;
 			params[1] = job.getId();
 			params[2] = value;
 
-			update(sql.toString(), params);
+			update(sql, params);
 
 			log.debug("insert value successful.");
-
+			return true;
 		} catch (SQLException e) {
 			log.error("insert value failed.", e);
 			return false;
 		}
-
-		return true;
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<JobValue> getAll() {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select name, `value`, count(*) as n ");
-		sql.append("from job_values ");
-		sql.append("group by name, `value` ");
-		sql.append("order by name, `value` ");
-
-		List<JobValue> result = new Vector<JobValue>();
+		String sql = "SELECT name, `value`, COUNT(*) AS n FROM job_values "
+				+ "GROUP BY name, `value` ORDER BY name, `value`";
 
 		try {
-
-			result = query(sql.toString(), new ValueMapper());
-
+			List<JobValue> result = query(sql, new ValueMapper());
 			log.debug("find counters successful. results: " + result);
-
 			return result;
 		} catch (SQLException e) {
 			log.error("find all counters failed", e);
+			return new ArrayList<>(); // TODO(Marc): This is inconsistent with JobDao. There, we return null
 		}
-
-		return result;
 	}
 
-	public class JobValue {
+	public static class JobValue {
 
 		private String name;
 		private String value;
@@ -98,20 +83,19 @@ public class JobValueDao extends JdbcDataAccessObject {
 		public int getCount() {
 			return count;
 		}
-
 	}
 
-	class ValueMapper implements IRowMapper {
+	static class ValueMapper implements IRowMapper {
 
 		@Override
 		public Object mapRow(ResultSet rs, int row) throws SQLException {
 			JobValue jobValue = new JobValue();
+
 			jobValue.setName(rs.getString("name"));
 			jobValue.setValue(rs.getString("value"));
 			jobValue.setCount(rs.getInt("n"));
+
 			return jobValue;
 		}
-
 	}
-
 }

@@ -3,7 +3,6 @@ package cloudgene.mapred.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Vector;
 
 import cloudgene.mapred.jobs.Step;
 import org.slf4j.Logger;
@@ -23,51 +22,36 @@ public class MessageDao extends JdbcDataAccessObject {
 	}
 
 	public boolean insert(Message logMessage) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("insert into log_messages (time, type, message, step_id) ");
-		sql.append("values (?,?,?,?)");
+		String sql = "INSERT INTO log_messages (time, type, message, step_id) VALUES (?,?,?,?)";
 
 		try {
-
 			Object[] params = new Object[4];
+
 			params[0] = System.currentTimeMillis();
 			params[1] = logMessage.getType();
-			params[2] = logMessage.getMessage().substring(0,
-					Math.min(logMessage.getMessage().length(), 20000));
+			params[2] = logMessage.getMessage().substring(0, Math.min(logMessage.getMessage().length(), 20000));
 			params[3] = logMessage.getStep().getId();
-			update(sql.toString(), params);
+
+			update(sql, params);
 
 			log.debug("insert log messages successful.");
-
+			return true;
 		} catch (SQLException e) {
 			log.error("insert log messages failed.", e);
 			return false;
 		}
-
-		return true;
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<Message> findAllByStep(Step step) {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from log_messages ");
-		sql.append("where step_id = ? ");
-		sql.append("order by time ");
+		String sql = "SELECT * FROM log_messages WHERE step_id = ? ORDER BY time ";
 
 		Object[] params = new Object[1];
 		params[0] = step.getId();
 
-		List<Message> result = new Vector<Message>();
-
 		try {
-
-			result = query(sql.toString(), params, new MessageMapper(step));
-
-			log.debug("find all log messages successful. results: "
-					+ result.size());
-
+			List<Message> result = query(sql, params, new MessageMapper(step));
+			log.debug("find all log messages successful. results: " + result.size());
 			return result;
 		} catch (SQLException e) {
 			log.error("find all log messages failed", e);
@@ -75,9 +59,9 @@ public class MessageDao extends JdbcDataAccessObject {
 		}
 	}
 
-	class MessageMapper implements IRowMapper {
+	static class MessageMapper implements IRowMapper {
 
-		private Step step;
+		private final Step step;
 
 		public MessageMapper(Step step) {
 			this.step = step;
@@ -86,13 +70,13 @@ public class MessageDao extends JdbcDataAccessObject {
 		@Override
 		public Object mapRow(ResultSet rs, int row) throws SQLException {
 			Message message = new Message();
+
 			message.setTime(rs.getLong("time"));
 			message.setStep(step);
 			message.setType(rs.getInt("type"));
 			message.setMessage(rs.getString("message"));
+
 			return message;
 		}
-
 	}
-
 }
