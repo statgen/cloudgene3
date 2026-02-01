@@ -1,8 +1,8 @@
 package cloudgene.mapred.steps;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class JavaExternalStep extends CloudgeneStep {
 			return false;
 		}
 
-		String javaBin = "";
+		String javaBin;
 
 		if (path.isDirectory()) {
 			javaBin = FileUtil.path(javaPath, "bin", "java");
@@ -65,7 +65,7 @@ public class JavaExternalStep extends CloudgeneStep {
 			params = paramsString.split(" ");
 		}
 
-		List<String> command = new Vector<String>();
+		List<String> command = new ArrayList<>();
 		command.add(javaBin);
 		command.add("-jar");
 		command.add(jar);
@@ -86,7 +86,9 @@ public class JavaExternalStep extends CloudgeneStep {
 				if (streamStdout) {
 					context.endTask(output.toString(), Message.ERROR);
 				} else {
-					context.endTask("Execution failed. Please contact the server administrators for help if you believe this job should have completed successfully.", Message.ERROR);
+					context.endTask(
+							"Execution failed. Please contact the server administrators for help if you believe this job should have completed successfully.",
+							Message.ERROR);
 				}
 				return false;
 			}
@@ -97,11 +99,6 @@ public class JavaExternalStep extends CloudgeneStep {
 		}
 	}
 
-	@Override
-	public void updateProgress() {
-
-	}
-
 	public int getMapProgress() {
 		return -1;
 	}
@@ -109,5 +106,4 @@ public class JavaExternalStep extends CloudgeneStep {
 	public int getReduceProgress() {
 		return -1;
 	}
-
 }

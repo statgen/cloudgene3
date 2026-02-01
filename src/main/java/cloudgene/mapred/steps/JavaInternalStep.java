@@ -7,7 +7,7 @@ import cloudgene.mapred.wdl.WdlStep;
 
 public class JavaInternalStep extends CloudgeneStep {
 
-	private WorkflowStep workflowStep;
+	private final WorkflowStep workflowStep;
 
 	public JavaInternalStep(WorkflowStep step) {
 		this.workflowStep = step;
@@ -36,5 +36,4 @@ public class JavaInternalStep extends CloudgeneStep {
 		context.setConfig(step);
 		return workflowStep.run(context);
 	}
-
 }
