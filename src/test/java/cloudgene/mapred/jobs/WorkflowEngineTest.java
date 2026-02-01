@@ -39,7 +39,7 @@ public class WorkflowEngineTest {
 
 		WdlApp app = WdlReader.loadAppFromFile("test-data/return-true.yaml");
 
-		Map<String, String> inputs = new HashMap<String, String>();
+		Map<String, String> inputs = new HashMap<>();
 		inputs.put("input", "input-file");
 
 		AbstractJob job = createJobFromWdl(app, inputs);
@@ -639,7 +639,6 @@ public class WorkflowEngineTest {
 		String localWorkspace = FileUtil.path(settings.getLocalWorkspace(), id);
 		FileUtil.createDirectory(localWorkspace);
 
-
 		// setup workspace
 		IWorkspace workspace = workspaceFactory.getDefault();
 		workspace.setJob(id);
@@ -656,5 +655,4 @@ public class WorkflowEngineTest {
 
 		return job;
 	}
-
 }
