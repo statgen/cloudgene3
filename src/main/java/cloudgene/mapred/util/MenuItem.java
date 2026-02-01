@@ -5,11 +5,11 @@ import java.util.List;
 public class MenuItem {
 
 	private String id;
-	
+
 	private String name;
-	
+
 	private String link;
-	
+
 	private List<MenuItem> items;
 
 	public String getId() {
@@ -43,7 +43,4 @@ public class MenuItem {
 	public void setItems(List<MenuItem> items) {
 		this.items = items;
 	}
-	
-	
-	
 }

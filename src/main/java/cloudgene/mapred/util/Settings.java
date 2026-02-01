@@ -3,28 +3,28 @@ package cloudgene.mapred.util;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.esotericsoftware.yamlbeans.YamlConfig;
-import com.esotericsoftware.yamlbeans.YamlException;
 import com.esotericsoftware.yamlbeans.YamlReader;
 import com.esotericsoftware.yamlbeans.YamlWriter;
 
 import cloudgene.mapred.apps.Application;
 import cloudgene.mapred.apps.ApplicationRepository;
 import cloudgene.mapred.jobs.Environment;
-import cloudgene.mapred.jobs.workspace.LocalWorkspace;
 import genepi.io.FileUtil;
 
 public class Settings {
 
 	private static final Logger log = LoggerFactory.getLogger(Settings.class);
+
+	private final ArrayList<Map<String, String>> maps = new ArrayList<>();
 
 	private String serverUrl = "http://localhost:8082";
 
@@ -43,12 +43,13 @@ public class Settings {
 	private Map<String, String> mail;
 
 	private Map<String, String> database;
-
+    
+    // TODO(Marc): The plugins concept seems to be abandoned. Perhaps we could remove it entirely.
 	private Map<String, Map<String, String>> plugins;
 
-	private List<Map<String, String>> errorHandlers = new Vector<Map<String, String>>();
+	private List<Map<String, String>> errorHandlers = new ArrayList<>();
 
-	private List<Map<String, String>> resources = new Vector<>();
+	private List<Map<String, String>> resources = maps;
 
 	private int autoRetireInterval = 5;
 
@@ -74,7 +75,7 @@ public class Settings {
 
 	private boolean showLogs = false;
 
-	private List<MenuItem> navigation = new Vector<MenuItem>();
+	private List<MenuItem> navigation = new ArrayList<>();
 
 	private Map<String, String> externalWorkspace = null;
 
@@ -88,12 +89,12 @@ public class Settings {
 
 	private boolean workspaceCleanup = true;
 
-	private List<String> counters = new Vector<String>();
+	private List<String> counters = new ArrayList<>();
 
 	public static final String DEFAULT_SECURITY_KEY = "default-key-change-me-immediately";
 
 	// fake!
-	private List<Application> apps = new Vector<Application>();
+	private List<Application> apps = new ArrayList<>();
 
 	private ApplicationRepository repository;
 
@@ -123,7 +124,7 @@ public class Settings {
 
 		String filename = Configuration.getSettingsFilename();
 
-		if (!new File(filename).exists()){
+		if (!new File(filename).exists()) {
 			log.info("Loading default settings. File '" + filename + "' not found.");
 			return new Settings();
 		}
@@ -147,7 +148,6 @@ public class Settings {
 		}
 
 		return settings;
-
 	}
 
 	public List<Application> getApps() {
@@ -429,9 +429,13 @@ public class Settings {
 		return port;
 	}
 
-	public void setWorkspaceCleanup(boolean workspaceCleanup) { this.workspaceCleanup = workspaceCleanup; }
+	public void setWorkspaceCleanup(boolean workspaceCleanup) {
+		this.workspaceCleanup = workspaceCleanup;
+	}
 
-	public boolean getWorkspaceCleanup() { return workspaceCleanup; }
+	public boolean getWorkspaceCleanup() {
+		return workspaceCleanup;
+	}
 
 	public void setShowLogs(boolean showLogs) {
 		this.showLogs = showLogs;
@@ -480,7 +484,6 @@ public class Settings {
 		}
 
 		return externalWorkspace.get("type");
-
 	}
 
 	public List<String> getCounters() {
@@ -518,5 +521,4 @@ public class Settings {
 	public void setEmailRequired(boolean emailRequired) {
 		this.emailRequired = emailRequired;
 	}
-
 }

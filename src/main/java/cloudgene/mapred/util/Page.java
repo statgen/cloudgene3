@@ -2,9 +2,9 @@ package cloudgene.mapred.util;
 
 import java.util.List;
 
-public class Page<o extends Object> {
+public class Page<T> {
 
-	private List<o> data;
+	private List<T> data;
 
 	private int count;
 
@@ -12,11 +12,11 @@ public class Page<o extends Object> {
 
 	private int page;
 
-	public List<o> getData() {
+	public List<T> getData() {
 		return data;
 	}
 
-	public void setData(List<o> data) {
+	public void setData(List<T> data) {
 		this.data = data;
 	}
 
@@ -43,5 +43,4 @@ public class Page<o extends Object> {
 	public void setPage(int page) {
 		this.page = page;
 	}
-
 }

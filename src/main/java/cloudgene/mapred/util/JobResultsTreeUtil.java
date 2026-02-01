@@ -1,17 +1,20 @@
 package cloudgene.mapred.util;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Vector;
 
 import cloudgene.mapred.jobs.CloudgeneParameterOutput;
 import cloudgene.mapred.jobs.Download;
 import cloudgene.mapred.jobs.JobResultsTreeItem;
 
-public class JobResultsTreeUtil {
+public final class JobResultsTreeUtil {
+
+	private JobResultsTreeUtil() {}
 
 	public static List<JobResultsTreeItem> createTree(CloudgeneParameterOutput param) {
-		List<JobResultsTreeItem> items = new Vector<JobResultsTreeItem>();
+		List<JobResultsTreeItem> items = new ArrayList<>();
+
 		for (Download file : param.getFiles()) {
 			String[] tiles = file.getName().split("/");
 			JobResultsTreeItem root = null;
@@ -20,7 +23,7 @@ public class JobResultsTreeUtil {
 				if (root == null) {
 					_items = items;
 				} else {
-					_items = root.getChilds();
+					_items = root.getChildren();
 				}
 				root = get(_items, tiles[i]);
 				if (root == null) {
@@ -45,31 +48,31 @@ public class JobResultsTreeUtil {
 				items.add(item);
 				items.sort(new JobsResultsTreeItemComparator());
 			} else {
-				root.getChilds().add(item);
-				root.getChilds().sort(new JobsResultsTreeItemComparator());
+				root.getChildren().add(item);
+				root.getChildren().sort(new JobsResultsTreeItemComparator());
 			}
 		}
+
 		return items;
 	}
 
 	public static JobResultsTreeItem get(List<JobResultsTreeItem> items, String name) {
-		for (JobResultsTreeItem item: items) {
-			if (item.getName().equals(name)) {
+		for (JobResultsTreeItem item : items) {
+			if (item.getName().equals(name))
 				return item;
-			}
 		}
+
 		return null;
 	}
-	
+
 	protected static class JobsResultsTreeItemComparator implements Comparator<JobResultsTreeItem> {
 		@Override
 		public int compare(JobResultsTreeItem arg0, JobResultsTreeItem arg1) {
 			if (arg0.isFolder() != arg1.isFolder()) {
 				return arg0.isFolder() ? -1 : 1;
 			}
-			
+
 			return arg0.getName().compareToIgnoreCase(arg1.getName());
 		}
 	}
-
 }

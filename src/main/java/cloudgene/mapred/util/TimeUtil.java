@@ -1,12 +1,32 @@
 package cloudgene.mapred.util;
 
-public class TimeUtil {
+public final class TimeUtil {
 
-	public static String format(long time) {
-		long h = (long) (Math.floor((time / 1000) / 60 / 60));
-		long m = (long) ((Math.floor((time / 1000) / 60)) % 60);
-
-		return (h > 0 ? h + " h " : "") + (m > 0 ? m + " min " : "") + (int) ((Math.floor(time / 1000)) % 60) + " sec";
+	private TimeUtil() {
 	}
 
+	/**
+	 * Converts the given milliseconds into a {@code String} showing hours, minutes,
+	 * and seconds. Output format: {@code [H h ][M min ]S sec}, where hours and/or
+	 * minutes are only shown if that segment is nonzero.
+	 *
+	 * @param millis Time span to represent, as total milliseconds.
+	 * @return {@code [H h ][M min ]S sec}
+	 */
+	public static String format(long millis) {
+		long totalSeconds = millis / 1000;
+		long totalMinutes = totalSeconds / 60;
+
+		long hours = totalMinutes / 60;
+		long minutes = totalMinutes % 60;
+		long seconds = totalSeconds % 60;
+
+		String out = seconds + " sec";
+		if (minutes > 0)
+			out = minutes + " min " + out;
+		if (hours > 0)
+			out = hours + " h " + out;
+
+		return out;
+	}
 }

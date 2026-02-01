@@ -1,20 +1,5 @@
 package cloudgene.mapred.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Vector;
-import java.util.function.Function;
-
-import cloudgene.mapred.server.controller.JobController;
-import org.apache.commons.io.FileUtils;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
 import genepi.io.FileUtil;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.multipart.CompletedFileUpload;
@@ -22,14 +7,25 @@ import io.micronaut.http.multipart.CompletedPart;
 import io.micronaut.http.server.multipart.MultipartBody;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import org.apache.commons.io.FileUtils;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
 @Singleton
 public class FormUtil {
 
-	private static Logger log = LoggerFactory.getLogger(FormUtil.class);
+	private static final Logger log = LoggerFactory.getLogger(FormUtil.class);
 
 	@Inject
 	protected cloudgene.mapred.server.Application application;
@@ -41,7 +37,7 @@ public class FormUtil {
 
 			body.subscribe(new Subscriber<CompletedPart>() {
 
-				List<Parameter> form = new Vector<Parameter>();
+				List<Parameter> form = new ArrayList<>();
 
 				private Subscription s;
 
@@ -85,18 +81,22 @@ public class FormUtil {
 
 			String originalFileName = ((CompletedFileUpload) completedPart).getFilename();
 			File file = new File(folder, originalFileName);
+			String absolutePath = file.getAbsolutePath();
 
 			try {
-
 				long start = System.currentTimeMillis();
-				log.debug("Write data to " + file.getAbsolutePath() + "...");
+				log.debug("Write data to " + absolutePath + "...");
+
 				InputStream stream = completedPart.getInputStream();
 				FileUtils.copyInputStreamToFile(stream, file);
 				stream.close();
-				log.debug("Data written to " + file.getAbsolutePath() + " in " + (System.currentTimeMillis() - start) + " ms.");
+
+				long end = System.currentTimeMillis();
+				log.debug("Data written to " + absolutePath + " in " + (end - start) + " ms.");
+
 				return new Parameter(partName, file);
 			} catch (IOException e) {
-				log.error("Write data to " + file.getAbsolutePath() + " failed", e);
+				log.error("Write data to " + absolutePath + " failed", e);
 			}
 
 		} else {
@@ -114,7 +114,6 @@ public class FormUtil {
 		}
 
 		return null;
-
 	}
 
 	public static class Parameter {
@@ -144,5 +143,4 @@ public class FormUtil {
 			this.value = value;
 		}
 	}
-
 }
