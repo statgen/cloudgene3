@@ -1,26 +1,26 @@
 package cloudgene.mapred.plugins.nextflow;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import cloudgene.mapred.jobs.CloudgeneContext;
 import cloudgene.mapred.jobs.Step;
 
 public class NextflowProcess {
 
-	private String name;
+	private final String name;
 
-	private Step step;
+	private final Step step;
 
-	private CloudgeneContext context;
+	private final CloudgeneContext context;
 
-	private List<NextflowTask> tasks = new Vector<NextflowTask>();
+	private final List<NextflowTask> tasks = new ArrayList<>();
 
 	public NextflowProcess(CloudgeneContext context, Map<String, Object> trace, Step step) throws IOException {
 		this.context = context;
-		this.name = (String)trace.get("process");
+		this.name = (String) trace.get("process");
 		this.step = step;
 		addTrace(trace);
 	}
@@ -34,7 +34,7 @@ public class NextflowProcess {
 	}
 
 	public void addTrace(Map<String, Object> trace) throws IOException {
-		int taskId = (Integer)trace.get("task_id");
+		int taskId = (Integer) trace.get("task_id");
 		for (NextflowTask task : tasks) {
 			if (task.getId() == taskId) {
 				task.update(trace);
@@ -44,5 +44,4 @@ public class NextflowProcess {
 		NextflowTask task = new NextflowTask(context, trace, step);
 		tasks.add(task);
 	}
-
 }

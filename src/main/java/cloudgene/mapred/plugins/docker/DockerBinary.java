@@ -5,15 +5,18 @@ import java.io.File;
 import cloudgene.mapred.util.BinaryFinder;
 import cloudgene.mapred.util.Settings;
 import cloudgene.mapred.util.command.Command;
-import genepi.io.FileUtil;
 
 public class DockerBinary {
 
 	private String binary = "";
 
 	public static DockerBinary build(Settings settings) {
-		String binary = new BinaryFinder("docker").settings(settings, "docker", "home").env("DOCKER_HOME")
-				.envPath().find();
+		String binary = new BinaryFinder("docker")
+				.settings(settings, "docker", "home")
+				.env("DOCKER_HOME")
+				.envPath()
+				.find();
+
 		return new DockerBinary(binary);
 	}
 

@@ -5,19 +5,14 @@ import cloudgene.mapred.jobs.Step;
 import cloudgene.mapred.plugins.nextflow.report.GitHubActionsParser.Command;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Vector;
 
 public class CommandOutput {
 
 	public static final String DEFAULT_FILENAME = ".command.out";
 
-	private List<Command> commands = new Vector<Command>();
-
-	public CommandOutput() {
-
-	}
+	private List<Command> commands = new ArrayList<>();
 
 	public CommandOutput(StringBuilder output) throws IOException {
 		String str = output.toString();
@@ -49,7 +44,7 @@ public class CommandOutput {
 		}
 
 		for (Command command : commands) {
-			switch(command.getName()){
+			switch (command.getName()) {
 				case "error":
 					context.message(step, command.getParameters().get("value"), CloudgeneContext.ERROR);
 					break;
@@ -68,19 +63,25 @@ public class CommandOutput {
 					break;
 				case "set-counter":
 				case "inc-counter":
-					context.incCounter(command.getParameters().get("name"), Integer.parseInt(command.getParameters().get("value")));
+					context.incCounter(
+							command.getParameters().get("name"),
+							Integer.parseInt(command.getParameters().get("value")));
 					break;
 				case "submit-counter":
 					context.submitCounter(command.getParameters().get("name"));
 					break;
 				case "set-value":
-					context.setValue(command.getParameters().get("name"), command.getParameters().get("value"));
+					context.setValue(
+							command.getParameters().get("name"),
+							command.getParameters().get("value"));
 					break;
 				case "submit-value":
 					context.submitValue(command.getParameters().get("name"));
 					break;
 				case "set-value-and-submit":
-					context.setValue(command.getParameters().get("name"), command.getParameters().get("value"));
+					context.setValue(
+							command.getParameters().get("name"),
+							command.getParameters().get("value"));
 					context.submitValue(command.getParameters().get("name"));
 					break;
 				default:
@@ -88,6 +89,4 @@ public class CommandOutput {
 			}
 		}
 	}
-
-
 }
