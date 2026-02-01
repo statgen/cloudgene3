@@ -1,9 +1,10 @@
 package cloudgene.mapred.wdl;
 
 public enum WdlParameterOutputType {
-	LOCAL_FOLDER("local_folder"), LOCAL_FILE("local_file");
+	LOCAL_FOLDER("local_folder"),
+	LOCAL_FILE("local_file");
 
-	private String value;
+	private final String value;
 
 	WdlParameterOutputType(String value) {
 		this.value = value;

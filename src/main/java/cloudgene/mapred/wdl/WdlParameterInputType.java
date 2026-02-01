@@ -24,7 +24,7 @@ public enum WdlParameterInputType {
 	AGBCHECKBOX("agbcheckbox"),
 
 	TERMS_CHECKBOX("terms_checkbox"),
-	
+
 	GROUP("group"),
 
 	APP_LIST("app_list"),
@@ -33,7 +33,7 @@ public enum WdlParameterInputType {
 
 	TEXTAREA("textarea");
 
-	private String value;
+	private final String value;
 
 	WdlParameterInputType(String value) {
 		this.value = value;
