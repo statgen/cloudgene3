@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.jobs.queue.PriorityRunnable;
 import cloudgene.mapred.jobs.queue.Queue;
@@ -21,8 +18,6 @@ public class WorkflowEngine implements Runnable {
 	private boolean running = false;
 
 	private AtomicLong priorityCounter = new AtomicLong();
-
-	private static final Logger log = LoggerFactory.getLogger(WorkflowEngine.class);
 
 	public WorkflowEngine(int ltqThreads) {
 
@@ -138,47 +133,37 @@ public class WorkflowEngine implements Runnable {
 				List<String> keys = (names == null) ? counters.keySet().stream().toList() : names;
 				for (String name : keys) {
 					Integer value = counters.get(name);
-					Long oldvalue = result.get(name);
-					if (oldvalue == null) {
-						oldvalue = new Long(0);
+					Long oldValue = result.get(name);
+					if (oldValue == null) {
+						oldValue = 0L;
 					}
-					result.put(name, oldvalue + value);
+					result.put(name, oldValue + value);
 				}
 			}
 		}
-		return result;
 
+		return result;
 	}
 
 	public List<AbstractJob> getJobsByUser(User user) {
-
 		List<AbstractJob> jobs = longTimeQueue.getJobsByUser(user);
 
 		for (AbstractJob job : jobs) {
-
 			if (job instanceof CloudgeneJob) {
-
 				((CloudgeneJob) job).updateProgress();
-
 			}
-
 		}
 
 		return jobs;
 	}
 
 	public List<AbstractJob> getAllJobsInLongTimeQueue() {
-
 		List<AbstractJob> jobs = longTimeQueue.getAllJobs();
 
 		for (AbstractJob job : jobs) {
-
 			if (job instanceof CloudgeneJob) {
-
 				((CloudgeneJob) job).updateProgress();
-
 			}
-
 		}
 
 		return jobs;
@@ -188,20 +173,13 @@ public class WorkflowEngine implements Runnable {
 		return longTimeQueue.isInQueue(job);
 	}
 
-	protected void statusUpdated(AbstractJob job) {
+	protected void statusUpdated(AbstractJob job) {}
 
-	}
+	protected void jobCompleted(AbstractJob job) {}
 
-	protected void jobCompleted(AbstractJob job) {
-
-	}
-
-	protected void jobSubmitted(AbstractJob job) {
-
-	}
+	protected void jobSubmitted(AbstractJob job) {}
 
 	public int getSize() {
 		return longTimeQueue.getSize();
 	}
-
 }

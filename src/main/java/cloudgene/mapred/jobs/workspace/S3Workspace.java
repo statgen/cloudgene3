@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ public class S3Workspace implements IWorkspace {
 
 	private static final Logger log = LoggerFactory.getLogger(S3Workspace.class);
 
-	private String location;
+	private final String location;
 
 	private String job;
 
@@ -53,7 +53,7 @@ public class S3Workspace implements IWorkspace {
 
 	@Override
 	public void setJob(String job) {
-	this.job = job;
+		this.job = job;
 	}
 
 	@Override
@@ -77,7 +77,6 @@ public class S3Workspace implements IWorkspace {
 			log.error("Copy file to '" + location + "/" + job + "/version.txt' failed.", e);
 			throw new IOException("Output Url '" + location + "' is not writable.", e);
 		}
-
 	}
 
 	@Override
@@ -142,7 +141,6 @@ public class S3Workspace implements IWorkspace {
 		} catch (Exception e) {
 			throw new IOException("Folder '" + url + "' could not be deleted.", e);
 		}
-
 	}
 
 	@Override
@@ -168,7 +166,6 @@ public class S3Workspace implements IWorkspace {
 		} catch (Exception e) {
 			throw new IOException("Folder '" + input + "' could not be deleted.", e);
 		}
-
 	}
 
 	@Override
@@ -183,7 +180,8 @@ public class S3Workspace implements IWorkspace {
 
 		// Generate the presigned URL.
 		log.debug("Generating pre-signed URL for " + url + "...");
-		GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(urlParts.bucket(), urlParts.key())
+		GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(urlParts.bucket(),
+				urlParts.key())
 				.withMethod(HttpMethod.GET).withExpiration(expiration);
 		URL publicUrl = s3.generatePresignedUrl(generatePresignedUrlRequest);
 		log.debug("Pre-signed URL for " + url + " generated. Link: " + publicUrl.toString());
@@ -225,7 +223,7 @@ public class S3Workspace implements IWorkspace {
 
 	@Override
 	public List<Download> getDownloads(String url) throws IOException {
-		List<Download> downloads = new Vector<Download>();
+		List<Download> downloads = new ArrayList<>();
 		ObjectListing listing = S3Util.listObjects(url);
 
 		S3Util.UrlParts urlParts = S3Util.getParts(url);
@@ -239,9 +237,11 @@ public class S3Workspace implements IWorkspace {
 			String filename = summary.getKey().replaceAll(urlParts.key() + "/", "");
 			String size = FileUtils.byteCountToDisplaySize(summary.getSize());
 			String hash = HashUtil.getSha256(filename + size + (Math.random() * 100000));
-			if (filename.equals("cloudgene.out")){
+
+			if (filename.equals("cloudgene.out")) {
 				continue;
 			}
+
 			Download download = new Download();
 			download.setName(filename);
 			download.setPath("s3://" + summary.getBucketName() + "/" + summary.getKey());
@@ -259,5 +259,4 @@ public class S3Workspace implements IWorkspace {
 		String url = location + "/" + job + "/" + LOGS_DIRECTORY;
 		return getDownloads(url);
 	}
-
 }

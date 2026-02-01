@@ -1,9 +1,9 @@
 package cloudgene.mapred.jobs;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import cloudgene.mapred.database.*;
 import cloudgene.mapred.jobs.engine.handler.IJobErrorHandler;
@@ -16,15 +16,15 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 
 	private static final Logger log = LoggerFactory.getLogger(PersistentWorkflowEngine.class);
 
-	private Database database;
+	private final Database database;
 
-	private JobDao dao;
+	private final JobDao dao;
 
-	private CounterDao counterDao;
+	private final CounterDao counterDao;
 
-	private Map<String, Long> counters;
+	private final Map<String, Long> counters;
 
-	private List<IJobErrorHandler> handlers = new Vector<IJobErrorHandler>();
+	private final List<IJobErrorHandler> handlers = new ArrayList<>();
 
 	public PersistentWorkflowEngine(Database database, int ltqThreads) {
 		super(ltqThreads);
@@ -46,7 +46,6 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 			job.setState(AbstractJob.STATE_DEAD);
 			dao.update(job);
 		}
-
 	}
 
 	@Override
@@ -62,43 +61,33 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 		DownloadDao downloadDao = new DownloadDao(database);
 
 		for (CloudgeneParameterOutput parameter : job.getOutputParams()) {
-
 			if (parameter.isDownload()) {
-
 				if (parameter.getFiles() != null) {
-
 					for (Download download : parameter.getFiles()) {
 						download.setParameter(parameter);
 						downloadDao.insert(download);
 					}
-
 				}
-
 			}
-
 		}
 
 		if (job.getLogOutput().getFiles() != null) {
-
 			for (Download download : job.getLogOutput().getFiles()) {
 				download.setParameter(job.getLogOutput());
 				downloadDao.insert(download);
 			}
-
 		}
 
 		if (job.getSteps() != null) {
 			StepDao dao2 = new StepDao(database);
 			for (Step step : job.getSteps()) {
 				dao2.insert(step);
-
 				MessageDao messageDao = new MessageDao(database);
 				if (step.getLogMessages() != null) {
 					for (Message logMessage : step.getLogMessages()) {
 						messageDao.insert(logMessage);
 					}
 				}
-
 			}
 		}
 
@@ -115,23 +104,23 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 			Integer value = submittedCounters.get(name);
 
 			if (value != null) {
-
 				Long counterValue = counters.get(name);
+
 				if (counterValue == null) {
 					counterValue = 0L + value;
 				} else {
 					counterValue = counterValue + value;
 				}
+
 				counters.put(name, counterValue);
-
 				counterDao.insert(name, value, job);
-
 			}
 		}
 
 		// write all submitted values into database
 		JobValueDao jobValueDao = new JobValueDao(database);
 		Map<String, String> submittedValues = job.getContext().getSubmittedValues();
+
 		for (String name : submittedValues.keySet()) {
 			String value = submittedValues.get(name);
 
@@ -144,11 +133,10 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 		dao.update(job);
 
 		if (job.getState() == AbstractJob.STATE_FAILED) {
-			for (IJobErrorHandler handler: handlers) {
+			for (IJobErrorHandler handler : handlers) {
 				handler.handle(this, job);
 			}
 		}
-
 	}
 
 	@Override
@@ -176,9 +164,11 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 		if (state == AbstractJob.STATE_SUCCESS) {
 			List<String> keys = (names == null) ? counters.keySet().stream().toList() : names;
 			Map<String, Long> counters = new HashMap<>();
-			for (String name: keys) {
+
+			for (String name : keys) {
 				counters.put(name, this.counters.get(name));
 			}
+
 			return counters;
 		} else {
 			return super.getCounters(state, null);
@@ -188,5 +178,4 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 	public void addJobErrorHandler(IJobErrorHandler handler) {
 		this.handlers.add(handler);
 	}
-
 }

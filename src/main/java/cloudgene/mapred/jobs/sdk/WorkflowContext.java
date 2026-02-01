@@ -21,6 +21,14 @@ public abstract class WorkflowContext {
 
 	public abstract String getOutput(String param);
 
+	/**
+	 * If an input with the given name exists, returns its value.
+	 * Otherwise, if an output with the given name exists, returns its value.
+	 * If no input or output parameter with the given name exists, returns {@code null}.
+	 *
+	 * @param param Name of the input or output parameter to retrieve.
+	 * @return The value of the requested parameter, or {@code null}.
+	 */
 	public abstract String get(String param);
 
 	public abstract void println(String line);
@@ -29,17 +37,14 @@ public abstract class WorkflowContext {
 
 	public abstract String getWorkingDirectory();
 
-	public abstract boolean sendNotification(String body) throws Exception;
-
 	public abstract boolean sendMail(String subject, String body) throws Exception;
 
 	public abstract boolean sendMail(String to, String subject, String body) throws Exception;
 
+	/**
+	 * @return The names of all available inputs.
+	 */
 	public abstract Set<String> getInputs();
-
-	public abstract void setInput(String input, String value);
-
-	//public abstract void setOutput(String input, String value);
 
 	public abstract void incCounter(String name, int value);
 
@@ -49,22 +54,13 @@ public abstract class WorkflowContext {
 
 	public abstract Object getData(String key);
 
-	public abstract String createLinkToFile(String id);
-
-	public String createLinkToFile(String id, String filename) {
-		return "[NOT AVAILABLE]";
-
-	}
-
 	public abstract String getJobName();
-
-	public abstract String getHdfsTemp();
 
 	public abstract String getLocalTemp();
 
-	public abstract void setConfig(Map<String, Object> config);
-
 	public abstract String getConfig(String param);
+
+	public abstract void setConfig(Map<String, Object> config);
 
 	public abstract void message(String message, int type);
 
@@ -95,11 +91,4 @@ public abstract class WorkflowContext {
 	public abstract void updateTask(String name, int type);
 
 	public abstract void endTask(String message, int type);
-
-	public void endTask(String message, Exception e) {
-		// TODO: add trace
-		String messageWithTrace = message + ". " + e.toString();
-		endTask(messageWithTrace, ERROR);
-	}
-
 }

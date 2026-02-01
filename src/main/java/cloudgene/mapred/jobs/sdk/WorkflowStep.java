@@ -4,14 +4,15 @@ import java.io.File;
 
 public abstract class WorkflowStep {
 
-	public String getFolder(Class clazz) {
-		return new File(clazz.getProtectionDomain().getCodeSource()
-				.getLocation().getPath()).getParent();
+	public String getFolder(Class<?> clazz) {
+		return new File(clazz.getProtectionDomain()
+				.getCodeSource()
+				.getLocation()
+				.getPath())
+				.getParent();
 	}
 
-	public void setup(WorkflowContext context) {
-
-	}
+	public void setup(WorkflowContext context) {}
 
 	abstract public boolean run(WorkflowContext context);
 
@@ -23,13 +24,7 @@ public abstract class WorkflowStep {
 		return 0;
 	}
 
-	public void updateProgress() {
+	public void updateProgress() {}
 
-	}
-
-	public void kill() {
-
-	}
-
-
+	public void kill() {}
 }

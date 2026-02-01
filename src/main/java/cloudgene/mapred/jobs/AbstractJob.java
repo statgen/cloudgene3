@@ -31,7 +31,7 @@ abstract public class AbstractJob extends PriorityRunnable {
 
 	private static final Logger log = LoggerFactory.getLogger(AbstractJob.class);
 
-	private DateFormat formatter = new SimpleDateFormat("yy/MM/dd HH:mm:ss");
+	private final DateFormat formatter = new SimpleDateFormat("yy/MM/dd HH:mm:ss");
 
 	// states
 
@@ -85,15 +85,15 @@ abstract public class AbstractJob extends PriorityRunnable {
 
 	private int positionInQueue = -1;
 
-	protected List<CloudgeneParameterInput> inputParams = new Vector<CloudgeneParameterInput>();
+	protected List<CloudgeneParameterInput> inputParams = new ArrayList<>();
 
-	protected List<CloudgeneParameterOutput> outputParams = new Vector<CloudgeneParameterOutput>();
+	protected List<CloudgeneParameterOutput> outputParams = new ArrayList<>();
 
 	protected Map<String, CloudgeneParameterOutput> outputParamsIndex = new HashMap<String, CloudgeneParameterOutput>();
 
 	protected CloudgeneParameterOutput logOutput = null;
 
-	protected List<Step> steps = new Vector<Step>();
+	protected List<Step> steps = new ArrayList<>();
 
 	protected BufferedOutputStream stdOutStream;
 
@@ -105,7 +105,7 @@ abstract public class AbstractJob extends PriorityRunnable {
 
 	private String localWorkspace;
 
-	private boolean canceld = false;
+	private boolean canceled = false;
 
 	protected IWorkspace workspace;
 
@@ -119,7 +119,8 @@ abstract public class AbstractJob extends PriorityRunnable {
 
 	public void setId(String id) {
 		this.id = id;
-		this.publicJobId = HashUtil.getSha256(id + RandomStringUtils.random(500));
+		String salt = RandomStringUtils.secure().next(500);
+		this.publicJobId = HashUtil.getSha256(id + salt);
 	}
 
 	public int getState() {
@@ -146,8 +147,8 @@ abstract public class AbstractJob extends PriorityRunnable {
 		this.endTime = endTime;
 	}
 
-	public void setSubmittedOn(long submitedOn) {
-		this.submittedOn = submitedOn;
+	public void setSubmittedOn(long submittedOn) {
+		this.submittedOn = submittedOn;
 	}
 
 	public long getSubmittedOn() {
@@ -208,7 +209,7 @@ abstract public class AbstractJob extends PriorityRunnable {
 
 	public void setOutputParams(List<CloudgeneParameterOutput> outputParams) {
 		this.outputParams = outputParams;
-		for (CloudgeneParameterOutput param: outputParams) {
+		for (CloudgeneParameterOutput param : outputParams) {
 			outputParamsIndex.put(param.getName(), param);
 		}
 	}
@@ -254,7 +255,7 @@ abstract public class AbstractJob extends PriorityRunnable {
 	@Override
 	public void run() {
 
-		if (canceld) {
+		if (canceled) {
 			return;
 		}
 
@@ -345,7 +346,7 @@ abstract public class AbstractJob extends PriorityRunnable {
 			log.info("[Job {}]cleanup successful.", getId());
 			writeLog("Cleanup successful.");
 
-			if (canceld) {
+			if (canceled) {
 				setState(AbstractJob.STATE_CANCELED);
 			}
 
@@ -377,7 +378,7 @@ abstract public class AbstractJob extends PriorityRunnable {
 		writeLog("Canceled by user.");
 		log.info("[Job {}]: canceld by user.", getId());
 
-		canceld = true;
+		canceled = true;
 		setEndTime(System.currentTimeMillis());
 		setState(AbstractJob.STATE_CANCELED);
 
@@ -389,9 +390,7 @@ abstract public class AbstractJob extends PriorityRunnable {
 	}
 
 	private void closeStdOutFiles() {
-
 		try {
-
 			stdOutStream.close();
 			logStream.close();
 
@@ -405,11 +404,9 @@ abstract public class AbstractJob extends PriorityRunnable {
 		} catch (IOException e) {
 			log.error("[Job {}]: Staging log files failed.", getId(), e);
 		}
-
 	}
 
 	public void writeOutput(String line) {
-
 		try {
 			if (stdOutStream != null && line != null) {
 				stdOutStream.write(line.getBytes("UTF-8"));
@@ -419,7 +416,6 @@ abstract public class AbstractJob extends PriorityRunnable {
 		} catch (IOException e) {
 			log.error("[Job {}]: Write output failed.", getId(), e);
 		}
-
 	}
 
 	public void writeOutputln(String line) {
@@ -427,7 +423,6 @@ abstract public class AbstractJob extends PriorityRunnable {
 	}
 
 	public void writeLog(String line) {
-
 		try {
 			if (logStream == null) {
 				initStdOutFiles();
@@ -441,7 +436,6 @@ abstract public class AbstractJob extends PriorityRunnable {
 		} catch (IOException e) {
 			log.error("[Job {}]: Write output failed.", getId(), e);
 		}
-
 	}
 
 	public List<Step> getSteps() {
@@ -458,13 +452,11 @@ abstract public class AbstractJob extends PriorityRunnable {
 
 	@Override
 	public boolean equals(Object obj) {
-
 		if (!(obj instanceof AbstractJob)) {
 			return false;
 		}
 
 		return ((AbstractJob) obj).getId().equals(id);
-
 	}
 
 	public Settings getSettings() {
@@ -536,7 +528,6 @@ abstract public class AbstractJob extends PriorityRunnable {
 	abstract public boolean cleanUp();
 
 	public void kill() {
-
 	}
 
 	public String getPublicJobId() {
@@ -547,5 +538,4 @@ abstract public class AbstractJob extends PriorityRunnable {
 		String logFilename = FileUtil.path(settings.getLocalWorkspace(), getId(), name);
 		return FileUtil.readFileAsString(logFilename);
 	}
-
 }

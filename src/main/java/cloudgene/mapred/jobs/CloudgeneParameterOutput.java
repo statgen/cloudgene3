@@ -1,8 +1,9 @@
 package cloudgene.mapred.jobs;
 
+import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 
 import cloudgene.mapred.wdl.WdlParameterOutput;
 import cloudgene.mapred.wdl.WdlParameterOutputType;
@@ -33,9 +34,7 @@ public class CloudgeneParameterOutput {
 
 	private String hash = "";
 
-	public CloudgeneParameterOutput() {
-
-	}
+	public CloudgeneParameterOutput() {}
 
 	public CloudgeneParameterOutput(WdlParameterOutput parameter) {
 		setName(parameter.getId());
@@ -43,7 +42,7 @@ public class CloudgeneParameterOutput {
 		setDownload(parameter.isDownload());
 		setDescription(parameter.getDescription());
 		setAdminOnly(parameter.isAdminOnly());
-		files = new Vector<Download>();
+		setFiles(new ArrayList<>());
 	}
 
 	public int getId() {
@@ -153,5 +152,4 @@ public class CloudgeneParameterOutput {
 			hash += randomChar;
 		}
 	}
-
 }

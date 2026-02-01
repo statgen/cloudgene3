@@ -1,7 +1,7 @@
 package cloudgene.mapred.jobs;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class Step {
 
@@ -11,11 +11,9 @@ public class Step {
 
 	private CloudgeneJob job;
 
-	private List<Message> logMessages = new Vector<Message>();
+	private List<Message> logMessages = new ArrayList<>();
 
-	public Step() {
-
-	}
+	public Step() {}
 
 	public void setId(int id) {
 		this.id = id;
