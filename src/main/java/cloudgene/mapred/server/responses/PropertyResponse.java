@@ -2,12 +2,13 @@ package cloudgene.mapred.server.responses;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 @JsonClassDescription
 public class PropertyResponse {
+
 	String key;
 	String value;
 	String label;
@@ -56,13 +57,15 @@ public class PropertyResponse {
 
 	public static PropertyResponse build(String key, String value) {
 		PropertyResponse response = new PropertyResponse();
+
 		response.setKey(key);
 		response.setValue(value);
+
 		return response;
 	}
 
-	public static List<PropertyResponse> buildWithValues(Map values) {
-		List<PropertyResponse> response = new Vector<PropertyResponse>();
+	public static List<PropertyResponse> buildWithValues(Map<?, ?> values) {
+		List<PropertyResponse> response = new ArrayList<>();
 
 		for (Object key : values.keySet()) {
 			String value = values.get(key).toString();
@@ -72,10 +75,10 @@ public class PropertyResponse {
 		return response;
 	}
 
-	public static List<PropertyResponse> buildWithValues(List<Map> values) {
-		List<PropertyResponse> response = new Vector<PropertyResponse>();
+	public static List<PropertyResponse> buildWithValues(List<Map<String, ?>> values) {
+		List<PropertyResponse> response = new ArrayList<>();
 
-		for (Map object : values) {
+		for (Map<String, ?> object : values) {
 			if (object.containsKey("id") && object.containsKey("name")) {
 				response.add(PropertyResponse.build(object.get("id").toString(), object.get("name").toString()));
 			}
@@ -86,16 +89,18 @@ public class PropertyResponse {
 
 	public static PropertyResponse build(String key, String value, Object values) {
 		PropertyResponse response = new PropertyResponse();
+
 		response.setKey(key);
 		response.setLabel(value);
+
 		if (values instanceof Map) {
-			List<PropertyResponse> responseWithValues = buildWithValues((Map) values);
+			List<PropertyResponse> responseWithValues = buildWithValues((Map<?, ?>) values);
 			response.setValues(responseWithValues);
 		} else if (values instanceof List) {
-			List<PropertyResponse> responseWithValues = buildWithValues((List) values);
+			List<PropertyResponse> responseWithValues = buildWithValues((List<Map<String, ?>>) values);
 			response.setValues(responseWithValues);
 		}
+
 		return response;
 	}
-
 }

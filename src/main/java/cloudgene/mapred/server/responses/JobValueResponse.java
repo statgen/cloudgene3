@@ -3,8 +3,8 @@ package cloudgene.mapred.server.responses;
 import cloudgene.mapred.database.JobValueDao;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 @JsonClassDescription
 public class JobValueResponse {
@@ -39,18 +39,21 @@ public class JobValueResponse {
 
 	public static JobValueResponse build(JobValueDao.JobValue jobValue) {
 		JobValueResponse response = new JobValueResponse();
+
 		response.setName(jobValue.getName());
 		response.setValue(jobValue.getValue());
 		response.setCount(jobValue.getCount());
+
 		return response;
 	}
 
 	public static List<JobValueResponse> build(List<JobValueDao.JobValue> data) {
-		List<JobValueResponse> responses = new Vector<JobValueResponse>();
+		List<JobValueResponse> responses = new ArrayList<>();
+
 		for (JobValueDao.JobValue jobValue : data) {
 			responses.add(JobValueResponse.build(jobValue));
 		}
+
 		return responses;
 	}
-	
 }

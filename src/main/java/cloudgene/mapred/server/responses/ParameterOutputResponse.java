@@ -1,7 +1,7 @@
 package cloudgene.mapred.server.responses;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,25 +15,15 @@ import cloudgene.mapred.wdl.WdlParameterOutputType;
 public class ParameterOutputResponse {
 
 	private int id;
-
 	private String description;
-
 	private String value;
-
 	private WdlParameterOutputType type;
-
 	private boolean download;
-
 	private String name;
-
 	private List<JobResultsTreeItem> tree;
-
 	private CloudgeneJob job;
-
 	private String jobId;
-
 	private boolean autoExport;
-
 	private String hash;
 
 	@JsonProperty("files")
@@ -41,6 +31,7 @@ public class ParameterOutputResponse {
 
 	public static ParameterOutputResponse build(CloudgeneParameterOutput paramsOut) {
 		ParameterOutputResponse response = new ParameterOutputResponse();
+
 		response.setId(paramsOut.getId());
 		response.setDescription(paramsOut.getDescription());
 		response.setValue(paramsOut.getValue());
@@ -57,10 +48,12 @@ public class ParameterOutputResponse {
 	}
 
 	public static List<ParameterOutputResponse> build(List<CloudgeneParameterOutput> params) {
-		List<ParameterOutputResponse> response = new Vector<ParameterOutputResponse>();
+		List<ParameterOutputResponse> response = new ArrayList<>();
+
 		for (CloudgeneParameterOutput param : params) {
 			response.add(ParameterOutputResponse.build(param));
 		}
+
 		return response;
 	}
 
@@ -159,5 +152,4 @@ public class ParameterOutputResponse {
 	public void setHash(String hash) {
 		this.hash = hash;
 	}
-
 }

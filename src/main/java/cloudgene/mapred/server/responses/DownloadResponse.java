@@ -1,7 +1,7 @@
 package cloudgene.mapred.server.responses;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import cloudgene.mapred.jobs.Download;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
@@ -72,23 +72,26 @@ public class DownloadResponse {
 	public void setUser(String user) {
 		this.user = user;
 	}
-	
+
 	public static DownloadResponse build(Download param) {
 		DownloadResponse response = new DownloadResponse();
+
 		response.setName(param.getName());
 		response.setHash(param.getHash());
 		response.setSize(param.getSize());
 		response.setCount(param.getCount());
 		response.setPath(param.getPath());
+
 		return response;
 	}
 
 	public static List<DownloadResponse> build(List<Download> params) {
-		List<DownloadResponse> response = new Vector<DownloadResponse>();
+		List<DownloadResponse> response = new ArrayList<>();
+
 		for (Download param : params) {
 			response.add(DownloadResponse.build(param));
 		}
+
 		return response;
 	}
-
 }

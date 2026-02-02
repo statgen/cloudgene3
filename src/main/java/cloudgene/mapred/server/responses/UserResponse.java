@@ -1,8 +1,8 @@
 package cloudgene.mapred.server.responses;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Vector;
 
 import cloudgene.mapred.core.User;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
@@ -11,37 +11,25 @@ import com.fasterxml.jackson.annotation.JsonClassDescription;
 public class UserResponse {
 
 	private int id;
-
 	private String username = "";
-
 	private String fullName = "";
-
 	private String lastLogin = "";
-
 	private String lockedUntil = "";
-
 	private boolean active = false;
-
 	private int loginAttempts;
-
 	private String role = "";
-
 	private String mail = "";
-
 	private boolean admin = false;
-
 	private boolean hasApiToken = false;
-
 	private String apiTokenMessage = "";
-
 	private boolean apiTokenValid = true;
 
 	public static final String MESSAGE_VALID_TOKEN = "API Token was created by %s and is valid until %s.";
-
 	public static final String MESSAGE_EXPIRED_TOKEN = "API Token was created by %s and expired on %s.";
 
 	public static UserResponse build(User user) {
 		UserResponse response = new UserResponse();
+
 		response.setId(user.getId());
 		response.setUsername(user.getUsername());
 		response.setFullName(user.getFullName());
@@ -70,10 +58,12 @@ public class UserResponse {
 	}
 
 	public static List<UserResponse> build(List<User> users) {
-		List<UserResponse> response = new Vector<UserResponse>();
+		List<UserResponse> response = new ArrayList<>();
+
 		for (User user : users) {
 			response.add(UserResponse.build(user));
 		}
+
 		return response;
 	}
 
