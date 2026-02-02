@@ -25,50 +25,29 @@ public class UserService {
 	private static Logger log = LoggerFactory.getLogger(UserService.class);
 
 	public static final String MESSAGE_USER_NOT_FOUND = "User %s not found.";
+	public static final String DEFAULT_ROLE = "User";
+	public static final String DEFAULT_ANONYMOUS_ROLE = "Anonymous_User";
 
 	private static final String MESSAGE_USER_PROFILE_DELETE = "User profile successfully delete.";
-
 	private static final String MESSAGE_DELETE_ERROR = "Error during deleting your user profile.";
-
 	private static final String MESSAGE_WRONG_PASSWORD = "Wrong password.";
-
 	private static final String MESSAGE_PROFILE_UPDATED = "User profile successfully updated.";
-
 	private static final String MESSAGE_NOT_ALLOWED = "You are not allowed to change this user profile.";
-
 	private static final String MESSAGE_NO_USERNAME_SET = "No username set.";
-
 	private static final String MESSAGE_PASSWORD_UPDATED = "Password successfully updated.";
-
 	private static final String MESSAGE_INVALID_RECOVERY_REQUEST = "Your recovery request is invalid or expired.";
-
 	private static final String MESSAGE_ACCOUNT_IS_INACTIVE = "Account is not activated.";
-
 	private static final String MESSAGE_ACCOUNT_NOT_FOUND = "We couldn't find an account with that username or email.";
-
 	private static final String MESSAGE_EMAIL_SENT = "We sent you an email with instructions on how to reset your password.";
-
 	private static final String MESSAGE_EMAIL_NOT_AVAILABLE = "No email address is associated with the provided username. Therefore, password recovery cannot be completed.";
-
 	private static final String MESSAGE_SENDING_EMAIL_FAILED = "Sending recovery email failed. ";
-
 	private static final String MESSAGE_INVALID_USERNAME = "Please enter a valid username or email address.";
-
 	private static final String MESSAGE_USER_CREATED = "User successfully created.";
-
 	private static final String MESSAGE_EMAIL_ALREADY_REGISTERED = "E-Mail is already registered.";
-
 	private static final String MESSAGE_USERNAME_ALREADY_EXISTS = "Username already exists.";
-
 	private static final String MESSAGE_WRONG_USERNAME = "Wrong username.";
-
 	private static final String MESSAGE_WRONG_ACTIVATION_CODE = "Wrong activation code.";
-
 	private static final String MESSAGE_USER_ACTIVATED = "User successfully activated.";
-
-	public static final String DEFAULT_ROLE = "User";
-
-	public static final String DEFAULT_ANONYMOUS_ROLE = "Anonymous_User";
 
 	@Inject
 	protected Application application;
@@ -156,7 +135,7 @@ public class UserService {
 			return MessageResponse.error(MESSAGE_NOT_ALLOWED);
 		}
 
-		error = User.checkName(full_name);
+		error = User.checkFullName(full_name);
 		if (error != null) {
 			return MessageResponse.error(error);
 		}
@@ -182,32 +161,47 @@ public class UserService {
 
 		String roleMessage = "";
 		if (!application.getSettings().isEmailRequired()) {
-			if ((newUser.getMail() == null || newUser.getMail().isEmpty()) && user.hasRole(DEFAULT_ROLE)) {
+			String newUserMail = newUser.getMail();
+			boolean newMailAvailable = (newUserMail != null && !newUserMail.isEmpty());
+
+			if (!newMailAvailable & user.hasRole(DEFAULT_ROLE)) {
 				newUser.replaceRole(DEFAULT_ROLE, DEFAULT_ANONYMOUS_ROLE);
-				log.info(String.format("User: changed role to %s for user %s (ID %s)", DEFAULT_ANONYMOUS_ROLE, newUser.getUsername(),
+
+				log.info(String.format(
+						"User: changed role to %s for user %s (ID %s)",
+						DEFAULT_ANONYMOUS_ROLE,
+						newUser.getUsername(),
 						newUser.getId()));
+
 				roleMessage += "<br><br>Your account has been <b>downgraded</b>.<br>To apply these changes, please log out and log back in.";
-			} else if ((newUser.getMail() != null && !newUser.getMail().isEmpty()) && user.hasRole(DEFAULT_ANONYMOUS_ROLE)) {
+			} else if (newMailAvailable && user.hasRole(DEFAULT_ANONYMOUS_ROLE)) {
 				newUser.replaceRole(DEFAULT_ANONYMOUS_ROLE, DEFAULT_ROLE);
-				log.info(String.format("User: changed role to %s for user %s (ID %s)", DEFAULT_ROLE, newUser.getUsername(),
+
+				log.info(String.format(
+						"User: changed role to %s for user %s (ID %s)",
+						DEFAULT_ROLE,
+						newUser.getUsername(),
 						newUser.getId()));
+
 				roleMessage += "<br><br>Your account has been <b>upgraded</b>.<br>To apply these changes, please log out and log back in.";
 			}
 		}
 
 		// update password only when it's not empty
 		if (new_password != null && !new_password.isEmpty()) {
-
 			error = User.checkPassword(new_password, confirm_new_password);
 
 			if (error != null) {
 				return MessageResponse.error(error);
 			}
+
 			newUser.setPassword(HashUtil.hashPassword(new_password));
 
-			log.info(String.format("User: changed password for user %s (ID %s - email %s)", newUser.getUsername(),
-					newUser.getId(), newUser.getMail()));
-
+			log.info(String.format(
+					"User: changed password for user %s (ID %s - email %s)",
+					newUser.getUsername(),
+					newUser.getId(),
+					newUser.getMail()));
 		}
 
 		dao.update(newUser);
@@ -216,7 +210,6 @@ public class UserService {
 	}
 
 	public MessageResponse deleteProfile(User user, String username, String password) {
-
 		// check if user is admin or it is his username
 		if (!user.getUsername().equals(username) && !user.isAdmin()) {
 			throw new JsonHttpStatusException(HttpStatus.FORBIDDEN, MESSAGE_NOT_ALLOWED);
@@ -239,10 +232,12 @@ public class UserService {
 		} else {
 			throw new JsonHttpStatusException(HttpStatus.UNAUTHORIZED, MESSAGE_WRONG_PASSWORD);
 		}
-
 	}
 
-	public MessageResponse updatePassword(String username, String token, String new_password,
+	public MessageResponse updatePassword(
+			String username,
+			String token,
+			String new_password,
 			String confirm_new_password) {
 
 		if (username == null || username.isEmpty()) {
@@ -260,7 +255,7 @@ public class UserService {
 			return MessageResponse.error(MESSAGE_ACCOUNT_IS_INACTIVE);
 		}
 
-		if (token == null || user.getActivationCode() == null || !user.getActivationCode().equals(token)) {
+		if (user.getActivationCode() == null || !user.getActivationCode().equals(token)) {
 			return MessageResponse.error(MESSAGE_INVALID_RECOVERY_REQUEST);
 		}
 
@@ -280,7 +275,6 @@ public class UserService {
 	}
 
 	public MessageResponse resetPassword(String username) {
-
 		if (username == null || username.trim().isEmpty()) {
 			return MessageResponse.error(MESSAGE_INVALID_USERNAME);
 		}
@@ -293,7 +287,6 @@ public class UserService {
 		}
 
 		if (user != null) {
-
 			if (!user.isActive()) {
 				return MessageResponse.error(MESSAGE_ACCOUNT_IS_INACTIVE);
 			}
@@ -323,7 +316,7 @@ public class UserService {
 			String body = application.getTemplate(Template.RECOVERY_MAIL, user.getFullName(), app, link);
 
 			try {
-				if (user.getMail()!= null && !user.getMail().isEmpty()) {
+				if (user.getMail() != null && !user.getMail().isEmpty()) {
 
 					log.info(String.format("Password reset link requested for user '%s'", username));
 
@@ -333,64 +326,69 @@ public class UserService {
 				} else {
 					return MessageResponse.error(MESSAGE_EMAIL_NOT_AVAILABLE);
 				}
-
 			} catch (Exception e) {
-
 				return MessageResponse.error(MESSAGE_SENDING_EMAIL_FAILED + e.getMessage());
-
 			}
-
 		} else {
-
 			return MessageResponse.error(MESSAGE_ACCOUNT_NOT_FOUND);
-
 		}
-
 	}
 
-	public MessageResponse registerUser(String username, String mail, String new_password, String confirm_new_password,
-			String full_name) {
-		// check username
+	public MessageResponse registerUser(
+			String username,
+			String mail,
+			String new_password,
+			String confirm_new_password,
+			String fullName) {
+
+		// ==== USERNAME ==== //
+
+		// check username format
 		String error = User.checkUsername(username);
 		if (error != null) {
 			return MessageResponse.error(error);
 		}
+
+		// check if username available
 		UserDao dao = new UserDao(application.getDatabase());
 		if (dao.findByUsername(username) != null) {
 			return MessageResponse.error(MESSAGE_USERNAME_ALREADY_EXISTS);
 		}
 
-		// check email
+		// ==== MAIL ==== //
+
 		boolean mailProvided = (mail != null && !mail.isEmpty());
 
 		if (application.getSettings().isEmailRequired() || mailProvided) {
-			// check email
+			// Check mail format
 			error = User.checkMail(mail);
 			if (error != null) {
 				return MessageResponse.error(error);
 			}
+
+			// Check if mail available
 			if (dao.findByMail(mail) != null) {
 				return MessageResponse.error(MESSAGE_EMAIL_ALREADY_REGISTERED);
 			}
 		}
 
-		String[] roles = new String[] { mailProvided ? DEFAULT_ROLE : DEFAULT_ANONYMOUS_ROLE};
+		String[] roles = new String[] { mailProvided ? DEFAULT_ROLE : DEFAULT_ANONYMOUS_ROLE };
 
-		// check password
+		// check password format
 		error = User.checkPassword(new_password, confirm_new_password);
 		if (error != null) {
 			return MessageResponse.error(error);
 		}
 
-		// check password
-		error = User.checkName(full_name);
+		// check full name format
+		error = User.checkFullName(fullName);
 		if (error != null) {
 			return MessageResponse.error(error);
 		}
 
 		User newUser = new User();
 		newUser.setUsername(username);
-		newUser.setFullName(full_name);
+		newUser.setFullName(fullName);
 		newUser.setMail(mail);
 		newUser.setRoles(roles);
 		newUser.setPassword(HashUtil.hashPassword(new_password));
@@ -413,7 +411,7 @@ public class UserService {
 				String appName = application.getSettings().getName();
 				String subject = "[" + appName + "] Signup activation";
 				String activationLink = hostname + "/#!activate/" + username + "/" + activationKey;
-				String body = application.getTemplate(Template.REGISTER_MAIL, full_name, appName, activationLink);
+				String body = application.getTemplate(Template.REGISTER_MAIL, fullName, appName, activationLink);
 
 				MailUtil.send(application.getSettings(), mail, subject, body);
 
@@ -450,8 +448,8 @@ public class UserService {
 				user.setActivationCode("");
 				dao.update(user);
 
-				log.info(String.format("User: activated user %s (ID %s - email %s)", user.getUsername(), user.getId(),
-						user.getMail()));
+				log.info(String.format("User: activated user %s (ID %s - email %s)",
+						user.getUsername(), user.getId(), user.getMail()));
 
 				return MessageResponse.success(MESSAGE_USER_ACTIVATED);
 
@@ -468,7 +466,6 @@ public class UserService {
 		} else {
 
 			log.warn(String.format("User: used activation code for missing or unknown username '%s'", username));
-
 			return MessageResponse.error(MESSAGE_WRONG_USERNAME);
 
 		}

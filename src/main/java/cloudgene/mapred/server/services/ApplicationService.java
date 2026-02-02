@@ -19,6 +19,8 @@ import jakarta.inject.Inject;
 
 public class ApplicationService {
 
+	private static final Logger log = LoggerFactory.getLogger(ApplicationService.class);
+
 	private static final String UNDER_MAINTENANCE = "This functionality is currently under maintenance.";
 	private static final String APPLICATION_IS_DATA_PACKAGE = "Application %s is a data package.";
 	private static final String APPLICATION_NOT_REMOVED = "Application not removed: %s";
@@ -27,13 +29,10 @@ public class ApplicationService {
 	private static final String NO_URL = "No url or file location set.";
 	private static final String APPLICATION_NOT_INSTALLED_NO_WORKFLOW = "Application not installed: No workflow file found.";
 
-	private static final Logger log = LoggerFactory.getLogger(ApplicationService.class);
-
 	@Inject
 	protected cloudgene.mapred.server.Application application;
 
 	public Application getById(String appId) {
-
 		ApplicationRepository repository = application.getSettings().getApplicationRepository();
 		Application app = repository.getById(appId);
 
@@ -42,11 +41,9 @@ public class ApplicationService {
 		}
 
 		return app;
-
 	}
 
 	public Application getByIdAndUser(User user, String appId) {
-
 		Settings settings = application.getSettings();
 
 		if (settings.isMaintenance() && (user == null || !user.isAdmin())) {
@@ -61,22 +58,18 @@ public class ApplicationService {
 		}
 
 		return app;
-
 	}
 
 	public void checkRequirements(Application app) {
-
 		WdlApp wdlApp = app.getWdlApp();
 
 		if (wdlApp.getWorkflow() == null) {
 			throw new JsonHttpStatusException(HttpStatus.NOT_FOUND,
 					String.format(APPLICATION_IS_DATA_PACKAGE, app.getId()));
 		}
-
 	}
 
 	public Application removeApp(String appId) {
-
 		ApplicationRepository repository = this.application.getSettings().getApplicationRepository();
 		Application app = repository.getById(appId);
 
@@ -93,20 +86,16 @@ public class ApplicationService {
 		} else {
 			throw new JsonHttpStatusException(HttpStatus.NOT_FOUND, String.format(APPLICATION_NOT_FOUND, appId));
 		}
-
 	}
 
 	public void enableApp(Application app, boolean enabled) {
-
 		ApplicationRepository repository = this.application.getSettings().getApplicationRepository();
 		app.setEnabled(enabled);
 		repository.reload();
 		this.application.getSettings().save();
-
 	}
 
 	public void updatePermissions(Application app, String permission) {
-
 		ApplicationRepository repository = this.application.getSettings().getApplicationRepository();
 		if (app == null || permission == null) {
 			return;
@@ -116,51 +105,47 @@ public class ApplicationService {
 			repository.reload();
 			this.application.getSettings().save();
 		}
-
 	}
 
 	public void updateConfig(Application app, Map<String, String> config) throws IOException {
-
-		ApplicationRepository repository = this.application.getSettings().getApplicationRepository();
 		WdlApp wdlApp = app.getWdlApp();
 
 		if (config == null) {
 			return;
 		}
 
-		for (IPlugin plugin: PluginManager.getInstance().getPlugins()) {
+		for (IPlugin plugin : PluginManager.getInstance().getPlugins()) {
 			Map<String, String> updatedConfig = plugin.getConfig(wdlApp);
 			if (updatedConfig == null) {
 				continue;
 			}
-			for (String key: config.keySet()){
+			for (String key : config.keySet()) {
 				updatedConfig.put(key, config.get(key));
 			}
 			plugin.updateConfig(wdlApp, updatedConfig);
 		}
-
 	}
 
 	public List<Application> listApps(boolean reload) {
-
 		ApplicationRepository repository = application.getSettings().getApplicationRepository();
 
 		if (reload) {
 			repository.reload();
 		}
 
-		List<Application> applications = new Vector<Application>(repository.getAll());
+		List<Application> applications = new ArrayList<>(repository.getAll());
+
 		Collections.sort(applications, new Comparator<Application>() {
 			@Override
 			public int compare(Application o1, Application o2) {
-					return o1.getWdlApp().getName().compareTo(o2.getWdlApp().getName());
+				return o1.getWdlApp().getName().compareTo(o2.getWdlApp().getName());
 			}
 		});
+
 		return applications;
 	}
 
 	public Application installApp(String url) {
-
 		if (url == null) {
 			throw new JsonHttpStatusException(HttpStatus.BAD_REQUEST, NO_URL);
 		}
@@ -168,7 +153,6 @@ public class ApplicationService {
 		ApplicationRepository repository = application.getSettings().getApplicationRepository();
 
 		try {
-
 			List<Application> apps = repository.install(url);
 			application.getSettings().save();
 
@@ -184,10 +168,11 @@ public class ApplicationService {
 
 		} catch (Error e) {
 			log.error(APPLICATION_NOT_INSTALLED, e);
-			throw new JsonHttpStatusException(HttpStatus.BAD_REQUEST,
+
+			throw new JsonHttpStatusException(
+					HttpStatus.BAD_REQUEST,
 					String.format(APPLICATION_NOT_INSTALLED, e.getMessage()));
 		}
-
 	}
 
 	public ApplicationRepository getRepository() {

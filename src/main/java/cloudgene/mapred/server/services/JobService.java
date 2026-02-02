@@ -2,10 +2,10 @@ package cloudgene.mapred.server.services;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import cloudgene.mapred.database.ParameterDao;
 import cloudgene.mapred.jobs.*;
@@ -181,7 +181,7 @@ public class JobService {
 		}
 
 		// if job is running, use in memory instance
-		List<AbstractJob> finalJobs = new Vector<AbstractJob>();
+		List<AbstractJob> finalJobs = new ArrayList<>();
 		for (AbstractJob job : jobs) {
 			AbstractJob runningJob = application.getWorkflowEngine().getJobById(job.getId());
 			if (runningJob != null) {
@@ -189,7 +189,6 @@ public class JobService {
 			} else {
 				finalJobs.add(job);
 			}
-
 		}
 
 		Page<AbstractJob> result = new Page<AbstractJob>();
@@ -295,7 +294,6 @@ public class JobService {
 		}
 
 		return count;
-
 	}
 
 	public AbstractJob changePriority(AbstractJob job, long priority) {
@@ -339,18 +337,17 @@ public class JobService {
 		} catch (Exception e) {
 			return "Retire " + job.getId() + " failed.";
 		}
-
 	}
 
 	public String increaseRetireDate(AbstractJob job, int days) {
-
 		JobDao dao = new JobDao(application.getDatabase());
+
 		if (job.getState() == AbstractJob.STATE_SUCESS_AND_NOTIFICATION_SEND
 				|| job.getState() == AbstractJob.STATE_FAILED_AND_NOTIFICATION_SEND) {
 
 			try {
 
-				job.setDeletedOn(job.getDeletedOn() + (days * 24 * 60 * 60 * 1000));
+				job.setDeletedOn(job.getDeletedOn() + (days * 24L * 60L * 60L * 1000L));
 
 				dao.update(job);
 
@@ -364,7 +361,6 @@ public class JobService {
 		} else {
 			return "Job " + job.getId() + " has wrong state for this operation.";
 		}
-
 	}
 
 	public String createId() {
@@ -372,10 +368,8 @@ public class JobService {
 		return "job-" + sdf.format(new Date());
 	}
 
-
 	public List<AbstractJob> getJobs(String state) {
-
-		List<AbstractJob> jobs = new Vector<AbstractJob>();
+		List<AbstractJob> jobs = new ArrayList<>();
 
 		WorkflowEngine engine = application.getWorkflowEngine();
 		JobDao dao = new JobDao(application.getDatabase());
@@ -383,33 +377,33 @@ public class JobService {
 		if (state != null) {
 			switch (state) {
 
-			case "running-ltq":
+				case "running-ltq":
 
-				jobs = engine.getAllJobsInLongTimeQueue();
-				break;
+					jobs = engine.getAllJobsInLongTimeQueue();
+					break;
 
-			case "running-stq":
+				case "running-stq":
 
-				// TODO: remove!
-				jobs = new Vector<AbstractJob>();
-				break;
+					// TODO: remove!
+					jobs = new ArrayList<>();
+					break;
 
-			case "current":
+				case "current":
 
-				jobs = dao.findAllNotRetiredJobs();
-				List<AbstractJob> toRemove = new Vector<AbstractJob>();
-				for (AbstractJob job : jobs) {
-					if (engine.isInQueue(job)) {
-						toRemove.add(job);
+					jobs = dao.findAllNotRetiredJobs();
+					List<AbstractJob> toRemove = new ArrayList<>();
+					for (AbstractJob job : jobs) {
+						if (engine.isInQueue(job)) {
+							toRemove.add(job);
+						}
 					}
-				}
-				jobs.removeAll(toRemove);
-				break;
+					jobs.removeAll(toRemove);
+					break;
 
-			case "retired":
+				case "retired":
 
-				jobs = dao.findAllByState(AbstractJob.STATE_RETIRED);
-				break;
+					jobs = dao.findAllByState(AbstractJob.STATE_RETIRED);
+					break;
 
 			}
 		}
@@ -425,5 +419,4 @@ public class JobService {
 			return workspace.downloadLog(name);
 		}
 	}
-
 }
