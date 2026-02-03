@@ -3,7 +3,6 @@ package cloudgene.mapred.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +71,6 @@ public class DownloadDao extends JdbcDataAccessObject {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<Download> findAllByParameter(CloudgeneParameterOutput parameter) {
 
 		StringBuilder sql = new StringBuilder();
@@ -84,11 +82,8 @@ public class DownloadDao extends JdbcDataAccessObject {
 		Object[] params = new Object[1];
 		params[0] = parameter.getId();
 
-		List<Download> result = new Vector<Download>();
-
 		try {
-
-			result = query(sql.toString(), params, new DownloadMapper());
+			List<Download> result = query(sql.toString(), params, new DownloadMapper());
 
 			log.debug("find all downloads successful. results: "
 					+ result.size());
@@ -111,12 +106,9 @@ public class DownloadDao extends JdbcDataAccessObject {
 		Object[] params = new Object[1];
 		params[0] = hash;
 
-		Download result = null;
-
 		try {
 
-			result = (Download) queryForObject(sql.toString(), params,
-					new DownloadMapper());
+			Download result = queryForObject(sql.toString(), params, new DownloadMapper());
 
 			log.debug("find download by hash successful. results: " + result);
 
@@ -138,12 +130,8 @@ public class DownloadDao extends JdbcDataAccessObject {
 		Object[] params = new Object[1];
 		params[0] = job + "/" + path;
 
-		Download result = null;
-
 		try {
-
-			result = (Download) queryForObject(sql.toString(), params,
-					new DownloadMapper());
+			Download result = queryForObject(sql.toString(), params, new DownloadMapper());
 
 			log.debug("find download by job " + job + " and path " + path
 					+ " successful. results: " + result);
@@ -155,7 +143,7 @@ public class DownloadDao extends JdbcDataAccessObject {
 		}
 	}
 
-    public Download findByParameterAndName(CloudgeneParameterOutput param, String filename) {
+	public Download findByParameterAndName(CloudgeneParameterOutput param, String filename) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("select * ");
 		sql.append("from downloads ");
@@ -166,12 +154,8 @@ public class DownloadDao extends JdbcDataAccessObject {
 		params[0] = filename;
 		params[1] = param.getId();
 
-		Download result = null;
-
 		try {
-
-			result = (Download) queryForObject(sql.toString(), params,
-					new DownloadMapper());
+			Download result = queryForObject(sql.toString(), params, new DownloadMapper());
 
 			log.debug("find download by param " + param.getId() + " and path " + filename
 					+ " successful. results: " + result);
@@ -181,21 +165,20 @@ public class DownloadDao extends JdbcDataAccessObject {
 			log.error("find download by job and path failed.", e);
 			return null;
 		}
-    }
+	}
 
-    class DownloadMapper implements IRowMapper {
-
+	static class DownloadMapper implements IRowMapper<Download> {
 		@Override
-		public Object mapRow(ResultSet rs, int row) throws SQLException {
+		public Download mapRow(ResultSet rs, int row) throws SQLException {
 			Download result = new Download();
+
 			result.setCount(rs.getInt("count"));
 			result.setHash(rs.getString("hash"));
 			result.setName(rs.getString("name"));
 			result.setPath(rs.getString("path"));
 			result.setSize(rs.getString("size"));
+
 			return result;
 		}
-
 	}
-
 }

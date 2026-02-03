@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class JobValueDao extends JdbcDataAccessObject {
 
@@ -26,7 +26,6 @@ public class JobValueDao extends JdbcDataAccessObject {
 		sql.append("values (?,?,?)");
 
 		try {
-
 			Object[] params = new Object[3];
 			params[0] = name;
 			params[1] = job.getId();
@@ -44,7 +43,6 @@ public class JobValueDao extends JdbcDataAccessObject {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<JobValue> getAll() {
 
 		StringBuilder sql = new StringBuilder();
@@ -53,11 +51,8 @@ public class JobValueDao extends JdbcDataAccessObject {
 		sql.append("group by name, `value` ");
 		sql.append("order by name, `value` ");
 
-		List<JobValue> result = new Vector<JobValue>();
-
 		try {
-
-			result = query(sql.toString(), new ValueMapper());
+			List<JobValue> result = query(sql.toString(), new ValueMapper());
 
 			log.debug("find counters successful. results: " + result);
 
@@ -66,10 +61,10 @@ public class JobValueDao extends JdbcDataAccessObject {
 			log.error("find all counters failed", e);
 		}
 
-		return result;
+		return new ArrayList<>();
 	}
 
-	public class JobValue {
+	public static class JobValue {
 
 		private String name;
 		private String value;
@@ -98,20 +93,18 @@ public class JobValueDao extends JdbcDataAccessObject {
 		public int getCount() {
 			return count;
 		}
-
 	}
 
-	class ValueMapper implements IRowMapper {
-
+	static class ValueMapper implements IRowMapper<JobValue> {
 		@Override
-		public Object mapRow(ResultSet rs, int row) throws SQLException {
+		public JobValue mapRow(ResultSet rs, int row) throws SQLException {
 			JobValue jobValue = new JobValue();
+
 			jobValue.setName(rs.getString("name"));
 			jobValue.setValue(rs.getString("value"));
 			jobValue.setCount(rs.getInt("n"));
+
 			return jobValue;
 		}
-
 	}
-
 }
