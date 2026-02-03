@@ -24,24 +24,24 @@ import JobDetailControl from 'components/core/job/detail/';
 import SubmitJobControl from 'components/core/job/submit/';
 
 // open all external link in new tab
-$(document.links).filter(function() {
+$(document.links).filter(function () {
   return this.hostname !== window.location.hostname;
 }).attr('target', '_blank');
 
 const routes = [{
   path: '',
   control: DashboardControl,
-  classes: 'fullsize-container'
+  classes: 'fullsize-container',
 }, {
   path: 'pages/home',
   control: DashboardControl,
-  classes: 'fullsize-container'
+  classes: 'fullsize-container',
 }, {
   path: 'pages/contact',
   control: StaticPage,
   options: {
-    template: 'static/contact.stache'
-  }
+    template: 'static/contact.stache',
+  },
 }, {
   path: 'pages/login',
   control: UserLoginControl,
@@ -50,51 +50,51 @@ const routes = [{
   control: UserLogoutControl,
 }, {
   path: 'activate/{user}/{key}',
-  control: UserActivateControl
+  control: UserActivateControl,
 }, {
   path: 'recovery/{user}/{key}',
-  control: UserPasswordRecoveryControl
+  control: UserPasswordRecoveryControl,
 }, {
   path: 'pages/register',
-  control: UserSignupControl
+  control: UserSignupControl,
 }, {
   path: 'pages/reset-password',
-  control: UserPasswordResetControl
+  control: UserPasswordResetControl,
 }, {
   path: 'pages/profile',
   control: UserProfileControl,
-  guard: loggedInGuard
+  guard: loggedInGuard,
 }, {
   path: 'pages/jobs',
   control: JobListControl,
   options: {
-    page: 1
+    page: 1,
   },
   classes: 'fullsize-container',
-  guard: loggedInGuard
+  guard: loggedInGuard,
 }, {
   path: 'pages/jobs/{page}',
   control: JobListControl,
   classes: 'fullsize-container',
-  guard: loggedInGuard
+  guard: loggedInGuard,
 }, {
   path: 'jobs/{job}',
   control: JobDetailControl,
   classes: 'fullsize-container',
-  guard: loggedInGuard
+  guard: loggedInGuard,
 }, {
   path: 'jobs/{job}/{tab}',
   control: JobDetailControl,
   classes: 'fullsize-container',
-  guard: loggedInGuard
+  guard: loggedInGuard,
 }, {
   path: 'run/{app}',
   control: SubmitJobControl,
   classes: 'fullsize-container',
-  guard: loggedInGuard
+  guard: loggedInGuard,
 }, {
   path: 'pages/{page}',
-  control: StaticPage
+  control: StaticPage,
 }];
 
 function loggedInGuard(appState) {
@@ -103,13 +103,12 @@ function loggedInGuard(appState) {
 
 addBeforeSendHook();
 
-Server.findOne({}, function(server) {
-
-  new LayoutControl("#main", {
-    server: server
+Server.findOne({}, function (server) {
+  new LayoutControl('#main', {
+    server: server,
   });
 
-  new RouterControl("#content", {
+  new RouterControl('#content', {
     routes: routes,
     appState: server,
     classes: 'container page my-5 p-5',
@@ -117,8 +116,8 @@ Server.findOne({}, function(server) {
       control: ErrorPage,
       options: {
         status: '401',
-        responseText: 'Oops, you need to <a href="#!pages/login">login</a> to view this content.'
-      }
-    }
+        responseText: 'Oops, you need to <a href="#!pages/login">login</a> to view this content.',
+      },
+    },
   });
 });

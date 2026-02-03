@@ -29,7 +29,7 @@ import io.micronaut.context.annotation.Context;
 @Context
 public class Application {
 
-	public static final String VERSION = "3.1.4-statgen.10";
+	public static final String VERSION = "3.1.4-statgen.11";
 
 	private Database database;
 

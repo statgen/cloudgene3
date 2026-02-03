@@ -5,7 +5,7 @@ import 'components/core/layout/layout.css';
 import template from './layout.stache';
 
 export default Control.extend({
-  "init": function(element, options) {
+  init: function (element, options) {
     let admin = false;
     const appState = options.appState;
 
@@ -16,5 +16,5 @@ export default Control.extend({
     $(element).hide();
     $(element).html(template({ admin: admin }));
     $(element).fadeIn();
-  }
+  },
 });

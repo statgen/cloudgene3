@@ -5,10 +5,9 @@ import './layout.css';
 import template from './layout.stache';
 
 export default Control.extend({
-
-  "init": function(element, options) {
+  init: function (element, options) {
     $(element).hide();
     $(element).html(template(options.server));
     $(element).fadeIn();
-  }
+  },
 });

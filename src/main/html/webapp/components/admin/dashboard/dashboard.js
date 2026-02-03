@@ -7,29 +7,25 @@ import Counter from 'models/counter';
 import JobValue from 'models/job-value';
 import template from './dashboard.stache';
 
-
 export default Control.extend({
 
-  'init': function(element) {
-
+  'init': function (element) {
     $(element).hide();
     const that = this;
 
     window.Raphael = Raphael;
 
-    JobValue.findAll({}, function(values) {
-
-      Counter.findOne({}, function(counter) {
+    JobValue.findAll({}, function (values) {
+      Counter.findOne({}, function (counter) {
         $(element).html(template({
           counter: counter,
-          values: values
+          values: values,
         }));
         $(element).fadeIn();
 
         $.getJSON('api/v2/admin/server/statistics', {
-          days: 1
-        }, function(mydata) {
-
+          days: 1,
+        }, function (mydata) {
           $('#new_users').html(mydata[0].users - mydata[mydata.length - 1].users);
           $('#total_users').html(mydata[0].users);
 
@@ -45,25 +41,23 @@ export default Control.extend({
             pointSize: 0,
             hideHover: 'always',
             smooth: 'false',
-            resize: true
+            resize: true,
           });
         });
-      }, function() {
+      }, function () {
         // Counter.findOne() error handler (noop)
       });
-    }, function() {
+    }, function () {
       // JobValue.findAll() error handler (noop)
     });
   },
 
-  '#day_combo change': function() {
-
+  '#day_combo change': function () {
     const days = $('#day_combo').val();
     const that = this;
     $.getJSON('api/v2/admin/server/statistics', {
-      days: days
-    }, function(mydata) {
-
+      days: days,
+    }, function (mydata) {
       $('#new_users').html(mydata[0].users - mydata[mydata.length - 1].users);
       $('#total_users').html(mydata[0].users);
 
@@ -72,5 +66,5 @@ export default Control.extend({
 
       that.options.running.setData(mydata);
     });
-  }
+  },
 });

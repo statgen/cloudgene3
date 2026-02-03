@@ -1,6 +1,6 @@
 {
   "name": "cloudgene",
-  "version": "3.1.4-statgen.10",
+  "version": "3.1.4-statgen.11",
   "description": "Cloudgene web client",
   "homepage": "http://www.cloudgene.io",
   "author": "Imputation Server Team <imputationserver@umich.edu>",
@@ -40,6 +40,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@stylistic/eslint-plugin": "^5.7.1",
     "eslint": "^9.39.2",
     "eslint-plugin-import": "^2.32.0",
     "globals": "^17.0.0",

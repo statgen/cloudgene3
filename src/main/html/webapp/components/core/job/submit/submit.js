@@ -24,13 +24,12 @@ import templateTextarea from './controls/textarea.stache';
 
 export default Control.extend({
 
-  'init': function(element, options) {
-
+  'init': function (element, options) {
     const that = this;
 
     Application.findOne({
-      tool: options.app
-    }, function(application) {
+      tool: options.app,
+    }, function (application) {
       that.application = application;
       $(element).hide();
       $(element).html(template({
@@ -45,19 +44,16 @@ export default Control.extend({
         controls_folder_pattern: templateFolderPattern,
         controls_terms_checkbox: templateTermsCheckbox,
         controls_textarea: templateTextarea,
-        controls_select_binded: templateSelectBinded
+        controls_select_binded: templateSelectBinded,
       }));
       $(element).fadeIn();
       $('select').change();
-
-    }, function(response) {
+    }, function (response) {
       new ErrorPage(element, response);
     });
-
   },
 
-  '#parameters submit': function(form, event) {
-
+  '#parameters submit': function (form, event) {
     event.preventDefault();
 
     // check required parameters.
@@ -66,20 +62,20 @@ export default Control.extend({
       return false;
     }
 
-    //show upload dialog
+    // show upload dialog
     const uploadDialog = bootbox.dialog({
       title: 'Uploading Data...',
       message: templateUploadingDialog(),
       closeButton: false,
       className: 'upload-dialog',
-      shown: false
+      shown: false,
     });
 
-    //start uploading when dialog is shown
-    uploadDialog.on('shown.bs.modal', function() {
+    // start uploading when dialog is shown
+    uploadDialog.on('shown.bs.modal', function () {
       const { csrf, token } = getLocalCloudgeneData();
 
-      //submit form and upload files
+      // submit form and upload files
       $(form).ajaxSubmit({
         dataType: 'json',
 
@@ -88,56 +84,49 @@ export default Control.extend({
           'X-Auth-Token': token,
         },
 
-        success: function(answer) {
-
+        success: function (answer) {
           uploadDialog.modal('hide');
 
           if (answer.success) {
-
             window.location.href = '#!jobs/' + answer.id;
-
           } else {
             new ErrorPage('#content', {
               status: '',
-              message: answer.message
+              message: answer.message,
             });
-
           }
         },
 
-        error: function(response) {
+        error: function (response) {
           uploadDialog.modal('hide');
           new ErrorPage('#content', response);
-
         },
 
-        //upade progress bar
-        uploadProgress: function(event, position, total, percentComplete) {
+        // upade progress bar
+        uploadProgress: function (event, position, total, percentComplete) {
           $('#waiting-progress').css('width', percentComplete + '%');
-        }
+        },
 
       });
-
     });
 
-    //show upload dialog. fires uploading files.
+    // show upload dialog. fires uploading files.
     uploadDialog.modal('show');
-
   },
 
   // custom file upload controls for single files
 
-  '.select-control change': function(){
+  '.select-control change': function () {
     this.application.updateBinding();
   },
 
-  '#select-single-file-btn click': function(button) {
+  '#select-single-file-btn click': function (button) {
     // trigger click to open file dialog
     const fileUpload = $(button).closest('.col-sm-3').find(':file');
     fileUpload.trigger('click');
   },
 
-  '.file-upload-field-single change': function(fileUpload) {
+  '.file-upload-field-single change': function (fileUpload) {
     const filenameControl = $(fileUpload).parent().find('.file-name-control');
     if (fileUpload.files.length > 0) {
       filenameControl.val(fileUpload.files[0].name);
@@ -148,14 +137,14 @@ export default Control.extend({
 
   // custom file upload controls for multiple files
 
-  '#select-files-btn click': function(button) {
+  '#select-files-btn click': function (button) {
     // trigger click to open file dialog
     const fileUpload = $(button).parent().find(':file');
     fileUpload.trigger('click');
   },
 
-  '.file-upload-field-multiple change': function(fileUpload) {
-    //update list of files
+  '.file-upload-field-multiple change': function (fileUpload) {
+    // update list of files
     const fileList = $(fileUpload).parent().find('.file-list');
     fileList.empty();
     for (let i = 0; i < fileUpload.files.length; i++) {
@@ -175,23 +164,23 @@ export default Control.extend({
     }
   },
 
-  '#change-files-btn click': function(button) {
+  '#change-files-btn click': function (button) {
     // trigger click to open file dialog
     const fileUpload = $(button).parent().find(':file');
     fileUpload.trigger('click');
   },
 
-  '#remove-all-files-btn click': function(button) {
-    //clear hidden file upload field
+  '#remove-all-files-btn click': function (button) {
+    // clear hidden file upload field
     const fileUpload = $(button).parent().find(':file');
     fileUpload.val('');
 
-    //clear list of files
+    // clear list of files
     const fileList = $(button).parent().find('.file-list');
     fileList.empty();
 
     fileUpload.parent().find('#select-files').show();
     fileUpload.parent().find('#change-files').hide();
     fileUpload.parent().find('#remove-all-files').hide();
-  }
+  },
 });

@@ -2,135 +2,186 @@ import Control from 'can-control';
 import $ from 'jquery';
 
 import User from 'models/user';
-
 import template from './signup.stache';
 
+const DUMMY_USER = new User();
+
+/**
+ * Updates the provided input and its feedback field based on the provided error.
+ *
+ * @param {HTMLInputElement} input The form control to update.
+ * @param {HTMLElement} feedback The Bootstrap feedback field for this input.
+ * @param {string | undefined} error An error string if validation failed, otherwise a falsy value.
+ */
+function updateControl(input, feedback, error) {
+  error = error || '';
+
+  input.setCustomValidity(error);
+
+  input.classList.toggle('is-valid', !error);
+  input.classList.toggle('is-invalid', !!error);
+
+  feedback.textContent = error;
+}
+
+/**
+ * @typedef {Object} ValidationResult
+ * @property {string} value
+ * @property {string | undefined} error
+ */
+
+/**
+ * @returns {ValidationResult}
+ */
+function validateUsername() {
+  const input = document.getElementById('username');
+  const feedback = document.getElementById('username-feedback');
+
+  const value = input.value;
+  const error = DUMMY_USER.checkUsername(value);
+
+  updateControl(input, feedback, error);
+  return { value, error };
+}
+
+/**
+ * @returns {ValidationResult}
+ */
+function validateFullName() {
+  const input = document.getElementById('full-name');
+  const feedback = document.getElementById('full-name-feedback');
+
+  const value = input.value;
+  const error = DUMMY_USER.checkName(value);
+
+  updateControl(input, feedback, error);
+  return { value, error };
+}
+
+/**
+ * @param {boolean} emailRequired
+ * @returns {boolean}
+ */
+function isAnonymous(emailRequired) {
+  if (emailRequired) return false;
+
+  /** @type {HTMLInputElement} */
+  const anonymousInput = document.querySelector('[name="anonymous"]:checked');
+
+  return anonymousInput.value === '1';
+}
+
+/**
+ * @param {boolean} emailRequired
+ * @returns {ValidationResult}
+ */
+function validateMail(emailRequired) {
+  const input = document.getElementById('mail');
+  const feedback = document.getElementById('mail-feedback');
+
+  const value = input.value;
+  const anonymous = isAnonymous(emailRequired);
+  const error = anonymous ? undefined : DUMMY_USER.checkMail(value);
+
+  updateControl(input, feedback, error);
+  return { value, error };
+}
+
+/**
+ * @returns {string | undefined}
+ */
+function validatePassword() {
+  const passwordInput = document.getElementById('password');
+  const confirmInput = document.getElementById('confirm-password');
+  const feedback = document.getElementById('password-feedback');
+
+  const password = passwordInput.value;
+  const confirm = confirmInput.value;
+  const error = DUMMY_USER.checkPassword(password, confirm);
+
+  updateControl(passwordInput, feedback, error);
+  return { value: password, error: error };
+}
 
 export default Control.extend({
 
-  "init": function(element, options) {
+  'init': function (element, options) {
     this.emailRequired = options.appState.attr('emailRequired');
+
     $(element).hide();
     $(element).html(template({
       emailRequired: options.appState.attr('emailRequired'),
       userEmailDescription: options.appState.attr('userEmailDescription'),
-      userWithoutEmailDescription: options.appState.attr('userWithoutEmailDescription')
+      userWithoutEmailDescription: options.appState.attr('userWithoutEmailDescription'),
     }));
+
+    document.getElementById('username').addEventListener('blur', validateUsername);
+    document.getElementById('full-name').addEventListener('blur', validateFullName);
+    document.getElementById('mail').addEventListener('blur', () => validateMail(this.emailRequired));
+    document.getElementById('password').addEventListener('blur', validatePassword);
+    document.getElementById('confirm-password').addEventListener('blur', validatePassword);
+
     $(element).fadeIn();
   },
 
-
-  "#anonymous1 click" : function(){
+  '#optional-mail-accept click': function () {
     this.updateEmailControl();
   },
 
-  "#anonymous2 click" : function(){
+  '#optional-mail-reject click': function () {
     this.updateEmailControl();
   },
 
-  "updateEmailControl": function() {
-      if (!this.emailRequired){
-        const anonymousControl = $(this.element).find("[name='anonymous']:checked");
-        const anonymous = (anonymousControl.val() == "1");
-        const mail = $(this.element).find("[name='mail']");
-        if (anonymous){
-          mail.attr('disabled','disabled');
-        } else {
-          mail.removeAttr('disabled');
-        }
-      }
-   },
+  'updateEmailControl': function () {
+    if (!this.emailRequired) {
+      const mailInput = document.getElementById('mail');
+      mailInput.disabled = isAnonymous(this.emailRequired);
+    }
+  },
 
-  'submit': function(element, event) {
+  'submit': function (element, event) {
     event.preventDefault();
 
-    const that = this;
-    const user = new User();
+    const emailRequired = this.emailRequired;
+    const anonymous = isAnonymous(emailRequired);
 
-    // anonymous radiobutton
-    let anonymous = false;
+    const { error: usernameError } = validateUsername();
+    const { error: fullNameError } = validateFullName();
+    const { error: mailError } = validateMail(emailRequired);
+    const { error: passwordError } = validatePassword();
 
-    if (!this.emailRequired){
-      const anonymousControl = $(element).find("[name='anonymous']:checked");
-      anonymous = (anonymousControl.val() == "1");
-    }
-
-    // username
-    let username = $(element).find("[name='username']");
-    const usernameError = user.checkUsername(username.val());
-    this.updateControl(username, usernameError);
-
-    // fullname
-    const fullname = $(element).find("[name='full-name']");
-    const fullnameError = user.checkName(fullname.val());
-    this.updateControl(fullname, fullnameError);
-
-    // mail
-    let mailError = undefined;
-    const mail = $(element).find("[name='mail']");
-    if (!anonymous){
-      mailError = user.checkMail(mail.val());
-      this.updateControl(mail, mailError);
-    } else {
-      this.updateControl(mail, undefined);
-    }
-
-    // password
-    const newPassword = $(element).find("[name='new-password']");
-    const confirmNewPassword = $(element).find("[name='confirm-new-password']");
-    const passwordError = user.checkPassword(newPassword.val(), confirmNewPassword.val());
-    this.updateControl(newPassword, passwordError);
-
-    if (usernameError || fullnameError || mailError || passwordError) {
+    if (usernameError || fullNameError || mailError || passwordError) {
       return false;
     }
 
     $('#save').button('loading');
 
     $.ajax({
-      url: "api/v2/users/register",
-      type: "POST",
-      data: $(element).find("#signon-form").serialize(),
+      url: 'api/v2/users/register',
+      type: 'POST',
+      data: $(element).find('#signup-form').serialize(),
       dataType: 'json',
-      success: function(data) {
-        if (data.success == true) {
-          // shows success
-          let message = "";
-          if (!anonymous){
-            message = "Well done!</b> An email including the activation code has been sent to your address."
+      success: function (data) {
+        if (data.success) {
+          let message = '';
+          if (!anonymous) {
+            message = '<b>Well done!</b> An email including the activation code has been sent to your address.';
           } else {
-            message = "<b>Well done!</b> Your account is now active. <a href=\"/\">Login now</a>."
+            message = '<b>Well done!</b> Your account is now active. <a href="/">Login now</a>.';
           }
 
-          $('#signon-form').hide();
+          $('#signup-form').hide();
           $('#success-message').html(message);
-          $('#success-message').show();
+          $('#success-message').removeClass('d-none');
         } else {
-          // shows error msg
-          username = $('#signon-form').find("[name='username']");
-          that.updateControl(username, data.message);
+          updateControl(document.getElementById('username'), document.getElementById('username-feedback'), data.message);
           $('#save').button('reset');
-
         }
       },
-      error: function(message) {
+      error: function (message) {
         alert('failure: ' + message);
         $('#save').button('reset');
-      }
+      },
     });
-
   },
-
-  updateControl: function(control, error) {
-    if (error) {
-      control.removeClass('is-valid');
-      control.addClass('is-invalid');
-      control.closest('.mb-3').find('.invalid-feedback').html(error);
-    } else {
-      control.removeClass('is-invalid');
-      control.addClass('is-valid');
-      control.closest('.mb-3').find('.invalid-feedback').html('');
-    }
-  }
-
 });

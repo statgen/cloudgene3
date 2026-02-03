@@ -11,38 +11,38 @@ import showErrorDialog from 'helpers/error-dialog';
 
 export default Control.extend({
 
-  'init': function(element) {
+  'init': function (element) {
     Template.findAll({},
-      function(templates) {
+      function (templates) {
         $(element).html(template({
           templates: templates,
         }));
         $('#content').fadeIn();
       },
-      function(response) {
+      function (response) {
         new ErrorPage(element, response);
       });
   },
 
-  '.edit-btn click': function(el) {
+  '.edit-btn click': function (el) {
     const tr = $(el).closest('tr');
     const template = domData.get.call(tr[0], 'template');
     const oldText = template.attr('text');
     bootbox.confirm({
       title: template.attr('key'),
       message: '<form><textarea class="form-control span5" id="message" rows="10" name="message" width="30" height="20">' + oldText + '</textarea></form>',
-      callback: function(result) {
+      callback: function (result) {
         if (result) {
           const text = $('#message').val();
           template.attr('text', text);
           template.save(
-            function() {},
-            function(response) {
+            function () {},
+            function (response) {
               showErrorDialog('Operation failed', response);
             },
           );
         }
-      }
+      },
     });
-  }
+  },
 });
