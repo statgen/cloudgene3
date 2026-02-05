@@ -4,6 +4,7 @@ import cloudgene.mapred.core.Banner;
 import cloudgene.mapred.database.util.Database;
 import cloudgene.mapred.database.util.IRowMapper;
 import cloudgene.mapred.database.util.JdbcDataAccessObject;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +20,7 @@ public class BannerDao extends JdbcDataAccessObject {
 		super(database);
 	}
 
-	public Banner insert(Banner.Type type, String message) {
+	public Banner insert(@NotNull Banner.Type type, @NotNull String message) {
 		String insertSql = "INSERT INTO banners (type, message, position) "
 				+ "SELECT ?, ?, COALESCE(MAX(position), 0) + 1 FROM banners";
 
@@ -41,18 +42,18 @@ public class BannerDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public boolean update(Banner banner) {
+	public boolean update(@NotNull Banner banner) {
 		if (banner.getId() < 0) {
 			throw new IllegalArgumentException("Banner does not have an assigned id yet.");
 		}
 
 		try {
 			update(
-                    "UPDATE banners SET type = ?, message = ?, position = ? WHERE id = ?",
-                    banner.getType().toString(),
-                    banner.getMessage(),
-                    banner.getPosition(),
-                    banner.getId());
+					"UPDATE banners SET type = ?, message = ?, position = ? WHERE id = ?",
+					banner.getType().toString(),
+					banner.getMessage(),
+					banner.getPosition(),
+					banner.getId());
 
 			log.debug("update banner successful.");
 			return true;
@@ -92,7 +93,7 @@ public class BannerDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public boolean delete(Banner banner) {
+	public boolean delete(@NotNull Banner banner) {
 		try {
 			update(
 					"DELETE FROM banners WHERE id = ?",
@@ -112,7 +113,7 @@ public class BannerDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public boolean swap(Banner first, Banner second) {
+	public boolean swap(@NotNull Banner first, @NotNull Banner second) {
 		int delta = first.getPosition() - second.getPosition();
 		if (delta != -1 && delta != +1) {
 			// Elements are not consecutive and cannot be swapped.
@@ -140,7 +141,7 @@ public class BannerDao extends JdbcDataAccessObject {
 
 	private static class BannerMapper implements IRowMapper<Banner> {
 		@Override
-		public Banner mapRow(ResultSet rs, int row) throws SQLException {
+		public Banner mapRow(@NotNull ResultSet rs, int row) throws SQLException {
 			return new Banner(
 					Banner.Type.of(rs.getString("type")),
 					rs.getString("message"),
