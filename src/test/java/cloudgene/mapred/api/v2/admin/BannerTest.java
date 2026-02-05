@@ -3,9 +3,12 @@ package cloudgene.mapred.api.v2.admin;
 import cloudgene.mapred.util.CloudgeneClientRestAssured;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -18,40 +21,51 @@ public class BannerTest {
 
 	@Test
 	public void testBannerCreation() {
-		// Must be logged in.
+		// Banner listing endpoint is public (no authentication required).
 		RestAssured
 				.when()
-				.get("/api/v2/admin/banner")
+				.get("/api/v2/banner")
+				.then()
+				.statusCode(200)
+				.body(equalTo("[]")); // We haven't added any elements yet.
+
+		// Must be logged in to POST.
+		RestAssured
+				.given()
+				.contentType(ContentType.JSON)
+				.body(Map.of(
+						"type", "warning",
+						"message", "Test, test's \"; 1, 2, 3!"))
+				.when()
+				.post("/api/v2/admin/banner")
 				.then()
 				.statusCode(401); // Requires authentication.
 
-		// Non-admin user denied.
+		// Non-admin POST denied.
 		Header publicToken = client.loginAsPublicUser();
 		RestAssured
 				.given()
 				.header(publicToken)
+				.contentType(ContentType.JSON)
+				.body(Map.of(
+						"type", "warning",
+						"message", "Test, test's \"; 1, 2, 3!"))
 				.when()
-				.get("/api/v2/admin/banner")
+				.post("/api/v2/admin/banner")
 				.then()
 				.statusCode(403); // Requires higher permissions.
 
-		// Admin user allowed, but we haven't added anything yet.
+		// Admin user allowed.
 		Header adminToken = client.login("admin", "admin1978");
-		RestAssured
-				.given()
-				.header(adminToken)
-				.when()
-				.get("/api/v2/admin/banner")
-				.then()
-				.statusCode(200)
-				.body(equalTo("[]")); // Top-level element is an empty list.
 
 		// Add a warning
 		RestAssured
 				.given()
 				.header(adminToken)
-				.formParam("type", "warning")
-				.formParam("message", "Test, test's \"; 1, 2, 3!")
+				.contentType(ContentType.JSON)
+				.body(Map.of(
+						"type", "warning",
+						"message", "Test, test's \"; 1, 2, 3!"))
 				.when()
 				.post("/api/v2/admin/banner")
 				.then()
@@ -60,12 +74,10 @@ public class BannerTest {
 				.body("message", equalTo("Test, test's \"; 1, 2, 3!"))
 				.body("id", equalTo(1));
 
-		// Now there is one element
+		// Now there is one element (publicly visible)
 		RestAssured
-				.given()
-				.header(adminToken)
 				.when()
-				.get("/api/v2/admin/banner")
+				.get("/api/v2/banner")
 				.then()
 				.statusCode(200)
 				.body("", hasSize(1))
@@ -77,8 +89,10 @@ public class BannerTest {
 		RestAssured
 				.given()
 				.header(adminToken)
-				.formParam("type", "danger")
-				.formParam("message", "\" or \"\"=\"")
+				.contentType(ContentType.JSON)
+				.body(Map.of(
+						"type", "danger",
+						"message", "\" or \"\"=\""))
 				.when()
 				.post("/api/v2/admin/banner")
 				.then()
@@ -89,10 +103,8 @@ public class BannerTest {
 
 		// Now there are two elements, in order of addition.
 		RestAssured
-				.given()
-				.header(adminToken)
 				.when()
-				.get("/api/v2/admin/banner")
+				.get("/api/v2/banner")
 				.then()
 				.statusCode(200)
 				.body("", hasSize(2))
@@ -115,10 +127,8 @@ public class BannerTest {
 
 		// Only second element remains.
 		RestAssured
-				.given()
-				.header(adminToken)
 				.when()
-				.get("/api/v2/admin/banner")
+				.get("/api/v2/banner")
 				.then()
 				.statusCode(200)
 				.body("", hasSize(1))
@@ -139,8 +149,10 @@ public class BannerTest {
 		RestAssured
 				.given()
 				.header(adminToken)
-				.formParam("type", "warning")
-				.formParam("message", "!@#$%^&*")
+				.contentType(ContentType.JSON)
+				.body(Map.of(
+						"type", "warning",
+						"message", "!@#$%^&*"))
 				.when()
 				.post("/api/v2/admin/banner")
 				.then()
@@ -151,10 +163,8 @@ public class BannerTest {
 
 		// Two elements again.
 		RestAssured
-				.given()
-				.header(adminToken)
 				.when()
-				.get("/api/v2/admin/banner")
+				.get("/api/v2/banner")
 				.then()
 				.statusCode(200)
 				.body("", hasSize(2))
@@ -170,8 +180,10 @@ public class BannerTest {
 		RestAssured
 				.given()
 				.header(adminToken)
-				.formParam("id1", 2)
-				.formParam("id2", 3)
+				.contentType(ContentType.JSON)
+				.body(Map.of(
+						"id1", 2,
+						"id2", 3))
 				.when()
 				.post("/api/v2/admin/banner/swap")
 				.then()
@@ -179,10 +191,8 @@ public class BannerTest {
 
 		// The elements have swapped.
 		RestAssured
-				.given()
-				.header(adminToken)
 				.when()
-				.get("/api/v2/admin/banner")
+				.get("/api/v2/banner")
 				.then()
 				.statusCode(200)
 				.body("", hasSize(2))
@@ -192,6 +202,33 @@ public class BannerTest {
 				.and()
 				.body("[1].type", equalTo("danger"))
 				.body("[1].message", equalTo("\" or \"\"=\""))
+				.body("[1].id", equalTo(2));
+
+		// Let's update one element.
+		RestAssured
+				.given()
+				.header(adminToken)
+				.contentType(ContentType.JSON)
+				.body(Map.of(
+						"message", "fresh"))
+				.when()
+				.put("/api/v2/admin/banner/2")
+				.then()
+				.statusCode(204);
+
+		// The element is updated.
+		RestAssured
+				.when()
+				.get("/api/v2/banner")
+				.then()
+				.statusCode(200)
+				.body("", hasSize(2))
+				.body("[0].type", equalTo("warning"))
+				.body("[0].message", equalTo("!@#$%^&*"))
+				.body("[0].id", equalTo(3))
+				.and()
+				.body("[1].type", equalTo("danger"))
+				.body("[1].message", equalTo("fresh")) // updated value here
 				.body("[1].id", equalTo(2));
 	}
 }
