@@ -1,6 +1,6 @@
 package cloudgene.mapred.database;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.InputStream;
 
@@ -15,20 +15,17 @@ import jakarta.inject.Inject;
 
 @MicronautTest
 public class DatabaseUpdateTest {
-	
-	@Inject
-	TestApplication application;	
-	
-	@Test
-	public void testVersionNoUpdateFromDB()   {
 
+	@Inject
+	TestApplication application;
+
+	@Test
+	public void testVersionNoUpdateFromDB() {
 		Database database = application.getDatabase();
 		InputStream is = Application.class.getResourceAsStream("/updates.sql");
-		DatabaseUpdater databaseUpdater = new DatabaseUpdater(database, null, is,
-				Application.VERSION);
-	
-		assertEquals(false, databaseUpdater.needUpdate());
 
+		DatabaseUpdater databaseUpdater = new DatabaseUpdater(database, null, is, Application.VERSION);
+
+		assertFalse(databaseUpdater.needUpdate());
 	}
-
 }

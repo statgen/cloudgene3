@@ -1,16 +1,16 @@
 /*******************************************************************************
  * Copyright (C) 2009-2016 Lukas Forer and Sebastian Schönherr
- *  
+ *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by 
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
- *  
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- *  
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
@@ -41,50 +41,42 @@ public class DatabaseUpdater {
 
 	protected static final Logger log = LoggerFactory.getLogger(DatabaseUpdater.class);
 
-	private DatabaseConnector connector;
-
-	private Database database;
-
-	private String oldVersion;
-
-	private String currentVersion;
-
-	private String filename;
-
-	private InputStream updateFileAsStream;
-
-	private boolean needUpdate = false;
-
-	private Map<String, IUpdateListener> listeners = new HashMap<String, IUpdateListener>();
+	private final DatabaseConnector connector;
+	private final Database database;
+	private final String oldVersion;
+	private final String currentVersion;
+	private final String filename;
+	private final InputStream updateFileAsStream;
+	private final boolean needUpdate;
+	private final Map<String, IUpdateListener> listeners;
 
 	public DatabaseUpdater(Database database, String filename, InputStream updateFileAsStream, String currentVersion) {
-
 		this.filename = filename;
 		this.database = database;
 		this.connector = database.getConnector();
 		this.updateFileAsStream = updateFileAsStream;
 		this.currentVersion = currentVersion;
+		this.listeners = new HashMap<>();
 
 		if (isVersionTableAvailable(database)) {
-
-			oldVersion = readVersionDB();
+			String oldVersion = readVersionDB();
 			log.info("Read current DB version: " + oldVersion);
 
-			// should not happen, since an entry is created when metadata table
-			// exists
+			// Should not happen, since an entry is created when metadata table exists.
 			if (oldVersion == null) {
 				oldVersion = readVersion(filename);
 				log.info("Read curent version from DB was not successful, read it from file: " + oldVersion);
 			}
 
+			this.oldVersion = oldVersion;
 		} else {
 			// check also file for backwards compatibility
-			oldVersion = readVersion(filename);
+			this.oldVersion = readVersion(filename);
 			log.info("Read current version from file: " + oldVersion);
 		}
+
 		log.info("Current app version: " + currentVersion);
 		needUpdate = (compareVersion(currentVersion, oldVersion) > 0);
-
 	}
 
 	public void addUpdate(String version, IUpdateListener listener) {
@@ -125,7 +117,6 @@ public class DatabaseUpdater {
 
 	public boolean update() {
 		if (needUpdate) {
-
 			log.info("Updating database from " + oldVersion + " to " + currentVersion + "...");
 
 			try {
@@ -146,11 +137,9 @@ public class DatabaseUpdater {
 			}
 
 			log.info("Updating database was successful.");
-
 		}
 
 		return true;
-
 	}
 
 	public boolean needUpdate() {
@@ -158,9 +147,7 @@ public class DatabaseUpdater {
 	}
 
 	public void writeVersion(String newVersion) {
-
 		try {
-
 			if (!isVersionTableAvailable(database)) {
 				createVersionTable(database);
 			}
@@ -185,31 +172,20 @@ public class DatabaseUpdater {
 	}
 
 	public String readVersion(String versionFile) {
-
 		File file = new File(versionFile);
 
 		if (file.exists()) {
-
 			try {
-
 				return readFileAsString(versionFile);
-
 			} catch (Exception e) {
-
 				return "0.0.0";
-
 			}
-
 		} else {
-
 			return "0.0.0";
-
 		}
-
 	}
 
 	public String readVersionDB() {
-
 		String version = null;
 
 		try {
@@ -229,11 +205,11 @@ public class DatabaseUpdater {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+
 		return version;
 	}
 
 	public static String readFileAsString(String filename) throws java.io.IOException, URISyntaxException {
-
 		InputStream is = new FileInputStream(filename);
 
 		DataInputStream in = new DataInputStream(is);
@@ -246,7 +222,6 @@ public class DatabaseUpdater {
 		}
 
 		in.close();
-
 		return builder.toString();
 	}
 
@@ -261,9 +236,7 @@ public class DatabaseUpdater {
 		String version = null;
 
 		while ((strLine = br.readLine()) != null) {
-
 			if (strLine.startsWith("--")) {
-
 				if (builder.length() > 0) {
 					executeSQLFile(builder.toString(), version);
 					builder.setLength(0);
@@ -282,7 +255,6 @@ public class DatabaseUpdater {
 						listener.beforeUpdate(database);
 					}
 				}
-
 			}
 
 			if (reading) {
@@ -295,13 +267,10 @@ public class DatabaseUpdater {
 		executeSQLFile(builder.toString(), version);
 
 		in.close();
-
 		return builder.toString();
-
 	}
 
 	public void executeSQLFile(String sqlContent, String version) throws SQLException {
-
 		String cleanedSQL = sqlContent
 				.replaceAll("(?s)/\\*.*?\\*/", "") // remove block comments
 				.replaceAll("(?m)^\\s*--.*?$", "") // remove full line comments
@@ -317,27 +286,22 @@ public class DatabaseUpdater {
 			log.info("DB SQL Update " + version + " finished");
 			writeVersion(version);
 		}
-
 	}
 
 	public static int compareVersion(String version1, String version2) {
+		String[] parts1 = version1.split("-", 2);
+		String[] parts2 = version2.split("-", 2);
 
-		String parts1[] = version1.split("-", 2);
-		String parts2[] = version2.split("-", 2);
-
-		String tiles1[] = parts1[0].split("\\.");
-		String tiles2[] = parts2[0].split("\\.");
+		String[] tiles1 = parts1[0].split("\\.");
+		String[] tiles2 = parts2[0].split("\\.");
 
 		for (int i = 0; i < tiles1.length; i++) {
 			int number1 = Integer.parseInt(tiles1[i].trim());
 			int number2 = Integer.parseInt(tiles2[i].trim());
 
 			if (number1 != number2) {
-
 				return number1 > number2 ? 1 : -1;
-
 			}
-
 		}
 
 		if (parts1.length > 1) {
@@ -353,7 +317,6 @@ public class DatabaseUpdater {
 		}
 
 		return 0;
-
 	}
 
 	public boolean isVersionTableAvailable(Database database) {
@@ -382,5 +345,4 @@ public class DatabaseUpdater {
 			e.printStackTrace();
 		}
 	}
-
 }

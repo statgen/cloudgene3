@@ -11,10 +11,10 @@ public class DatabaseConnectorFactory {
 
 		String driver = settings.get("driver");
 
-		if (driver == null){
+		if (driver == null) {
 			return null;
 		}
-		
+
 		if (driver.equals("h2")) {
 
 			String database = settings.get("database");
@@ -48,5 +48,4 @@ public class DatabaseConnectorFactory {
 
 		}
 	}
-
 }
