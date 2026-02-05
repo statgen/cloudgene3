@@ -3,16 +3,14 @@ package cloudgene.mapred.server.auth;
 import java.util.Arrays;
 import java.util.Date;
 
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.reactivestreams.Publisher;
 
-import cloudgene.mapred.core.Template;
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.database.UserDao;
 import cloudgene.mapred.server.Application;
 import cloudgene.mapred.server.services.UserService;
 import cloudgene.mapred.util.HashUtil;
-import cloudgene.mapred.util.MailUtil;
 import io.micronaut.context.annotation.Replaces;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
@@ -37,69 +35,66 @@ public class OAuthAuthenticationMapper extends DefaultOpenIdAuthenticationMapper
 
 	private static final String MESSAGE_ACCOUNT_LOCKED = "The user account is locked for %d minutes. Too many failed logins.";
 
-	public static final int MAX_LOGIN_ATTEMMPTS = 5;
+	public static final int MAX_LOGIN_ATTEMPTS = 5;
 
 	public static final int LOCKING_TIME_MIN = 30;
 
 	@Inject
 	protected Application application;
 
-	public OAuthAuthenticationMapper(OpenIdAdditionalClaimsConfiguration openIdAdditionalClaimsConfiguration,
+	public OAuthAuthenticationMapper(
+			OpenIdAdditionalClaimsConfiguration openIdAdditionalClaimsConfiguration,
 			AuthenticationModeConfiguration authenticationModeConfiguration) {
+
 		super(openIdAdditionalClaimsConfiguration, authenticationModeConfiguration);
 	}
 
 	@Override
 	@NonNull
-	public Publisher<AuthenticationResponse> createAuthenticationResponse(String providerName, OpenIdTokenResponse tokenResponse,
-			OpenIdClaims openIdClaims, @Nullable State state) {
+	public Publisher<AuthenticationResponse> createAuthenticationResponse(
+			String providerName,
+			OpenIdTokenResponse tokenResponse,
+			OpenIdClaims openIdClaims,
+			@Nullable State state) {
 
 		return Mono.<AuthenticationResponse>create(emitter -> {
-		
-		
-		String email = openIdClaims.getEmail();
+			String email = openIdClaims.getEmail();
 
-		UserDao dao = new UserDao(application.getDatabase());
-		User user = dao.findByMail(email);
-		
-		if (user != null) {
+			UserDao dao = new UserDao(application.getDatabase());
+			User user = dao.findByMail(email);
 
-			if (!user.isActive()) {
-				throw AuthenticationResponse.exception(MESSAGE_ACCOUNT_IS_INACTIVE);
-			}
-
-			if (user.getLoginAttempts() >= MAX_LOGIN_ATTEMMPTS) {
-				if (user.getLockedUntil() == null || user.getLockedUntil().after(new Date())) {
-
-					throw AuthenticationResponse.exception(String.format(MESSAGE_ACCOUNT_LOCKED, LOCKING_TIME_MIN));
-
-				} else {
-					// penalty time is over. set to zero
-					user.setLoginAttempts(0);
+			if (user != null) {
+				if (!user.isActive()) {
+					throw AuthenticationResponse.exception(MESSAGE_ACCOUNT_IS_INACTIVE);
 				}
+
+				if (user.getLoginAttempts() >= MAX_LOGIN_ATTEMPTS) {
+					if (user.getLockedUntil() == null || user.getLockedUntil().after(new Date())) {
+
+						throw AuthenticationResponse.exception(String.format(MESSAGE_ACCOUNT_LOCKED, LOCKING_TIME_MIN));
+
+					} else {
+						// penalty time is over. set to zero
+						user.setLoginAttempts(0);
+					}
+				}
+
+				user.setLoginAttempts(0);
+				user.setLastLogin(new Date());
+				dao.update(user);
+
+				emitter.success(AuthenticationResponse.success(user.getUsername(), Arrays.asList(user.getRoles())));
+			} else {
+				user = new User();
+				user.setUsername(email);
+				user.setFullName(openIdClaims.getName());
+				user.setMail(email);
+				user.setRoles(new String[] { UserService.DEFAULT_ROLE });
+				user.setPassword(HashUtil.hashPassword(RandomStringUtils.secure().nextAlphanumeric(30)));
+				dao.insert(user);
+
+				emitter.success(AuthenticationResponse.success(user.getUsername(), Arrays.asList(user.getRoles())));
 			}
-
-			user.setLoginAttempts(0);
-			user.setLastLogin(new Date());
-			dao.update(user);
-
-	
-			emitter.success(AuthenticationResponse.success(user.getUsername(), Arrays.asList(user.getRoles())));
-
-		} else {
-
-			user = new User();
-			user.setUsername(email);
-			user.setFullName(openIdClaims.getName());
-			user.setMail(email);
-			user.setRoles(new String[] { UserService.DEFAULT_ROLE });
-			user.setPassword(HashUtil.hashPassword(RandomStringUtils.randomAlphanumeric(30)));
-			dao.insert(user);
-			
-			emitter.success(AuthenticationResponse.success(user.getUsername(), Arrays.asList(user.getRoles())));
-
-		}
-
-		});	
+		});
 	}
 }

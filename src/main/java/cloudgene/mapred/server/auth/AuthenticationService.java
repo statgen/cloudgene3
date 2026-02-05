@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -49,8 +49,8 @@ public class AuthenticationService {
 	}
 
 	public User getUserByAuthentication(Authentication authentication, AuthenticationType authenticationType) {
+		User user;
 
-		User user = null;
 		if (authentication != null) {
 			UserDao userDao = new UserDao(application.getDatabase());
 			user = userDao.findByUsername(authentication.getName());
@@ -69,41 +69,32 @@ public class AuthenticationService {
 							return user;
 						}
 					}
-
 				} else if (tokenType.equalsIgnoreCase(AuthenticationType.ACCESS_TOKEN.toString())) {
-
 					if (authenticationType == AuthenticationType.ACCESS_TOKEN
 							|| authenticationType == AuthenticationType.ALL_TOKENS) {
 						return user;
 					}
-
 				}
-
 			} else {
-
 				if (authenticationType == AuthenticationType.ACCESS_TOKEN
 						|| authenticationType == AuthenticationType.ALL_TOKENS) {
 					return user;
 				}
-
 			}
-
 			throw new AuthorizationException(authentication);
-
 		}
-
 		throw new AuthenticationException();
-
 	}
 
 	public ApiToken createApiToken(User user, int lifetime) {
-
-		String hash = RandomStringUtils.randomAlphanumeric(30);
+		String hash = RandomStringUtils.secure().nextAlphabetic(30);
 
 		Map<String, Object> attributes = new HashMap<String, Object>();
+
 		attributes.put(ATTRIBUTE_TOKEN_TYPE, AuthenticationType.API_TOKEN.toString());
 		attributes.put(ATTRIBUTE_API_HASH, hash);
-		// addition attributes that are needed by imputationbot
+
+		// Additional attributes needed by imputationbot
 		attributes.put("username", user.getUsername());
 		attributes.put("name", user.getFullName());
 		attributes.put("mail", user.getMail());
@@ -115,7 +106,6 @@ public class AuthenticationService {
 		Date expiresOn = new Date(System.currentTimeMillis() + (lifetime * 1000L));
 
 		return new ApiToken(token.get(), hash, expiresOn);
-
 	}
 
 	public Mono<ValidatedApiTokenResponse> validateApiToken(String token) {
@@ -162,10 +152,7 @@ public class AuthenticationService {
 					this.subscription = subscription;
 					subscription.request(1);
 				}
-
 			});
 		}).single();
-
 	}
-
 }

@@ -341,6 +341,12 @@
 			<scope>compile</scope>
 		</dependency>
 
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.15.0</version>
+        </dependency>
+
 	</dependencies>
 
 	<!-- **** Build **** -->
