@@ -19,7 +19,7 @@ import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.authentication.AuthenticationException;
 import io.micronaut.security.authentication.AuthorizationException;
 import io.micronaut.security.token.jwt.generator.JwtTokenGenerator;
-import io.micronaut.security.token.jwt.validator.JwtTokenValidator;
+import io.micronaut.security.token.jwt.validator.ReactiveJsonWebTokenValidator;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import reactor.core.publisher.Mono;
@@ -38,7 +38,7 @@ public class AuthenticationService {
 	protected JwtTokenGenerator generator;
 
 	@Inject
-	protected JwtTokenValidator validator;
+	protected ReactiveJsonWebTokenValidator<?, ?> validator;
 
 	public static String ATTRIBUTE_TOKEN_TYPE = "token_type";
 
