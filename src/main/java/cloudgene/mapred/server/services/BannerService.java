@@ -23,7 +23,7 @@ public class BannerService {
 	}
 
 	@Nullable
-	public Banner add(@NotNull String type, @NotNull String message) {
+	public Banner create(@NotNull String type, @NotNull String message) {
 		// Raises IllegalArgumentException if null or malformed.
 		Banner.Type bannerType = Banner.Type.of(type);
 
@@ -37,8 +37,48 @@ public class BannerService {
 		return banner;
 	}
 
+	public boolean update(
+			@Nullable Banner banner,
+			@Nullable Banner.Type type,
+			@Nullable String message) {
+
+		if (banner == null || banner.getId() < 0 || banner.getPosition() < 0) {
+			return false;
+		}
+
+		if (type != null) {
+			banner.setType(type);
+		}
+
+		if (message != null && !message.isBlank()) {
+			message = message.trim();
+			banner.setMessage(message);
+		}
+
+		BannerDao dao = new BannerDao(application.getDatabase());
+		return dao.update(banner);
+	}
+
+	public boolean update(
+			int id,
+			@Nullable String type,
+			@Nullable String message) {
+
+		Banner.Type bannerType;
+		if (type != null && !type.isBlank()) {
+			bannerType = Banner.Type.of(type);
+		} else {
+			bannerType = null;
+		}
+
+		BannerDao dao = new BannerDao(application.getDatabase());
+		Banner banner = dao.findById(id);
+
+		return update(banner, bannerType, message);
+	}
+
 	public boolean delete(Banner banner) {
-		if (banner == null) {
+		if (banner == null || banner.getId() < 0 || banner.getPosition() < 0) {
 			return false;
 		}
 
@@ -55,7 +95,11 @@ public class BannerService {
 	}
 
 	public boolean swap(Banner first, Banner second) {
-		if (first == null || second == null) {
+		if (first == null || first.getId() < 0 || first.getPosition() < 0) {
+			return false;
+		}
+
+		if (second == null || second.getId() < 0 || second.getPosition() < 0) {
 			return false;
 		}
 
