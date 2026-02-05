@@ -3,11 +3,14 @@
 set -euxo pipefail
 set -m # Sets JOB CONTROL mode, needed for fg
 
-# Rebuild front-end
-(cd src/main/html/webapp && rm -rf dist && npm run build)
+# Bust front-end cache
+rm -rf src/main/html/webapp/dist
+
+# Bust back-end cache
+rm -rf target
 
 # Rebuild bundle
-rm -rf target && mvn install -DskipTests
+mvn install -DskipTests
 
 # Set Cloudgene up
 cd target/cloudgene-*-statgen.*/
