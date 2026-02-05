@@ -3,7 +3,6 @@ package cloudgene.mapred.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +34,11 @@ public class TemplateDao extends JdbcDataAccessObject {
 			update(sql.toString(), params);
 
 			log.debug("insert html snippet successful.");
-
+			return true;
 		} catch (SQLException e) {
 			log.error("insert  html snippet  failed.", e);
 			return false;
 		}
-
-		return true;
 	}
 
 	public boolean update(Template snippet) {
@@ -49,7 +46,6 @@ public class TemplateDao extends JdbcDataAccessObject {
 		sql.append("update html_snippets SET text = ? where `key` = ? ");
 
 		try {
-
 			Object[] params = new Object[2];
 			params[0] = snippet.getText();
 			params[1] = snippet.getKey();
@@ -57,27 +53,20 @@ public class TemplateDao extends JdbcDataAccessObject {
 			update(sql.toString(), params);
 
 			log.debug("update html snippet successful.");
-
+			return true;
 		} catch (SQLException e) {
 			log.error("update  html snippet  failed.", e);
 			return false;
 		}
-
-		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<Template> findAll() {
-
 		StringBuilder sql = new StringBuilder();
 		sql.append("select * ");
 		sql.append("from html_snippets ");
 
-		List<Template> result = new Vector<Template>();
-
 		try {
-
-			result = query(sql.toString(), new TemplateMapper());
+			List<Template> result = query(sql.toString(), new TemplateMapper());
 
 			log.debug("find all html snippets successful. results: "
 					+ result.size());
@@ -90,7 +79,6 @@ public class TemplateDao extends JdbcDataAccessObject {
 	}
 
 	public Template findByKey(String key) {
-
 		StringBuffer sql = new StringBuffer();
 
 		sql.append("select * ");
@@ -100,29 +88,20 @@ public class TemplateDao extends JdbcDataAccessObject {
 		Object[] params = new Object[1];
 		params[0] = key;
 
-		Template result = null;
-
 		try {
-			result = (Template) queryForObject(sql.toString(), params,
-					new TemplateMapper());
-
+			Template result = queryForObject(sql.toString(), params, new TemplateMapper());
 			log.debug("find html snippet by key '" + key + "' successful.");
-
+			return result;
 		} catch (SQLException e1) {
-
 			log.error("find html snippet by key '" + key + "'  failed.", e1);
-
+			return null;
 		}
-		return result;
 	}
 
-	class TemplateMapper implements IRowMapper {
-
+	static class TemplateMapper implements IRowMapper<Template> {
 		@Override
-		public Object mapRow(ResultSet rs, int row) throws SQLException {
+		public Template mapRow(ResultSet rs, int row) throws SQLException {
 			return new Template(rs.getString("key"), rs.getString("text"));
 		}
-
 	}
-
 }

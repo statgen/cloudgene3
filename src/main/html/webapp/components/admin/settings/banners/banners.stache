@@ -1,0 +1,84 @@
+<div class="mb-5">
+  <h2>Banners</h2>
+  <p>Update and customize banners displayed on the homepage.</p>
+</div>
+
+<table class="table table-striped table-bordered" id="banners">
+
+  <colgroup>
+    <col style="width: 4rem;">
+    <col style="width: 10rem;">
+    <col>
+    <col style="width: 20rem;">
+  </colgroup>
+
+  <thead>
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">Type</th>
+      <th scope="col">Message</th>
+      <th scope="col">Actions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {{#banners}}
+      <tr {{data 'banner'}} class="{{rowClass}}">
+        <th scope="row">
+          {{id}}
+        </th>
+        <td>
+          {{type}}
+        </td>
+        <td>
+          {{message}}
+        </td>
+        <td>
+          <button type="button" class="up-btn btn btn-sm btn-outline-dark">
+            <i class="fas fa-arrow-up"></i> Up
+          </button>
+          <button type="button" class="down-btn btn btn-sm btn-outline-dark">
+            <i class="fas fa-arrow-down"></i> Down
+          </button>
+          <button type="button" class="edit-btn btn btn-sm btn-outline-primary">
+            <i class="fas fa-pencil-alt"></i> Edit
+          </button>
+          <button type="button" class="delete-btn btn btn-sm btn-outline-danger">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </td>
+      </tr>
+    {{/banners}}
+
+    <tr id="add-row" class="table-warning">
+      <td>
+      </td>
+      <td>
+        <select name="add-type" id="add-type" class="form-select" required>
+          <option value="warning" selected>
+            <div class="alert alert-warning">Warning</div>
+          </option>
+          <option value="danger">
+            <div class="alert alert-danger">Danger</div>
+          </option>
+        </select>
+      </td>
+      <td>
+        <textarea
+          name="add-message"
+          id="add-message"
+          type="text"
+          autocomplete="off"
+          class="form-control"
+          required
+        ></textarea>
+        <div id="add-message-feedback" class="invalid-feedback"></div>
+      </td>
+      <td>
+        <button type="button" id="add-submit" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Add
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>

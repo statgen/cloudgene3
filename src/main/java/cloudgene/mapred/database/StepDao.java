@@ -3,7 +3,6 @@ package cloudgene.mapred.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Vector;
 
 import cloudgene.mapred.jobs.Step;
 import org.slf4j.Logger;
@@ -50,9 +49,7 @@ public class StepDao extends JdbcDataAccessObject {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<Step> findAllByJob(CloudgeneJob job) {
-
 		StringBuilder sql = new StringBuilder();
 		sql.append("select * ");
 		sql.append("from steps ");
@@ -62,11 +59,8 @@ public class StepDao extends JdbcDataAccessObject {
 		Object[] params = new Object[1];
 		params[0] = job.getId();
 
-		List<Step> result = new Vector<Step>();
-
 		try {
-
-			result = query(sql.toString(), params, new CloudgeneStepMapper());
+			List<Step> result = query(sql.toString(), params, new CloudgeneStepMapper());
 
 			// load messages for all steps
 			MessageDao messageDao = new MessageDao(database);
@@ -85,18 +79,15 @@ public class StepDao extends JdbcDataAccessObject {
 		}
 	}
 
-	class CloudgeneStepMapper implements IRowMapper {
-
+	static class CloudgeneStepMapper implements IRowMapper<Step> {
 		@Override
-		public Object mapRow(ResultSet rs, int row) throws SQLException {
-
+		public Step mapRow(ResultSet rs, int row) throws SQLException {
 			Step step = new Step();
+
 			step.setId(rs.getInt("id"));
 			step.setName(rs.getString("name"));
+
 			return step;
-
 		}
-
 	}
-
 }

@@ -3,7 +3,6 @@ package cloudgene.mapred.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Vector;
 
 import cloudgene.mapred.jobs.*;
 import org.slf4j.Logger;
@@ -146,7 +145,6 @@ public class JobDao extends JdbcDataAccessObject {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAllByUser(User user) {
 
 		StringBuilder sql = new StringBuilder();
@@ -159,11 +157,8 @@ public class JobDao extends JdbcDataAccessObject {
 		params[0] = user.getId();
 		params[1] = AbstractJob.STATE_DELETED;
 
-		List<AbstractJob> result = new Vector<AbstractJob>();
-
 		try {
-
-			result = query(sql.toString(), params, new JobMapper());
+			List<AbstractJob> result = query(sql.toString(), params, new JobMapper());
 
 			log.debug("find all jobs successful. results: " + result.size());
 
@@ -174,7 +169,6 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAllByUser(User user, int offset, int limit) {
 
 		StringBuilder sql = new StringBuilder();
@@ -190,11 +184,8 @@ public class JobDao extends JdbcDataAccessObject {
 		params[2] = offset;
 		params[3] = limit;
 
-		List<AbstractJob> result = new Vector<AbstractJob>();
-
 		try {
-
-			result = query(sql.toString(), params, new JobMapper());
+			List<AbstractJob> result = query(sql.toString(), params, new JobMapper());
 
 			log.debug("find all jobs successful. results: " + result.size());
 
@@ -216,11 +207,8 @@ public class JobDao extends JdbcDataAccessObject {
 		params[0] = user.getId();
 		params[1] = AbstractJob.STATE_DELETED;
 
-		int result = 0;
-
 		try {
-
-			result = (Integer) queryForObject(sql.toString(), params, new IntegerMapper());
+			int result = queryForObject(sql.toString(), params, new IntegerMapper());
 
 			log.debug("count all jobs successful. results: " + result);
 
@@ -231,7 +219,6 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAll() {
 		// log.info("finding all jobs");
 
@@ -241,11 +228,8 @@ public class JobDao extends JdbcDataAccessObject {
 		sql.append("join `user` on job.user_id = `user`.id ");
 		sql.append("order by job.id asc ");
 
-		List<AbstractJob> result = new Vector<AbstractJob>();
-
 		try {
-
-			result = query(sql.toString(), new JobAndUserMapper());
+			List<AbstractJob> result = query(sql.toString(), new JobAndUserMapper());
 
 			log.debug("find all jobs successful. results: " + result.size());
 
@@ -256,7 +240,6 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAllNotRetiredJobs() {
 
 		StringBuilder sql = new StringBuilder();
@@ -265,8 +248,6 @@ public class JobDao extends JdbcDataAccessObject {
 		sql.append("join `user` on job.user_id = `user`.id ");
 		sql.append("where state  not in (?,?,?,?,?,?,?) ");
 		sql.append("order by job.id desc ");
-
-		List<AbstractJob> result = new Vector<AbstractJob>();
 
 		Object[] params = new Object[7];
 		params[0] = AbstractJob.STATE_WAITING;
@@ -278,8 +259,7 @@ public class JobDao extends JdbcDataAccessObject {
 		params[6] = AbstractJob.STATE_DELETED;
 
 		try {
-
-			result = query(sql.toString(), params, new JobAndUserMapper());
+			List<AbstractJob> result = query(sql.toString(), params, new JobAndUserMapper());
 
 			log.debug("find all jobs successful. results: " + result.size());
 
@@ -290,7 +270,6 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAllNotNotifiedJobs() {
 
 		StringBuilder sql = new StringBuilder();
@@ -300,8 +279,6 @@ public class JobDao extends JdbcDataAccessObject {
 		sql.append("where state != ? AND state != ? AND state != ? AND state != ? ");
 		sql.append("order by job.id desc ");
 
-		List<AbstractJob> result = new Vector<AbstractJob>();
-
 		Object[] params = new Object[4];
 		params[0] = AbstractJob.STATE_RETIRED;
 		params[1] = AbstractJob.STATE_SUCESS_AND_NOTIFICATION_SEND;
@@ -309,8 +286,7 @@ public class JobDao extends JdbcDataAccessObject {
 		params[3] = AbstractJob.STATE_DELETED;
 
 		try {
-
-			result = query(sql.toString(), params, new JobAndUserMapper());
+			List<AbstractJob> result = query(sql.toString(), params, new JobAndUserMapper());
 
 			log.debug("find all jobs successful. results: " + result.size());
 
@@ -321,7 +297,6 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAllNotifiedJobs() {
 
 		StringBuilder sql = new StringBuilder();
@@ -335,11 +310,8 @@ public class JobDao extends JdbcDataAccessObject {
 		params[0] = AbstractJob.STATE_SUCESS_AND_NOTIFICATION_SEND;
 		params[1] = AbstractJob.STATE_FAILED_AND_NOTIFICATION_SEND;
 
-		List<AbstractJob> result = new Vector<AbstractJob>();
-
 		try {
-
-			result = query(sql.toString(), params, new JobAndUserMapper());
+			List<AbstractJob> result = query(sql.toString(), params, new JobAndUserMapper());
 
 			log.debug("find all old jobs successful. results: " + result.size());
 
@@ -350,7 +322,6 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAllOlderThan(long time, int state) {
 
 		StringBuilder sql = new StringBuilder();
@@ -364,11 +335,8 @@ public class JobDao extends JdbcDataAccessObject {
 		params[0] = state;
 		params[1] = time;
 
-		List<AbstractJob> result = new Vector<AbstractJob>();
-
 		try {
-
-			result = query(sql.toString(), params, new JobAndUserMapper());
+			List<AbstractJob> result = query(sql.toString(), params, new JobAndUserMapper());
 
 			log.debug("find all old jobs successful. results: " + result.size());
 
@@ -379,7 +347,6 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAllByState(int state) {
 
 		StringBuilder sql = new StringBuilder();
@@ -392,11 +359,8 @@ public class JobDao extends JdbcDataAccessObject {
 		Object[] params = new Object[1];
 		params[0] = state;
 
-		List<AbstractJob> result = new Vector<AbstractJob>();
-
 		try {
-
-			result = query(sql.toString(), params, new JobAndUserMapper());
+			List<AbstractJob> result = query(sql.toString(), params, new JobAndUserMapper());
 
 			log.debug("find all old jobs successful. results: " + result.size());
 
@@ -466,12 +430,11 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	class JobMapper implements IRowMapper {
-
+	static class JobMapper implements IRowMapper<AbstractJob> {
 		@Override
 		public AbstractJob mapRow(ResultSet rs, int row) throws SQLException {
-
 			AbstractJob job = new CloudgeneJob();
+
 			job.setId(rs.getString("job.id"));
 			job.setName(rs.getString("job.name"));
 			job.setState(rs.getInt("job.state"));
@@ -485,18 +448,15 @@ public class JobDao extends JdbcDataAccessObject {
 
 			return job;
 		}
-
 	}
 
-	class JobAndUserMapper implements IRowMapper {
+	static class JobAndUserMapper implements IRowMapper<AbstractJob> {
 
-		private JobMapper jobMaper = new JobMapper();
-
-		private UserMapper userMapper = new UserMapper();
+		private final JobMapper jobMaper = new JobMapper();
+		private final UserMapper userMapper = new UserMapper();
 
 		@Override
-		public Object mapRow(ResultSet rs, int row) throws SQLException {
-
+		public AbstractJob mapRow(ResultSet rs, int row) throws SQLException {
 			AbstractJob job = jobMaper.mapRow(rs, row);
 
 			User user = userMapper.mapRow(rs, row);
@@ -504,11 +464,9 @@ public class JobDao extends JdbcDataAccessObject {
 
 			return job;
 		}
-
 	}
 
 	public String trimToLength(String string, int maxLength) {
 		return string.substring(0, Math.min(string.length(), maxLength));
 	}
-
 }

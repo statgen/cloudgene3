@@ -3,7 +3,6 @@ package cloudgene.mapred.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Vector;
 
 import cloudgene.mapred.jobs.Step;
 import org.slf4j.Logger;
@@ -28,7 +27,6 @@ public class MessageDao extends JdbcDataAccessObject {
 		sql.append("values (?,?,?,?)");
 
 		try {
-
 			Object[] params = new Object[4];
 			params[0] = System.currentTimeMillis();
 			params[1] = logMessage.getType();
@@ -47,7 +45,6 @@ public class MessageDao extends JdbcDataAccessObject {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<Message> findAllByStep(Step step) {
 
 		StringBuilder sql = new StringBuilder();
@@ -59,11 +56,8 @@ public class MessageDao extends JdbcDataAccessObject {
 		Object[] params = new Object[1];
 		params[0] = step.getId();
 
-		List<Message> result = new Vector<Message>();
-
 		try {
-
-			result = query(sql.toString(), params, new MessageMapper(step));
+			List<Message> result = query(sql.toString(), params, new MessageMapper(step));
 
 			log.debug("find all log messages successful. results: "
 					+ result.size());
@@ -75,24 +69,24 @@ public class MessageDao extends JdbcDataAccessObject {
 		}
 	}
 
-	class MessageMapper implements IRowMapper {
+	static class MessageMapper implements IRowMapper<Message> {
 
-		private Step step;
+		private final Step step;
 
 		public MessageMapper(Step step) {
 			this.step = step;
 		}
 
 		@Override
-		public Object mapRow(ResultSet rs, int row) throws SQLException {
+		public Message mapRow(ResultSet rs, int row) throws SQLException {
 			Message message = new Message();
+
 			message.setTime(rs.getLong("time"));
 			message.setStep(step);
 			message.setType(rs.getInt("type"));
 			message.setMessage(rs.getString("message"));
+
 			return message;
 		}
-
 	}
-
 }

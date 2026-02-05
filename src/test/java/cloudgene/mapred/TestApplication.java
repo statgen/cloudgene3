@@ -3,6 +3,7 @@ package cloudgene.mapred;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.Vector;
 
 import com.esotericsoftware.yamlbeans.YamlException;
@@ -22,18 +23,17 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 
 	static {
 		try {
-			TestApplication.settings = loadSettings();
+			TestApplication.settings = loadSettings("primary");
 		} catch (FileNotFoundException | YamlException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public TestApplication() throws Exception {
 		super();
 	}
 
-	protected static Settings loadSettings() throws FileNotFoundException, YamlException {
-		
+	public static Settings loadSettings(String prefix) throws FileNotFoundException, YamlException {
 		Settings settings = new Settings();
 
 		HashMap<String, String> mail = new HashMap<String, String>();
@@ -49,7 +49,7 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 
 		HashMap<String, String> database = new HashMap<String, String>();
 		database.put("driver", "h2");
-		database.put("database", "./test-database/mapred");
+		database.put("database", "./test-database/mapred-" + prefix + "-" + UUID.randomUUID());
 		database.put("user", "mapred");
 		database.put("password", "mapred");
 		settings.setDatabase(database);
@@ -66,7 +66,6 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 	}
 
 	protected static List<Application> registerApplications(Settings settings) {
-
 		List<Application> applications = new Vector<Application>();
 
 		Application app = new Application();
@@ -130,7 +129,7 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 		applications.add(app14);
 
 		//app links
-		
+
 		Application app17 = new Application();
 		app17.setFilename("test-data/app-links.yaml");
 		app17.setPermission("public");
@@ -164,12 +163,10 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 		settings.setApps(applications);
 
 		return applications;
-
 	}
 
 	@Override
 	protected void afterDatabaseConnection(Database database) {
-
 		String username = "admin";
 		String password = "admin1978";
 
@@ -194,7 +191,7 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 			user = new User();
 			user.setUsername(usernameUser);
 			password = HashUtil.hashPassword(passwordUser);
-			user.setPassword(passwordUser);
+			user.setPassword(passwordUser); // TODO: Looks like typo (should add 'password')
 			user.setRoles(new String[] { "public" });
 			dao.insert(user);
 		}
@@ -208,7 +205,5 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 			userPublic.setRoles(new String[] { "public" });
 			dao.insert(userPublic);
 		}
-
 	}
-
 }

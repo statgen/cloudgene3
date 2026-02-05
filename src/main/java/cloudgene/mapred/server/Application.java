@@ -29,20 +29,19 @@ import io.micronaut.context.annotation.Context;
 @Context
 public class Application {
 
-	public static final String VERSION = "3.1.4-statgen.10";
+	public static final String VERSION = "3.1.4-statgen.12";
 
-	private Database database;
+	private static final Logger log = LoggerFactory.getLogger(Application.class);
 
-	public static Settings settings;
+	public static Settings settings; // HACK! Used to pass data to constructor (but becomes shared state).
+
+	private final Database database;
 
 	private WorkflowEngine engine;
 
 	private Map<String, String> cacheTemplates;
 
-	protected Logger log = LoggerFactory.getLogger(Application.class);
-
 	public Application() throws Exception {
-
 		PluginManager pluginManager = PluginManager.getInstance();
 		pluginManager.initPlugins(settings);
 
@@ -52,24 +51,17 @@ public class Application {
 		DatabaseConnector connector = DatabaseConnectorFactory.createConnector(settings.getDatabase());
 
 		if (connector == null) {
-
 			log.error("Unknown database driver");
 			System.exit(1);
-
 		}
 
 		// connect do database
 		try {
-
 			database.connect(connector);
-
 			log.info("Establish connection to database successful");
-
 		} catch (SQLException e) {
-
 			log.error("Establish connection to database failed", e);
 			System.exit(1);
-
 		}
 
 		// update database schema if needed
@@ -96,26 +88,24 @@ public class Application {
 
 		// start workflow engine
 		try {
+			PersistentWorkflowEngine persistentWorkflowEngine = new PersistentWorkflowEngine(
+					database,
+					settings.getThreadsQueue());
 
-			PersistentWorkflowEngine persistentWorkflowEngine = new PersistentWorkflowEngine(database, settings.getThreadsQueue());
-			for (Map<String, String> map: settings.getErrorHandlers()) {
+			for (Map<String, String> map : settings.getErrorHandlers()) {
 				IJobErrorHandler handler = JobErrorHandlerFactory.createByMap(map);
 				persistentWorkflowEngine.addJobErrorHandler(handler);
-				log.info("Created Job Error handler `" + handler.getName() + "`.");
+				log.info("Created Job Error handler `{}`.", handler.getName());
 			}
 			engine = persistentWorkflowEngine;
 			new Thread(engine).start();
 
 		} catch (Exception e) {
-
-			log.error("Can't launch the web server.\nAn unexpected " + "exception occured:", e);
+			log.error("Can't launch the web server.\nAn unexpected exception occurred:", e);
 
 			database.disconnect();
-
 			System.exit(1);
-
 		}
-
 	}
 
 	@EventListener
@@ -142,14 +132,13 @@ public class Application {
 		TemplateDao dao = new TemplateDao(database);
 		List<cloudgene.mapred.core.Template> templates = dao.findAll();
 
-		cacheTemplates = new HashMap<String, String>();
+		cacheTemplates = new HashMap<>();
 		for (cloudgene.mapred.core.Template snippet : templates) {
 			cacheTemplates.put(snippet.getKey(), snippet.getText());
 		}
 	}
 
 	public String getTemplate(String key) {
-
 		String template = cacheTemplates.get(key);
 
 		if (template != null) {
@@ -157,28 +146,26 @@ public class Application {
 		} else {
 			return "!" + key;
 		}
-
 	}
 
 	public String getTemplate(String key, Object... strings) {
-
 		String template = cacheTemplates.get(key);
 
 		if (template != null) {
 			try {
 				return String.format(template, strings);
 			} catch (IllegalFormatException e) {
-				String msg = String.format("Failed to format template '%s' with arguments: %s", key, Arrays.toString(strings));
+				String msg = String.format(
+						"Failed to format template '%s' with arguments: %s",
+						key, Arrays.toString(strings));
+
 				throw new IllegalArgumentException(msg, e);
 			}
 		} else {
 			return "!" + key;
 		}
-
 	}
 
 	protected void afterDatabaseConnection(Database database) {
-
 	}
-
 }

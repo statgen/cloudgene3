@@ -20,10 +20,8 @@ public class JobDaoTest {
 
 	@Inject
 	TestApplication application;
-	
-	public static int DAYS_MS = 24 * 60 * 60 * 1000;
 
-	public static int DAYS_SECONDS = 24 * 60 * 60;
+	public static long DAYS_MS = 24 * 60 * 60 * 1000;
 
 	@Test
 	public void testFindAllOlderThan() throws Exception {
@@ -93,11 +91,10 @@ public class JobDaoTest {
 		jobDao.delete(job4);
 
 		assertEquals(3, jobsOlder5Days.size());
-
 	}
 
 	@Test
-	public void testFindAllByState() throws Exception {
+	public void testFindAllByState() {
 
 		Database database = application.getDatabase();
 
@@ -116,7 +113,7 @@ public class JobDaoTest {
 		jobr.setApplication("appplication");
 		jobr.setApplicationId("appplication-id");
 		jobDao.insert(jobr);
-		
+
 		CloudgeneJob job1 = new CloudgeneJob();
 		job1.setId("old-dummy-job-1-" + System.currentTimeMillis());
 		job1.setName("old-dummy-job-1" + System.currentTimeMillis());
@@ -163,19 +160,15 @@ public class JobDaoTest {
 
 		assertTrue(jobDao.findAll().size() > 3);
 
-		List<AbstractJob> failedJobs = jobDao
-				.findAllByState(CloudgeneJob.STATE_FAILED);
-		List<AbstractJob> succeedJobs = jobDao
-				.findAllByState(CloudgeneJob.STATE_SUCCESS);
+		List<AbstractJob> failedJobs = jobDao.findAllByState(CloudgeneJob.STATE_FAILED);
+		List<AbstractJob> succeedJobs = jobDao.findAllByState(CloudgeneJob.STATE_SUCCESS);
 
 		jobDao.delete(job1);
 		jobDao.delete(job2);
 		jobDao.delete(job3);
 		jobDao.delete(job4);
 
-		assertTrue(failedJobs.size()  >= 3 );
-		assertTrue(succeedJobs.size()  >= 1);
-		
+		assertTrue(failedJobs.size() >= 3);
+		assertTrue(succeedJobs.size() >= 1);
 	}
-
 }

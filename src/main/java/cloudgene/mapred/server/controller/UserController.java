@@ -94,26 +94,30 @@ public class UserController {
 
 		User inquirer = authenticationService.getUserByAuthentication(authentication, AuthenticationType.ALL_TOKENS);
 
-        if (!inquirer.isAdmin() && !inquirer.getUsername().equals(username)) {
-            return HttpResponse.status(HttpStatus.FORBIDDEN);
-        }
+		if (!inquirer.isAdmin() && !inquirer.getUsername().equals(username)) {
+			return HttpResponse.status(HttpStatus.FORBIDDEN);
+		}
 
-        User subject = userService.getByUsername(username);
+		User subject = userService.getByUsername(username);
 
 		UserDao dao = new UserDao(application.getDatabase());
 		User updatedSubject = dao.findByUsername(subject.getUsername());
 
-        UserResponse response = UserResponse.build(updatedSubject);
+		UserResponse response = UserResponse.build(updatedSubject);
 		return HttpResponse.ok(response);
 	}
 
 	@Post("/api/v2/users/{user2}/profile")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Secured(SecurityRule.IS_AUTHENTICATED)
-	public HttpResponse<MessageResponse> update(Authentication authentication, String user2, @Nullable String username,
-												@Parameter("full-name") String full_name, @Nullable String mail,
-												@Nullable @Parameter("new-password") String new_password,
-												@Nullable @Parameter("confirm-new-password") String confirm_new_password) {
+	public HttpResponse<MessageResponse> update(
+			Authentication authentication,
+			String user2,
+			@Nullable String username,
+			@Parameter("full-name") String full_name,
+			@Nullable String mail,
+			@Nullable @Parameter("new-password") String new_password,
+			@Nullable @Parameter("confirm-new-password") String confirm_new_password) {
 
 		User user = authenticationService.getUserByAuthentication(authentication);
 
@@ -127,7 +131,9 @@ public class UserController {
 	@Delete("/api/v2/users/{username}/profile")
 	@Consumes(MediaType.ALL)
 	@Secured(SecurityRule.IS_AUTHENTICATED)
-	public HttpResponse<MessageResponse> delete(Authentication authentication, String username,
+	public HttpResponse<MessageResponse> delete(
+			Authentication authentication,
+			String username,
 			@QueryValue String password) {
 
 		User user = authenticationService.getUserByAuthentication(authentication);
@@ -141,8 +147,11 @@ public class UserController {
 	@Post("/api/v2/users/update-password")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Secured(SecurityRule.IS_ANONYMOUS)
-	public HttpResponse<MessageResponse> updatePassword(String token, @Nullable String username,
-			@Parameter("new-password") String new_password, @Parameter("confirm-new-password") String confirm_new_password) {
+	public HttpResponse<MessageResponse> updatePassword(
+			String token,
+			@Nullable String username,
+			@Parameter("new-password") String new_password,
+			@Parameter("confirm-new-password") String confirm_new_password) {
 
 		MessageResponse response = userService.updatePassword(username, token, new_password, confirm_new_password);
 
@@ -163,11 +172,16 @@ public class UserController {
 	@Post("/api/v2/users/register")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Secured(SecurityRule.IS_ANONYMOUS)
-	public HttpResponse<MessageResponse> register(String username, @Parameter("full-name") String full_name, @Nullable String mail,
-		@Nullable @Parameter("new-password") String new_password, @Nullable @Parameter("confirm-new-password") String confirm_new_password) {
+	public HttpResponse<MessageResponse> register(
+			String username,
+			@Parameter("full-name") String fullName,
+			@Nullable String mail,
+			@Nullable @Parameter("new-password") String newPassword,
+			@Nullable @Parameter("confirm-new-password") String confirmNewPassword) {
 
-		MessageResponse response = userService.registerUser(username, mail, new_password, confirm_new_password,
-				full_name);
+		MessageResponse response = userService.registerUser(username, mail, newPassword, confirmNewPassword,
+				fullName);
+
 		return HttpResponse.ok(response);
 
 	}
@@ -180,5 +194,4 @@ public class UserController {
 		return HttpResponse.ok(response);
 
 	}
-
 }

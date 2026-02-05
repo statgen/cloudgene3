@@ -40,13 +40,13 @@
     </tr>
   </thead>
   <tbody>
-    {{#each users }}
-      <tr {{data 'user' }}>
+    {{#each users}}
+      <tr {{data 'user'}}>
         <td class="text-center">
-          {{#if lockedUntil }}
+          {{#if lockedUntil}}
             <i class="fas fa-lock" title="account is temporarily locked"></i>
           {{else}}
-            {{#if active }}
+            {{#if active}}
               <i class="fas fa-check-circle" title="account is active"></i>
             {{else}}
               <i class="fas fa-user-clock" title="account is pending verification"></i>

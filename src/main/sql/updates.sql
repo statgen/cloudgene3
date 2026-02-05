@@ -1,6 +1,6 @@
 -- 0.0.1
 
-create table `user`( 
+create table `user`(
 	id          integer not null auto_increment primary key,
 	username	varchar(100) not null,
 	password	varchar(100) not null,
@@ -17,7 +17,7 @@ create table `user`(
 	active boolean
 );
 
-create table job( 
+create table job(
 	id		varchar(100) not null primary key,
 	state		integer not null,
 	start_time	bigint not null,
@@ -28,7 +28,7 @@ create table job(
 	user_id integer not null references `user`(id) on delete cascade
 );
 
-create table parameter( 
+create table parameter(
 	id			integer not null auto_increment primary key,
 	name		varchar(100) not null,
 	`value`		varchar(200) not null,
@@ -40,7 +40,7 @@ create table parameter(
 	job_id		varchar(100) not null references job(id) on delete cascade
 );
 
-create table steps ( 
+create table steps (
 	id	    	integer not null auto_increment primary key,
 	state		integer not null,
 	name	    varchar(300),
@@ -50,7 +50,7 @@ create table steps (
 );
 
 create table log_messages(
- 	id			integer not null auto_increment primary key, 
+ 	id			integer not null auto_increment primary key,
 	time	    bigint not null,
 	type		integer not null,
 	message	    varchar(1000),
@@ -66,14 +66,14 @@ create table downloads(
  	job_id  varchar(100) not null,
  	name		  varchar(200) null,
  	path		  varchar(200) null,
- 	hash          varchar(200) null,		   
+ 	hash          varchar(200) null,
 	count	      integer not null,
 	size		  varchar(200) null
-); 
+);
 
 -- 1.0.5
 
-create table cache_entries ( 
+create table cache_entries (
 	id	    	integer not null auto_increment primary key,
 	signature	    varchar(300),
 	used		integer not null,
@@ -88,7 +88,7 @@ create table cache_entries (
 
 -- 1.0.7
 
-create table counters ( 
+create table counters (
 	id	    	integer not null auto_increment primary key,
 	name		varchar(300),
 	job_id		varchar(100) null,
@@ -98,19 +98,19 @@ create table counters (
 
 -- 1.9.0
 
-create table counters_history ( 
+create table counters_history (
 	id	    	integer not null auto_increment primary key,
 	time_stamp	bigint not null,
 	name		varchar(300),
-	`value`		bigint not null	
+	`value`		bigint not null
 );
 
 -- 1.9.1
 
-create table html_snippets ( 
+create table html_snippets (
 	id	    	integer not null auto_increment primary key,
 	`key`	     	varchar(300),
-	text		varchar(1000)	
+	text		varchar(1000)
 );
 
 -- 1.9.2
@@ -190,3 +190,12 @@ create table job_values (
 
 -- 3.0.1
 ALTER TABLE parameter modify `value` varchar(200) NULL;
+
+-- 3.1.4-statgen.12
+
+CREATE TABLE banners (
+	type     ENUM('warning', 'danger') NOT NULL,
+	message  VARCHAR(1000) NOT NULL,
+	position INTEGER NOT NULL UNIQUE,
+	id       INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY
+);

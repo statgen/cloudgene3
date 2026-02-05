@@ -45,7 +45,6 @@ public class CounterDao extends JdbcDataAccessObject {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	public Map<String, Long> getAll() {
 
 		StringBuilder sql = new StringBuilder();
@@ -53,14 +52,11 @@ public class CounterDao extends JdbcDataAccessObject {
 		sql.append("from counters ");
 		sql.append("group by name");
 
-		Map<String, Long> result = new HashMap<String, Long>();
+		Map<String, Long> result = new HashMap<>();
 
 		try {
-
 			result = queryForMap(sql.toString(), new CounterMapper());
-
-			log.debug("find counters successful. results: " + result);
-
+			log.debug("find counters successful. results: {}", result);
 			return result;
 		} catch (SQLException e) {
 			log.error("find all counters failed", e);
@@ -69,18 +65,15 @@ public class CounterDao extends JdbcDataAccessObject {
 		return result;
 	}
 
-	class CounterMapper implements IRowMapMapper {
-
+	static class CounterMapper implements IRowMapMapper<String, Long> {
 		@Override
-		public Object getRowKey(ResultSet rs, int row) throws SQLException {
+		public String getRowKey(ResultSet rs, int row) throws SQLException {
 			return rs.getString(1);
 		}
 
 		@Override
-		public Object getRowValue(ResultSet rs, int row) throws SQLException {
+		public Long getRowValue(ResultSet rs, int row) throws SQLException {
 			return rs.getLong(2);
 		}
-
 	}
-
 }
