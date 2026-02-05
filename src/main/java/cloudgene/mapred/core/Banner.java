@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import java.util.Objects;
+
 @JsonClassDescription
 public class Banner {
 
@@ -26,7 +28,7 @@ public class Banner {
 
 		public static Type of(String value) {
 			if (value == null || value.isBlank()) {
-				throw new IllegalArgumentException("value must be a non-blank string.");
+				throw new IllegalArgumentException("Value must be a non-blank string.");
 			}
 
 			value = value.strip().toLowerCase();
@@ -93,5 +95,23 @@ public class Banner {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (!(other instanceof Banner))
+			return false;
+
+		Banner that = (Banner) other;
+
+		return this.position == that.position
+				&& this.id == that.id
+				&& this.type == that.type
+				&& Objects.equals(this.message, that.message);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(type, message, position, id);
 	}
 }
