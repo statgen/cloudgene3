@@ -24,6 +24,7 @@ import SettingsNextflowControl from 'components/admin/settings/nextflow/';
 import SettingsServerControl from 'components/admin/settings/server/';
 import SettingsMailControl from 'components/admin/settings/mail/';
 import SettingsTemplatesControl from 'components/admin/settings/templates/';
+import SettingsBannersControl from 'components/admin/settings/banners/';
 import SettingsLogsControl from 'components/admin/settings/logs/';
 
 $(document.links).filter(function () {
@@ -94,6 +95,10 @@ const routes = [{
 }, {
   path: 'pages/admin-settings-templates',
   control: SettingsTemplatesControl,
+  guard: adminGuard,
+}, {
+  path: 'pages/admin-settings-banners',
+  control: SettingsBannersControl,
   guard: adminGuard,
 }, {
   path: 'pages/admin-logs',

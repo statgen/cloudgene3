@@ -30,6 +30,7 @@
               <a class="dropdown-item" href="#!pages/admin-settings-general">General</a>
               <a class="dropdown-item" href="#!pages/admin-settings-nextflow">Nextflow</a>
               <a class="dropdown-item" href="#!pages/admin-settings-templates">Templates</a>
+              <a class="dropdown-item" href="#!pages/admin-settings-banners">Banners</a>
               <a class="dropdown-item" href="#!pages/admin-settings-mail">Mail</a>
             </div>
           </li>
