@@ -46,16 +46,13 @@ public class BannerDao extends JdbcDataAccessObject {
 			throw new IllegalArgumentException("Banner does not have an assigned id yet.");
 		}
 
-		String sql = "UPDATE banners SET type = ?, message = ?, position = ? WHERE id = ?";
-
 		try {
-			Object[] params = new Object[4];
-			params[0] = banner.getType();
-			params[1] = banner.getMessage();
-			params[2] = banner.getPosition();
-			params[3] = banner.getId();
-
-			update(sql, params);
+			update(
+                    "UPDATE banners SET type = ?, message = ?, position = ? WHERE id = ?",
+                    banner.getType().toString(),
+                    banner.getMessage(),
+                    banner.getPosition(),
+                    banner.getId());
 
 			log.debug("update banner successful.");
 			return true;
