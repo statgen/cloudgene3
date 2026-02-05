@@ -37,12 +37,6 @@ const routes = [{
   control: DashboardControl,
   classes: 'fullsize-container',
 }, {
-  path: 'pages/contact',
-  control: StaticPage,
-  options: {
-    template: 'static/contact.stache',
-  },
-}, {
   path: 'pages/login',
   control: UserLoginControl,
 }, {
