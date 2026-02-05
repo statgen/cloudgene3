@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 @MicronautTest()
-public class BannerTest {
+public class ApiBannerTest {
 
 	@Inject
 	CloudgeneClientRestAssured client;
