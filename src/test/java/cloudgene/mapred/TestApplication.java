@@ -1,9 +1,9 @@
 package cloudgene.mapred;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
 
 import com.esotericsoftware.yamlbeans.YamlException;
 
@@ -27,13 +27,12 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public TestApplication() throws Exception {
 		super();
 	}
 
 	protected static Settings loadSettings() throws FileNotFoundException, YamlException {
-		
 		Settings settings = new Settings();
 
 		HashMap<String, String> mail = new HashMap<String, String>();
@@ -66,8 +65,7 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 	}
 
 	protected static List<Application> registerApplications(Settings settings) {
-
-		List<Application> applications = new Vector<Application>();
+		List<Application> applications = new ArrayList<>();
 
 		Application app = new Application();
 		app.setFilename("test-data/return-true.yaml");
@@ -129,8 +127,8 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 		app14.setPermission("public");
 		applications.add(app14);
 
-		//app links
-		
+		// app links
+
 		Application app17 = new Application();
 		app17.setFilename("test-data/app-links.yaml");
 		app17.setPermission("public");
@@ -164,51 +162,64 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 		settings.setApps(applications);
 
 		return applications;
-
 	}
 
 	@Override
 	protected void afterDatabaseConnection(Database database) {
-
-		String username = "admin";
-		String password = "admin1978";
-
-		// insert user admin
 		UserDao dao = new UserDao(database);
-		User adminUser = dao.findByUsername(username);
-		if (adminUser == null) {
-			adminUser = new User();
-			adminUser.setUsername(username);
-			password = HashUtil.hashPassword(password);
-			adminUser.setPassword(password);
-			adminUser.makeAdmin();
-			dao.insert(adminUser);
-		}
 
-		String usernameUser = "user";
-		String passwordUser = "admin1978";
+		addUser(
+				dao,
+				"admin",
+				"admin1978",
+				null,
+				null,
+				true,
+				null);
 
-		// insert user admin
-		User user = dao.findByUsername(usernameUser);
-		if (user == null) {
-			user = new User();
-			user.setUsername(usernameUser);
-			password = HashUtil.hashPassword(passwordUser);
-			user.setPassword(passwordUser);
-			user.setRoles(new String[] { "public" });
-			dao.insert(user);
-		}
+		addUser(
+				dao,
+				"user",
+				"admin1978",
+				"User User",
+				"foo@bar.com",
+				false,
+				new String[] { "public" });
 
-		User userPublic = dao.findByUsername("public");
-		if (userPublic == null) {
-			userPublic = new User();
-			userPublic.setUsername("public");
-			password = HashUtil.hashPassword("public");
-			userPublic.setPassword(password);
-			userPublic.setRoles(new String[] { "public" });
-			dao.insert(userPublic);
-		}
-
+		addUser(
+				dao,
+				"public",
+				"public",
+				null,
+				null,
+				false,
+				new String[] { "public" });
 	}
 
+	private void addUser(UserDao dao, String username, String password, String fullName, String mail, boolean isAdmin,
+			String[] roles) {
+		User user = dao.findByUsername(username);
+
+		if (user == null) {
+			user = new User();
+
+			// Mandatory
+			user.setUsername(username);
+			user.setPassword(HashUtil.hashPassword(password));
+
+			// Optional
+			user.setFullName(fullName);
+			user.setMail(mail);
+
+			if (roles != null) {
+				user.setRoles(roles);
+			}
+
+			if (isAdmin) {
+				user.makeAdmin();
+			}
+
+			dao.insert(user);
+		}
+	}
 }
