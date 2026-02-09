@@ -2,6 +2,7 @@ package cloudgene.mapred.cli;
 
 import java.io.File;
 import java.io.FileReader;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -15,33 +16,29 @@ import cloudgene.mapred.util.S3Util;
 
 public class CloneApplications extends BaseTool {
 
-	private String cmd = "cloudgene";
-
 	public CloneApplications(String[] args) {
 		super(args);
 	}
 
 	@Override
-	public void createParameters() {
-
-	}
+	public void createParameters() {}
 
 	@Override
 	public int run() {
-
 		if (args.length != 1) {
-			System.out.println("Usage: " + cmd + "clone <filename|url> ");
+			System.out.println("Usage: cloudgene clone <filename|url> ");
 			System.out.println();
 			System.exit(1);
 		}
 
 		String repo = args[0];
+		File tmpFile = new File("repo.yaml");
 
-		String tmpFilename = "repo.yaml";
 		if (repo.startsWith("http://") || repo.startsWith("https://")) {
 			try {
-				FileUtils.copyURLToFile(new URL(repo), new File(tmpFilename));
-				repo = tmpFilename;
+				URL url = new URI(repo).toURL();
+				FileUtils.copyURLToFile(url, tmpFile);
+				repo = tmpFile.getPath();
 			} catch (Exception e) {
 				System.out.println("Error during download repository from " + repo);
 				e.printStackTrace();
@@ -49,8 +46,8 @@ public class CloneApplications extends BaseTool {
 			}
 		} else if (repo.startsWith("s3://")) {
 			try {
-				S3Util.copyToFile(repo, new File(tmpFilename));
-				repo = tmpFilename;
+				S3Util.copyToFile(repo, tmpFile);
+				repo = tmpFile.getPath();
 			} catch (Exception e) {
 				System.out.println("Error during download repository from " + repo);
 				e.printStackTrace();
@@ -60,21 +57,22 @@ public class CloneApplications extends BaseTool {
 
 		try {
 			YamlReader reader = new YamlReader(new FileReader(repo));
+
 			while (true) {
-				Map entry = reader.read(Map.class);
+				Map<?, ?> entry = reader.read(Map.class);
 				if (entry == null) {
 					break;
 				}
-				String url = entry.get("url").toString();
 
+				String url = entry.get("url").toString();
 				System.out.println("Installing application " + url + "...");
-				
+
 				try {
 					List<Application> applications = repository.install(url);
 
 					if (!applications.isEmpty()) {
 						settings.save();
-						for (Application application: applications) {
+						for (Application application : applications) {
 							printlnInGreen("[OK] Application '" + application.getWdlApp().getName() + "' installed.");
 						}
 						System.out.println();
@@ -82,19 +80,16 @@ public class CloneApplications extends BaseTool {
 						printlnInRed("[ERROR] No valid Application found in repo '" + url + "'\n");
 						return 1;
 					}
-
 				} catch (Exception e) {
-
-					printlnInRed("[ERROR] Application not installed:" + e.toString() + "\n");
-
+					printlnInRed("[ERROR] Application not installed:" + e + "\n");
 				}
-
 			}
+
 			reader.close();
 		} catch (Exception e) {
-			printlnInRed("[ERROR] Error reading file '" + repo + "':" + e.toString() + "\n");
+			printlnInRed("[ERROR] Error reading file '" + repo + "':" + e + "\n");
 		}
-		return 0;
 
+		return 0;
 	}
 }
