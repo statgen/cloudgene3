@@ -196,6 +196,6 @@ ALTER TABLE parameter modify `value` varchar(200) NULL;
 CREATE TABLE banners (
 	type     ENUM('warning', 'danger') NOT NULL,
 	message  VARCHAR(1000) NOT NULL,
-	position INTEGER NOT NULL UNIQUE,
+	position INTEGER NOT NULL,
 	id       INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY
 );

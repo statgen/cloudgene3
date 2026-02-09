@@ -121,6 +121,11 @@ public class BannerDao extends JdbcDataAccessObject {
 		}
 
 		try {
+			// NOTE(Marc): Originally, this was written to update both records atomically,
+			// so that 'position' could be UNIQUE. However, MySQL / MariaDB does this very
+			// dumb thing where uniqueness constraints are checked *for each row modified*
+			// instead of at the end of the transaction, so keeping UNIQUE would make this
+			// messy. We chose instead to not require UNIQUE in the schema.
 			update(
 					"UPDATE banners SET position = CASE "
 							+ "WHEN id = ? THEN ? "
