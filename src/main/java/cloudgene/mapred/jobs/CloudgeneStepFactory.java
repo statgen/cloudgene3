@@ -11,8 +11,8 @@ import cloudgene.mapred.wdl.WdlStep;
 public class CloudgeneStepFactory {
 
 	private static CloudgeneStepFactory instance = null;
-	
-	private Map<String, Class> registeredClasses;
+
+	private Map<String, Class<?>> registeredClasses;
 
 	public static CloudgeneStepFactory getInstance() {
 		if (instance == null) {
@@ -20,19 +20,19 @@ public class CloudgeneStepFactory {
 		}
 		return instance;
 	}
-	
+
 	private CloudgeneStepFactory() {
-		registeredClasses = new HashMap<String, Class>();
+		registeredClasses = new HashMap<>();
 		register("java", JavaExternalStep.class);
 		register("groovy", GroovyStep.class);
 		register("command", BashCommandStep.class);
 	}
-	
-	public void register(String type, Class clazz) {
+
+	public void register(String type, Class<?> clazz) {
 		registeredClasses.put(type, clazz);
 	}
-	
-	public Class getClassname(WdlStep step) {
+
+	public Class<?> getClassname(WdlStep step) {
 
 		if (step.getClassname() != null) {
 			try {
@@ -47,13 +47,11 @@ public class CloudgeneStepFactory {
 			type = "nextflow";
 		}
 
-		Class clazz = registeredClasses.get(type);
+		Class<?> clazz = registeredClasses.get(type);
 		if (clazz != null) {
 			return clazz;
 		}
 
 		throw new RuntimeException("Unknown type: '" + type + "'");
-
 	}
-
 }

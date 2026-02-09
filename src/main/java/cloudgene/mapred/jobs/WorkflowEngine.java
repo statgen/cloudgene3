@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.jobs.queue.PriorityRunnable;
 import cloudgene.mapred.jobs.queue.Queue;
@@ -16,13 +13,11 @@ public class WorkflowEngine implements Runnable {
 
 	private Thread threadLongTimeQueue;
 
-	private Queue longTimeQueue;
+	private final Queue longTimeQueue;
 
 	private boolean running = false;
 
-	private AtomicLong priorityCounter = new AtomicLong();
-
-	private static final Logger log = LoggerFactory.getLogger(WorkflowEngine.class);
+	private final AtomicLong priorityCounter = new AtomicLong();
 
 	public WorkflowEngine(int ltqThreads) {
 
@@ -38,9 +33,7 @@ public class WorkflowEngine implements Runnable {
 				job.setEndTime(System.currentTimeMillis());
 				jobCompleted(job);
 			}
-
 		};
-
 	}
 
 	public void submit(AbstractJob job) {
@@ -82,7 +75,6 @@ public class WorkflowEngine implements Runnable {
 			job.setEndTime(System.currentTimeMillis());
 			statusUpdated(job);
 		}
-
 	}
 
 	public void updatePriority(AbstractJob job, long priority) {
@@ -100,7 +92,6 @@ public class WorkflowEngine implements Runnable {
 		threadLongTimeQueue = new Thread(longTimeQueue);
 		threadLongTimeQueue.start();
 		running = true;
-
 	}
 
 	public void stop() {
@@ -140,45 +131,35 @@ public class WorkflowEngine implements Runnable {
 					Integer value = counters.get(name);
 					Long oldvalue = result.get(name);
 					if (oldvalue == null) {
-						oldvalue = new Long(0);
+						oldvalue = 0L;
 					}
 					result.put(name, oldvalue + value);
 				}
 			}
 		}
-		return result;
 
+		return result;
 	}
 
 	public List<AbstractJob> getJobsByUser(User user) {
-
 		List<AbstractJob> jobs = longTimeQueue.getJobsByUser(user);
 
 		for (AbstractJob job : jobs) {
-
 			if (job instanceof CloudgeneJob) {
-
 				((CloudgeneJob) job).updateProgress();
-
 			}
-
 		}
 
 		return jobs;
 	}
 
 	public List<AbstractJob> getAllJobsInLongTimeQueue() {
-
 		List<AbstractJob> jobs = longTimeQueue.getAllJobs();
 
 		for (AbstractJob job : jobs) {
-
 			if (job instanceof CloudgeneJob) {
-
 				((CloudgeneJob) job).updateProgress();
-
 			}
-
 		}
 
 		return jobs;
@@ -189,19 +170,15 @@ public class WorkflowEngine implements Runnable {
 	}
 
 	protected void statusUpdated(AbstractJob job) {
-
 	}
 
 	protected void jobCompleted(AbstractJob job) {
-
 	}
 
 	protected void jobSubmitted(AbstractJob job) {
-
 	}
 
 	public int getSize() {
 		return longTimeQueue.getSize();
 	}
-
 }

@@ -18,7 +18,6 @@ public class GroovyStep extends CloudgeneStep {
 
 	private static final Logger log = LoggerFactory.getLogger(GroovyStep.class);
 
-	
 	@Override
 	public boolean run(WdlStep step, CloudgeneContext context) {
 		context.createStep(step.getName());
@@ -30,29 +29,32 @@ public class GroovyStep extends CloudgeneStep {
 		String filename = FileUtil.path(workingDirectory, script);
 
 		try {
+			GroovyScriptEngine engine = new GroovyScriptEngine(".", getClass().getClassLoader());
+			Class<?> scriptClass = engine.loadScriptByName(filename);
+			Object scriptInstance = scriptClass.getDeclaredConstructor().newInstance();
 
-			Class scriptClass = new GroovyScriptEngine(".", getClass().getClassLoader()).loadScriptByName(filename);
-			Object scriptInstance = scriptClass.newInstance();
+			Method method = scriptClass.getDeclaredMethod("run", WorkflowContext.class);
+			Object result = method.invoke(scriptInstance, context);
 
-			Method method = scriptClass.getDeclaredMethod("run", new Class[] { WorkflowContext.class });
-			Object result = method.invoke(scriptInstance, new Object[] { context });
 			if (result instanceof Boolean) {
 				return (Boolean) result;
 			} else {
 				return true;
 			}
-
 		} catch (Exception e) {
 			if (e.getCause() != null) {
-				log.error("[Job {}] Step '{}': Error in script '{}'", context.getJobId(), step.getName(), script, e.getCause());
+				log.error(
+					"[Job {}] Step '{}': Error in script '{}'",
+					context.getJobId(), step.getName(), script, e.getCause());
+
 				context.error("Error in script " + script + ":\n" + getStackTraceAsString(e.getCause()));
 			} else {
 				log.error("[Job {}] Step '{}': Error in script '{}'", context.getJobId(), step.getName(), script, e);
 				context.error("Error in script " + script + ":\n" + getStackTraceAsString(e));
 			}
+
 			return false;
 		}
-
 	}
 
 	public static String getStackTraceAsString(Throwable throwable) {
@@ -60,5 +62,4 @@ public class GroovyStep extends CloudgeneStep {
 		throwable.printStackTrace(new PrintWriter(stringWriter));
 		return stringWriter.toString();
 	}
-
 }

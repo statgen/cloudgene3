@@ -119,7 +119,8 @@ abstract public class AbstractJob extends PriorityRunnable {
 
 	public void setId(String id) {
 		this.id = id;
-		this.publicJobId = HashUtil.getSha256(id + RandomStringUtils.random(500));
+		String salt = RandomStringUtils.secure().next(500);
+		this.publicJobId = HashUtil.getSha256(id + salt);
 	}
 
 	public int getState() {
@@ -208,7 +209,7 @@ abstract public class AbstractJob extends PriorityRunnable {
 
 	public void setOutputParams(List<CloudgeneParameterOutput> outputParams) {
 		this.outputParams = outputParams;
-		for (CloudgeneParameterOutput param: outputParams) {
+		for (CloudgeneParameterOutput param : outputParams) {
 			outputParamsIndex.put(param.getName(), param);
 		}
 	}
