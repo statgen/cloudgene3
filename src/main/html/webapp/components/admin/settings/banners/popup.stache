@@ -1,0 +1,24 @@
+<div class="mb-3">
+  <label for="popup-type">Type</label>
+  <select name="popup-type" id="popup-type" class="form-select" value:from="type" required>
+    <option
+      value="warning">
+      <div class="alert alert-warning">Warning</div>
+    </option>
+    <option value="danger">
+      <div class="alert alert-danger">Danger</div>
+    </option>
+  </select>
+</div>
+
+<div class="mb-3">
+  <textarea
+    name="popup-message"
+    id="popup-message"
+    type="text"
+    autocomplete="off"
+    class="form-control"
+    required
+  >{{message}}</textarea>
+  <div id="popup-message-feedback" class="invalid-feedback"></div>
+</div>

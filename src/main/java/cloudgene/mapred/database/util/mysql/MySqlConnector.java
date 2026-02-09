@@ -29,6 +29,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.dbutils.DbUtils;
 import org.slf4j.Logger;
@@ -42,11 +43,11 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 
 	private BasicDataSource dataSource;
 
-	private String host;
-	private String port;
-	private String database;
-	private String user;
-	private String password;
+	private final String host;
+	private final String port;
+	private final String database;
+	private final String user;
+	private final String password;
 
 	public MySqlConnector(String host, String port, String database, String user, String password) {
 		this.host = host;
@@ -58,7 +59,6 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 
 	@Override
 	public void connect() throws SQLException {
-
 		log.debug("Establishing connection to " + user + "@" + host + ":" + port);
 
 		if (DbUtils.loadDriver("com.mysql.cj.jdbc.Driver")) {
@@ -83,7 +83,6 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 		} else {
 			throw  new SQLException("MySQL Driver class not found.");
 		}
-
 	}
 
 	@Override
@@ -96,9 +95,10 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 		return dataSource;
 	}
 
-	public void executeSQL(InputStream is) throws SQLException, IOException, URISyntaxException {
-
+	@Override
+    public void executeSQL(@NotNull InputStream is) throws SQLException, IOException, URISyntaxException {
 		String sqlContent = readFileAsString(is);
+
 		if (!sqlContent.isEmpty()) {
 			Connection connection = dataSource.getConnection();
 			PreparedStatement ps = connection.prepareStatement(sqlContent);
@@ -107,8 +107,7 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 		}
 	}
 
-	public static String readFileAsString(InputStream is) throws java.io.IOException, URISyntaxException {
-
+	public static String readFileAsString(@NotNull InputStream is) throws IOException, URISyntaxException {
 		DataInputStream in = new DataInputStream(is);
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String strLine;
@@ -141,5 +140,4 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 		}
 		return exists;
 	}
-
 }

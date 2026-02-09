@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import com.esotericsoftware.yamlbeans.YamlException;
 
@@ -22,7 +23,7 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 
 	static {
 		try {
-			TestApplication.settings = loadSettings();
+			TestApplication.settings = loadSettings("primary");
 		} catch (FileNotFoundException | YamlException e) {
 			e.printStackTrace();
 		}
@@ -32,7 +33,7 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 		super();
 	}
 
-	protected static Settings loadSettings() throws FileNotFoundException, YamlException {
+	public static Settings loadSettings(String prefix) throws FileNotFoundException, YamlException {
 		Settings settings = new Settings();
 
 		HashMap<String, String> mail = new HashMap<String, String>();
@@ -48,7 +49,7 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 
 		HashMap<String, String> database = new HashMap<String, String>();
 		database.put("driver", "h2");
-		database.put("database", "./test-database/mapred");
+		database.put("database", "./test-database/mapred-" + prefix + "-" + UUID.randomUUID());
 		database.put("user", "mapred");
 		database.put("password", "mapred");
 		settings.setDatabase(database);

@@ -40,49 +40,40 @@ public abstract class JdbcDataAccessObject {
 		runner = new QueryRunner(database.getDataSource());
 	}
 
-	/*
-	 * protected Connection getConnection() { return database.getConnection(); }
-	 */
-
-	public Object queryForObject(String sql, Object[] params, IRowMapper mapper) throws SQLException {
-		return runner.query(sql, new ObjectHandler(mapper), params);
+	public <T> T queryForObject(String sql, IRowMapper<T> mapper) throws SQLException {
+		return runner.query(sql, new ObjectHandler<>(mapper));
 	}
 
-	@SuppressWarnings("rawtypes")
-	public List query(String sql, Object[] params, IRowMapper mapper) throws SQLException {
-		return (List) runner.query(sql, new ListHandler(mapper), params);
+	public <T> T queryForObject(String sql, Object[] params, IRowMapper<T> mapper) throws SQLException {
+		return runner.query(sql, new ObjectHandler<>(mapper), params);
 	}
 
-	public Object queryForObject(String sql, IRowMapper mapper) throws SQLException {
-		return runner.query(sql, new ObjectHandler(mapper));
+	public <T> List<T> query(String sql, Object[] params, IRowMapper<T> mapper) throws SQLException {
+		return runner.query(sql, new ListHandler<>(mapper), params);
 	}
 
-	@SuppressWarnings("rawtypes")
-	public Map queryForMap(String sql, IRowMapMapper mapper) throws SQLException {
-		return (Map) runner.query(sql, new MapHandler(mapper));
+	public <K, V> Map<K, V> queryForMap(String sql, IRowMapMapper<K, V> mapper) throws SQLException {
+		return runner.query(sql, new MapHandler<>(mapper));
 	}
 
-	@SuppressWarnings("rawtypes")
-	public Map queryForMap(String sql, Object[] params, IRowMapMapper mapper) throws SQLException {
-		return (Map) runner.query(sql, new MapHandler(mapper), params);
+	public <K, V> Map<K, V> queryForMap(String sql, Object[] params, IRowMapMapper<K, V> mapper) throws SQLException {
+		return runner.query(sql, new MapHandler<>(mapper), params);
 	}
 
-	@SuppressWarnings("rawtypes")
-	public Map queryForGroupedList(String sql, Object[] params, IRowMapMapper mapper) throws SQLException {
-		return (Map) runner.query(sql, new GroupedListHandler(mapper), params);
+	public <K, V> Map<K, List<V>> queryForGroupedList(String sql, Object[] params, IRowMapMapper<K, V> mapper)
+			throws SQLException {
+		return runner.query(sql, new GroupedListHandler<>(mapper), params);
 	}
 
-	@SuppressWarnings("rawtypes")
-	public Map queryForGroupedList(String sql, IRowMapMapper mapper) throws SQLException {
-		return (Map) runner.query(sql, new GroupedListHandler(mapper));
+	public <K, V> Map<K, List<V>> queryForGroupedList(String sql, IRowMapMapper<K, V> mapper) throws SQLException {
+		return runner.query(sql, new GroupedListHandler<>(mapper));
 	}
 
-	@SuppressWarnings("rawtypes")
-	public List query(String sql, IRowMapper mapper) throws SQLException {
-		return (List) runner.query(sql, new ListHandler(mapper));
+	public <T> List<T> query(String sql, IRowMapper<T> mapper) throws SQLException {
+		return runner.query(sql, new ListHandler<>(mapper));
 	}
 
-	public int update(String sql, Object[] params) throws SQLException {
+	public int update(String sql, Object... params) throws SQLException {
 		return runner.update(sql, params);
 	}
 
@@ -90,10 +81,12 @@ public abstract class JdbcDataAccessObject {
 		return runner.update(sql);
 	}
 
-	public int insert(String sql, Object[] params) throws SQLException {
-		Connection connection = database.getDataSource().getConnection();
+	public <T> T insert(String sql, Object[] params, IRowMapper<T> mapper) throws SQLException {
+		return runner.insert(sql, new ObjectHandler<>(mapper), params);
+	}
 
-		try {
+	public int insert(String sql, Object[] params) throws SQLException {
+		try (Connection connection = database.getDataSource().getConnection()) {
 			PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
 
 			runner.fillStatement(statement, params);
@@ -106,8 +99,6 @@ public abstract class JdbcDataAccessObject {
 			int id = rs.getInt(1);
 			connection.close();
 			return id;
-		} finally {
-			connection.close();
 		}
 	}
 
@@ -131,25 +122,19 @@ public abstract class JdbcDataAccessObject {
 	}
 
 	public boolean callProcedure(String sql, Object[] params) throws SQLException {
-		Connection connection = database.getDataSource().getConnection();
-		;
-
-		try {
+		try (Connection connection = database.getDataSource().getConnection()) {
 			CallableStatement statement = connection.prepareCall(sql);
 			runner.fillStatement(statement, params);
 			boolean state = statement.execute();
 			statement.close();
 			connection.close();
 			return state;
-		} finally {
-			connection.close();
 		}
 	}
 
-	public static class IntegerMapper implements IRowMapper {
-
+	public static class IntegerMapper implements IRowMapper<Integer> {
 		@Override
-		public Object mapRow(ResultSet rs, int row) throws SQLException {
+		public Integer mapRow(ResultSet rs, int row) throws SQLException {
 			return rs.getInt(1);
 		}
 	}

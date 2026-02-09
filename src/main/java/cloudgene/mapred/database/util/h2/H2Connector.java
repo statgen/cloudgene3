@@ -19,7 +19,6 @@ package cloudgene.mapred.database.util.h2;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -30,13 +29,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.dbutils.DbUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cloudgene.mapred.database.util.DatabaseConnector;
-import genepi.io.FileUtil;
 
 public class H2Connector implements DatabaseConnector {
 
@@ -56,20 +55,7 @@ public class H2Connector implements DatabaseConnector {
 		this.multiuser = multiuser;
 	}
 
-	public boolean createBackup(String folder) {
-		File file = new File(path + ".h2.db");
-		File file2 = new File(path + ".mv.db");
-
-		boolean exists = file.exists() || file2.exists();
-
-		if (exists) {
-			FileUtil.copyDirectory(file.getParent(), folder);
-		}
-
-		log.info("Created backup file " + folder);
-		return true;
-	}
-
+	@Override
 	public void connect() throws SQLException {
 		log.debug("Establishing connection to " + user + "@" + path);
 
@@ -78,7 +64,7 @@ public class H2Connector implements DatabaseConnector {
 				dataSource = new BasicDataSource();
 				dataSource.setDriverClassName("org.h2.Driver");
 
-				String newPath = path;
+				String newPath;
 				if (!path.startsWith("/")) {
 					newPath = "./" + path;
 				} else {
@@ -93,7 +79,7 @@ public class H2Connector implements DatabaseConnector {
 
 				dataSource.setUsername(user);
 				dataSource.setPassword(password);
-				dataSource.setMaxIdle(10000);
+				dataSource.setMaxIdle(10_000);
 				dataSource.setDefaultAutoCommit(true);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -103,12 +89,15 @@ public class H2Connector implements DatabaseConnector {
 		}
 	}
 
+	@Override
 	public void disconnect() throws SQLException {
 		dataSource.close();
 	}
 
-	public void executeSQL(InputStream is) throws SQLException, IOException, URISyntaxException {
+	@Override
+	public void executeSQL(@NotNull InputStream is) throws SQLException, IOException, URISyntaxException {
 		String sqlContent = readFileAsString(is);
+
 		if (!sqlContent.isEmpty()) {
 			Connection connection = dataSource.getConnection();
 			PreparedStatement ps = connection.prepareStatement(sqlContent);
@@ -117,7 +106,7 @@ public class H2Connector implements DatabaseConnector {
 		}
 	}
 
-	public static String readFileAsString(InputStream is) throws java.io.IOException, URISyntaxException {
+	public static String readFileAsString(@NotNull InputStream is) throws java.io.IOException, URISyntaxException {
 		DataInputStream in = new DataInputStream(is);
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String strLine;

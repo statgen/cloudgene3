@@ -54,13 +54,25 @@ public class TemplateDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<Template> findAll() {
+<<<<<<< HEAD
 		String sql = "SELECT * FROM html_snippets";
 
 		try {
 			List<Template> result = query(sql, new TemplateMapper());
 			log.debug("find all html snippets successful. results: " + result.size());
+=======
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * ");
+		sql.append("from html_snippets ");
+
+		try {
+			List<Template> result = query(sql.toString(), new TemplateMapper());
+
+			log.debug("find all html snippets successful. results: "
+					+ result.size());
+
+>>>>>>> origin/statgen-custom-changes
 			return result;
 		} catch (SQLException e) {
 			log.error("find all html snippets failed", e);
@@ -69,6 +81,7 @@ public class TemplateDao extends JdbcDataAccessObject {
 	}
 
 	public Template findByKey(String key) {
+<<<<<<< HEAD
 		String sql = "SELECT * FROM html_snippets WHERE `key` = ?";
 
 		try {
@@ -76,6 +89,19 @@ public class TemplateDao extends JdbcDataAccessObject {
 			params[0] = key;
 
 			Template result = (Template) queryForObject(sql, params, new TemplateMapper());
+=======
+		StringBuffer sql = new StringBuffer();
+
+		sql.append("select * ");
+		sql.append("from html_snippets ");
+		sql.append("where `key` = ?");
+
+		Object[] params = new Object[1];
+		params[0] = key;
+
+		try {
+			Template result = queryForObject(sql.toString(), params, new TemplateMapper());
+>>>>>>> origin/statgen-custom-changes
 			log.debug("find html snippet by key '" + key + "' successful.");
 			return result;
 		} catch (SQLException e1) {
@@ -84,9 +110,13 @@ public class TemplateDao extends JdbcDataAccessObject {
 		}
 	}
 
+<<<<<<< HEAD
 	static class TemplateMapper implements IRowMapper {
+=======
+	static class TemplateMapper implements IRowMapper<Template> {
+>>>>>>> origin/statgen-custom-changes
 		@Override
-		public Object mapRow(ResultSet rs, int row) throws SQLException {
+		public Template mapRow(ResultSet rs, int row) throws SQLException {
 			return new Template(rs.getString("key"), rs.getString("text"));
 		}
 	}

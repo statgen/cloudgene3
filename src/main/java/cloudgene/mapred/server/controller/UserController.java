@@ -166,13 +166,13 @@ public class UserController {
 	@Secured(SecurityRule.IS_ANONYMOUS)
 	public HttpResponse<MessageResponse> register(
 			String username,
-			@Parameter("full-name") String full_name,
+			@Parameter("full-name") String fullName,
 			@Nullable String mail,
-			@Nullable @Parameter("new-password") String new_password,
-			@Nullable @Parameter("confirm-new-password") String confirm_new_password) {
+			@Nullable @Parameter("new-password") String newPassword,
+			@Nullable @Parameter("confirm-new-password") String confirmNewPassword) {
 
-		MessageResponse response = userService.registerUser(username, mail, new_password, confirm_new_password,
-				full_name);
+		MessageResponse response = userService.registerUser(username, mail, newPassword, confirmNewPassword, fullName);
+
 		return HttpResponse.ok(response);
 	}
 

@@ -19,38 +19,44 @@ package cloudgene.mapred.database.util;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+=======
+import java.util.*;
+>>>>>>> origin/statgen-custom-changes
 
 import org.apache.commons.dbutils.ResultSetHandler;
 
-public class GroupedListHandler implements ResultSetHandler<Object> {
+public class GroupedListHandler<K, V> implements ResultSetHandler<Map<K, List<V>>> {
 
-	private IRowMapMapper mapper;
+	private final IRowMapMapper<K, V> mapper;
 
-	public GroupedListHandler(IRowMapMapper rowMapper) {
+	public GroupedListHandler(IRowMapMapper<K, V> rowMapper) {
 		this.mapper = rowMapper;
 	}
 
-	public Map<Object, List<Object>> toBeanList(ResultSet rs)
-			throws SQLException {
-		Map<Object, List<Object>> result = new HashMap<Object, List<Object>>();
+	public Map<K, List<V>> toBeanList(ResultSet rs) throws SQLException {
+		Map<K, List<V>> result = new HashMap<>();
 
 		int row = 0;
 		while (rs.next()) {
-			Object key = mapper.getRowKey(rs, row);
-			Object value = mapper.getRowValue(rs, row);
-			if (value != null) {
+			K key = mapper.getRowKey(rs, row);
+			V value = mapper.getRowValue(rs, row);
 
-				List<Object> list = result.get(key);
+			if (value != null) {
+				List<V> list = result.get(key);
+
 				if (list == null) {
 					list = new ArrayList<>();
 					result.put(key, list);
 				}
+
 				list.add(value);
 			}
+
 			row++;
 		}
 
@@ -58,7 +64,7 @@ public class GroupedListHandler implements ResultSetHandler<Object> {
 	}
 
 	@Override
-	public Object handle(ResultSet rs) throws SQLException {
+	public Map<K, List<V>> handle(ResultSet rs) throws SQLException {
 		return toBeanList(rs);
 	}
 }

@@ -26,9 +26,16 @@ public class ParameterDao extends JdbcDataAccessObject {
 	}
 
 	public boolean insert(CloudgeneParameterInput parameter) {
+<<<<<<< HEAD
 		String sql = "INSERT INTO parameter "
 				+ "(name, `value`, input, job_id, type, variable, download, format, admin_only, hash) "
 				+ "VALUES (?,?,?,?,?,?,?,?,?,?)";
+=======
+		StringBuilder sql = new StringBuilder();
+		sql.append(
+				"insert into parameter (name, `value`, input, job_id, type, variable, download, format, admin_only, hash) ");
+		sql.append("values (?,?,?,?,?,?,?,?,?,?)");
+>>>>>>> origin/statgen-custom-changes
 
 		try {
 			Object[] params = new Object[10];
@@ -63,9 +70,16 @@ public class ParameterDao extends JdbcDataAccessObject {
 	}
 
 	public boolean insert(CloudgeneParameterOutput parameter) {
+<<<<<<< HEAD
 		String sql = "INSERT INTO parameter "
 				+ "(name, `value`, input, job_id, type, variable, download, format, admin_only, hash) "
 				+ "VALUES (?,?,?,?,?,?,?,?,?,?)";
+=======
+		StringBuilder sql = new StringBuilder();
+		sql.append(
+				"insert into parameter (name, `value`, input, job_id, type, variable, download, format, admin_only, hash) ");
+		sql.append("values (?,?,?,?,?,?,?,?,?,?)");
+>>>>>>> origin/statgen-custom-changes
 
 		try {
 			Object[] params = new Object[10];
@@ -93,7 +107,6 @@ public class ParameterDao extends JdbcDataAccessObject {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<CloudgeneParameterInput> findAllInputByJob(AbstractJob job) {
 		String sql = "SELECT * FROM parameter WHERE job_id = ? AND input = true";
 
@@ -101,7 +114,12 @@ public class ParameterDao extends JdbcDataAccessObject {
 		params[0] = job.getId();
 
 		try {
+<<<<<<< HEAD
 			List<CloudgeneParameterInput> result = query(sql, params, new ParameterInputMapper());
+=======
+			List<CloudgeneParameterInput> result = query(sql.toString(), params, new ParameterInputMapper());
+
+>>>>>>> origin/statgen-custom-changes
 			log.debug("find all input parameters for job '" + job.getId() + "' successful. results: " + result.size());
 			return result;
 		} catch (SQLException e) {
@@ -110,7 +128,6 @@ public class ParameterDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<CloudgeneParameterOutput> findAllOutputByJob(AbstractJob job) {
 		String sql = "SELECT * FROM parameter WHERE job_id = ? AND input = false";
 
@@ -118,7 +135,11 @@ public class ParameterDao extends JdbcDataAccessObject {
 		params[0] = job.getId();
 
 		try {
+<<<<<<< HEAD
 			List<CloudgeneParameterOutput> result = query(sql, params, new ParameterOutputMapper());
+=======
+			List<CloudgeneParameterOutput> result = query(sql.toString(), params, new ParameterOutputMapper());
+>>>>>>> origin/statgen-custom-changes
 
 			DownloadDao downloadDao = new DownloadDao(database);
 			for (CloudgeneParameterOutput parameter : result) {
@@ -142,7 +163,11 @@ public class ParameterDao extends JdbcDataAccessObject {
 		params[0] = id;
 
 		try {
+<<<<<<< HEAD
 			CloudgeneParameterOutput result = (CloudgeneParameterOutput) queryForObject(sql, params,
+=======
+			CloudgeneParameterOutput result = (CloudgeneParameterOutput) queryForObject(sql.toString(), params,
+>>>>>>> origin/statgen-custom-changes
 					new ParameterOutputMapper());
 
 			DownloadDao downloadDao = new DownloadDao(database);
@@ -159,14 +184,25 @@ public class ParameterDao extends JdbcDataAccessObject {
 	}
 
 	public CloudgeneParameterOutput findByHash(String hash) {
+<<<<<<< HEAD
 		String sql = "SELECT * FROM parameter WHERE hash = ?";
+=======
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * ");
+		sql.append("from parameter ");
+		sql.append("where hash = ?");
+>>>>>>> origin/statgen-custom-changes
 
 		Object[] params = new Object[1];
 		params[0] = hash;
 
 		try {
+<<<<<<< HEAD
 			CloudgeneParameterOutput result = (CloudgeneParameterOutput) queryForObject(sql.toString(), params,
 					new ParameterOutputMapper());
+=======
+			CloudgeneParameterOutput result = queryForObject(sql.toString(), params, new ParameterOutputMapper());
+>>>>>>> origin/statgen-custom-changes
 
 			DownloadDao downloadDao = new DownloadDao(database);
 			List<Download> downloads = downloadDao.findAllByParameter(result);
@@ -182,10 +218,20 @@ public class ParameterDao extends JdbcDataAccessObject {
 	}
 
 	public List<CloudgeneParameterOutput> findAllOutput() {
+<<<<<<< HEAD
 		String sql = "SELECT * FROM parameter WHERE input = false";
 
 		try {
 			List<CloudgeneParameterOutput> result = query(sql, new ParameterOutputMapper());
+=======
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * ");
+		sql.append("from parameter ");
+		sql.append("where input = false");
+
+		try {
+			List<CloudgeneParameterOutput> result = query(sql.toString(), new ParameterOutputMapper());
+>>>>>>> origin/statgen-custom-changes
 
 			DownloadDao downloadDao = new DownloadDao(database);
 			for (CloudgeneParameterOutput parameter : result) {
@@ -204,10 +250,18 @@ public class ParameterDao extends JdbcDataAccessObject {
 
 	public boolean deleteSensitiveByJob(AbstractJob job) {
 		// FIXME: Automate/generalize in the future
+<<<<<<< HEAD
 		// Fully remove any parameters that may contain sensitive information, but only once job is completed.
 		// The existing workflow schema (yml file) does not have a flag for "sensitive" parameters. A future fix would
 		// automate management of such data by understanding which workflow params are sensitive; this hardcoded list
 		// is a temporary workaround based on existing workflows.
+=======
+		// Fully remove any parameters that may contain sensitive information, but only
+		// once job is completed. The existing workflow schema (yml file) does not have
+		// a flag for "sensitive" parameters. A future fix would automate management of
+		// such data by understanding which workflow params are sensitive; this
+		// hardcoded list is a temporary workaround based on existing workflows.
+>>>>>>> origin/statgen-custom-changes
 		try {
 			String sql = "DELETE FROM parameter WHERE job_id = ? AND name LIKE '%password%'";
 
@@ -226,10 +280,14 @@ public class ParameterDao extends JdbcDataAccessObject {
 		}
 	}
 
+<<<<<<< HEAD
 	static class ParameterInputMapper implements IRowMapper {
 
+=======
+	static class ParameterInputMapper implements IRowMapper<CloudgeneParameterInput> {
+>>>>>>> origin/statgen-custom-changes
 		@Override
-		public Object mapRow(ResultSet rs, int row) throws SQLException {
+		public CloudgeneParameterInput mapRow(ResultSet rs, int row) throws SQLException {
 			CloudgeneParameterInput parameter = new CloudgeneParameterInput();
 
 			parameter.setDescription(rs.getString("name"));
@@ -245,10 +303,14 @@ public class ParameterDao extends JdbcDataAccessObject {
 		}
 	}
 
+<<<<<<< HEAD
 	static class ParameterOutputMapper implements IRowMapper {
 
+=======
+	static class ParameterOutputMapper implements IRowMapper<CloudgeneParameterOutput> {
+>>>>>>> origin/statgen-custom-changes
 		@Override
-		public Object mapRow(ResultSet rs, int row) throws SQLException {
+		public CloudgeneParameterOutput mapRow(ResultSet rs, int row) throws SQLException {
 			CloudgeneParameterOutput parameter = new CloudgeneParameterOutput();
 
 			parameter.setDescription(rs.getString("name"));

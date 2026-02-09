@@ -39,19 +39,36 @@ public class JobValueDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<JobValue> getAll() {
+<<<<<<< HEAD
 		String sql = "SELECT name, `value`, COUNT(*) AS n FROM job_values "
 				+ "GROUP BY name, `value` ORDER BY name, `value`";
 
 		try {
 			List<JobValue> result = query(sql, new ValueMapper());
+=======
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("select name, `value`, count(*) as n ");
+		sql.append("from job_values ");
+		sql.append("group by name, `value` ");
+		sql.append("order by name, `value` ");
+
+		try {
+			List<JobValue> result = query(sql.toString(), new ValueMapper());
+
+>>>>>>> origin/statgen-custom-changes
 			log.debug("find counters successful. results: " + result);
 			return result;
 		} catch (SQLException e) {
 			log.error("find all counters failed", e);
 			return new ArrayList<>(); // TODO(Marc): This is inconsistent with JobDao. There, we return null
 		}
+<<<<<<< HEAD
+=======
+
+		return new ArrayList<>();
+>>>>>>> origin/statgen-custom-changes
 	}
 
 	public static class JobValue {
@@ -85,10 +102,14 @@ public class JobValueDao extends JdbcDataAccessObject {
 		}
 	}
 
+<<<<<<< HEAD
 	static class ValueMapper implements IRowMapper {
 
+=======
+	static class ValueMapper implements IRowMapper<JobValue> {
+>>>>>>> origin/statgen-custom-changes
 		@Override
-		public Object mapRow(ResultSet rs, int row) throws SQLException {
+		public JobValue mapRow(ResultSet rs, int row) throws SQLException {
 			JobValue jobValue = new JobValue();
 
 			jobValue.setName(rs.getString("name"));

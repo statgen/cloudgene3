@@ -24,21 +24,21 @@ import java.util.Map;
 
 import org.apache.commons.dbutils.ResultSetHandler;
 
-public class MapHandler implements ResultSetHandler<Object> {
+public class MapHandler<K, V> implements ResultSetHandler<Map<K, V>> {
 
-	private final IRowMapMapper mapper;
+	private final IRowMapMapper<K, V> mapper;
 
-	public MapHandler(IRowMapMapper rowMapper) {
+	public MapHandler(IRowMapMapper<K, V> rowMapper) {
 		this.mapper = rowMapper;
 	}
 
-	public Map<Object, Object> toBeanList(ResultSet rs) throws SQLException {
-		Map<Object, Object> result = new HashMap<>();
+	public Map<K, V> toBeanList(ResultSet rs) throws SQLException {
+		Map<K, V> result = new HashMap<>();
 
 		int row = 0;
 		while (rs.next()) {
-			Object key = mapper.getRowKey(rs, row);
-			Object value = mapper.getRowValue(rs, row);
+			K key = mapper.getRowKey(rs, row);
+			V value = mapper.getRowValue(rs, row);
 			if (value != null) {
 				result.put(key, value);
 			}
@@ -49,7 +49,7 @@ public class MapHandler implements ResultSetHandler<Object> {
 	}
 
 	@Override
-	public Object handle(ResultSet rs) throws SQLException {
+	public Map<K, V> handle(ResultSet rs) throws SQLException {
 		return toBeanList(rs);
 	}
 }

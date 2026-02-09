@@ -24,20 +24,20 @@ import java.util.List;
 
 import org.apache.commons.dbutils.ResultSetHandler;
 
-public class ListHandler implements ResultSetHandler<Object> {
+public class ListHandler<T> implements ResultSetHandler<List<T>> {
 
-	private final IRowMapper mapper;
+	private final IRowMapper<T> mapper;
 
-	public ListHandler(IRowMapper rowMapper) {
+	public ListHandler(IRowMapper<T> rowMapper) {
 		this.mapper = rowMapper;
 	}
 
-	public List<Object> toBeanList(ResultSet rs) throws SQLException {
-		List<Object> result = new ArrayList<>();
+	public List<T> toBeanList(ResultSet rs) throws SQLException {
+		List<T> result = new ArrayList<>();
 
 		int row = 0;
 		while (rs.next()) {
-			Object value = mapper.mapRow(rs, row);
+			T value = mapper.mapRow(rs, row);
 			if (value != null) {
 				result.add(value);
 			}
@@ -48,7 +48,7 @@ public class ListHandler implements ResultSetHandler<Object> {
 	}
 
 	@Override
-	public Object handle(ResultSet rs) throws SQLException {
+	public List<T> handle(ResultSet rs) throws SQLException {
 		return toBeanList(rs);
 	}
 }

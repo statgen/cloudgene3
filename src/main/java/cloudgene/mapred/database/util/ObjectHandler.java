@@ -22,15 +22,15 @@ import java.sql.SQLException;
 
 import org.apache.commons.dbutils.ResultSetHandler;
 
-public class ObjectHandler implements ResultSetHandler<Object> {
+public class ObjectHandler<T> implements ResultSetHandler<T> {
 
-	private final IRowMapper mapper;
+	private final IRowMapper<T> mapper;
 
-	public ObjectHandler(IRowMapper rowMapper) {
+	public ObjectHandler(IRowMapper<T> rowMapper) {
 		this.mapper = rowMapper;
 	}
 
-	public Object toBean(ResultSet rs) throws SQLException {
+	public T toBean(ResultSet rs) throws SQLException {
 		if (!rs.next()) {
 			return null;
 		} else {
@@ -39,7 +39,7 @@ public class ObjectHandler implements ResultSetHandler<Object> {
 	}
 
 	@Override
-	public Object handle(ResultSet rs) throws SQLException {
+	public T handle(ResultSet rs) throws SQLException {
 		return toBean(rs);
 	}
 }

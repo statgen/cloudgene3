@@ -42,7 +42,6 @@ public class MessageDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<Message> findAllByStep(Step step) {
 		String sql = "SELECT * FROM log_messages WHERE step_id = ? ORDER BY time ";
 
@@ -50,8 +49,16 @@ public class MessageDao extends JdbcDataAccessObject {
 		params[0] = step.getId();
 
 		try {
+<<<<<<< HEAD
 			List<Message> result = query(sql, params, new MessageMapper(step));
 			log.debug("find all log messages successful. results: " + result.size());
+=======
+			List<Message> result = query(sql.toString(), params, new MessageMapper(step));
+
+			log.debug("find all log messages successful. results: "
+					+ result.size());
+
+>>>>>>> origin/statgen-custom-changes
 			return result;
 		} catch (SQLException e) {
 			log.error("find all log messages failed", e);
@@ -59,7 +66,11 @@ public class MessageDao extends JdbcDataAccessObject {
 		}
 	}
 
+<<<<<<< HEAD
 	static class MessageMapper implements IRowMapper {
+=======
+	static class MessageMapper implements IRowMapper<Message> {
+>>>>>>> origin/statgen-custom-changes
 
 		private final Step step;
 
@@ -68,7 +79,7 @@ public class MessageDao extends JdbcDataAccessObject {
 		}
 
 		@Override
-		public Object mapRow(ResultSet rs, int row) throws SQLException {
+		public Message mapRow(ResultSet rs, int row) throws SQLException {
 			Message message = new Message();
 
 			message.setTime(rs.getLong("time"));

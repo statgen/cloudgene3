@@ -39,13 +39,12 @@ public class CounterDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public Map<String, Long> getAll() {
 		String sql = "SELECT name, SUM(`value`) FROM counters GROUP BY name";
 
 		try {
 			Map<String, Long> result = queryForMap(sql, new CounterMapper());
-			log.debug("find counters successful. results: " + result);
+			log.debug("find counters successful. results: {}", result);
 			return result;
 		} catch (SQLException e) {
 			log.error("find all counters failed", e);
@@ -53,15 +52,14 @@ public class CounterDao extends JdbcDataAccessObject {
 		}
 	}
 
-	static class CounterMapper implements IRowMapMapper {
-
+	static class CounterMapper implements IRowMapMapper<String, Long> {
 		@Override
-		public Object getRowKey(ResultSet rs, int row) throws SQLException {
+		public String getRowKey(ResultSet rs, int row) throws SQLException {
 			return rs.getString(1);
 		}
 
 		@Override
-		public Object getRowValue(ResultSet rs, int row) throws SQLException {
+		public Long getRowValue(ResultSet rs, int row) throws SQLException {
 			return rs.getLong(2);
 		}
 	}

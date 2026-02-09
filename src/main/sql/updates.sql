@@ -196,3 +196,12 @@ CREATE TABLE job_values (
 -- 3.0.1
 
 ALTER TABLE parameter MODIFY `value` VARCHAR(200) NULL;
+
+-- 3.1.4-statgen.12
+
+CREATE TABLE banners (
+    type     ENUM('warning', 'danger') NOT NULL,
+    message  VARCHAR(1000) NOT NULL,
+    position INTEGER NOT NULL,
+    id       INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY
+);

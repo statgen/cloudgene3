@@ -129,7 +129,6 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAllByUser(User user) {
 		String sql = "SELECT * FROM job WHERE user_id = ? AND state != ? ORDER BY id DESC";
 
@@ -138,7 +137,12 @@ public class JobDao extends JdbcDataAccessObject {
 		params[1] = AbstractJob.STATE_DELETED;
 
 		try {
+<<<<<<< HEAD
 			List<AbstractJob> result = query(sql, params, new JobMapper());
+=======
+			List<AbstractJob> result = query(sql.toString(), params, new JobMapper());
+
+>>>>>>> origin/statgen-custom-changes
 			log.debug("find all jobs successful. results: " + result.size());
 			return result;
 		} catch (SQLException e) {
@@ -147,7 +151,6 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAllByUser(User user, int offset, int limit) {
 		String sql = "SELECT * FROM job WHERE user_id = ? AND state != ? ORDER BY id DESC LIMIT ?,?";
 
@@ -158,7 +161,12 @@ public class JobDao extends JdbcDataAccessObject {
 		params[3] = limit;
 
 		try {
+<<<<<<< HEAD
 			List<AbstractJob> result = query(sql, params, new JobMapper());
+=======
+			List<AbstractJob> result = query(sql.toString(), params, new JobMapper());
+
+>>>>>>> origin/statgen-custom-changes
 			log.debug("find all jobs successful. results: " + result.size());
 			return result;
 		} catch (SQLException e) {
@@ -175,7 +183,12 @@ public class JobDao extends JdbcDataAccessObject {
 		params[1] = AbstractJob.STATE_DELETED;
 
 		try {
+<<<<<<< HEAD
 			int result = (Integer) queryForObject(sql, params, new IntegerMapper());
+=======
+			int result = queryForObject(sql.toString(), params, new IntegerMapper());
+
+>>>>>>> origin/statgen-custom-changes
 			log.debug("count all jobs successful. results: " + result);
 			return result;
 		} catch (SQLException e) {
@@ -184,12 +197,25 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAll() {
+<<<<<<< HEAD
 		String sql = "SELECT * FROM job JOIN `user` ON job.user_id = `user`.id ORDER BY job.id ASC";
 
 		try {
 			List<AbstractJob> result = query(sql, new JobAndUserMapper());
+=======
+		// log.info("finding all jobs");
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * ");
+		sql.append("from job ");
+		sql.append("join `user` on job.user_id = `user`.id ");
+		sql.append("order by job.id asc ");
+
+		try {
+			List<AbstractJob> result = query(sql.toString(), new JobAndUserMapper());
+
+>>>>>>> origin/statgen-custom-changes
 			log.debug("find all jobs successful. results: " + result.size());
 			return result;
 		} catch (SQLException e) {
@@ -198,10 +224,19 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAllNotRetiredJobs() {
+<<<<<<< HEAD
 		String sql = "SELECT * FROM job JOIN `user` ON job.user_id = `user`.id "
 				+ "WHERE state NOT IN (?,?,?,?,?,?,?) ORDER BY job.id DESC";
+=======
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * ");
+		sql.append("from job ");
+		sql.append("join `user` on job.user_id = `user`.id ");
+		sql.append("where state  not in (?,?,?,?,?,?,?) ");
+		sql.append("order by job.id desc ");
+>>>>>>> origin/statgen-custom-changes
 
 		Object[] params = new Object[7];
 		params[0] = AbstractJob.STATE_WAITING;
@@ -213,7 +248,12 @@ public class JobDao extends JdbcDataAccessObject {
 		params[6] = AbstractJob.STATE_DELETED;
 
 		try {
+<<<<<<< HEAD
 			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
+=======
+			List<AbstractJob> result = query(sql.toString(), params, new JobAndUserMapper());
+
+>>>>>>> origin/statgen-custom-changes
 			log.debug("find all jobs successful. results: " + result.size());
 			return result;
 		} catch (SQLException e) {
@@ -222,10 +262,19 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAllNotNotifiedJobs() {
+<<<<<<< HEAD
 		String sql = "SELECT * FROM job JOIN `user` ON job.user_id = `user`.id WHERE state != ? "
 				+ "AND state != ? AND state != ? AND state != ? ORDER BY job.id DESC";
+=======
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * ");
+		sql.append("from job ");
+		sql.append("join `user` on job.user_id = `user`.id ");
+		sql.append("where state != ? AND state != ? AND state != ? AND state != ? ");
+		sql.append("order by job.id desc ");
+>>>>>>> origin/statgen-custom-changes
 
 		Object[] params = new Object[4];
 		params[0] = AbstractJob.STATE_RETIRED;
@@ -234,7 +283,12 @@ public class JobDao extends JdbcDataAccessObject {
 		params[3] = AbstractJob.STATE_DELETED;
 
 		try {
+<<<<<<< HEAD
 			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
+=======
+			List<AbstractJob> result = query(sql.toString(), params, new JobAndUserMapper());
+
+>>>>>>> origin/statgen-custom-changes
 			log.debug("find all jobs successful. results: " + result.size());
 			return result;
 		} catch (SQLException e) {
@@ -243,7 +297,6 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAllNotifiedJobs() {
 		String sql = "SELECT * FROM job JOIN `user` ON job.user_id = `user`.id "
 				+ "WHERE state = ? OR state = ? ORDER BY job.id DESC";
@@ -253,7 +306,12 @@ public class JobDao extends JdbcDataAccessObject {
 		params[1] = AbstractJob.STATE_FAILED_AND_NOTIFICATION_SEND;
 
 		try {
+<<<<<<< HEAD
 			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
+=======
+			List<AbstractJob> result = query(sql.toString(), params, new JobAndUserMapper());
+
+>>>>>>> origin/statgen-custom-changes
 			log.debug("find all old jobs successful. results: " + result.size());
 			return result;
 		} catch (SQLException e) {
@@ -262,7 +320,6 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAllOlderThan(long time, int state) {
 		String sql = "SELECT * FROM job JOIN `user` ON job.user_id = `user`.id "
 				+ "WHERE state = ? AND finished_on != 0 AND finished_on < ? ORDER BY job.id DESC ";
@@ -272,7 +329,12 @@ public class JobDao extends JdbcDataAccessObject {
 		params[1] = time;
 
 		try {
+<<<<<<< HEAD
 			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
+=======
+			List<AbstractJob> result = query(sql.toString(), params, new JobAndUserMapper());
+
+>>>>>>> origin/statgen-custom-changes
 			log.debug("find all old jobs successful. results: " + result.size());
 			return result;
 		} catch (SQLException e) {
@@ -281,7 +343,6 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<AbstractJob> findAllByState(int state) {
 		String sql = "SELECT * FROM job JOIN `user` ON job.user_id = `user`.id "
 				+ "WHERE state = ? ORDER BY job.id DESC";
@@ -290,7 +351,12 @@ public class JobDao extends JdbcDataAccessObject {
 		params[0] = state;
 
 		try {
+<<<<<<< HEAD
 			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
+=======
+			List<AbstractJob> result = query(sql.toString(), params, new JobAndUserMapper());
+
+>>>>>>> origin/statgen-custom-changes
 			log.debug("find all old jobs successful. results: " + result.size());
 			return result;
 		} catch (SQLException e) {
@@ -344,11 +410,16 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
+<<<<<<< HEAD
 	static class JobMapper implements IRowMapper {
 
+=======
+	static class JobMapper implements IRowMapper<AbstractJob> {
+>>>>>>> origin/statgen-custom-changes
 		@Override
 		public AbstractJob mapRow(ResultSet rs, int row) throws SQLException {
 			AbstractJob job = new CloudgeneJob();
+
 			job.setId(rs.getString("job.id"));
 			job.setName(rs.getString("job.name"));
 			job.setState(rs.getInt("job.state"));
@@ -364,6 +435,7 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
+<<<<<<< HEAD
 	static class JobAndUserMapper implements IRowMapper {
 
 		private final JobMapper jobMaper = new JobMapper();
@@ -372,6 +444,15 @@ public class JobDao extends JdbcDataAccessObject {
 
 		@Override
 		public Object mapRow(ResultSet rs, int row) throws SQLException {
+=======
+	static class JobAndUserMapper implements IRowMapper<AbstractJob> {
+
+		private final JobMapper jobMaper = new JobMapper();
+		private final UserMapper userMapper = new UserMapper();
+
+		@Override
+		public AbstractJob mapRow(ResultSet rs, int row) throws SQLException {
+>>>>>>> origin/statgen-custom-changes
 			AbstractJob job = jobMaper.mapRow(rs, row);
 
 			User user = userMapper.mapRow(rs, row);

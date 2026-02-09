@@ -42,6 +42,7 @@ public class DatabaseUpdater {
 	protected static final Logger log = LoggerFactory.getLogger(DatabaseUpdater.class);
 
 	private final DatabaseConnector connector;
+<<<<<<< HEAD
 
 	private final Database database;
 
@@ -56,30 +57,38 @@ public class DatabaseUpdater {
 	private boolean needUpdate = false;
 
 	private final Map<String, IUpdateListener> listeners = new HashMap<>();
+=======
+	private final Database database;
+	private final String oldVersion;
+	private final String currentVersion;
+	private final String filename;
+	private final InputStream updateFileAsStream;
+	private final boolean needUpdate;
+	private final Map<String, IUpdateListener> listeners;
+>>>>>>> origin/statgen-custom-changes
 
 	public DatabaseUpdater(Database database, String filename, InputStream updateFileAsStream, String currentVersion) {
-
 		this.filename = filename;
 		this.database = database;
 		this.connector = database.getConnector();
 		this.updateFileAsStream = updateFileAsStream;
 		this.currentVersion = currentVersion;
+		this.listeners = new HashMap<>();
 
 		if (isVersionTableAvailable(database)) {
-
-			oldVersion = readVersionDB();
+			String oldVersion = readVersionDB();
 			log.info("Read current DB version: " + oldVersion);
 
-			// should not happen, since an entry is created when metadata table
-			// exists
+			// Should not happen, since an entry is created when metadata table exists.
 			if (oldVersion == null) {
 				oldVersion = readVersion(filename);
 				log.info("Read curent version from DB was not successful, read it from file: " + oldVersion);
 			}
 
+			this.oldVersion = oldVersion;
 		} else {
 			// check also file for backwards compatibility
-			oldVersion = readVersion(filename);
+			this.oldVersion = readVersion(filename);
 			log.info("Read current version from file: " + oldVersion);
 		}
 
@@ -125,7 +134,6 @@ public class DatabaseUpdater {
 
 	public boolean update() {
 		if (needUpdate) {
-
 			log.info("Updating database from " + oldVersion + " to " + currentVersion + "...");
 
 			try {
@@ -156,7 +164,6 @@ public class DatabaseUpdater {
 	}
 
 	public void writeVersion(String newVersion) {
-
 		try {
 			if (!isVersionTableAvailable(database)) {
 				createVersionTable(database);
@@ -195,10 +202,13 @@ public class DatabaseUpdater {
 	}
 
 	public String readVersionDB() {
+<<<<<<< HEAD
 		String sql = "SELECT version FROM database_versions "
 				+ "WHERE updated_on = (SELECT MAX(updated_on) FROM database_versions) "
 				+ "ORDER BY updated_on, id DESC";
 
+=======
+>>>>>>> origin/statgen-custom-changes
 		String version = null;
 
 		try {
@@ -216,6 +226,7 @@ public class DatabaseUpdater {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+
 		return version;
 	}
 
@@ -282,7 +293,6 @@ public class DatabaseUpdater {
 	}
 
 	public void executeSQLFile(String sqlContent, String version) throws SQLException {
-
 		String cleanedSQL = sqlContent
 				.replaceAll("(?s)/\\*.*?\\*/", "") // remove block comments
 				.replaceAll("(?m)^\\s*--.*?$", "") // remove full line comments
@@ -301,10 +311,15 @@ public class DatabaseUpdater {
 	}
 
 	public static int compareVersion(String version1, String version2) {
-
 		String[] parts1 = version1.split("-", 2);
 		String[] parts2 = version2.split("-", 2);
 
+<<<<<<< HEAD
+		String[] parts1 = version1.split("-", 2);
+		String[] parts2 = version2.split("-", 2);
+
+=======
+>>>>>>> origin/statgen-custom-changes
 		String[] tiles1 = parts1[0].split("\\.");
 		String[] tiles2 = parts2[0].split("\\.");
 
