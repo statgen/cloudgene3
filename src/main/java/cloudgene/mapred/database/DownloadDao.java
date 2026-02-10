@@ -69,16 +69,8 @@ public class DownloadDao extends JdbcDataAccessObject {
 		params[0] = parameter.getId();
 
 		try {
-<<<<<<< HEAD
 			List<Download> result = query(sql, params, new DownloadMapper());
-			log.debug("find all downloads successful. results: " + result.size());
-=======
-			List<Download> result = query(sql.toString(), params, new DownloadMapper());
-
-			log.debug("find all downloads successful. results: "
-					+ result.size());
-
->>>>>>> origin/statgen-custom-changes
+			log.debug("find all downloads successful. results: {}", result.size());
 			return result;
 		} catch (SQLException e) {
 			log.error("find all downloads failed", e);
@@ -93,14 +85,8 @@ public class DownloadDao extends JdbcDataAccessObject {
 		params[0] = hash;
 
 		try {
-<<<<<<< HEAD
-			Download result = (Download) queryForObject(sql, params, new DownloadMapper());
-=======
-
-			Download result = queryForObject(sql.toString(), params, new DownloadMapper());
-
->>>>>>> origin/statgen-custom-changes
-			log.debug("find download by hash successful. results: " + result);
+			Download result = queryForObject(sql, params, new DownloadMapper());
+			log.debug("find download by hash successful. results: {}", result);
 			return result;
 		} catch (SQLException e) {
 			log.error("find download by hash failed", e);
@@ -115,16 +101,8 @@ public class DownloadDao extends JdbcDataAccessObject {
 		params[0] = job + "/" + path;
 
 		try {
-<<<<<<< HEAD
-			Download result = (Download) queryForObject(sql, params, new DownloadMapper());
-			log.debug("find download by job " + job + " and path " + path + " successful. results: " + result);
-=======
-			Download result = queryForObject(sql.toString(), params, new DownloadMapper());
-
-			log.debug("find download by job " + job + " and path " + path
-					+ " successful. results: " + result);
-
->>>>>>> origin/statgen-custom-changes
+			Download result = queryForObject(sql, params, new DownloadMapper());
+			log.debug("find download by job {} and path {} successful. results: {}", job, path, result);
 			return result;
 		} catch (SQLException e) {
 			log.error("find download by job and path failed.", e);
@@ -133,43 +111,21 @@ public class DownloadDao extends JdbcDataAccessObject {
 	}
 
 	public Download findByParameterAndName(CloudgeneParameterOutput param, String filename) {
-<<<<<<< HEAD
 		String sql = "SELECT * FROM downloads WHERE name = ? AND parameter_id = ? ORDER BY path";
-=======
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from downloads ");
-		sql.append("where name = ? and parameter_id = ? ");
-		sql.append("order by path ");
->>>>>>> origin/statgen-custom-changes
 
 		Object[] params = new Object[2];
 		params[0] = filename;
 		params[1] = param.getId();
 
 		try {
-<<<<<<< HEAD
-			Download result = (Download) queryForObject(sql.toString(), params, new DownloadMapper());
-			log.debug("find download by param " + param.getId() + " and path " + filename + " successful. results: "
-					+ result);
-=======
-			Download result = queryForObject(sql.toString(), params, new DownloadMapper());
-
-			log.debug("find download by param " + param.getId() + " and path " + filename
-					+ " successful. results: " + result);
-
->>>>>>> origin/statgen-custom-changes
+			Download result = queryForObject(sql, params, new DownloadMapper());
+			log.debug("find download by param {} and path {} successful. results: {}", param.getId(), filename, result);
 			return result;
 		} catch (SQLException e) {
 			log.error("find download by job and path failed.", e);
 			return null;
 		}
 	}
-<<<<<<< HEAD
-
-	static class DownloadMapper implements IRowMapper {
-=======
->>>>>>> origin/statgen-custom-changes
 
 	static class DownloadMapper implements IRowMapper<Download> {
 		@Override

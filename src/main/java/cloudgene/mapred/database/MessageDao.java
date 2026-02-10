@@ -26,7 +26,6 @@ public class MessageDao extends JdbcDataAccessObject {
 
 		try {
 			Object[] params = new Object[4];
-
 			params[0] = System.currentTimeMillis();
 			params[1] = logMessage.getType();
 			params[2] = logMessage.getMessage().substring(0, Math.min(logMessage.getMessage().length(), 20000));
@@ -49,16 +48,8 @@ public class MessageDao extends JdbcDataAccessObject {
 		params[0] = step.getId();
 
 		try {
-<<<<<<< HEAD
 			List<Message> result = query(sql, params, new MessageMapper(step));
-			log.debug("find all log messages successful. results: " + result.size());
-=======
-			List<Message> result = query(sql.toString(), params, new MessageMapper(step));
-
-			log.debug("find all log messages successful. results: "
-					+ result.size());
-
->>>>>>> origin/statgen-custom-changes
+			log.debug("find all log messages successful. results: {}", result.size());
 			return result;
 		} catch (SQLException e) {
 			log.error("find all log messages failed", e);
@@ -66,11 +57,7 @@ public class MessageDao extends JdbcDataAccessObject {
 		}
 	}
 
-<<<<<<< HEAD
-	static class MessageMapper implements IRowMapper {
-=======
 	static class MessageMapper implements IRowMapper<Message> {
->>>>>>> origin/statgen-custom-changes
 
 		private final Step step;
 

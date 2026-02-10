@@ -19,14 +19,10 @@ package cloudgene.mapred.database.util;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-=======
-import java.util.*;
->>>>>>> origin/statgen-custom-changes
 
 import org.apache.commons.dbutils.ResultSetHandler;
 

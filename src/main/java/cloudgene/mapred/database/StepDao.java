@@ -47,25 +47,13 @@ public class StepDao extends JdbcDataAccessObject {
 	}
 
 	public List<Step> findAllByJob(CloudgeneJob job) {
-<<<<<<< HEAD
 		String sql = "SELECT * FROM steps WHERE job_id = ? ORDER BY start_time";
-=======
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from steps ");
-		sql.append("where job_id = ? ");
-		sql.append("order by start_time ");
->>>>>>> origin/statgen-custom-changes
 
 		Object[] params = new Object[1];
 		params[0] = job.getId();
 
 		try {
-<<<<<<< HEAD
 			List<Step> result = query(sql, params, new CloudgeneStepMapper());
-=======
-			List<Step> result = query(sql.toString(), params, new CloudgeneStepMapper());
->>>>>>> origin/statgen-custom-changes
 
 			// load messages for all steps
 			MessageDao messageDao = new MessageDao(database);
@@ -75,7 +63,7 @@ public class StepDao extends JdbcDataAccessObject {
 				step.setJob(job);
 			}
 
-			log.debug("find all log step successful. results: " + result.size());
+			log.debug("find all log step successful. results: {}", result.size());
 			return result;
 		} catch (SQLException e) {
 			log.error("find all log step failed", e);
@@ -83,16 +71,9 @@ public class StepDao extends JdbcDataAccessObject {
 		}
 	}
 
-<<<<<<< HEAD
-	static class CloudgeneStepMapper implements IRowMapper {
-
-		@Override
-		public Object mapRow(ResultSet rs, int row) throws SQLException {
-=======
 	static class CloudgeneStepMapper implements IRowMapper<Step> {
 		@Override
 		public Step mapRow(ResultSet rs, int row) throws SQLException {
->>>>>>> origin/statgen-custom-changes
 			Step step = new Step();
 
 			step.setId(rs.getInt("id"));
