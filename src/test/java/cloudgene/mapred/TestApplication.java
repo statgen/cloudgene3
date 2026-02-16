@@ -190,15 +190,22 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 		addUser(
 				dao,
 				"public",
-				"public",
+				"public-password",
 				null,
 				null,
 				false,
 				new String[] { "public" });
 	}
 
-	private void addUser(UserDao dao, String username, String password, String fullName, String mail, boolean isAdmin,
+	private void addUser(
+			UserDao dao,
+			String username,
+			String password,
+			String fullName,
+			String mail,
+			boolean isAdmin,
 			String[] roles) {
+
 		User user = dao.findByUsername(username);
 
 		if (user == null) {

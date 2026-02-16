@@ -27,7 +27,7 @@ public final class PublicUser {
 		if (user == null) {
 			user = new User();
 			user.setUsername("public");
-			String password = HashUtil.getSha256("public-password");
+			String password = HashUtil.hashPassword("public-password");
 			user.setPassword(password);
 			user.setRoles(new String[] { "public" });
 			dao.insert(user);
