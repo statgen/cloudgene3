@@ -74,15 +74,19 @@ class GitHubActionsParserTest {
 				arguments(
 						"test-data/parse-logs/endgroup-without-group.log",
 						null,
-						"Found ::endgroup:: without ::group::"),
+						"Found ::endgroup:: outside of a ::group:: block"),
 
-				// TODO(Marc): Probably it should also be an error to not close ::group:: by the
-				// end of the input. Throws IOException on unclosed ::group:: IF another command
-				// is attempted.
+				// Throws IOException on unclosed ::group:: block.
 				arguments(
 						"test-data/parse-logs/group-without-endgroup.log",
 						null,
-						"No ::endgroup:: found."));
+						"Reached end-of-stream while reading ::group:: contents (no ::endgroup:: found)"),
+
+				// Throws IOException on command inside ::group:: block.
+				arguments(
+						"test-data/parse-logs/command-inside-group.log",
+						null,
+						"Found a command while parsing ::group::, before finding ::endgroup::"));
 	}
 
 	@ParameterizedTest

@@ -43,48 +43,48 @@ public class CommandOutput {
 		}
 
 		for (Command command : commands) {
-			switch (command.getName()) {
+			switch (command.name()) {
 				case "error":
-					context.message(step, command.getParameters().get("value"), CloudgeneContext.ERROR);
+					context.message(step, command.parameters().get("value"), CloudgeneContext.ERROR);
 					break;
 				case "warning":
-					context.message(step, command.getParameters().get("value"), CloudgeneContext.WARNING);
+					context.message(step, command.parameters().get("value"), CloudgeneContext.WARNING);
 					break;
 				case "message":
 				case "notice":
-					context.message(step, command.getParameters().get("value"), CloudgeneContext.OK);
+					context.message(step, command.parameters().get("value"), CloudgeneContext.OK);
 					break;
 				case "log":
-					context.log(command.getParameters().get("value"));
+					context.log(command.parameters().get("value"));
 					break;
 				case "debug":
-					context.println(command.getParameters().get("value"));
+					context.println(command.parameters().get("value"));
 					break;
 				case "set-counter":
 				case "inc-counter":
 					context.incCounter(
-							command.getParameters().get("name"),
-							Integer.parseInt(command.getParameters().get("value")));
+							command.parameters().get("name"),
+							Integer.parseInt(command.parameters().get("value")));
 					break;
 				case "submit-counter":
-					context.submitCounter(command.getParameters().get("name"));
+					context.submitCounter(command.parameters().get("name"));
 					break;
 				case "set-value":
 					context.setValue(
-							command.getParameters().get("name"),
-							command.getParameters().get("value"));
+							command.parameters().get("name"),
+							command.parameters().get("value"));
 					break;
 				case "submit-value":
-					context.submitValue(command.getParameters().get("name"));
+					context.submitValue(command.parameters().get("name"));
 					break;
 				case "set-value-and-submit":
 					context.setValue(
-							command.getParameters().get("name"),
-							command.getParameters().get("value"));
-					context.submitValue(command.getParameters().get("name"));
+							command.parameters().get("name"),
+							command.parameters().get("value"));
+					context.submitValue(command.parameters().get("name"));
 					break;
 				default:
-					throw new IOException("Unknown command: " + command.getName());
+					throw new IOException("Unknown command: " + command.name());
 			}
 		}
 	}
