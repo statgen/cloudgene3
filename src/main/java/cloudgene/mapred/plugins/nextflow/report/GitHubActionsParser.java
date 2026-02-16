@@ -5,10 +5,11 @@ import java.util.*;
 
 // TODO(Marc): RENAME! This has nothing to do with GitHub Actions as far as I can tell.
 //             Instead, it's used to parse logs from Nextflow.
-// TODO(Marc): This class and its methods should be static!
-public class GitHubActionsParser {
+public final class GitHubActionsParser {
 
-	public List<Command> parseOutput(InputStream in) throws IOException {
+    private GitHubActionsParser() {}
+
+	public static List<Command> parseOutput(InputStream in) throws IOException {
 		List<Command> commands = new ArrayList<>();
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
 			String line;
@@ -52,7 +53,7 @@ public class GitHubActionsParser {
 		return commands;
 	}
 
-	public Command parseCommand(String line) {
+	public static Command parseCommand(String line) {
 		int firstSpace = line.indexOf("::");
 		int secondSpace = line.indexOf("::", firstSpace + 1);
 
@@ -80,7 +81,7 @@ public class GitHubActionsParser {
 		return new Command(commandName.toLowerCase(), parameterMap);
 	}
 
-	private Map<String, String> parseParameters(String parameters) {
+	private static Map<String, String> parseParameters(String parameters) {
 		Map<String, String> paramMap = new HashMap<>();
 		String[] pairs = parameters.split(",");
 		for (String pair : pairs) {

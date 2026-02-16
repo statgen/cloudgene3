@@ -33,8 +33,7 @@ public class CommandOutput {
 	}
 
 	public void loadFromInputStream(InputStream in) throws IOException {
-		GitHubActionsParser parser = new GitHubActionsParser();
-		commands = parser.parseOutput(in);
+		commands = GitHubActionsParser.parseOutput(in);
 	}
 
 	public void execute(CloudgeneContext context, Step step) throws IOException {

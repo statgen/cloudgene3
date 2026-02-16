@@ -93,8 +93,7 @@ class GitHubActionsParserTest {
 			String errorMessage) {
 
 		try (InputStream inputStream = new FileInputStream(path)) {
-			GitHubActionsParser parser = new GitHubActionsParser();
-			List<GitHubActionsParser.Command> observedCommands = parser.parseOutput(inputStream);
+			List<GitHubActionsParser.Command> observedCommands = GitHubActionsParser.parseOutput(inputStream);
 
 			assertNull(errorMessage);
 			assertEquals(expectedCommands, observedCommands);
@@ -148,8 +147,7 @@ class GitHubActionsParserTest {
 	@ParameterizedTest
 	@MethodSource("provideForParseCommand")
 	public void testParseCommand(String line, GitHubActionsParser.Command expectedCommand) {
-		GitHubActionsParser parser = new GitHubActionsParser();
-		GitHubActionsParser.Command observedCommand = parser.parseCommand(line);
+		GitHubActionsParser.Command observedCommand = GitHubActionsParser.parseCommand(line);
 		assertEquals(expectedCommand, observedCommand);
 	}
 }
