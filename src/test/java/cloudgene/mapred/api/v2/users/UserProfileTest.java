@@ -37,7 +37,6 @@ public class UserProfileTest {
 
 	@BeforeAll
 	protected void setUp() throws Exception {
-
 		// insert two dummy users
 		Database database = application.getDatabase();
 		UserDao userDao = new UserDao(database);
@@ -61,14 +60,15 @@ public class UserProfileTest {
 		testUser2.setActivationCode("");
 		testUser2.setPassword(HashUtil.hashPassword("Test2+Passw?rd"));
 		userDao.insert(testUser2);
-
 	}
 
 	@Test
 	public void testGetWithWrongCredentials() {
-
-		RestAssured.when().get("/api/v2/users/test1/profile").then().statusCode(401);
-
+		RestAssured
+				.when()
+				.get("/api/v2/users/test1/profile")
+				.then()
+				.statusCode(401);
 	}
 
 	@Test
@@ -78,8 +78,15 @@ public class UserProfileTest {
 
 		Header accessToken = client.login("test1", "Test1Password!");
 
-		RestAssured.given().header(accessToken).when().get("/api/v2/users/test1/profile").then().statusCode(200).and()
-				.body("username", equalTo("test1")).and().body("mail", equalTo("test1@test.com"))
+		RestAssured
+				.given()
+				.header(accessToken)
+				.when()
+				.get("/api/v2/users/test1/profile")
+				.then()
+				.statusCode(200)
+				.body("username", equalTo("test1"))
+				.body("mail", equalTo("test1@test.com"))
 				.body("password", nullValue());
 
 	}
@@ -91,35 +98,55 @@ public class UserProfileTest {
 		Header accessToken = client.login("test2", "Test2+Passw?rd");
 
 		// try to update password for test2
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "test2");
 		form.put("full-name", "new full-name");
 		form.put("mail", "test1@test.com");
 		form.put("new-password", "new-Password27");
 		form.put("confirm-new-password", "new-Password27");
 
-		RestAssured.given().header(accessToken).and().formParams(form).when().post("/api/v2/users/test1/profile").then()
-				.statusCode(200).and().body("success", equalTo(true)).and()
+		RestAssured
+				.given()
+				.header(accessToken)
+				.and()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/test1/profile")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(true))
 				.body("message", equalTo("User profile successfully updated."));
 
 		// try login with old password
-		form = new HashMap<String, String>();
+		form = new HashMap<>();
 		form.put("username", "test2");
 		form.put("password", "old-Test2+Passw?rd");
-		RestAssured.given().formParams(form).when().post("/login").then().statusCode(401).and()
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/login")
+				.then()
+				.statusCode(401)
 				.body("message", equalTo("Login Failed! Wrong Username or Password."));
 
 		// try login with new password
-		form = new HashMap<String, String>();
+		form = new HashMap<>();
 		form.put("username", "test2");
 		form.put("password", "new-Password27");
-		RestAssured.given().formParams(form).when().post("/login").then().statusCode(200).and()
-				.body("username", equalTo("test2")).and().body("access_token", notNullValue());
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/login")
+				.then()
+				.statusCode(200)
+				.body("username", equalTo("test2"))
+				.body("access_token", notNullValue());
 	}
 
 	@Test
 	public void testUpdateWithWrongCredentials() {
-
 		// login as user test1
 		Header accessToken = client.login("test1", "Test1Password!");
 
@@ -131,139 +158,186 @@ public class UserProfileTest {
 		form.put("new-password", "Password27");
 		form.put("confirm-new-password", "Password27");
 
-		RestAssured.given().header(accessToken).and().formParams(form).when().post("/api/v2/users/test1/profile").then()
-				.statusCode(200).and().body("success", equalTo(false)).and()
+		RestAssured
+				.given()
+				.header(accessToken)
+				.and()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/test1/profile")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
 				.body("message", containsString("not allowed to change"));
-
 	}
 
 	@Test
 	public void testUpdateWithWrongConfirmPassword() {
-
 		Header accessToken = client.login("test1", "Test1Password!");
 
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "test1");
 		form.put("full-name", "test1 new");
 		form.put("mail", "test1@test.com");
 		form.put("new-password", "aaa");
 		form.put("confirm-new-password", "abbb");
 
-		RestAssured.given().header(accessToken).and().formParams(form).when().post("/api/v2/users/test1/profile").then()
-				.statusCode(200).and().body("success", equalTo(false)).and()
-				.body("message", containsString("check your passwords"));
+		RestAssured
+				.given()
+				.header(accessToken)
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/test1/profile")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", equalTo("Please ensure the passwords match."));
 	}
 
 	@Test
 	public void testUpdatePasswordWithMissingLowercase() {
-
 		Header accessToken = client.login("test1", "Test1Password!");
 
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "test1");
 		form.put("full-name", "test1 new");
 		form.put("mail", "test1@test.com");
 		form.put("new-password", "P&SSWORD=3141592");
 		form.put("confirm-new-password", "P&SSWORD=3141592");
 
-		RestAssured.given().header(accessToken).and().formParams(form).when().post("/api/v2/users/test1/profile").then()
-				.statusCode(200).and().body("success", equalTo(false)).and()
+		RestAssured
+				.given()
+				.header(accessToken)
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/test1/profile")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
 				.body("message", containsString("least one lowercase"));
 
 	}
 
 	@Test
 	public void testUpdatePasswordWithMissingNumber() {
-
 		Header accessToken = client.login("test1", "Test1Password!");
 
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "test1");
 		form.put("full-name", "test1 new");
 		form.put("mail", "test1@test.com");
 		form.put("new-password", "PASSWORDpassword");
 		form.put("confirm-new-password", "PASSWORDpassword");
 
-		RestAssured.given().header(accessToken).and().formParams(form).when().post("/api/v2/users/test1/profile").then()
-				.statusCode(200).and().body("success", equalTo(false)).and()
+		RestAssured
+				.given()
+				.header(accessToken)
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/test1/profile")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
 				.body("message", containsString("least one number"));
 
 	}
 
 	@Test
 	public void testUpdatePasswordWithMissingUppercase() {
-
 		Header accessToken = client.login("test1", "Test1Password!");
 
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "test1");
 		form.put("full-name", "test1 new");
 		form.put("mail", "test1@test.com");
 		form.put("new-password", "passwordword27");
 		form.put("confirm-new-password", "passwordword27");
 
-		RestAssured.given().header(accessToken).and().formParams(form).when().post("/api/v2/users/test1/profile").then()
-				.statusCode(200).and().body("success", equalTo(false)).and()
+		RestAssured
+				.given()
+				.header(accessToken)
+				.and()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/test1/profile")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
 				.body("message", containsString("least one uppercase"));
-
 	}
 
 	@Test
 	public void testUpdateWithEmptyEmail() {
-
 		Header accessToken = client.login("test1", "Test1Password!");
 
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "test1");
 		form.put("full-name", "test1 new");
 		form.put("mail", "");
 
-		RestAssured.given().header(accessToken).and().formParams(form).when().post("/api/v2/users/test1/profile").then().log().all()
-				.statusCode(200).and().body("success", equalTo(false)).and()
+		RestAssured
+				.given()
+				.header(accessToken)
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/test1/profile")
+				.then()
+				// .log().all()
+				.statusCode(200)
+				.body("success", equalTo(false))
 				.body("message", containsString("E-Mail is required."));
-
 	}
 
 	@Test
-	public void testDowngradeAndUpgradeAccount()  {
-
+	public void testDowngradeAndUpgradeAccount() {
 		application.getSettings().setEmailRequired(false);
 		Header accessToken = client.login("test1", "Test1Password!");
 
 		// downgrade by removing email
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "test1");
 		form.put("full-name", "test1 new");
 		form.put("mail", "");
 
-		RestAssured.given().header(accessToken).and().formParams(form).when().post("/api/v2/users/test1/profile").then()
-				.statusCode(200).and().body("success", equalTo(true)).and()
+		RestAssured
+				.given()
+				.header(accessToken)
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/test1/profile")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(true))
 				.body("message", containsString("downgraded"));
 
-		//check role
+		// check role
 		UserDao dao = new UserDao(application.getDatabase());
 		User user = dao.findByUsername("test1");
 		assertEquals(1, user.getRoles().length);
 		assertEquals(UserService.DEFAULT_ANONYMOUS_ROLE, user.getRoles()[0]);
 
-		//upgrade by adding email
-		form = new HashMap<String, String>();
+		// upgrade by adding email
+		form = new HashMap<>();
 		form.put("username", "test1");
 		form.put("full-name", "test1 new");
 		form.put("mail", "test1@test.com");
 
-		RestAssured.given().header(accessToken).and().formParams(form).when().post("/api/v2/users/test1/profile").then()
-				.statusCode(200).and().body("success", equalTo(true)).and()
+		RestAssured
+				.given()
+				.header(accessToken)
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/test1/profile")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(true))
 				.body("message", containsString("upgraded"));
 
-
-		//check role
+		// check role
 		user = dao.findByUsername("test1");
 		assertEquals(1, user.getRoles().length);
 		assertEquals(UserService.DEFAULT_ROLE, user.getRoles()[0]);
 
 		application.getSettings().setEmailRequired(true);
-
 	}
-
 }
