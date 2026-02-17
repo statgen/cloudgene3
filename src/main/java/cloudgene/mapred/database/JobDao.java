@@ -230,7 +230,7 @@ public class JobDao extends JdbcDataAccessObject {
 
 		Object[] params = new Object[4];
 		params[0] = AbstractJob.STATE_RETIRED;
-		params[1] = AbstractJob.STATE_SUCESS_AND_NOTIFICATION_SEND;
+		params[1] = AbstractJob.STATE_SUCCESS_AND_NOTIFICATION_SEND;
 		params[2] = AbstractJob.STATE_FAILED_AND_NOTIFICATION_SEND;
 		params[3] = AbstractJob.STATE_DELETED;
 
@@ -251,7 +251,7 @@ public class JobDao extends JdbcDataAccessObject {
 				+ "ORDER BY job.id DESC";
 
 		Object[] params = new Object[2];
-		params[0] = AbstractJob.STATE_SUCESS_AND_NOTIFICATION_SEND;
+		params[0] = AbstractJob.STATE_SUCCESS_AND_NOTIFICATION_SEND;
 		params[1] = AbstractJob.STATE_FAILED_AND_NOTIFICATION_SEND;
 
 		try {

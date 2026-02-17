@@ -99,7 +99,7 @@ public class JobCleanUpService {
 					MailUtil.send(settings, mail, subject, body);
 				}
 
-				job.setState(AbstractJob.STATE_SUCESS_AND_NOTIFICATION_SEND);
+				job.setState(AbstractJob.STATE_SUCCESS_AND_NOTIFICATION_SEND);
 				job.setDeletedOn(System.currentTimeMillis() + daysInMilliSeconds);
 				dao.update(job);
 
@@ -155,7 +155,7 @@ public class JobCleanUpService {
 					MailUtil.send(settings, mail, subject, body);
 				}
 
-				job.setState(AbstractJob.STATE_SUCESS_AND_NOTIFICATION_SEND);
+				job.setState(AbstractJob.STATE_SUCCESS_AND_NOTIFICATION_SEND);
 				job.setDeletedOn(System.currentTimeMillis()
 						+ ((settings.getRetireAfterInSec() - settings.getNotificationAfterInSec()) * 1000));
 

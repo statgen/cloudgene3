@@ -69,20 +69,19 @@ public class JobAdminResponse {
 	public void setCanceled(int canceled) {
 		this.canceled = canceled;
 	}
-	
+
 	public static JobAdminResponse build(List<JobResponse> responses, String workspace) {
-		
 		int success = 0;
 		int failed = 0;
 		int pending = 0;
 		int waiting = 0;
 		int canceled = 0;
 		int running = 0;
-		
+
 		JobAdminResponse response = new JobAdminResponse();
 		response.setData(responses);
 		response.setCount(responses.size());
-		for (JobResponse job: responses) {
+		for (JobResponse job : responses) {
 
 			String folder = FileUtil.path(workspace, job.getId());
 			File file = new File(folder);
@@ -95,7 +94,7 @@ public class JobAdminResponse {
 				running++;
 			}
 			if (job.getState() == AbstractJob.STATE_SUCCESS
-					|| job.getState() == AbstractJob.STATE_SUCESS_AND_NOTIFICATION_SEND) {
+					|| job.getState() == AbstractJob.STATE_SUCCESS_AND_NOTIFICATION_SEND) {
 				success++;
 			}
 			if (job.getState() == AbstractJob.STATE_FAILED
@@ -112,16 +111,15 @@ public class JobAdminResponse {
 				canceled++;
 			}
 		}
-		
+
 		response.setSuccess(success);
 		response.setFailed(failed);
 		response.setPending(pending);
 		response.setWaiting(waiting);
 		response.setCanceled(canceled);
 		response.setRunning(running);
-		
-		return response;
 
+		return response;
 	}
 
 	public List<JobResponse> getData() {
@@ -139,6 +137,4 @@ public class JobAdminResponse {
 	public void setCount(int count) {
 		this.count = count;
 	}
-
-
 }

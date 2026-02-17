@@ -41,7 +41,6 @@ public class JobService {
 	protected WorkspaceFactory workspaceFactory;
 
 	public AbstractJob getById(String id) {
-
 		// TODO: better to go via database? only load from engine when running?
 
 		AbstractJob job = application.getWorkflowEngine().getJobById(id);
@@ -66,7 +65,6 @@ public class JobService {
 	}
 
 	public AbstractJob getByIdAndUser(String id, User user) {
-
 		if (user == null) {
 			throw new JsonHttpStatusException(HttpStatus.UNAUTHORIZED, "Access denied.");
 		}
@@ -82,7 +80,6 @@ public class JobService {
 	}
 
 	public AbstractJob submitJob(String appId, List<Parameter> form, User user, String userAgent) {
-
 		if (user == null) {
 			throw new JsonHttpStatusException(HttpStatus.UNAUTHORIZED, "Access denied.");
 		}
@@ -149,11 +146,9 @@ public class JobService {
 		engine.submit(job);
 
 		return job;
-
 	}
 
 	public Page<AbstractJob> getAllByUserAndPage(User user, Integer page, int pageSize) {
-
 		int offset = 0;
 		if (page != null) {
 
@@ -198,7 +193,6 @@ public class JobService {
 		result.setData(finalJobs);
 
 		return result;
-
 	}
 
 	public AbstractJob delete(AbstractJob job) {
@@ -236,7 +230,6 @@ public class JobService {
 	}
 
 	public AbstractJob restart(AbstractJob job) {
-
 		Settings settings = application.getSettings();
 
 		if (job.getState() != AbstractJob.STATE_DEAD) {
@@ -273,13 +266,12 @@ public class JobService {
 		this.application.getWorkflowEngine().restart(job);
 
 		return job;
-
 	}
 
 	public int reset(AbstractJob job, int maxDownloads) {
-
 		DownloadDao downloadDao = new DownloadDao(application.getDatabase());
 		int count = 0;
+
 		for (CloudgeneParameterOutput param : job.getOutputParams()) {
 			if (param.isDownload()) {
 				List<Download> downloads = param.getFiles();
@@ -312,7 +304,6 @@ public class JobService {
 		}
 
 		try {
-
 			// delete local directory and hdfs directory
 			String localOutput = FileUtil.path(settings.getLocalWorkspace(), job.getId());
 			FileUtil.deleteDirectory(localOutput);
@@ -333,7 +324,6 @@ public class JobService {
 			}
 
 			return "Retired job " + job.getId();
-
 		} catch (Exception e) {
 			return "Retire " + job.getId() + " failed.";
 		}
@@ -342,7 +332,7 @@ public class JobService {
 	public String increaseRetireDate(AbstractJob job, int days) {
 		JobDao dao = new JobDao(application.getDatabase());
 
-		if (job.getState() == AbstractJob.STATE_SUCESS_AND_NOTIFICATION_SEND
+		if (job.getState() == AbstractJob.STATE_SUCCESS_AND_NOTIFICATION_SEND
 				|| job.getState() == AbstractJob.STATE_FAILED_AND_NOTIFICATION_SEND) {
 
 			try {
@@ -376,20 +366,16 @@ public class JobService {
 
 		if (state != null) {
 			switch (state) {
-
 				case "running-ltq":
-
 					jobs = engine.getAllJobsInLongTimeQueue();
 					break;
 
 				case "running-stq":
-
 					// TODO: remove!
 					jobs = new ArrayList<>();
 					break;
 
 				case "current":
-
 					jobs = dao.findAllNotRetiredJobs();
 					List<AbstractJob> toRemove = new ArrayList<>();
 					for (AbstractJob job : jobs) {
@@ -401,10 +387,8 @@ public class JobService {
 					break;
 
 				case "retired":
-
 					jobs = dao.findAllByState(AbstractJob.STATE_RETIRED);
 					break;
-
 			}
 		}
 		return jobs;
