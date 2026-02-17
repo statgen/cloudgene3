@@ -94,22 +94,22 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 		}
 
 		// count all runs when counter was not set by application
-		Map<String, Integer> submittedCounters = job.getContext().getSubmittedCounters();
+		Map<String, Long> submittedCounters = job.getContext().getSubmittedCounters();
 		if (!submittedCounters.containsKey("runs")) {
 			if (job.getState() == AbstractJob.STATE_SUCCESS) {
-				submittedCounters.put("runs", 1);
+				submittedCounters.put("runs", 1L);
 			}
 		}
 
 		// write all submitted counters into database
 		for (String name : submittedCounters.keySet()) {
-			Integer value = submittedCounters.get(name);
+			Long value = submittedCounters.get(name);
 
 			if (value != null) {
 				Long counterValue = counters.get(name);
 
 				if (counterValue == null) {
-					counterValue = 0L + value;
+					counterValue = value;
 				} else {
 					counterValue = counterValue + value;
 				}

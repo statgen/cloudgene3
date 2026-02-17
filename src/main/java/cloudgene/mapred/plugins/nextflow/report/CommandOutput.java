@@ -63,7 +63,7 @@ public class CommandOutput {
 				case "inc-counter":
 					context.incCounter(
 							command.parameters().get("name"),
-							Integer.parseInt(command.parameters().get("value")));
+							Long.parseLong(command.parameters().get("value")));
 					break;
 				case "submit-counter":
 					context.submitCounter(command.parameters().get("name"));

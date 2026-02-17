@@ -21,7 +21,7 @@ public class CounterDao extends JdbcDataAccessObject {
 		super(database);
 	}
 
-	public boolean insert(String name, int value, AbstractJob job) {
+	public boolean insert(String name, long value, AbstractJob job) {
 		String sql = "INSERT INTO counters (name, job_id, `value`) VALUES (?,?,?)";
 
 		try {

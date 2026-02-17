@@ -133,10 +133,10 @@ public class WorkflowEngine implements Runnable {
 
 		for (AbstractJob job : jobs) {
 			if (job.getState() == state) {
-				Map<String, Integer> counters = job.getContext().getCounters();
+				Map<String, Long> counters = job.getContext().getCounters();
 				List<String> keys = (names == null) ? counters.keySet().stream().toList() : names;
 				for (String name : keys) {
-					Integer value = counters.get(name);
+					Long value = counters.get(name);
 					Long oldValue = result.get(name);
 					if (oldValue == null) {
 						oldValue = 0L;

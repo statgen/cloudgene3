@@ -31,7 +31,7 @@ public class CloudgeneContext extends WorkflowContext {
 
 	private final Map<String, CloudgeneParameterOutput> outputParameters;
 
-	private final Map<String, Integer> counters = new HashMap<>();
+	private final Map<String, Long> counters = new HashMap<>();
 
 	private final Map<String, String> values = new HashMap<>();
 
@@ -244,12 +244,12 @@ public class CloudgeneContext extends WorkflowContext {
 	}
 
 	@Override
-	public void incCounter(String name, int value) {
-		Integer oldCount = counters.get(name);
+	public void incCounter(String name, long value) {
+		Long oldCount = counters.get(name);
 		if (oldCount == null) {
-			oldCount = 0;
+			oldCount = 0L;
 		}
-		Integer newCount = oldCount + value;
+		Long newCount = oldCount + value;
 
 		log(String.format("Increment counter '%s': %,d + %,d = %,d", name, oldCount, value, newCount));
 		counters.put(name, newCount);
@@ -261,8 +261,8 @@ public class CloudgeneContext extends WorkflowContext {
 		submitCounters.put(name, true);
 	}
 
-	public Map<String, Integer> getSubmittedCounters() {
-		Map<String, Integer> result = new HashMap<>();
+	public Map<String, Long> getSubmittedCounters() {
+		Map<String, Long> result = new HashMap<>();
 		for (String counter : submitCounters.keySet()) {
 			result.put(counter, counters.get(counter));
 		}
@@ -270,7 +270,7 @@ public class CloudgeneContext extends WorkflowContext {
 	}
 
 	@Override
-	public Map<String, Integer> getCounters() {
+	public Map<String, Long> getCounters() {
 		return counters;
 	}
 

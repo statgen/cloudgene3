@@ -46,11 +46,11 @@ public abstract class WorkflowContext {
 	 */
 	public abstract Set<String> getInputs();
 
-	public abstract void incCounter(String name, int value);
+	public abstract void incCounter(String name, long value);
 
 	public abstract void submitCounter(String name);
 
-	public abstract Map<String, Integer> getCounters();
+	public abstract Map<String, Long> getCounters();
 
 	public abstract Object getData(String key);
 

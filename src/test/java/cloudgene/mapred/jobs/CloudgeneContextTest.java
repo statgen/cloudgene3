@@ -120,7 +120,7 @@ public class CloudgeneContextTest {
 	@Test
 	public void testIncCounter() {
 		CloudgeneContext context = makeContext();
-		Map<String, Integer> counters;
+		Map<String, Long> counters;
 
 		counters = context.getCounters();
 		assertEquals(0, counters.size());
@@ -155,8 +155,8 @@ public class CloudgeneContextTest {
 		// subset of the counters keys (as one would expect, but we don't enforce).
 
 		CloudgeneContext context = makeContext();
-		Map<String, Integer> counters;
-		Map<String, Integer> submittedCounters;
+		Map<String, Long> counters;
+		Map<String, Long> submittedCounters;
 
 		counters = context.getCounters();
 		submittedCounters = context.getSubmittedCounters();
