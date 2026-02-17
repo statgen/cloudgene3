@@ -21,23 +21,25 @@ import cloudgene.mapred.wdl.WdlStep;
 
 public class CloudgeneJob extends AbstractJob {
 
+	public static final int MAX_DOWNLOAD = 10;
+
+	private static final Logger log = LoggerFactory.getLogger(CloudgeneJob.class);
 	private static final String CLOUDGENE_LOGS_PARAM = "cloudgene_logs";
 
 	private WdlApp app;
-
 	private String workingDirectory;
-
 	private Executor executor;
-
-	public static final int MAX_DOWNLOAD = 10;
-
-	private static Logger log = LoggerFactory.getLogger(CloudgeneJob.class);
 
 	public CloudgeneJob() {
 		super();
 	}
 
-	public CloudgeneJob(User user, String id, WdlApp app, Map<String, String> params) {
+	public CloudgeneJob(
+			User user,
+			String id,
+			@NotNull WdlApp app,
+			@NotNull Map<String, String> params) {
+
 		this.app = app;
 		setId(id);
 		setUser(user);
@@ -66,11 +68,9 @@ public class CloudgeneJob extends AbstractJob {
 		}
 
 		initLogOutput();
-
 	}
 
-	public void loadApp(WdlApp app) {
-
+	public void loadApp(@NotNull WdlApp app) {
 		this.app = app;
 		workingDirectory = app.getPath();
 
@@ -84,7 +84,6 @@ public class CloudgeneJob extends AbstractJob {
 		if (logOutput != null) {
 			getOutputParams().remove(logOutput);
 		}
-
 	}
 
 	protected void initLogOutput() {
@@ -100,7 +99,6 @@ public class CloudgeneJob extends AbstractJob {
 
 	@Override
 	public boolean setup() throws Exception {
-
 		context = new CloudgeneContext(this);
 		context.resolveAppLinks();
 
@@ -139,9 +137,7 @@ public class CloudgeneJob extends AbstractJob {
 
 	@Override
 	public boolean execute() {
-
 		try {
-
 			// evaluate WDL and replace all variables (e.g. ${job_id})
 			Planner planner = new Planner();
 			WdlApp app = planner.evaluateWDL(this.app, context, getSettings());
@@ -173,7 +169,6 @@ public class CloudgeneJob extends AbstractJob {
 			log.error("[Job {}] execution failed.", getId(), e);
 			return false;
 		}
-
 	}
 
 	@Override
@@ -184,7 +179,6 @@ public class CloudgeneJob extends AbstractJob {
 	}
 
 	public boolean executeFailureStep() {
-
 		WdlStep step = app.getWorkflow().getOnFailure();
 		cleanUp();
 
@@ -214,7 +208,6 @@ public class CloudgeneJob extends AbstractJob {
 
 	@Override
 	public boolean cleanUp() {
-
 		Settings settings = getSettings();
 		boolean shouldCleanUp = settings.getWorkspaceCleanup();
 		if (!shouldCleanUp) {
@@ -239,8 +232,8 @@ public class CloudgeneJob extends AbstractJob {
 
 	@Override
 	public boolean after() {
-
 		log.info("[Job {}] Export parameters...", getId());
+
 		try {
 			for (WdlParameterOutput output : getApp().getWorkflow().getOutputs()) {
 				if (output.isDownload()) {
@@ -259,6 +252,7 @@ public class CloudgeneJob extends AbstractJob {
 			log.error("[Job {}] Export parameters failed.", getId(), e);
 			return false;
 		}
+
 		return true;
 	}
 
@@ -308,7 +302,6 @@ public class CloudgeneJob extends AbstractJob {
 	}
 
 	public void updateProgress() {
-
 		if (executor != null) {
 			executor.updateProgress();
 		}

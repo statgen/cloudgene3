@@ -64,7 +64,6 @@ public class WorkflowEngine implements Runnable {
 	}
 
 	public void restart(AbstractJob job, long priority) {
-
 		job.setPriority(priority);
 		job.setSubmittedOn(System.currentTimeMillis());
 		job.setStartTime(0);
@@ -72,14 +71,12 @@ public class WorkflowEngine implements Runnable {
 		job.setState(AbstractJob.STATE_WAITING);
 		statusUpdated(job);
 
-		boolean okey = job.afterSubmission();
-		if (okey) {
+		if (job.afterSubmission()) {
 			longTimeQueue.submit(job);
 		} else {
 			job.setEndTime(System.currentTimeMillis());
 			statusUpdated(job);
 		}
-
 	}
 
 	public void updatePriority(AbstractJob job, long priority) {
