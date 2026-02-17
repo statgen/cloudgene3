@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-class GitHubActionsParserTest {
+class CommandOutputParserTest {
 
 	private static Stream<Arguments> provideForParseOutput() {
 		return Stream.of(
@@ -22,40 +22,40 @@ class GitHubActionsParserTest {
 				arguments(
 						"test-data/parse-logs/example.log",
 						List.of(
-								new GitHubActionsParser.Command(
+								new Command(
 										"foo",
 										Map.of(
 												"bar", "baz",
 												"value", "Hello, world!")),
-								new GitHubActionsParser.Command(
+								new Command(
 										"one",
 										Map.of("value", "")),
-								new GitHubActionsParser.Command(
+								new Command(
 										"two",
 										Map.of("value", "three")),
-								new GitHubActionsParser.Command(
+								new Command(
 										"four",
 										Map.of(
 												"five", "six",
 												"value", "")),
-								new GitHubActionsParser.Command(
+								new Command(
 										"a",
 										Map.of(
 												"b", "c",
 												"d", "e",
 												"f", "g",
 												"value", "h")),
-								new GitHubActionsParser.Command(
+								new Command(
 										"",
 										Map.of("value", "")),
-								new GitHubActionsParser.Command(
+								new Command(
 										"",
 										Map.of("value", "")),
-								new GitHubActionsParser.Command(
+								new Command(
 										"message",
 										Map.of("value", "This is a group named 'message' (default value).\n" +
 												"Everything between ::group:: and ::endgroup:: is parsed as the 'value'.")),
-								new GitHubActionsParser.Command(
+								new Command(
 										"foo",
 										Map.of(
 												"type", "foo",
@@ -93,11 +93,11 @@ class GitHubActionsParserTest {
 	@MethodSource("provideForParseOutput")
 	public void testParseOutput(
 			String path,
-			List<GitHubActionsParser.Command> expectedCommands,
+			List<Command> expectedCommands,
 			String errorMessage) {
 
 		try (InputStream inputStream = new FileInputStream(path)) {
-			List<GitHubActionsParser.Command> observedCommands = GitHubActionsParser.parseOutput(inputStream);
+			List<Command> observedCommands = CommandOutputParser.parseOutput(inputStream);
 
 			assertNull(errorMessage);
 			assertEquals(expectedCommands, observedCommands);
@@ -112,14 +112,14 @@ class GitHubActionsParserTest {
 				// Given a correctly formatted command string, output the parsed command
 				arguments(
 						"::message::this is a message",
-						new GitHubActionsParser.Command(
+						new Command(
 								"message",
 								Map.of("value", "this is a message"))),
 
 				// With one parameter, no value.
 				arguments(
 						"::foo bar=baz::",
-						new GitHubActionsParser.Command(
+						new Command(
 								"foo",
 								Map.of(
 										"bar", "baz",
@@ -129,7 +129,7 @@ class GitHubActionsParserTest {
 				// with ignored whitespace all around (except beginning).
 				arguments(
 						":: qw er=ty , ui=op :: asdfg ",
-						new GitHubActionsParser.Command(
+						new Command(
 								"qw",
 								Map.of(
 										"er", "ty",
@@ -150,8 +150,8 @@ class GitHubActionsParserTest {
 
 	@ParameterizedTest
 	@MethodSource("provideForParseCommand")
-	public void testParseCommand(String line, GitHubActionsParser.Command expectedCommand) {
-		GitHubActionsParser.Command observedCommand = GitHubActionsParser.parseCommand(line);
+	public void testParseCommand(String line, Command expectedCommand) {
+		Command observedCommand = CommandOutputParser.parseCommand(line);
 		assertEquals(expectedCommand, observedCommand);
 	}
 }

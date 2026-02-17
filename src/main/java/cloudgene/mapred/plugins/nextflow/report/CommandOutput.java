@@ -2,7 +2,6 @@ package cloudgene.mapred.plugins.nextflow.report;
 
 import cloudgene.mapred.jobs.CloudgeneContext;
 import cloudgene.mapred.jobs.Step;
-import cloudgene.mapred.plugins.nextflow.report.GitHubActionsParser.Command;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ public class CommandOutput {
 	}
 
 	public void loadFromInputStream(InputStream in) throws IOException {
-		commands = GitHubActionsParser.parseOutput(in);
+		commands = CommandOutputParser.parseOutput(in);
 	}
 
 	public void execute(CloudgeneContext context, Step step) throws IOException {

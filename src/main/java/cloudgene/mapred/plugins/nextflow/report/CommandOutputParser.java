@@ -3,14 +3,9 @@ package cloudgene.mapred.plugins.nextflow.report;
 import java.io.*;
 import java.util.*;
 
-// TODO(Marc): RENAME! This has nothing to do with GitHub Actions as far as I can tell.
-//             Instead, it's used to parse logs from Nextflow.
-public final class GitHubActionsParser {
+public final class CommandOutputParser {
 
-	private GitHubActionsParser() {
-	}
-
-	public record Command(String name, Map<String, String> parameters) {
+	private CommandOutputParser() {
 	}
 
 	/**
@@ -41,7 +36,7 @@ public final class GitHubActionsParser {
 					command = parseGroup(command, reader);
 				}
 
-				if (command.name.equals("endgroup")) {
+				if (command.name().equals("endgroup")) {
 					throw new IOException("Found ::endgroup:: outside of a ::group:: block");
 				}
 
