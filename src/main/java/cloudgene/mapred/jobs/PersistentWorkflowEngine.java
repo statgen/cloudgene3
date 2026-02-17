@@ -7,6 +7,8 @@ import java.util.Map;
 
 import cloudgene.mapred.database.*;
 import cloudgene.mapred.jobs.engine.handler.IJobErrorHandler;
+import io.micronaut.core.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +20,7 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 
 	private final Database database;
 
-	private final JobDao dao;
+	private final JobDao jobDao;
 
 	private final CounterDao counterDao;
 
@@ -35,27 +37,27 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 		counterDao = new CounterDao(database);
 		counters = counterDao.getAll();
 
-		dao = new JobDao(database);
+		jobDao = new JobDao(database);
 
-		List<AbstractJob> deadJobs = dao.findAllByState(AbstractJob.STATE_WAITING);
-		deadJobs.addAll(dao.findAllByState(AbstractJob.STATE_RUNNING));
-		deadJobs.addAll(dao.findAllByState(AbstractJob.STATE_EXPORTING));
+		List<AbstractJob> deadJobs = jobDao.findAllByState(AbstractJob.STATE_WAITING);
+		deadJobs.addAll(jobDao.findAllByState(AbstractJob.STATE_RUNNING));
+		deadJobs.addAll(jobDao.findAllByState(AbstractJob.STATE_EXPORTING));
 
 		for (AbstractJob job : deadJobs) {
-			log.info("lost control over job " + job.getId() + " -> Dead");
+			log.info("lost control over job {} -> Dead", job.getId());
 			job.setState(AbstractJob.STATE_DEAD);
-			dao.update(job);
+			jobDao.update(job);
 		}
 	}
 
 	@Override
-	protected void statusUpdated(AbstractJob job) {
+	protected void statusUpdated(@NotNull AbstractJob job) {
 		super.statusUpdated(job);
-		dao.update(job);
+		jobDao.update(job);
 	}
 
 	@Override
-	protected void jobCompleted(AbstractJob job) {
+	protected void jobCompleted(@NotNull AbstractJob job) {
 		super.jobCompleted(job);
 
 		DownloadDao downloadDao = new DownloadDao(database);
@@ -79,9 +81,9 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 		}
 
 		if (job.getSteps() != null) {
-			StepDao dao2 = new StepDao(database);
+			StepDao stepDao = new StepDao(database);
 			for (Step step : job.getSteps()) {
-				dao2.insert(step);
+				stepDao.insert(step);
 				MessageDao messageDao = new MessageDao(database);
 				if (step.getLogMessages() != null) {
 					for (Message logMessage : step.getLogMessages()) {
@@ -130,7 +132,7 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 		}
 
 		// update job updates (state, endtime, ....)
-		dao.update(job);
+		jobDao.update(job);
 
 		if (job.getState() == AbstractJob.STATE_FAILED) {
 			for (IJobErrorHandler handler : handlers) {
@@ -140,27 +142,28 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 	}
 
 	@Override
-	protected void jobSubmitted(AbstractJob job) {
+	protected void jobSubmitted(@NotNull AbstractJob job) {
 		super.jobSubmitted(job);
-		dao.insert(job);
+		jobDao.insert(job);
 
-		ParameterDao dao = new ParameterDao(database);
+		ParameterDao parameterDao = new ParameterDao(database);
 
 		for (CloudgeneParameterInput parameter : job.getInputParams()) {
 			parameter.setJobId(job.getId());
-			dao.insert(parameter);
+			parameterDao.insert(parameter);
 		}
 
 		for (CloudgeneParameterOutput parameter : job.getOutputParams()) {
 			parameter.setJobId(job.getId());
-			dao.insert(parameter);
+			parameterDao.insert(parameter);
 		}
 
-		dao.insert(job.getLogOutput());
+		parameterDao.insert(job.getLogOutput());
 	}
 
 	@Override
-	public Map<String, Long> getCounters(int state, List<String> names) {
+	@NotNull
+	public Map<String, Long> getCounters(int state, @Nullable List<String> names) {
 		if (state == AbstractJob.STATE_SUCCESS) {
 			List<String> keys = (names == null) ? counters.keySet().stream().toList() : names;
 			Map<String, Long> counters = new HashMap<>();

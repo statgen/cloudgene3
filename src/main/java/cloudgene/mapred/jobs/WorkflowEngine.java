@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.jobs.queue.PriorityRunnable;
 import cloudgene.mapred.jobs.queue.Queue;
+import io.micronaut.core.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 
 public class WorkflowEngine implements Runnable {
 
@@ -124,9 +126,11 @@ public class WorkflowEngine implements Runnable {
 		return longTimeQueue.getJobById(id);
 	}
 
-	public Map<String, Long> getCounters(int state, List<String> names) {
-		Map<String, Long> result = new HashMap<String, Long>();
+	@NotNull
+	public Map<String, Long> getCounters(int state, @Nullable List<String> names) {
+		Map<String, Long> result = new HashMap<>();
 		List<AbstractJob> jobs = longTimeQueue.getAllJobs();
+
 		for (AbstractJob job : jobs) {
 			if (job.getState() == state) {
 				Map<String, Integer> counters = job.getContext().getCounters();
