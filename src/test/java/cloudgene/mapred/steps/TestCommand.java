@@ -41,7 +41,7 @@ public class TestCommand {
 		WorkflowEngine engine = application.getWorkflowEngine();
 		WdlApp app = WdlReader.loadAppFromFile("test-data/command/valid-command.yaml");
 
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		params.put("input", "input-file");
 
 		AbstractJob job = createJobFromWdl(app, params);
@@ -51,11 +51,11 @@ public class TestCommand {
 			Thread.sleep(1_000); // TODO(Marc): WTF?
 		}
 
-		assertEquals(JobState.STATE_SUCCESS.getValue(), job.getState());
+		assertEquals(JobState.STATE_SUCCESS, job.getState());
 
 		List<Message> messages = job.getSteps().get(0).getLogMessages();
 		assertEquals(1, messages.size());
-		assertEquals(messages.get(0).getType(), WorkflowContext.OK);
+		assertEquals(WorkflowContext.OK, messages.get(0).getType());
 		assertTrue(messages.get(0).getMessage().contains("Execution successful."));
 
 		String stdout = FileUtil.path(application.getSettings().getLocalWorkspace(), job.getId(), "logs", "std.out");
@@ -76,7 +76,7 @@ public class TestCommand {
 		WorkflowEngine engine = application.getWorkflowEngine();
 		WdlApp app = WdlReader.loadAppFromFile("test-data/command/invalid-command.yaml");
 
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		params.put("input", "input-file");
 
 		AbstractJob job = createJobFromWdl(app, params);
@@ -86,17 +86,17 @@ public class TestCommand {
 			Thread.sleep(1_000); // TODO(Marc): WTF?
 		}
 
-		assertEquals(JobState.STATE_FAILED.getValue(), job.getState());
+		assertEquals(JobState.STATE_FAILED, job.getState());
 
 		List<Message> messages = job.getSteps().get(0).getLogMessages();
 		assertEquals(1, messages.size());
-		assertEquals(messages.get(0).getType(), WorkflowContext.ERROR);
+		assertEquals(WorkflowContext.ERROR, messages.get(0).getType());
 		assertTrue(messages.get(0).getMessage().contains("Command '/bin/lukas/forer' was not found."));
 	}
 
 	// TODO: check file staging
 
-	public CloudgeneJob createJobFromWdl(WdlApp app, Map<String, String> inputs) throws Exception {
+	private CloudgeneJob createJobFromWdl(WdlApp app, Map<String, String> inputs) throws Exception {
 		UserDao userDao = new UserDao(application.getDatabase());
 		User user = userDao.findByUsername("user");
 
