@@ -268,7 +268,7 @@ public class User {
 		}
 
 		if (!UPPERCASE.matcher(password).find()) {
-			return "Password must contain at least one uppercase letter: A-Z";
+			return "Password must contain at least one UPPERCASE letter: A-Z";
 		}
 
 		if (!SPECIAL.matcher(password).find()) {
