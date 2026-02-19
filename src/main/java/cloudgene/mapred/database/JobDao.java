@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import cloudgene.mapred.jobs.*;
+import cloudgene.mapred.jobs.state.JobState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ public class JobDao extends JdbcDataAccessObject {
 			Object[] params = new Object[15];
 			params[0] = job.getId();
 			params[1] = job.getName();
-			params[2] = job.getState();
+			params[2] = job.getState().getValue();
 			params[3] = job.getStartTime();
 			params[4] = job.getEndTime();
 			params[5] = job.getUser().getId();
@@ -66,7 +67,7 @@ public class JobDao extends JdbcDataAccessObject {
 		try {
 			Object[] params = new Object[15];
 			params[0] = job.getName();
-			params[1] = job.getState();
+			params[1] = job.getState().getValue();
 			params[2] = job.getStartTime();
 			params[3] = job.getEndTime();
 			params[4] = job.getUser().getId();
@@ -132,7 +133,7 @@ public class JobDao extends JdbcDataAccessObject {
 
 		Object[] params = new Object[2];
 		params[0] = user.getId();
-		params[1] = AbstractJob.STATE_DELETED;
+		params[1] = JobState.STATE_DELETED.getValue();
 
 		try {
 			List<AbstractJob> result = query(sql, params, new JobMapper());
@@ -149,7 +150,7 @@ public class JobDao extends JdbcDataAccessObject {
 
 		Object[] params = new Object[4];
 		params[0] = user.getId();
-		params[1] = AbstractJob.STATE_DELETED;
+		params[1] = JobState.STATE_DELETED.getValue();
 		params[2] = offset;
 		params[3] = limit;
 
@@ -168,7 +169,7 @@ public class JobDao extends JdbcDataAccessObject {
 
 		Object[] params = new Object[2];
 		params[0] = user.getId();
-		params[1] = AbstractJob.STATE_DELETED;
+		params[1] = JobState.STATE_DELETED.getValue();
 
 		try {
 			int result = queryForObject(sql, params, new IntegerMapper());
@@ -204,13 +205,13 @@ public class JobDao extends JdbcDataAccessObject {
 		// TODO(Marc): Looks like RETIRED and DELETED are duplicated for no reason.
 		// Remove?
 		Object[] params = new Object[7];
-		params[0] = AbstractJob.STATE_WAITING;
-		params[1] = AbstractJob.STATE_RUNNING;
-		params[2] = AbstractJob.STATE_EXPORTING;
-		params[3] = AbstractJob.STATE_RETIRED;
-		params[4] = AbstractJob.STATE_DELETED;
-		params[5] = AbstractJob.STATE_RETIRED;
-		params[6] = AbstractJob.STATE_DELETED;
+		params[0] = JobState.STATE_WAITING.getValue();
+		params[1] = JobState.STATE_RUNNING.getValue();
+		params[2] = JobState.STATE_EXPORTING.getValue();
+		params[3] = JobState.STATE_RETIRED.getValue();
+		params[4] = JobState.STATE_DELETED.getValue();
+		params[5] = JobState.STATE_RETIRED.getValue();
+		params[6] = JobState.STATE_DELETED.getValue();
 
 		try {
 			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
@@ -229,10 +230,10 @@ public class JobDao extends JdbcDataAccessObject {
 				+ "ORDER BY job.id DESC";
 
 		Object[] params = new Object[4];
-		params[0] = AbstractJob.STATE_RETIRED;
-		params[1] = AbstractJob.STATE_SUCCESS_AND_NOTIFICATION_SEND;
-		params[2] = AbstractJob.STATE_FAILED_AND_NOTIFICATION_SEND;
-		params[3] = AbstractJob.STATE_DELETED;
+		params[0] = JobState.STATE_RETIRED.getValue();
+		params[1] = JobState.STATE_SUCCESS_AND_NOTIFICATION_SEND.getValue();
+		params[2] = JobState.STATE_FAILED_AND_NOTIFICATION_SEND.getValue();
+		params[3] = JobState.STATE_DELETED.getValue();
 
 		try {
 			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
@@ -251,8 +252,8 @@ public class JobDao extends JdbcDataAccessObject {
 				+ "ORDER BY job.id DESC";
 
 		Object[] params = new Object[2];
-		params[0] = AbstractJob.STATE_SUCCESS_AND_NOTIFICATION_SEND;
-		params[1] = AbstractJob.STATE_FAILED_AND_NOTIFICATION_SEND;
+		params[0] = JobState.STATE_SUCCESS_AND_NOTIFICATION_SEND.getValue();
+		params[1] = JobState.STATE_FAILED_AND_NOTIFICATION_SEND.getValue();
 
 		try {
 			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
@@ -264,19 +265,19 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public List<AbstractJob> findAllOlderThan(long time, int state) {
+	public List<AbstractJob> findAllOlderThan(long time, JobState state) {
 		String sql = "SELECT * FROM job "
 				+ "JOIN `user` ON job.user_id = `user`.id "
 				+ "WHERE state = ? AND finished_on != 0 AND finished_on < ? "
 				+ "ORDER BY job.id DESC ";
 
 		Object[] params = new Object[2];
-		params[0] = state;
+		params[0] = state.getValue();
 		params[1] = time;
 
 		try {
 			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
-			log.debug("find all old jobs successful. results: " + result.size());
+			log.debug("find all old jobs successful. results: {}", result.size());
 			return result;
 		} catch (SQLException e) {
 			log.error("find all old jobs failed", e);
@@ -284,13 +285,13 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public List<AbstractJob> findAllByState(int state) {
+	public List<AbstractJob> findAllByState(JobState state) {
 		String sql = "SELECT * FROM job "
 				+ "JOIN `user` ON job.user_id = `user`.id "
 				+ "WHERE state = ? ORDER BY job.id DESC";
 
 		Object[] params = new Object[1];
-		params[0] = state;
+		params[0] = state.getValue();
 
 		try {
 			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
@@ -313,7 +314,7 @@ public class JobDao extends JdbcDataAccessObject {
 
 		Object[] params = new Object[2];
 		params[0] = id;
-		params[1] = AbstractJob.STATE_DELETED;
+		params[1] = JobState.STATE_DELETED.getValue();
 
 		try {
 			AbstractJob job = queryForObject(sql, params, new JobAndUserMapper());
@@ -356,7 +357,7 @@ public class JobDao extends JdbcDataAccessObject {
 
 			job.setId(rs.getString("job.id"));
 			job.setName(rs.getString("job.name"));
-			job.setState(rs.getInt("job.state"));
+			job.setState(JobState.of(rs.getInt("job.state")));
 			job.setStartTime(rs.getLong("job.start_time"));
 			job.setEndTime(rs.getLong("job.end_time"));
 			job.setDeletedOn(rs.getLong("job.deleted_on"));

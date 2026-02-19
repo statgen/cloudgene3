@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cloudgene.mapred.jobs.AbstractJob;
 import cloudgene.mapred.jobs.WorkflowEngine;
+import cloudgene.mapred.jobs.state.JobState;
 import cloudgene.mapred.server.Application;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import jakarta.inject.Inject;
@@ -47,7 +47,7 @@ public class CounterResponse {
 	public static CounterResponse build(WorkflowEngine workflowEngine, List<String> counters) {
 		CounterResponse response = new CounterResponse();
 
-		response.complete = workflowEngine.getCounters(AbstractJob.STATE_SUCCESS, counters);
+		response.complete = workflowEngine.getCounters(JobState.STATE_SUCCESS, counters);
 		response.queue.put("size", (long) workflowEngine.getSize());
 
 		return response;

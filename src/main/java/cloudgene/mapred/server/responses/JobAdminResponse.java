@@ -3,10 +3,10 @@ package cloudgene.mapred.server.responses;
 import java.io.File;
 import java.util.List;
 
+import cloudgene.mapred.jobs.state.JobState;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import org.apache.commons.io.FileUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import cloudgene.mapred.jobs.AbstractJob;
 import genepi.io.FileUtil;
 
 @JsonInclude(JsonInclude.Include.ALWAYS)
@@ -81,33 +81,40 @@ public class JobAdminResponse {
 		JobAdminResponse response = new JobAdminResponse();
 		response.setData(responses);
 		response.setCount(responses.size());
-		for (JobResponse job : responses) {
 
+		for (JobResponse job : responses) {
 			String folder = FileUtil.path(workspace, job.getId());
 			File file = new File(folder);
+
 			if (file.exists()) {
 				long size = FileUtils.sizeOfDirectory(file);
 				job.setWorkspaceSize(FileUtils.byteCountToDisplaySize(size));
 			}
 
-			if (job.getState() == AbstractJob.STATE_EXPORTING || job.getState() == AbstractJob.STATE_RUNNING) {
+			if (job.getState() == JobState.STATE_EXPORTING.getValue()
+					|| job.getState() == JobState.STATE_RUNNING.getValue()) {
 				running++;
 			}
-			if (job.getState() == AbstractJob.STATE_SUCCESS
-					|| job.getState() == AbstractJob.STATE_SUCCESS_AND_NOTIFICATION_SEND) {
+
+			if (job.getState() == JobState.STATE_SUCCESS.getValue()
+					|| job.getState() == JobState.STATE_SUCCESS_AND_NOTIFICATION_SEND.getValue()) {
 				success++;
 			}
-			if (job.getState() == AbstractJob.STATE_FAILED
-					|| job.getState() == AbstractJob.STATE_FAILED_AND_NOTIFICATION_SEND) {
+
+			if (job.getState() == JobState.STATE_FAILED.getValue()
+					|| job.getState() == JobState.STATE_FAILED_AND_NOTIFICATION_SEND.getValue()) {
 				failed++;
 			}
-			if (job.getState() == AbstractJob.STATE_DEAD) {
+
+			if (job.getState() == JobState.STATE_DEAD.getValue()) {
 				pending++;
 			}
-			if (job.getState() == AbstractJob.STATE_WAITING) {
+
+			if (job.getState() == JobState.STATE_WAITING.getValue()) {
 				waiting++;
 			}
-			if (job.getState() == AbstractJob.STATE_CANCELED) {
+
+			if (job.getState() == JobState.STATE_CANCELED.getValue()) {
 				canceled++;
 			}
 		}

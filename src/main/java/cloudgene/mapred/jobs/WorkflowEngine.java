@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.jobs.queue.PriorityRunnable;
 import cloudgene.mapred.jobs.queue.Queue;
+import cloudgene.mapred.jobs.state.JobState;
 import io.micronaut.core.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
@@ -50,8 +51,7 @@ public class WorkflowEngine implements Runnable {
 		job.setSubmittedOn(System.currentTimeMillis());
 		jobSubmitted(job);
 
-		boolean okey = job.afterSubmission();
-		if (okey) {
+		if (job.afterSubmission()) {
 			longTimeQueue.submit(job);
 		} else {
 			job.setEndTime(System.currentTimeMillis());
@@ -68,7 +68,7 @@ public class WorkflowEngine implements Runnable {
 		job.setSubmittedOn(System.currentTimeMillis());
 		job.setStartTime(0);
 		job.setEndTime(0);
-		job.setState(AbstractJob.STATE_WAITING);
+		job.setState(JobState.STATE_WAITING);
 		statusUpdated(job);
 
 		if (job.afterSubmission()) {
@@ -124,7 +124,7 @@ public class WorkflowEngine implements Runnable {
 	}
 
 	@NotNull
-	public Map<String, Long> getCounters(int state, @Nullable List<String> names) {
+	public Map<String, Long> getCounters(JobState state, @Nullable List<String> names) {
 		Map<String, Long> result = new HashMap<>();
 		List<AbstractJob> jobs = longTimeQueue.getAllJobs();
 

@@ -1,6 +1,6 @@
 package cloudgene.mapred.util;
 
-import cloudgene.mapred.jobs.AbstractJob;
+import cloudgene.mapred.jobs.state.JobState;
 import io.micronaut.context.annotation.Prototype;
 import io.restassured.RestAssured;
 import io.restassured.http.Header;
@@ -41,9 +41,9 @@ public class CloudgeneClientRestAssured {
 
 		int state = response.body().jsonPath().getInt("state");
 
-		boolean running = state == AbstractJob.STATE_WAITING
-				|| state == AbstractJob.STATE_RUNNING
-				|| state == AbstractJob.STATE_EXPORTING;
+		boolean running = state == JobState.STATE_WAITING.getValue()
+				|| state == JobState.STATE_RUNNING.getValue()
+				|| state == JobState.STATE_EXPORTING.getValue();
 
 		if (running) {
 			try {

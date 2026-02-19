@@ -18,6 +18,7 @@ import cloudgene.mapred.jobs.CloudgeneJob;
 import cloudgene.mapred.jobs.Message;
 import cloudgene.mapred.jobs.WorkflowEngine;
 import cloudgene.mapred.jobs.sdk.WorkflowContext;
+import cloudgene.mapred.jobs.state.JobState;
 import cloudgene.mapred.jobs.workspace.WorkspaceFactory;
 import cloudgene.mapred.util.Settings;
 import cloudgene.mapred.wdl.WdlApp;
@@ -37,9 +38,7 @@ public class TestCommand {
 
 	@Test
 	public void testValidCommand() throws Exception {
-
 		WorkflowEngine engine = application.getWorkflowEngine();
-
 		WdlApp app = WdlReader.loadAppFromFile("test-data/command/valid-command.yaml");
 
 		Map<String, String> params = new HashMap<String, String>();
@@ -47,11 +46,12 @@ public class TestCommand {
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
+
 		while (job.isRunning()) {
-			Thread.sleep(1000);
+			Thread.sleep(1_000); // TODO(Marc): WTF?
 		}
 
-		assertEquals(AbstractJob.STATE_SUCCESS, job.getState());
+		assertEquals(JobState.STATE_SUCCESS.getValue(), job.getState());
 
 		List<Message> messages = job.getSteps().get(0).getLogMessages();
 		assertEquals(1, messages.size());
@@ -69,14 +69,11 @@ public class TestCommand {
 
 		// simple check if exit code = 0
 		assertTrue(contentjobLog.contains("Exit Code: 0"));
-
 	}
 
 	@Test
 	public void testInvalidCommand() throws Exception {
-
 		WorkflowEngine engine = application.getWorkflowEngine();
-
 		WdlApp app = WdlReader.loadAppFromFile("test-data/command/invalid-command.yaml");
 
 		Map<String, String> params = new HashMap<String, String>();
@@ -84,11 +81,12 @@ public class TestCommand {
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
+
 		while (job.isRunning()) {
-			Thread.sleep(1000);
+			Thread.sleep(1_000); // TODO(Marc): WTF?
 		}
 
-		assertEquals(AbstractJob.STATE_FAILED, job.getState());
+		assertEquals(JobState.STATE_FAILED.getValue(), job.getState());
 
 		List<Message> messages = job.getSteps().get(0).getLogMessages();
 		assertEquals(1, messages.size());
@@ -96,40 +94,9 @@ public class TestCommand {
 		assertTrue(messages.get(0).getMessage().contains("Command '/bin/lukas/forer' was not found."));
 	}
 
-	/*
-	 * public void testInvalidParameters() throws Exception{ WdlApp app =
-	 * WdlReader.loadAppFromFile("test-data/command/invalid-parameters.yaml");
-	 * 
-	 * Map<String, String> params = new HashMap<String, String>();
-	 * params.put("input", "input-file");
-	 * 
-	 * AbstractJob job = createJobFromWdl(app, params); engine.submit(job); while
-	 * (job.isRunning()) { Thread.sleep(1000); }
-	 * 
-	 * assertEquals(AbstractJob.STATE_FAILED, job.getState());
-	 * 
-	 * List<Message> messages = job.getSteps().get(0).getLogMessages();
-	 * assertEquals(1, messages.size()); assertEquals(messages.get(0).getType(),
-	 * WorkflowContext.ERROR);
-	 * assertTrue(messages.get(0).getMessage().contains("Execution failed."));
-	 * 
-	 * String stdout = FileUtil.path(TestServer.getInstance().getSettings()
-	 * .getLocalWorkspace(), job.getId(), "std.out"); System.out.println(stdout);
-	 * String contentStdOut = FileUtil.readFileAsString(stdout);
-	 * 
-	 * //simple check for unrecognized option
-	 * assertTrue(contentStdOut.contains("unrecognized option"));
-	 * 
-	 * //simple check if exit code = 1
-	 * assertFalse(contentStdOut.contains("Exit Code: 0"));
-	 * 
-	 * }
-	 */
-
 	// TODO: check file staging
 
 	public CloudgeneJob createJobFromWdl(WdlApp app, Map<String, String> inputs) throws Exception {
-
 		UserDao userDao = new UserDao(application.getDatabase());
 		User user = userDao.findByUsername("user");
 

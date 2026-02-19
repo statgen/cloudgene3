@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import cloudgene.mapred.TestApplication;
-import cloudgene.mapred.jobs.AbstractJob;
+import cloudgene.mapred.jobs.state.JobState;
 import cloudgene.mapred.util.CloudgeneClientRestAssured;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.restassured.RestAssured;
@@ -55,7 +55,7 @@ public class DownloadResultsTest {
 		response.then()
 				.statusCode(200)
 				.and()
-				.body("state", equalTo(AbstractJob.STATE_SUCCESS))
+				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()))
 				.body("outputParams[0].name", equalTo("output"))
 				.body("outputParams[0].files.size()", equalTo(1));
 
@@ -120,7 +120,7 @@ public class DownloadResultsTest {
 
 		response.then()
 				.statusCode(200)
-				.body("state", equalTo(AbstractJob.STATE_SUCCESS))
+				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()))
 				.body("outputParams[0].name", equalTo("output"))
 				.body("outputParams[0].files.size()", equalTo(5));
 
@@ -174,7 +174,7 @@ public class DownloadResultsTest {
 
 		response.then()
 				.statusCode(200)
-				.body("state", equalTo(AbstractJob.STATE_SUCCESS))
+				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()))
 				.body("outputParams[0].name", equalTo("output"))
 				.body("outputParams[0].files.size()", equalTo(5));
 

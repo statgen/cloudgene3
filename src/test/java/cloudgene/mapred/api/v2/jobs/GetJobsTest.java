@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import cloudgene.mapred.TestApplication;
-import cloudgene.mapred.jobs.AbstractJob;
+import cloudgene.mapred.jobs.state.JobState;
 import cloudgene.mapred.util.CloudgeneClientRestAssured;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.restassured.RestAssured;
@@ -27,47 +27,71 @@ public class GetJobsTest {
 
 	@Test
 	public void testGetJobsWithoutLogin() {
-
-		RestAssured.when().get("/api/v2/jobs").then().statusCode(401);
-
+		RestAssured
+				.when()
+				.get("/api/v2/jobs")
+				.then()
+				.statusCode(401);
 	}
 
 	@Test
 	public void testGetJobsAsAdminUser() {
-
 		Header accessToken = client.login("admin", "admin1978");
-
-		RestAssured.given().header(accessToken).when().get("/api/v2/jobs").then().statusCode(200);
-
+		RestAssured
+				.given()
+				.header(accessToken)
+				.when()
+				.get("/api/v2/jobs")
+				.then()
+				.statusCode(200);
 	}
 
 	@Test
 	public void testGetJobsAsAdminUserAndSubmit() {
-
 		Header accessToken = client.login("admin", "admin1978");
 
 		// get list of jobs before submit
-		Response response = RestAssured.given().header(accessToken).when().get("/api/v2/jobs").thenReturn();
+		Response response = RestAssured
+				.given()
+				.header(accessToken)
+				.when()
+				.get("/api/v2/jobs")
+				.thenReturn();
+
 		List<Object> jobsBefore = response.body().jsonPath().getList("data");
 
 		// submit new job
-		String id = RestAssured.given().header(accessToken).and().multiPart("input", "input-file")
-				.post("/api/v2/jobs/submit/return-true-step-public").then().statusCode(200).and().extract().jsonPath()
-				.getString("id");
+		String id = RestAssured
+				.given()
+				.header(accessToken)
+				.multiPart("input", "input-file")
+				.post("/api/v2/jobs/submit/return-true-step-public")
+				.then()
+				.statusCode(200)
+				.extract().jsonPath().getString("id");
 
 		// wait until job is complete
 		client.waitForJob(id, accessToken);
 
 		// check job state
-		RestAssured.given().when().header(accessToken).get("/api/v2/jobs/" + id).then().statusCode(200).and()
-				.body("state", equalTo(AbstractJob.STATE_SUCCESS));
+		RestAssured
+				.given()
+				.when()
+				.header(accessToken)
+				.get("/api/v2/jobs/" + id)
+				.then()
+				.statusCode(200)
+				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()));
 
 		// get list of jobs after submit
-		response = RestAssured.given().when().header(accessToken).get("/api/v2/jobs").thenReturn();
+		response = RestAssured
+				.given()
+				.when()
+				.header(accessToken)
+				.get("/api/v2/jobs")
+				.thenReturn();
+
 		List<Object> jobsAfter = response.body().jsonPath().getList("data");
-
 		assertEquals(jobsBefore.size() + 1, jobsAfter.size());
-
 	}
-
 }

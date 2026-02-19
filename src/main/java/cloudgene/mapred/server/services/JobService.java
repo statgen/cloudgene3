@@ -9,6 +9,7 @@ import java.util.Map;
 
 import cloudgene.mapred.database.ParameterDao;
 import cloudgene.mapred.jobs.*;
+import cloudgene.mapred.jobs.state.JobState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -203,7 +204,7 @@ public class JobService {
 		FileUtil.deleteDirectory(localOutput);
 
 		// delete job from database
-		job.setState(AbstractJob.STATE_DELETED);
+		job.setState(JobState.STATE_DELETED);
 
 		JobDao dao = new JobDao(application.getDatabase());
 		dao.update(job);
@@ -232,7 +233,7 @@ public class JobService {
 	public AbstractJob restart(AbstractJob job) {
 		Settings settings = application.getSettings();
 
-		if (job.getState() != AbstractJob.STATE_DEAD) {
+		if (job.getState() != JobState.STATE_DEAD) {
 			throw new JsonHttpStatusException(HttpStatus.BAD_REQUEST, "Job " + job.getId() + " is not pending.");
 		}
 
@@ -298,8 +299,9 @@ public class JobService {
 
 		JobDao dao = new JobDao(application.getDatabase());
 
-		if (job.getState() != AbstractJob.STATE_SUCCESS && job.getState() != AbstractJob.STATE_FAILED
-				&& job.getState() != AbstractJob.STATE_CANCELED) {
+		if (job.getState() != JobState.STATE_SUCCESS
+				&& job.getState() != JobState.STATE_FAILED
+				&& job.getState() != JobState.STATE_CANCELED) {
 			return "Job " + job.getId() + " has wrong state for this operation.";
 		}
 
@@ -308,7 +310,7 @@ public class JobService {
 			String localOutput = FileUtil.path(settings.getLocalWorkspace(), job.getId());
 			FileUtil.deleteDirectory(localOutput);
 
-			job.setState(AbstractJob.STATE_RETIRED);
+			job.setState(JobState.STATE_RETIRED);
 			dao.update(job);
 
 			// When an admin manually deletes a job, clear sensitive data immediately
@@ -332,8 +334,8 @@ public class JobService {
 	public String increaseRetireDate(AbstractJob job, int days) {
 		JobDao dao = new JobDao(application.getDatabase());
 
-		if (job.getState() == AbstractJob.STATE_SUCCESS_AND_NOTIFICATION_SEND
-				|| job.getState() == AbstractJob.STATE_FAILED_AND_NOTIFICATION_SEND) {
+		if (job.getState() == JobState.STATE_SUCCESS_AND_NOTIFICATION_SEND
+				|| job.getState() == JobState.STATE_FAILED_AND_NOTIFICATION_SEND) {
 
 			try {
 
@@ -387,7 +389,7 @@ public class JobService {
 					break;
 
 				case "retired":
-					jobs = dao.findAllByState(AbstractJob.STATE_RETIRED);
+					jobs = dao.findAllByState(JobState.STATE_RETIRED);
 					break;
 			}
 		}

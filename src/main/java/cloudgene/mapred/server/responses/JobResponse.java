@@ -206,7 +206,9 @@ public class JobResponse {
 		response.setName(job.getName());
 		response.setId(job.getId());
 
-		response.setState(job.getState());
+		// TODO(Marc): Send job state to front end as human-readable string? (might
+		//             break tooling).
+		response.setState(job.getState().getValue());
 
 		response.setPositionInQueue(job.getPositionInQueue());
 		response.setUserAgent(job.getUserAgent());

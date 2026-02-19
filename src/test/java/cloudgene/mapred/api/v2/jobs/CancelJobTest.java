@@ -2,10 +2,10 @@ package cloudgene.mapred.api.v2.jobs;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 
+import cloudgene.mapred.jobs.state.JobState;
 import org.junit.jupiter.api.Test;
 
 import cloudgene.mapred.TestApplication;
-import cloudgene.mapred.jobs.AbstractJob;
 import cloudgene.mapred.util.CloudgeneClientRestAssured;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.restassured.RestAssured;
@@ -23,45 +23,66 @@ public class CancelJobTest {
 
 	@Test
 	public void testCancelSleepJob() throws InterruptedException {
-
 		String app = "long-sleep";
-
 		Header accessToken = client.loginAsPublicUser();
 
 		// submit job
-		String id = RestAssured.given().header(accessToken).and().multiPart("input", "dummy").when()
-				.post("/api/v2/jobs/submit/{app}", app).then().statusCode(200).and().extract().jsonPath()
-				.getString("id");
+		String id = RestAssured
+				.given()
+				.header(accessToken)
+				.multiPart("input", "dummy")
+				.when()
+				.post("/api/v2/jobs/submit/{app}", app)
+				.then()
+				.statusCode(200)
+				.extract().jsonPath().getString("id");
 
-		Thread.sleep(8000);
+		Thread.sleep(8_000); // TODO(Marc): WTF?
 
 		// cancel job after 8 secs
-		RestAssured.given().header(accessToken).when().get("/api/v2/jobs/{id}/cancel", id).then().statusCode(200);
+		RestAssured
+				.given()
+				.header(accessToken)
+				.when()
+				.get("/api/v2/jobs/{id}/cancel", id)
+				.then()
+				.statusCode(200);
 
 		// get details and check state
-		RestAssured.given().header(accessToken).when().get("/api/v2/jobs/{id}", id).then().statusCode(200).and()
-				.body("state", equalTo(AbstractJob.STATE_CANCELED));
+		RestAssured.given()
+				.header(accessToken)
+				.when()
+				.get("/api/v2/jobs/{id}", id)
+				.then()
+				.statusCode(200)
+				.and()
+				.body("state", equalTo(JobState.STATE_CANCELED.getValue()));
 
 	}
 
 	@Test
 	public void testCancelWithWrongJobId() {
-
 		String id = "some-random-id";
-
 		Header accessToken = client.loginAsPublicUser();
 
-		RestAssured.given().header(accessToken).when().get("/api/v2/jobs/{id}/cancel", id).then().statusCode(404).and()
-				.body("success", equalTo(false)).and().body("message", equalTo("Job " + id + " not found."));
-
+		RestAssured.given()
+				.header(accessToken)
+				.when()
+				.get("/api/v2/jobs/{id}/cancel", id)
+				.then()
+				.statusCode(404)
+				.and()
+				.body("success", equalTo(false))
+				.and()
+				.body("message", equalTo("Job " + id + " not found."));
 	}
 
 	@Test
 	public void testCancelWithoutLogin() {
-
 		String id = "some-random-id";
-		RestAssured.when().get("/api/v2/jobs/{id}/cancel", id).then().statusCode(401);
-
+		RestAssured.when()
+				.get("/api/v2/jobs/{id}/cancel", id)
+				.then()
+				.statusCode(401);
 	}
-
 }

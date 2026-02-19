@@ -3,6 +3,7 @@ package cloudgene.mapred.jobs.queue;
 import java.util.*;
 import java.util.concurrent.Future;
 
+import cloudgene.mapred.jobs.state.JobState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,9 +67,9 @@ public abstract class Queue implements Runnable {
 
 	public synchronized void cancel(AbstractJob job) {
 
-		if (job.getState() == AbstractJob.STATE_RUNNING || job.getState() == AbstractJob.STATE_EXPORTING) {
+		if (job.getState() == JobState.STATE_RUNNING || job.getState() == JobState.STATE_EXPORTING) {
 
-			log.info(name + ": Cancel running job " + job.getId() + "...");
+			log.info("{}: Cancel running job {}...", name, job.getId());
 
 			job.cancel();
 			job.kill();
@@ -79,7 +80,7 @@ public abstract class Queue implements Runnable {
 				updatePositionInQueue();
 			}
 
-		} else if (job.getState() == AbstractJob.STATE_WAITING) {
+		} else if (job.getState() == JobState.STATE_WAITING) {
 
 			log.info(name + ": Cancel waiting job " + job.getId() + "...");
 
@@ -106,7 +107,7 @@ public abstract class Queue implements Runnable {
 				}
 			}
 		} else {
-			log.info(name + ": Cancel job " + job.getId() + ". Unkown state: " + job.getState());
+			log.info("{}: Cancel job {}. Unkown state: {}", name, job.getId(), job.getState());
 		}
 	}
 
@@ -116,7 +117,6 @@ public abstract class Queue implements Runnable {
 
 		while (true) {
 			try {
-
 				synchronized (futures) {
 					synchronized (queue) {
 
@@ -125,7 +125,7 @@ public abstract class Queue implements Runnable {
 						for (AbstractJob job : futures.keySet()) {
 							Future<?> future = futures.get(job);
 							if (future.isDone() || future.isCancelled()) {
-								log.info(name + ": Job " + job.getId() + ": finished");
+								log.info("{}: Job {}: finished", name, job.getId());
 								queue.remove(job);
 								complete.add(job);
 							}
@@ -135,7 +135,7 @@ public abstract class Queue implements Runnable {
 							try {
 								onComplete(job);
 							} catch (Exception e) {
-								log.warn(name + ": Job " + job.getId() + ": On complete failed. ", e);
+								log.warn("{}: Job {}: On complete failed. ", name, job.getId(), e);
 							}
 							futures.remove(job);
 							if (updatePositions) {
@@ -145,7 +145,7 @@ public abstract class Queue implements Runnable {
 					}
 				}
 			} catch (Exception e) {
-				log.warn(name + ": Concurrency Exception!! ", e);
+				log.warn("{}: Concurrency Exception!! ", name, e);
 			}
 
 			try {
@@ -157,12 +157,12 @@ public abstract class Queue implements Runnable {
 	}
 
 	public void pause() {
-		log.info(name + ": Pause...");
+		log.info("{}: Pause...", name);
 		scheduler.pause();
 	}
 
 	public void resume() {
-		log.info(name + ": Resume...");
+		log.info("{}: Resume...", name);
 		scheduler.resume();
 	}
 
@@ -175,19 +175,14 @@ public abstract class Queue implements Runnable {
 	}
 
 	public List<AbstractJob> getJobsByUser(User user) {
-
 		List<AbstractJob> result = new ArrayList<>();
 
 		synchronized (queue) {
-
 			for (AbstractJob job : queue) {
-
 				if (job.getUser().getId() == user.getId()) {
 					result.add(job);
 				}
-
 			}
-
 		}
 
 		return result;
@@ -220,7 +215,7 @@ public abstract class Queue implements Runnable {
 			int position = 0;
 			for (AbstractJob job : queue) {
 				job.setPositionInQueue(position);
-				if (job.getState() == AbstractJob.STATE_WAITING) {
+				if (job.getState() == JobState.STATE_WAITING) {
 					position++;
 				}
 			}
@@ -237,13 +232,12 @@ public abstract class Queue implements Runnable {
 			return false;
 		}
 
-		if (job.getState() != AbstractJob.STATE_WAITING) {
+		if (job.getState() != JobState.STATE_WAITING) {
 			return false;
 		}
 
 		synchronized (futures) {
 			synchronized (queue) {
-
 				Future<?> oldFuture = futures.get(job);
 				if (oldFuture != null) {
 					oldFuture.cancel(false);
@@ -252,11 +246,11 @@ public abstract class Queue implements Runnable {
 				Future<?> future = scheduler.resubmit(job);
 				if (future != null) {
 					futures.put(job, future);
-					log.info(name + ": Update priority of " + job.getId()
-							+ (this.priority ? " (P: " + job.getPriority() + ")" : "") + "...");
+					log.info("{}: Update priority of {}{}...", name, job.getId(),
+							this.priority ? " (P: " + job.getPriority() + ")" : "");
 
 					// sorty by state and by priority
-					Collections.sort(queue, new PriorityComparator());
+					queue.sort(new PriorityComparator());
 
 					if (updatePositions) {
 						updatePositionInQueue();
@@ -278,26 +272,19 @@ public abstract class Queue implements Runnable {
 
 	protected static class PriorityComparator implements Comparator<AbstractJob> {
 
+		// TODO(Marc): This does not seem like a stable compare (what if two jobs are
+		//             RUNNING?)
 		@Override
 		public int compare(AbstractJob o1, AbstractJob o2) {
-
 			if (o1.getState() != o2.getState()) {
-				if (o1.getState() == AbstractJob.STATE_RUNNING) {
+				if (o1.getState() == JobState.STATE_RUNNING) {
 					return -1;
 				} else {
 					return 1;
 				}
 			}
 
-			if (o1.getPriority() == o2.getPriority()) {
-				return 0;
-			} else {
-				if (o1.getPriority() < o2.getPriority()) {
-					return -1;
-				} else {
-					return 1;
-				}
-			}
+			return Long.compare(o1.getPriority(), o2.getPriority());
 		}
 	}
 
@@ -308,5 +295,4 @@ public abstract class Queue implements Runnable {
 	abstract public void onComplete(AbstractJob job);
 
 	abstract public PriorityRunnable createRunnable(AbstractJob job);
-
 }

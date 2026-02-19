@@ -9,6 +9,7 @@ import cloudgene.mapred.database.UserDao;
 import cloudgene.mapred.database.util.Database;
 import cloudgene.mapred.jobs.AbstractJob;
 import cloudgene.mapred.jobs.WorkflowEngine;
+import cloudgene.mapred.jobs.state.JobState;
 import cloudgene.mapred.server.Application;
 import io.micronaut.scheduling.annotation.Scheduled;
 import jakarta.inject.Inject;
@@ -20,13 +21,12 @@ public class ServerTasks {
 	@Inject
 	protected Application application;
 
-	@Scheduled(fixedDelay = "5m") 
+	@Scheduled(fixedDelay = "5m")
 	public void writeStatistics() {
-
 		if (!application.getSettings().isWriteStatistics()) {
 			return;
 		}
-		
+
 		WorkflowEngine engine = application.getWorkflowEngine();
 		Database database = application.getDatabase();
 
@@ -35,20 +35,20 @@ public class ServerTasks {
 		long countRunning = 0;
 
 		for (AbstractJob job : jobs) {
-			if (job.getState() == AbstractJob.STATE_RUNNING) {
+			if (job.getState() == JobState.STATE_RUNNING) {
 				countRunning++;
 			}
-			if (job.getState() == AbstractJob.STATE_WAITING) {
+			if (job.getState() == JobState.STATE_WAITING) {
 				countWaiting++;
 			}
 		}
 
 		Map<String, Long> countersRunning = engine
-				.getCounters(AbstractJob.STATE_RUNNING, null);
+				.getCounters(JobState.STATE_RUNNING, null);
 		Map<String, Long> countersWaiting = engine
-				.getCounters(AbstractJob.STATE_WAITING, null);
+				.getCounters(JobState.STATE_WAITING, null);
 		Map<String, Long> countersComplete = engine
-				.getCounters(AbstractJob.STATE_SUCCESS, null);
+				.getCounters(JobState.STATE_SUCCESS, null);
 
 		UserDao daoUser = new UserDao(database);
 		List<User> users = daoUser.findAll();
@@ -72,5 +72,4 @@ public class ServerTasks {
 				.get("runs") == null ? 0 : countersComplete.get("runs")));
 
 	}
-	
 }
