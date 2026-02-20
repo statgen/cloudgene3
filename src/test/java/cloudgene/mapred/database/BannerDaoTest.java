@@ -3,7 +3,7 @@ package cloudgene.mapred.database;
 import cloudgene.mapred.TestApplication;
 import cloudgene.mapred.core.Banner;
 import cloudgene.mapred.database.util.Database;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

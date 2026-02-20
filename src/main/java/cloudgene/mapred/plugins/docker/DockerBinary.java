@@ -3,7 +3,7 @@ package cloudgene.mapred.plugins.docker;
 import java.io.File;
 
 import cloudgene.mapred.util.BinaryFinder;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.util.command.Command;
 
 public class DockerBinary {

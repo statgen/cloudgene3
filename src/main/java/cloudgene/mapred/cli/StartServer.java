@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ch.qos.logback.classic.ClassicConstants;
-import cloudgene.mapred.util.Configuration;
+import cloudgene.mapred.util.config.Configuration;
 import genepi.io.FileUtil;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import cloudgene.mapred.server.Application;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import genepi.base.Tool;
 import io.micronaut.context.env.Environment;
 import io.micronaut.runtime.Micronaut;

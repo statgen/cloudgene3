@@ -23,7 +23,7 @@ import cloudgene.mapred.server.Application;
 import cloudgene.mapred.server.exceptions.JsonHttpStatusException;
 import cloudgene.mapred.util.FormUtil.Parameter;
 import cloudgene.mapred.util.Page;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.wdl.WdlApp;
 import genepi.io.FileUtil;
 import io.micronaut.http.HttpStatus;

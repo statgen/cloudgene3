@@ -3,6 +3,7 @@ package cloudgene.mapred.util;
 import java.util.Properties;
 import java.util.Map;
 
+import cloudgene.mapred.util.config.Settings;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.PasswordAuthentication;

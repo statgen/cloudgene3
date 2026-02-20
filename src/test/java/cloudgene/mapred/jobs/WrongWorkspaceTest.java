@@ -14,7 +14,7 @@ import cloudgene.mapred.core.User;
 import cloudgene.mapred.database.JobDao;
 import cloudgene.mapred.database.UserDao;
 import cloudgene.mapred.jobs.workspace.WorkspaceFactory;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.wdl.WdlApp;
 import cloudgene.mapred.wdl.WdlReader;
 import genepi.io.FileUtil;

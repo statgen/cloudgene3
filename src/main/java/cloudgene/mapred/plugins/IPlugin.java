@@ -1,6 +1,6 @@
 package cloudgene.mapred.plugins;
 
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.wdl.WdlApp;
 
 import java.io.IOException;

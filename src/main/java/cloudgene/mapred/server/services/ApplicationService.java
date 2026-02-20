@@ -12,7 +12,7 @@ import cloudgene.mapred.apps.Application;
 import cloudgene.mapred.apps.ApplicationRepository;
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.server.exceptions.JsonHttpStatusException;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.wdl.WdlApp;
 import io.micronaut.http.HttpStatus;
 import jakarta.inject.Inject;

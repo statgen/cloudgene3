@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 import cloudgene.mapred.plugins.IPlugin;
 import cloudgene.mapred.plugins.PluginManager;
-import cloudgene.mapred.util.Configuration;
+import cloudgene.mapred.util.config.Configuration;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

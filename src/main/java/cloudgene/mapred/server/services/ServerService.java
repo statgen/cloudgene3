@@ -7,7 +7,7 @@ import cloudgene.mapred.plugins.IPlugin;
 import cloudgene.mapred.plugins.PluginManager;
 import cloudgene.mapred.plugins.nextflow.NextflowPlugin;
 import cloudgene.mapred.server.Application;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.util.command.Command;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cloudgene.mapred.server.Application;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.security.annotation.Secured;

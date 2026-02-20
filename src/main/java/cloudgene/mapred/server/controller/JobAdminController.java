@@ -16,7 +16,7 @@ import cloudgene.mapred.server.responses.MessageResponse;
 import cloudgene.mapred.server.services.JobCleanUpService;
 import cloudgene.mapred.server.services.JobService;
 import cloudgene.mapred.util.FormUtil;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Controller;

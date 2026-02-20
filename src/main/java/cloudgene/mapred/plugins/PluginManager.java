@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import cloudgene.mapred.plugins.docker.DockerPlugin;
 import cloudgene.mapred.plugins.nextflow.NextflowPlugin;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 
 public class PluginManager {
 

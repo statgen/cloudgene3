@@ -17,7 +17,7 @@ import cloudgene.mapred.database.UserDao;
 import cloudgene.mapred.jobs.sdk.WorkflowContext;
 import cloudgene.mapred.jobs.state.JobState;
 import cloudgene.mapred.jobs.workspace.WorkspaceFactory;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.wdl.WdlApp;
 import cloudgene.mapred.wdl.WdlReader;
 import genepi.io.FileUtil;

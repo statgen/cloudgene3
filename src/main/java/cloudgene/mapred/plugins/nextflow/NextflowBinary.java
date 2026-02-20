@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cloudgene.mapred.util.BinaryFinder;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.util.command.Command;
 
 public class NextflowBinary {

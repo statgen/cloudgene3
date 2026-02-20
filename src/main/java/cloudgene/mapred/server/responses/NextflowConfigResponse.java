@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import cloudgene.mapred.jobs.Environment.Variable;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import genepi.io.FileUtil;
 
 @JsonInclude(JsonInclude.Include.ALWAYS)

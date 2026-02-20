@@ -11,7 +11,7 @@ import cloudgene.mapred.apps.ApplicationRepository;
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.jobs.sdk.WorkflowContext;
 import cloudgene.mapred.util.MailUtil;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.wdl.WdlParameterInputType;
 import genepi.io.FileUtil;
 

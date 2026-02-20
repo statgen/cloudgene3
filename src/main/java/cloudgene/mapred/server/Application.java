@@ -6,7 +6,7 @@ import java.util.*;
 
 import cloudgene.mapred.jobs.engine.handler.IJobErrorHandler;
 import cloudgene.mapred.jobs.engine.handler.JobErrorHandlerFactory;
-import cloudgene.mapred.util.Configuration;
+import cloudgene.mapred.util.config.Configuration;
 import io.micronaut.runtime.event.ApplicationShutdownEvent;
 import io.micronaut.runtime.event.annotation.EventListener;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ import cloudgene.mapred.database.util.Fixtures;
 import cloudgene.mapred.jobs.PersistentWorkflowEngine;
 import cloudgene.mapred.jobs.WorkflowEngine;
 import cloudgene.mapred.plugins.PluginManager;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import genepi.io.FileUtil;
 import io.micronaut.context.annotation.Context;
 

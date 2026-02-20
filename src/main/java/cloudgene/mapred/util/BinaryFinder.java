@@ -3,6 +3,7 @@ package cloudgene.mapred.util;
 import java.io.File;
 import java.util.Map;
 
+import cloudgene.mapred.util.config.Settings;
 import genepi.io.FileUtil;
 import jakarta.annotation.Nullable;
 

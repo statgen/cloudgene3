@@ -2,7 +2,7 @@ package cloudgene.mapred.jobs.workspace;
 
 import cloudgene.mapred.jobs.AbstractJob;
 import cloudgene.mapred.server.Application;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 

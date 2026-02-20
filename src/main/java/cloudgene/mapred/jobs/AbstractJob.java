@@ -21,7 +21,7 @@ import cloudgene.mapred.core.User;
 import cloudgene.mapred.jobs.queue.PriorityRunnable;
 import cloudgene.mapred.jobs.workspace.IWorkspace;
 import cloudgene.mapred.util.HashUtil;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import genepi.io.FileUtil;
 
 abstract public class AbstractJob extends PriorityRunnable {

@@ -1,7 +1,7 @@
 package cloudgene.mapred.cli;
 
 import cloudgene.mapred.apps.ApplicationRepository;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import genepi.base.Tool;
 
 public abstract class BaseTool extends Tool {
@@ -111,7 +111,7 @@ public abstract class BaseTool extends Tool {
 	}
 
 	public void turnLoggingOff() {
-		
+
 	}
 
 }

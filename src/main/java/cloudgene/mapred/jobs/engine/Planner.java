@@ -6,7 +6,7 @@ import java.util.Map;
 
 import cloudgene.mapred.jobs.CloudgeneContext;
 import cloudgene.mapred.util.MapValueParser;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.wdl.*;
 import groovy.text.SimpleTemplateEngine;
 

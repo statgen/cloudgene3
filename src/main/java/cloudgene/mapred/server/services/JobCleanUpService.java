@@ -15,7 +15,7 @@ import cloudgene.mapred.jobs.workspace.WorkspaceFactory;
 import cloudgene.mapred.jobs.workspace.IWorkspace;
 import cloudgene.mapred.server.Application;
 import cloudgene.mapred.util.MailUtil;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import genepi.io.FileUtil;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;

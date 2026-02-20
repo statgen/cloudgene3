@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.*;
 
 import cloudgene.mapred.util.GlobUtil;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

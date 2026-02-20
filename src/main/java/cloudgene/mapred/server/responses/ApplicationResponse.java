@@ -12,7 +12,7 @@ import cloudgene.mapred.apps.ApplicationRepository;
 import cloudgene.mapred.jobs.Environment;
 import cloudgene.mapred.plugins.IPlugin;
 import cloudgene.mapred.plugins.PluginManager;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import genepi.io.FileUtil;
 import org.slf4j.Logger;

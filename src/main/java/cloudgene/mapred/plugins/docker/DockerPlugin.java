@@ -2,7 +2,7 @@ package cloudgene.mapred.plugins.docker;
 
 import cloudgene.mapred.jobs.CloudgeneStepFactory;
 import cloudgene.mapred.plugins.IPlugin;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.wdl.WdlApp;
 
 import java.util.Map;
