@@ -40,7 +40,7 @@ public class ApiTokensTest {
 	CloudgeneClientRestAssured client;
 
 	@BeforeAll
-	protected void setUp() throws Exception {
+	protected void setUp() {
 		// insert two dummy users
 		Database database = application.getDatabase();
 		UserDao userDao = new UserDao(database);
@@ -67,7 +67,7 @@ public class ApiTokensTest {
 	}
 
 	@Test
-	public void testValidateToken() throws InterruptedException {
+	public void testValidateToken() {
 		Header accessToken = client.login("testusertoken", "Test1Password");
 
 		// check if token is empty
@@ -165,7 +165,7 @@ public class ApiTokensTest {
 	}
 
 	@Test
-	public void testCreateTokenWithCorrectCredentials() throws InterruptedException {
+	public void testCreateTokenWithCorrectCredentials() {
 		Header accessToken = client.login("testusertoken", "Test1Password");
 
 		// check if token is empty
@@ -246,7 +246,7 @@ public class ApiTokensTest {
 	}
 
 	@Test
-	public void testSubmitWithoutVersion() throws InterruptedException {
+	public void testSubmitWithoutVersion() {
 		Header accessToken = client.login("testusertoken2", "Test2Password");
 
 		// check if token is empty
@@ -312,7 +312,7 @@ public class ApiTokensTest {
 				.body("success", equalTo(true));
 
 		// validate token
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("token", apiToken);
 
 		RestAssured
@@ -326,14 +326,14 @@ public class ApiTokensTest {
 	}
 
 	@Test
-	public void testSubmitTokenWithWrongApiToken() throws InterruptedException {
+	public void testSubmitTokenWithWrongApiToken() {
 
 		submitTestJob("Wrong Token").then().statusCode(401);
 
 	}
 
 	@Test
-	public void testSubmitJobWithExpiredApiToken() throws InterruptedException {
+	public void testSubmitJobWithExpiredApiToken() {
 		int expiration = 0;
 		Header accessToken = client.login("testusertoken", "Test1Password");
 
@@ -363,7 +363,7 @@ public class ApiTokensTest {
 				.body("success", equalTo(true));
 
 		// validate token
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("token", apiToken);
 
 		RestAssured

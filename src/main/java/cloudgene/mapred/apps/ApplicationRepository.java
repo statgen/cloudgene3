@@ -112,6 +112,7 @@ public class ApplicationRepository {
 				versions.add(app);
 			}
 		}
+
 		if (versions.isEmpty()) {
 			return null;
 		}

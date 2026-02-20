@@ -200,11 +200,8 @@ abstract public class AbstractJob extends PriorityRunnable {
 			return;
 		}
 
-		log.info("[Job {}] Setup job...", getId());
-		setState(JobState.RUNNING);
-		setStartTime(System.currentTimeMillis());
-
 		log.info("[Job {}] Running job...", getId());
+		setState(JobState.RUNNING);
 		setStartTime(System.currentTimeMillis());
 
 		try {

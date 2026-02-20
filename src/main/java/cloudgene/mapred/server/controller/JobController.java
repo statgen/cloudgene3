@@ -153,7 +153,6 @@ public class JobController {
 	@Delete("/{id}")
 	@Secured(SecurityRule.IS_AUTHENTICATED)
 	public JobResponse delete(Authentication authentication, String id) {
-
 		User user = authenticationService.getUserByAuthentication(authentication);
 		blockInMaintenanceMode(user);
 
@@ -167,21 +166,19 @@ public class JobController {
 		log.info(message);
 
 		JobResponse response = JobResponse.build(job, user);
-
 		return response;
 	}
 
 	@Get("/{id}/status")
 	@Secured(SecurityRule.IS_AUTHENTICATED)
 	public JobResponse status(Authentication authentication, String id) {
-
 		User user = authenticationService.getUserByAuthentication(authentication, AuthenticationType.ALL_TOKENS);
 		blockInMaintenanceMode(user);
 
 		AbstractJob job = jobService.getByIdAndUser(id, user);
+
 		JobResponse response = JobResponse.build(job, user);
 		return response;
-
 	}
 
 	@Get("/{id}/cancel")

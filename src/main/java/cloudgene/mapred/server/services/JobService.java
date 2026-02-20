@@ -231,14 +231,14 @@ public class JobService {
 	public AbstractJob delete(AbstractJob job) {
 		Settings settings = application.getSettings();
 
+		JobDao dao = new JobDao(application.getDatabase());
+
 		// delete local directory
 		String localOutput = FileUtil.path(settings.getLocalWorkspace(), job.getId());
 		FileUtil.deleteDirectory(localOutput);
 
 		// delete job from database
 		job.setState(JobState.DELETED);
-
-		JobDao dao = new JobDao(application.getDatabase());
 		dao.update(job);
 
 		// When a user manually deletes a job, clear sensitive data immediately
@@ -246,7 +246,6 @@ public class JobService {
 		parameterDao.deleteSensitiveByJob(job);
 
 		// delete all results that are stored on external workspaces
-
 		IWorkspace workspace = workspaceFactory.getByJob(job);
 		try {
 			workspace.delete(job.getId());
@@ -306,6 +305,12 @@ public class JobService {
 		return job;
 	}
 
+	/**
+	 * Sets the download attempt counter for each downloadable artifact in the
+	 * provided {@code job} to {@code maxDownloads} (the download counter counts
+	 * DOWN to zero; after that no more download attempts are allowed for the
+	 * specific artifact).
+	 */
 	public int reset(AbstractJob job, int maxDownloads) {
 		DownloadDao downloadDao = new DownloadDao(application.getDatabase());
 		int count = 0;
@@ -343,7 +348,7 @@ public class JobService {
 		}
 
 		try {
-			// delete local directory and hdfs directory
+			// delete local directory
 			String localOutput = FileUtil.path(settings.getLocalWorkspace(), job.getId());
 			FileUtil.deleteDirectory(localOutput);
 
@@ -354,8 +359,8 @@ public class JobService {
 			ParameterDao parameterDao = new ParameterDao(application.getDatabase());
 			parameterDao.deleteSensitiveByJob(job);
 
+			// delete all results that are stored on external workspaces
 			IWorkspace workspace = workspaceFactory.getByJob(job);
-
 			try {
 				workspace.delete(job.getId());
 			} catch (Exception e) {

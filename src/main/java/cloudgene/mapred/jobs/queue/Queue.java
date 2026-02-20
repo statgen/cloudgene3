@@ -66,23 +66,20 @@ public abstract class Queue implements Runnable {
 	}
 
 	public synchronized void cancel(AbstractJob job) {
-
 		if (job.getState() == JobState.RUNNING || job.getState() == JobState.EXPORTING) {
-
 			log.info("{}: Cancel running job {}...", name, job.getId());
 
 			job.cancel();
 			job.kill();
 
-			log.info(name + ": Job " + job.getId() + " canceled.");
+            log.info("{}: Job {} canceled.", name, job.getId());
 
 			if (updatePositions) {
 				updatePositionInQueue();
 			}
 
 		} else if (job.getState() == JobState.WAITING) {
-
-			log.info(name + ": Cancel waiting job " + job.getId() + "...");
+            log.info("{}: Cancel waiting job {}...", name, job.getId());
 
 			synchronized (futures) {
 				synchronized (queue) {
@@ -99,7 +96,7 @@ public abstract class Queue implements Runnable {
 					futures.remove(job);
 					onComplete(job);
 
-					log.info(name + ": Job " + job.getId() + " canceled.");
+					log.info("{}: Job {} canceled.", name, job.getId());
 
 					if (updatePositions) {
 						updatePositionInQueue();
@@ -272,8 +269,6 @@ public abstract class Queue implements Runnable {
 
 	protected static class PriorityComparator implements Comparator<AbstractJob> {
 
-		// TODO(Marc): This does not seem like a stable compare (what if two jobs are
-		//             RUNNING?)
 		@Override
 		public int compare(AbstractJob o1, AbstractJob o2) {
 			if (o1.getState() != o2.getState()) {
