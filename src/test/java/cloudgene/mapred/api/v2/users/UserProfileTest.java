@@ -263,7 +263,7 @@ public class UserProfileTest {
 				.then()
 				.statusCode(200)
 				.body("success", equalTo(false))
-				.body("message", containsString("least one uppercase"));
+				.body("message", containsString("least one UPPERCASE"));
 	}
 
 	@Test

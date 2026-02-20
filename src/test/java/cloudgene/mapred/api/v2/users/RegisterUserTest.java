@@ -352,7 +352,7 @@ public class RegisterUserTest {
 				.then()
 				.statusCode(200)
 				.body("success", equalTo(false))
-				.body("message", containsString("least one uppercase"));
+				.body("message", containsString("least one UPPERCASE"));
 
 		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 	}
