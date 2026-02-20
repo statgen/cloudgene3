@@ -101,7 +101,7 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 
 		applications.add(new Application(
 				"test-data/all-possible-inputs-private.yaml",
-				"public"));
+				"private"));
 
 		applications.add(new Application(
 				"test-data/long-sleep.yaml",
@@ -113,10 +113,6 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 
 		applications.add(new Application(
 				"test-data/three-tasks.yaml",
-				"public"));
-
-		applications.add(new Application(
-				"test-data/write-text-to-std-out.yaml",
 				"public"));
 
 		applications.add(new Application(
