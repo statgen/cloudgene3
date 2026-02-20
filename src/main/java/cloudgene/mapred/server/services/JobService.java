@@ -27,7 +27,6 @@ import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.wdl.WdlApp;
 import genepi.io.FileUtil;
 import io.micronaut.http.HttpStatus;
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 @Singleton
@@ -35,12 +34,25 @@ public class JobService {
 
 	private static final Logger log = LoggerFactory.getLogger(JobService.class);
 
-	@Inject
-	protected Application application;
+	private static final SimpleDateFormat ID_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS");
 
-	@Inject
+	protected Application application;
 	protected WorkspaceFactory workspaceFactory;
 
+	public JobService(Application application, WorkspaceFactory workspaceFactory) {
+		this.application = application;
+		this.workspaceFactory = workspaceFactory;
+	}
+
+	/**
+	 * Attempts to retrieve the requested job from:
+	 * <ol>
+	 *     <li>The current workflow engine (in-memory data).</li>
+	 *     <li>The database.</li>
+	 * </ol>
+	 *
+	 * If the job cannot be found, a {@link JsonHttpStatusException} is thrown.
+	 */
 	public AbstractJob getById(String id) {
 		// TODO: better to go via database? only load from engine when running?
 
@@ -50,9 +62,7 @@ public class JobService {
 			// finished job is in database
 			JobDao dao = new JobDao(application.getDatabase());
 			job = dao.findById(id, true);
-
 		} else {
-
 			if (job instanceof CloudgeneJob) {
 				((CloudgeneJob) job).updateProgress();
 			}
@@ -65,6 +75,11 @@ public class JobService {
 		return job;
 	}
 
+	/**
+	 * Similar to {@link #getById(String)}, but also throws a
+	 * {@link JsonHttpStatusException} if {@code user} is not authorized to view
+	 * this job.
+	 */
 	public AbstractJob getByIdAndUser(String id, User user) {
 		if (user == null) {
 			throw new JsonHttpStatusException(HttpStatus.UNAUTHORIZED, "Access denied.");
@@ -80,6 +95,24 @@ public class JobService {
 		return job;
 	}
 
+	/**
+	 * Submits the requested job for running, if applicable.
+	 * <p>
+	 * {@code appId} must be a valid application identifier for an installed app.
+	 * Requesting an unknown ID raises an exception.
+	 * <p>
+	 * Non-admin users are limited to {@code maxRunningJobsPerUser} simultaneous
+	 * queued and/or running jobs. Attempting to submit beyond this limit raises an
+	 * exception.
+	 *
+	 * @param appId     String of form {@code <name>[@version]} identifying which
+	 *                  installed Cloudgene application to run.
+	 * @param form      Input parameters for the job.
+	 * @param user      Who is submitting this job?
+	 * @param userAgent Web user agent used to perform this request (stored with job
+	 *                  data).
+	 * @return The submitted job.
+	 */
 	public AbstractJob submitJob(String appId, List<Parameter> form, User user, String userAgent) {
 		if (user == null) {
 			throw new JsonHttpStatusException(HttpStatus.UNAUTHORIZED, "Access denied.");
@@ -107,12 +140,11 @@ public class JobService {
 
 		String id = createId();
 
-		Map<String, String> inputParams = null;
+		Map<String, String> inputParams;
 
 		IWorkspace workspace = workspaceFactory.getDefault();
 
 		try {
-
 			// setup workspace
 			workspace.setJob(id);
 			workspace.setup();
@@ -126,7 +158,7 @@ public class JobService {
 
 		String name = id;
 		String jobName = inputParams.get("job-name");
-		if (jobName != null && !jobName.trim().isEmpty()) {
+		if (jobName != null && !jobName.isBlank()) {
 			name = jobName;
 		}
 
@@ -166,7 +198,7 @@ public class JobService {
 		// count all jobs
 		int count = dao.countAllByUser(user);
 
-		List<AbstractJob> jobs = null;
+		List<AbstractJob> jobs;
 		if (page != null) {
 			jobs = dao.findAllByUser(user, offset, pageSize);
 		} else {
@@ -187,7 +219,7 @@ public class JobService {
 			}
 		}
 
-		Page<AbstractJob> result = new Page<AbstractJob>();
+		Page<AbstractJob> result = new Page<>();
 		result.setCount(count);
 		result.setPage(page);
 		result.setPageSize(pageSize);
@@ -219,12 +251,17 @@ public class JobService {
 		try {
 			workspace.delete(job.getId());
 		} catch (Exception e) {
-			log.error("Deleting " + job.getId() + " form workspace failed.", e);
+			log.error("Deleting {} form workspace failed.", job.getId(), e);
 		}
 
 		return job;
 	}
 
+	/**
+	 * If the {@code job} is in the long time queue (WAITING or RUNNING, basically),
+	 * it is canceled. This is reflected by a change in its {@code state}.
+	 * Otherwise, nothing is done. Returns the passed {@code job}.
+	 */
 	public AbstractJob cancel(AbstractJob job) {
 		application.getWorkflowEngine().cancel(job);
 		return job;
@@ -322,7 +359,7 @@ public class JobService {
 			try {
 				workspace.delete(job.getId());
 			} catch (Exception e) {
-				log.error("Deleting " + job.getId() + " from workspace failed.", e);
+				log.error("Deleting {} from workspace failed.", job.getId(), e);
 			}
 
 			return "Retired job " + job.getId();
@@ -355,11 +392,35 @@ public class JobService {
 		}
 	}
 
+	/**
+	 * Returns a hopefully unique ID based on a timestamp, with form
+	 * {@code job-yyyyMMdd-HHmmss-SSS}.
+	 */
 	public String createId() {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS");
-		return "job-" + sdf.format(new Date());
+		return "job-" + ID_DATE_FORMAT.format(new Date());
 	}
 
+	/**
+	 * Returns all available jobs from the given {@code state} (not to be confused
+	 * with {@link JobState}), where the options are:
+	 * <ul>
+	 *     <li>
+	 *         {@code running-ltq}: whatever the long time queue is (actual
+	 *         waiting and running jobs?)
+	 *     </li>
+	 *     <li>
+	 *         {@code running-stq}: legacy value. Doesn't return anything.
+	 *     </li>
+	 *     <li>
+	 *         {@code current}: whatever current is (finished jobs with data
+	 *         available?)
+	 *     </li>
+	 *     <li>
+	 *         {@code retired}: whatever retired is (old jobs that have been
+	 *         purged?)
+	 *     </li>
+	 * </ul>
+	 */
 	public List<AbstractJob> getJobs(String state) {
 		List<AbstractJob> jobs = new ArrayList<>();
 
@@ -393,6 +454,7 @@ public class JobService {
 					break;
 			}
 		}
+
 		return jobs;
 	}
 

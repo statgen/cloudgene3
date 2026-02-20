@@ -16,13 +16,12 @@ import cloudgene.mapred.util.HashUtil;
 import cloudgene.mapred.util.MailUtil;
 import cloudgene.mapred.util.Page;
 import io.micronaut.http.HttpStatus;
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 @Singleton
 public class UserService {
 
-	private static Logger log = LoggerFactory.getLogger(UserService.class);
+	private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
 	public static final String MESSAGE_USER_NOT_FOUND = "User %s not found.";
 	public static final String DEFAULT_ROLE = "User";
@@ -49,8 +48,11 @@ public class UserService {
 	private static final String MESSAGE_WRONG_ACTIVATION_CODE = "Wrong activation code.";
 	private static final String MESSAGE_USER_ACTIVATED = "User successfully activated.";
 
-	@Inject
 	protected Application application;
+
+	public UserService(Application application) {
+		this.application = application;
+	}
 
 	public Page<User> getAll(String query, String page, int pageSize) {
 
@@ -93,7 +95,6 @@ public class UserService {
 		result.setData(users);
 
 		return result;
-
 	}
 
 	public User getByUsername(String username) {
@@ -394,7 +395,6 @@ public class UserService {
 		newUser.setPassword(HashUtil.hashPassword(new_password));
 
 		try {
-
 			String hostname = application.getSettings().getServerUrl();
 			hostname += application.getSettings().getBaseUrl();
 
@@ -432,7 +432,6 @@ public class UserService {
 		} catch (Exception e) {
 
 			return MessageResponse.error(e.getMessage());
-
 		}
 	}
 
@@ -467,7 +466,6 @@ public class UserService {
 
 			log.warn(String.format("User: used activation code for missing or unknown username '%s'", username));
 			return MessageResponse.error(MESSAGE_WRONG_USERNAME);
-
 		}
 	}
 }

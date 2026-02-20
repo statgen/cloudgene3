@@ -123,6 +123,10 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 				"test-data/write-text-to-std-out.yaml",
 				"public"));
 
+		applications.add(new Application(
+				"test-data/no-workflow.yaml",
+				"public"));
+
 		// -------- Application Links -------- //
 
 		applications.add(new Application(
