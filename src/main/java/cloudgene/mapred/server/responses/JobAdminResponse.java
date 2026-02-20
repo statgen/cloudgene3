@@ -91,30 +91,30 @@ public class JobAdminResponse {
 				job.setWorkspaceSize(FileUtils.byteCountToDisplaySize(size));
 			}
 
-			if (job.getState() == JobState.STATE_EXPORTING.getValue()
-					|| job.getState() == JobState.STATE_RUNNING.getValue()) {
+			if (job.getState() == JobState.EXPORTING.getValue()
+					|| job.getState() == JobState.RUNNING.getValue()) {
 				running++;
 			}
 
-			if (job.getState() == JobState.STATE_SUCCESS.getValue()
-					|| job.getState() == JobState.STATE_SUCCESS_AND_NOTIFICATION_SEND.getValue()) {
+			if (job.getState() == JobState.SUCCESS.getValue()
+					|| job.getState() == JobState.SUCCESS_AND_NOTIFICATION_SENT.getValue()) {
 				success++;
 			}
 
-			if (job.getState() == JobState.STATE_FAILED.getValue()
-					|| job.getState() == JobState.STATE_FAILED_AND_NOTIFICATION_SEND.getValue()) {
+			if (job.getState() == JobState.FAILED.getValue()
+					|| job.getState() == JobState.FAILED_AND_NOTIFICATION_SENT.getValue()) {
 				failed++;
 			}
 
-			if (job.getState() == JobState.STATE_DEAD.getValue()) {
+			if (job.getState() == JobState.DEAD.getValue()) {
 				pending++;
 			}
 
-			if (job.getState() == JobState.STATE_WAITING.getValue()) {
+			if (job.getState() == JobState.WAITING.getValue()) {
 				waiting++;
 			}
 
-			if (job.getState() == JobState.STATE_CANCELED.getValue()) {
+			if (job.getState() == JobState.CANCELED.getValue()) {
 				canceled++;
 			}
 		}

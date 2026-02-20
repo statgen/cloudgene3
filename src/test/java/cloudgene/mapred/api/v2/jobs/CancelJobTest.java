@@ -56,7 +56,7 @@ public class CancelJobTest {
 				.then()
 				.statusCode(200)
 				.and()
-				.body("state", equalTo(JobState.STATE_CANCELED.getValue()));
+				.body("state", equalTo(JobState.CANCELED.getValue()));
 
 	}
 

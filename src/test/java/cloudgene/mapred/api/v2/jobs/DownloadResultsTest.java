@@ -55,7 +55,7 @@ public class DownloadResultsTest {
 		response.then()
 				.statusCode(200)
 				.and()
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()))
+				.body("state", equalTo(JobState.SUCCESS.getValue()))
 				.body("outputParams[0].name", equalTo("output"))
 				.body("outputParams[0].files.size()", equalTo(1));
 
@@ -120,7 +120,7 @@ public class DownloadResultsTest {
 
 		response.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()))
+				.body("state", equalTo(JobState.SUCCESS.getValue()))
 				.body("outputParams[0].name", equalTo("output"))
 				.body("outputParams[0].files.size()", equalTo(5));
 
@@ -174,7 +174,7 @@ public class DownloadResultsTest {
 
 		response.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()))
+				.body("state", equalTo(JobState.SUCCESS.getValue()))
 				.body("outputParams[0].name", equalTo("output"))
 				.body("outputParams[0].files.size()", equalTo(5));
 

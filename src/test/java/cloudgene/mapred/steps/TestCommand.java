@@ -51,7 +51,7 @@ public class TestCommand {
 			Thread.sleep(1_000); // TODO(Marc): WTF?
 		}
 
-		assertEquals(JobState.STATE_SUCCESS, job.getState());
+		assertEquals(JobState.SUCCESS, job.getState());
 
 		List<Message> messages = job.getSteps().get(0).getLogMessages();
 		assertEquals(1, messages.size());
@@ -86,7 +86,7 @@ public class TestCommand {
 			Thread.sleep(1_000); // TODO(Marc): WTF?
 		}
 
-		assertEquals(JobState.STATE_FAILED, job.getState());
+		assertEquals(JobState.FAILED, job.getState());
 
 		List<Message> messages = job.getSteps().get(0).getLogMessages();
 		assertEquals(1, messages.size());

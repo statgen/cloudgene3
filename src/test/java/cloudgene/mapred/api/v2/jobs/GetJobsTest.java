@@ -81,7 +81,7 @@ public class GetJobsTest {
 				.get("/api/v2/jobs/" + id)
 				.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()));
+				.body("state", equalTo(JobState.SUCCESS.getValue()));
 
 		// get list of jobs after submit
 		response = RestAssured

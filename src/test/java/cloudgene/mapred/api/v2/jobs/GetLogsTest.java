@@ -67,9 +67,9 @@ public class GetLogsTest {
 
 		response.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()))
+				.body("state", equalTo(JobState.SUCCESS.getValue()))
 				.body("name", equalTo("my-job-name"))
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()))
+				.body("state", equalTo(JobState.SUCCESS.getValue()))
 				.body("logs", emptyString());
 
 		// direct link should work
@@ -130,7 +130,7 @@ public class GetLogsTest {
 				.get("/api/v2/jobs/" + id)
 				.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()))
+				.body("state", equalTo(JobState.SUCCESS.getValue()))
 				.body("logs", emptyString());
 
 		// direct link should work

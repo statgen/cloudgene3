@@ -236,7 +236,7 @@ public class JobService {
 		FileUtil.deleteDirectory(localOutput);
 
 		// delete job from database
-		job.setState(JobState.STATE_DELETED);
+		job.setState(JobState.DELETED);
 
 		JobDao dao = new JobDao(application.getDatabase());
 		dao.update(job);
@@ -270,7 +270,7 @@ public class JobService {
 	public AbstractJob restart(AbstractJob job) {
 		Settings settings = application.getSettings();
 
-		if (job.getState() != JobState.STATE_DEAD) {
+		if (job.getState() != JobState.DEAD) {
 			throw new JsonHttpStatusException(HttpStatus.BAD_REQUEST, "Job " + job.getId() + " is not pending.");
 		}
 
@@ -336,9 +336,9 @@ public class JobService {
 
 		JobDao dao = new JobDao(application.getDatabase());
 
-		if (job.getState() != JobState.STATE_SUCCESS
-				&& job.getState() != JobState.STATE_FAILED
-				&& job.getState() != JobState.STATE_CANCELED) {
+		if (job.getState() != JobState.SUCCESS
+				&& job.getState() != JobState.FAILED
+				&& job.getState() != JobState.CANCELED) {
 			return "Job " + job.getId() + " has wrong state for this operation.";
 		}
 
@@ -347,7 +347,7 @@ public class JobService {
 			String localOutput = FileUtil.path(settings.getLocalWorkspace(), job.getId());
 			FileUtil.deleteDirectory(localOutput);
 
-			job.setState(JobState.STATE_RETIRED);
+			job.setState(JobState.RETIRED);
 			dao.update(job);
 
 			// When an admin manually deletes a job, clear sensitive data immediately
@@ -371,8 +371,8 @@ public class JobService {
 	public String increaseRetireDate(AbstractJob job, int days) {
 		JobDao dao = new JobDao(application.getDatabase());
 
-		if (job.getState() == JobState.STATE_SUCCESS_AND_NOTIFICATION_SEND
-				|| job.getState() == JobState.STATE_FAILED_AND_NOTIFICATION_SEND) {
+		if (job.getState() == JobState.SUCCESS_AND_NOTIFICATION_SENT
+				|| job.getState() == JobState.FAILED_AND_NOTIFICATION_SENT) {
 
 			try {
 
@@ -450,7 +450,7 @@ public class JobService {
 					break;
 
 				case "retired":
-					jobs = dao.findAllByState(JobState.STATE_RETIRED);
+					jobs = dao.findAllByState(JobState.RETIRED);
 					break;
 			}
 		}

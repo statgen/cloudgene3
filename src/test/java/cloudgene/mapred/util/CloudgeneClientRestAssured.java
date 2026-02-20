@@ -41,9 +41,9 @@ public class CloudgeneClientRestAssured {
 
 		int state = response.body().jsonPath().getInt("state");
 
-		boolean running = state == JobState.STATE_WAITING.getValue()
-				|| state == JobState.STATE_RUNNING.getValue()
-				|| state == JobState.STATE_EXPORTING.getValue();
+		boolean running = state == JobState.WAITING.getValue()
+				|| state == JobState.RUNNING.getValue()
+				|| state == JobState.EXPORTING.getValue();
 
 		if (running) {
 			try {

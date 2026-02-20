@@ -49,8 +49,8 @@ public class WrongWorkspaceTest {
 		JobDao dao = new JobDao(application.getDatabase());
 		AbstractJob jobFromDb = dao.findById(job.getId());
 
-		assertEquals(JobState.STATE_FAILED, jobFromDb.getState());
-		assertEquals(JobState.STATE_FAILED, job.getState());
+		assertEquals(JobState.FAILED, jobFromDb.getState());
+		assertEquals(JobState.FAILED, job.getState());
 	}
 
 	public CloudgeneJob createJobFromWdl(WdlApp app, Map<String, String> inputs) throws Exception {

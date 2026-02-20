@@ -133,7 +133,7 @@ public class JobDao extends JdbcDataAccessObject {
 
 		Object[] params = new Object[2];
 		params[0] = user.getId();
-		params[1] = JobState.STATE_DELETED.getValue();
+		params[1] = JobState.DELETED.getValue();
 
 		try {
 			List<AbstractJob> result = query(sql, params, new JobMapper());
@@ -150,7 +150,7 @@ public class JobDao extends JdbcDataAccessObject {
 
 		Object[] params = new Object[4];
 		params[0] = user.getId();
-		params[1] = JobState.STATE_DELETED.getValue();
+		params[1] = JobState.DELETED.getValue();
 		params[2] = offset;
 		params[3] = limit;
 
@@ -169,7 +169,7 @@ public class JobDao extends JdbcDataAccessObject {
 
 		Object[] params = new Object[2];
 		params[0] = user.getId();
-		params[1] = JobState.STATE_DELETED.getValue();
+		params[1] = JobState.DELETED.getValue();
 
 		try {
 			int result = queryForObject(sql, params, new IntegerMapper());
@@ -205,13 +205,13 @@ public class JobDao extends JdbcDataAccessObject {
 		// TODO(Marc): Looks like RETIRED and DELETED are duplicated for no reason.
 		// Remove?
 		Object[] params = new Object[7];
-		params[0] = JobState.STATE_WAITING.getValue();
-		params[1] = JobState.STATE_RUNNING.getValue();
-		params[2] = JobState.STATE_EXPORTING.getValue();
-		params[3] = JobState.STATE_RETIRED.getValue();
-		params[4] = JobState.STATE_DELETED.getValue();
-		params[5] = JobState.STATE_RETIRED.getValue();
-		params[6] = JobState.STATE_DELETED.getValue();
+		params[0] = JobState.WAITING.getValue();
+		params[1] = JobState.RUNNING.getValue();
+		params[2] = JobState.EXPORTING.getValue();
+		params[3] = JobState.RETIRED.getValue();
+		params[4] = JobState.DELETED.getValue();
+		params[5] = JobState.RETIRED.getValue();
+		params[6] = JobState.DELETED.getValue();
 
 		try {
 			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
@@ -230,10 +230,10 @@ public class JobDao extends JdbcDataAccessObject {
 				+ "ORDER BY job.id DESC";
 
 		Object[] params = new Object[4];
-		params[0] = JobState.STATE_RETIRED.getValue();
-		params[1] = JobState.STATE_SUCCESS_AND_NOTIFICATION_SEND.getValue();
-		params[2] = JobState.STATE_FAILED_AND_NOTIFICATION_SEND.getValue();
-		params[3] = JobState.STATE_DELETED.getValue();
+		params[0] = JobState.RETIRED.getValue();
+		params[1] = JobState.SUCCESS_AND_NOTIFICATION_SENT.getValue();
+		params[2] = JobState.FAILED_AND_NOTIFICATION_SENT.getValue();
+		params[3] = JobState.DELETED.getValue();
 
 		try {
 			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
@@ -252,8 +252,8 @@ public class JobDao extends JdbcDataAccessObject {
 				+ "ORDER BY job.id DESC";
 
 		Object[] params = new Object[2];
-		params[0] = JobState.STATE_SUCCESS_AND_NOTIFICATION_SEND.getValue();
-		params[1] = JobState.STATE_FAILED_AND_NOTIFICATION_SEND.getValue();
+		params[0] = JobState.SUCCESS_AND_NOTIFICATION_SENT.getValue();
+		params[1] = JobState.FAILED_AND_NOTIFICATION_SENT.getValue();
 
 		try {
 			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
@@ -314,7 +314,7 @@ public class JobDao extends JdbcDataAccessObject {
 
 		Object[] params = new Object[2];
 		params[0] = id;
-		params[1] = JobState.STATE_DELETED.getValue();
+		params[1] = JobState.DELETED.getValue();
 
 		try {
 			AbstractJob job = queryForObject(sql, params, new JobAndUserMapper());

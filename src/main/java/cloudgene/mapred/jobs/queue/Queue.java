@@ -67,7 +67,7 @@ public abstract class Queue implements Runnable {
 
 	public synchronized void cancel(AbstractJob job) {
 
-		if (job.getState() == JobState.STATE_RUNNING || job.getState() == JobState.STATE_EXPORTING) {
+		if (job.getState() == JobState.RUNNING || job.getState() == JobState.EXPORTING) {
 
 			log.info("{}: Cancel running job {}...", name, job.getId());
 
@@ -80,7 +80,7 @@ public abstract class Queue implements Runnable {
 				updatePositionInQueue();
 			}
 
-		} else if (job.getState() == JobState.STATE_WAITING) {
+		} else if (job.getState() == JobState.WAITING) {
 
 			log.info(name + ": Cancel waiting job " + job.getId() + "...");
 
@@ -215,7 +215,7 @@ public abstract class Queue implements Runnable {
 			int position = 0;
 			for (AbstractJob job : queue) {
 				job.setPositionInQueue(position);
-				if (job.getState() == JobState.STATE_WAITING) {
+				if (job.getState() == JobState.WAITING) {
 					position++;
 				}
 			}
@@ -232,7 +232,7 @@ public abstract class Queue implements Runnable {
 			return false;
 		}
 
-		if (job.getState() != JobState.STATE_WAITING) {
+		if (job.getState() != JobState.WAITING) {
 			return false;
 		}
 
@@ -277,7 +277,7 @@ public abstract class Queue implements Runnable {
 		@Override
 		public int compare(AbstractJob o1, AbstractJob o2) {
 			if (o1.getState() != o2.getState()) {
-				if (o1.getState() == JobState.STATE_RUNNING) {
+				if (o1.getState() == JobState.RUNNING) {
 					return -1;
 				} else {
 					return 1;

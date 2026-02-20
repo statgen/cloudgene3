@@ -52,7 +52,7 @@ public class WorkflowEngineTest {
 
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
-		assertEquals(JobState.STATE_SUCCESS, job.getState());
+		assertEquals(JobState.SUCCESS, job.getState());
 	}
 
 	@Test
@@ -73,7 +73,7 @@ public class WorkflowEngineTest {
 		assertTrue(job.getSubmittedOn() > 0);
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
-		assertEquals(JobState.STATE_FAILED, job.getState());
+		assertEquals(JobState.FAILED, job.getState());
 	}
 
 	@Test
@@ -94,7 +94,7 @@ public class WorkflowEngineTest {
 		assertTrue(job.getSubmittedOn() > 0);
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
-		assertEquals(JobState.STATE_FAILED, job.getState());
+		assertEquals(JobState.FAILED, job.getState());
 	}
 
 	@Test
@@ -117,7 +117,7 @@ public class WorkflowEngineTest {
 		// no steps
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
-		assertEquals(JobState.STATE_SUCCESS, job.getState());
+		assertEquals(JobState.SUCCESS, job.getState());
 	}
 
 	@Test
@@ -139,7 +139,7 @@ public class WorkflowEngineTest {
 		// no steps
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
-		assertEquals(JobState.STATE_FAILED, job.getState());
+		assertEquals(JobState.FAILED, job.getState());
 	}
 
 	@Test
@@ -161,7 +161,7 @@ public class WorkflowEngineTest {
 		// no steps
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
-		assertEquals(JobState.STATE_SUCCESS, job.getState());
+		assertEquals(JobState.SUCCESS, job.getState());
 	}
 
 	@Test
@@ -184,7 +184,7 @@ public class WorkflowEngineTest {
 		// one steps
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
-		assertEquals(JobState.STATE_SUCCESS, job.getState());
+		assertEquals(JobState.SUCCESS, job.getState());
 	}
 
 	@Test
@@ -204,7 +204,7 @@ public class WorkflowEngineTest {
 		assertTrue(job.getSubmittedOn() > 0);
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
-		assertEquals(JobState.STATE_SUCCESS, job.getState());
+		assertEquals(JobState.SUCCESS, job.getState());
 
 		// check step ouputs
 		assertEquals("text1: my-value\n", job.getSteps().get(0).getLogMessages().get(0).getMessage());
@@ -233,7 +233,7 @@ public class WorkflowEngineTest {
 		while (job.isRunning()) {
 			Thread.sleep(500);
 		}
-		assertEquals(JobState.STATE_SUCCESS, job.getState());
+		assertEquals(JobState.SUCCESS, job.getState());
 
 		Settings settings = application.getSettings();
 		String path = job.getOutputParams().get(0).getFiles().get(0).getPath();
@@ -251,7 +251,7 @@ public class WorkflowEngineTest {
 		while (job.isRunning()) {
 			Thread.sleep(500);
 		}
-		assertEquals(JobState.STATE_FAILED, job.getState());
+		assertEquals(JobState.FAILED, job.getState());
 
 		System.out.println("ok:" + job.getOutputParams().get(0).getValue());
 
@@ -284,7 +284,7 @@ public class WorkflowEngineTest {
 		assertTrue(job.getSubmittedOn() > 0);
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
-		assertEquals(JobState.STATE_SUCCESS, job.getState());
+		assertEquals(JobState.SUCCESS, job.getState());
 	}
 
 	@Test
@@ -305,7 +305,7 @@ public class WorkflowEngineTest {
 		assertTrue(job.getSubmittedOn() > 0);
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
-		assertEquals(JobState.STATE_FAILED, job.getState());
+		assertEquals(JobState.FAILED, job.getState());
 	}
 
 	@Test
@@ -333,7 +333,7 @@ public class WorkflowEngineTest {
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
 		assertEquals("lukas_text", content);
-		assertEquals(JobState.STATE_SUCCESS, job.getState());
+		assertEquals(JobState.SUCCESS, job.getState());
 	}
 
 	@Test
@@ -360,7 +360,7 @@ public class WorkflowEngineTest {
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
 		assertEquals("lukas_text", content);
-		assertEquals(JobState.STATE_FAILED, job.getState());
+		assertEquals(JobState.FAILED, job.getState());
 	}
 
 	@Test
@@ -389,7 +389,7 @@ public class WorkflowEngineTest {
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
 		assertEquals("lukas_text", content);
-		assertEquals(JobState.STATE_FAILED, job.getState());
+		assertEquals(JobState.FAILED, job.getState());
 	}
 
 	@Test
@@ -419,7 +419,7 @@ public class WorkflowEngineTest {
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
 		assertEquals("lukas_text", content);
-		assertEquals(JobState.STATE_FAILED, job.getState());
+		assertEquals(JobState.FAILED, job.getState());
 	}
 
 	@Test
@@ -438,7 +438,7 @@ public class WorkflowEngineTest {
 			Thread.sleep(500);
 		}
 
-		assertEquals(JobState.STATE_SUCCESS, job.getState());
+		assertEquals(JobState.SUCCESS, job.getState());
 
 		List<Message> messages = job.getSteps().get(0).getLogMessages();
 
@@ -470,7 +470,7 @@ public class WorkflowEngineTest {
 			Thread.sleep(500);
 		}
 
-		assertEquals(JobState.STATE_SUCCESS, job.getState());
+		assertEquals(JobState.SUCCESS, job.getState());
 
 		String stdout = FileUtil.path(application.getSettings().getLocalWorkspace(), job.getId(), "logs", "std.out");
 		String contentStdOut = FileUtil.readFileAsString(stdout);
@@ -508,7 +508,7 @@ public class WorkflowEngineTest {
 		assertTrue(job.getSubmittedOn() > 0);
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
-		assertEquals(JobState.STATE_SUCCESS, job.getState());
+		assertEquals(JobState.SUCCESS, job.getState());
 
 		Message message = job.getSteps().get(0).getLogMessages().get(0);
 		assertEquals(Message.OK, message.getType());
@@ -536,7 +536,7 @@ public class WorkflowEngineTest {
 		assertTrue(job.getSubmittedOn() > 0);
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
-		assertEquals(JobState.STATE_SUCCESS, job.getState());
+		assertEquals(JobState.SUCCESS, job.getState());
 
 		Message message = job.getSteps().get(0).getLogMessages().get(0);
 		assertEquals(Message.OK, message.getType());
@@ -563,7 +563,7 @@ public class WorkflowEngineTest {
 		assertTrue(job.getSubmittedOn() > 0);
 		assertTrue(job.getStartTime() > 0);
 		assertTrue(job.getEndTime() > 0);
-		assertEquals(JobState.STATE_SUCCESS, job.getState());
+		assertEquals(JobState.SUCCESS, job.getState());
 
 		Message message = job.getSteps().get(0).getLogMessages().get(0);
 		assertEquals(Message.OK, message.getType());
@@ -589,7 +589,7 @@ public class WorkflowEngineTest {
 			Thread.sleep(500);
 		}
 		assertTrue(job.getSubmittedOn() > 0);
-		assertEquals(JobState.STATE_FAILED, job.getState());
+		assertEquals(JobState.FAILED, job.getState());
 
 	}
 
@@ -609,7 +609,7 @@ public class WorkflowEngineTest {
 			Thread.sleep(500);
 		}
 		assertTrue(job.getSubmittedOn() > 0);
-		assertEquals(JobState.STATE_FAILED, job.getState());
+		assertEquals(JobState.FAILED, job.getState());
 
 	}
 

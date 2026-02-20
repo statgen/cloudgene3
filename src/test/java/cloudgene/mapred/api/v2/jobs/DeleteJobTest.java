@@ -57,7 +57,7 @@ public class DeleteJobTest {
 
 		response.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()));
+				.body("state", equalTo(JobState.SUCCESS.getValue()));
 
 		// get file details
 		String name = response.jsonPath().getString("outputParams[0].files[0].name");

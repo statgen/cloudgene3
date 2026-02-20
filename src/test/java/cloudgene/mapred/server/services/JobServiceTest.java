@@ -160,8 +160,8 @@ public class JobServiceTest {
 		assertNotNull(submitted.getId());
 		assertFalse(submitted.getId().isBlank());
 
-		assertTrue((submitted.getState() == JobState.STATE_RUNNING)
-				|| (submitted.getState() == JobState.STATE_WAITING));
+		assertTrue((submitted.getState() == JobState.RUNNING)
+				|| (submitted.getState() == JobState.WAITING));
 
 		// Job can be read for now.
 		AbstractJob read = jobService.getById(submitted.getId());
@@ -173,7 +173,7 @@ public class JobServiceTest {
 		assertSame(canceled, submitted); // Referential equality.
 
 		// Status was set to CANCELED
-		assertEquals(JobState.STATE_CANCELED, canceled.getState());
+		assertEquals(JobState.CANCELED, canceled.getState());
 
 		// Job can still be found, but it is still CANCELED.
 		AbstractJob reRead = jobService.getById(submitted.getId());

@@ -50,7 +50,7 @@ public class JobCleanUpService {
 				String localOutput = FileUtil.path(settings.getLocalWorkspace(), job.getId());
 				FileUtil.deleteDirectory(localOutput);
 
-				job.setState(JobState.STATE_RETIRED);
+				job.setState(JobState.RETIRED);
 				dao.update(job);
 
 				log.info("Job {} retired.", job.getId());
@@ -84,7 +84,7 @@ public class JobCleanUpService {
 		Settings settings = application.getSettings();
 		JobDao dao = new JobDao(application.getDatabase());
 
-		if (job.getState() == JobState.STATE_SUCCESS) {
+		if (job.getState() == JobState.SUCCESS) {
 			try {
 				String subject = "[" + settings.getName() + "] Job " + job.getId() + " will be retired in " + days
 						+ " days";
@@ -98,7 +98,7 @@ public class JobCleanUpService {
 					MailUtil.send(settings, mail, subject, body);
 				}
 
-				job.setState(JobState.STATE_SUCCESS_AND_NOTIFICATION_SEND);
+				job.setState(JobState.SUCCESS_AND_NOTIFICATION_SENT);
 				job.setDeletedOn(System.currentTimeMillis() + daysInMilliSeconds);
 				dao.update(job);
 
@@ -109,10 +109,10 @@ public class JobCleanUpService {
 				return "Sent notification for job " + job.getId() + " failed.";
 			}
 
-		} else if (job.getState() == JobState.STATE_FAILED
-				|| job.getState() == JobState.STATE_CANCELED) {
+		} else if (job.getState() == JobState.FAILED
+				|| job.getState() == JobState.CANCELED) {
 
-			job.setState(JobState.STATE_FAILED_AND_NOTIFICATION_SEND);
+			job.setState(JobState.FAILED_AND_NOTIFICATION_SENT);
 			job.setDeletedOn(System.currentTimeMillis() + daysInMilliSeconds);
 			dao.update(job);
 
@@ -136,7 +136,7 @@ public class JobCleanUpService {
 
 		List<AbstractJob> oldJobs = dao.findAllOlderThan(
 				System.currentTimeMillis() - settings.getNotificationAfterInSec() * 1000,
-				JobState.STATE_SUCCESS);
+				JobState.SUCCESS);
 
 		int send = 0;
 
@@ -154,7 +154,7 @@ public class JobCleanUpService {
 					MailUtil.send(settings, mail, subject, body);
 				}
 
-				job.setState(JobState.STATE_SUCCESS_AND_NOTIFICATION_SEND);
+				job.setState(JobState.SUCCESS_AND_NOTIFICATION_SENT);
 				job.setDeletedOn(System.currentTimeMillis()
 						+ ((settings.getRetireAfterInSec() - settings.getNotificationAfterInSec()) * 1000));
 
@@ -169,14 +169,14 @@ public class JobCleanUpService {
 		}
 
 		oldJobs = dao.findAllOlderThan(System.currentTimeMillis() - settings.getNotificationAfterInSec() * 1000,
-				JobState.STATE_FAILED);
+				JobState.FAILED);
 
 		int otherJobs = 0;
 
 		for (AbstractJob job : oldJobs) {
 
 			log.info("Job failed, no notification sent for job " + job.getId() + ".");
-			job.setState(JobState.STATE_FAILED_AND_NOTIFICATION_SEND);
+			job.setState(JobState.FAILED_AND_NOTIFICATION_SENT);
 			job.setDeletedOn(System.currentTimeMillis()
 					+ ((settings.getRetireAfterInSec() - settings.getNotificationAfterInSec()) * 1000));
 			dao.update(job);
@@ -185,12 +185,12 @@ public class JobCleanUpService {
 		}
 
 		oldJobs = dao.findAllOlderThan(System.currentTimeMillis() - settings.getNotificationAfterInSec() * 1000,
-				JobState.STATE_CANCELED);
+				JobState.CANCELED);
 
 		for (AbstractJob job : oldJobs) {
 
 			log.info("Job failed, no notification sent for job " + job.getId() + ".");
-			job.setState(JobState.STATE_FAILED_AND_NOTIFICATION_SEND);
+			job.setState(JobState.FAILED_AND_NOTIFICATION_SENT);
 			job.setDeletedOn(System.currentTimeMillis()
 					+ ((settings.getRetireAfterInSec() - settings.getNotificationAfterInSec()) * 1000));
 			dao.update(job);

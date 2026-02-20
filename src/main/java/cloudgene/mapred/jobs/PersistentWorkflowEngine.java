@@ -40,13 +40,13 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 
 		jobDao = new JobDao(database);
 
-		List<AbstractJob> deadJobs = jobDao.findAllByState(JobState.STATE_WAITING);
-		deadJobs.addAll(jobDao.findAllByState(JobState.STATE_RUNNING));
-		deadJobs.addAll(jobDao.findAllByState(JobState.STATE_EXPORTING));
+		List<AbstractJob> deadJobs = jobDao.findAllByState(JobState.WAITING);
+		deadJobs.addAll(jobDao.findAllByState(JobState.RUNNING));
+		deadJobs.addAll(jobDao.findAllByState(JobState.EXPORTING));
 
 		for (AbstractJob job : deadJobs) {
 			log.info("lost control over job {} -> Dead", job.getId());
-			job.setState(JobState.STATE_DEAD);
+			job.setState(JobState.DEAD);
 			jobDao.update(job);
 		}
 	}
@@ -97,7 +97,7 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 		// count all runs when counter was not set by application
 		Map<String, Long> submittedCounters = job.getContext().getSubmittedCounters();
 		if (!submittedCounters.containsKey("runs")) {
-			if (job.getState() == JobState.STATE_SUCCESS) {
+			if (job.getState() == JobState.SUCCESS) {
 				submittedCounters.put("runs", 1L);
 			}
 		}
@@ -135,7 +135,7 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 		// update job updates (state, endtime, ....)
 		jobDao.update(job);
 
-		if (job.getState() == JobState.STATE_FAILED) {
+		if (job.getState() == JobState.FAILED) {
 			for (IJobErrorHandler handler : handlers) {
 				handler.handle(this, job);
 			}
@@ -165,7 +165,7 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 	@Override
 	@NotNull
 	public Map<String, Long> getCounters(JobState state, @Nullable List<String> names) {
-		if (state == JobState.STATE_SUCCESS) {
+		if (state == JobState.SUCCESS) {
 			List<String> keys = (names == null) ? counters.keySet().stream().toList() : names;
 			Map<String, Long> counters = new HashMap<>();
 

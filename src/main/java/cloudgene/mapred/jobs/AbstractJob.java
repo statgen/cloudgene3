@@ -41,7 +41,7 @@ abstract public class AbstractJob extends PriorityRunnable {
 	protected IWorkspace workspace;
 
 	private String id;
-	private JobState state = JobState.STATE_WAITING;
+	private JobState state = JobState.WAITING;
 	private long startTime = 0;
 	private long endTime = 0;
 	private long submittedOn = 0;
@@ -189,7 +189,7 @@ abstract public class AbstractJob extends PriorityRunnable {
 		} catch (Exception e1) {
 			log.error("Job {}: initialization failed.", getId(), e1);
 			writeLog("Initialization failed: " + e1.getLocalizedMessage());
-			setState(JobState.STATE_FAILED);
+			setState(JobState.FAILED);
 			return false;
 		}
 	}
@@ -201,7 +201,7 @@ abstract public class AbstractJob extends PriorityRunnable {
 		}
 
 		log.info("[Job {}] Setup job...", getId());
-		setState(JobState.STATE_RUNNING);
+		setState(JobState.RUNNING);
 		setStartTime(System.currentTimeMillis());
 
 		log.info("[Job {}] Running job...", getId());
@@ -237,17 +237,17 @@ abstract public class AbstractJob extends PriorityRunnable {
 				writeLog("Job Execution successful.");
 				writeLog("Exporting Data...");
 
-				setState(JobState.STATE_EXPORTING);
+				setState(JobState.EXPORTING);
 
 				try {
 					boolean successfulAfter = after();
 
 					if (successfulAfter) {
-						setState(JobState.STATE_SUCCESS);
+						setState(JobState.SUCCESS);
 						log.info("[Job {}]  data export successful.", getId());
 						writeLog("Data Export successful.");
 					} else {
-						setState(JobState.STATE_FAILED);
+						setState(JobState.FAILED);
 						log.error("[Job {}]  data export failed.", getId());
 						writeLog("Data Export failed.");
 					}
@@ -257,19 +257,19 @@ abstract public class AbstractJob extends PriorityRunnable {
 					e.printStackTrace(printWriter);
 					String s = writer.toString();
 
-					setState(JobState.STATE_FAILED);
+					setState(JobState.FAILED);
 					log.error("[Job {}]  data export failed.", getId(), e);
 					writeLog("Data Export failed: " + e.getLocalizedMessage() + "\n" + s);
 				}
 			} else {
-				setState(JobState.STATE_FAILED);
+				setState(JobState.FAILED);
 				log.error("[Job {}] Execution failed. {}", getId(), getError());
 				writeLog("Job Execution failed: " + getError());
 			}
 
 			writeLog("Cleaning up...");
 
-			if (getState() == JobState.STATE_FAILED || getState() == JobState.STATE_CANCELED) {
+			if (getState() == JobState.FAILED || getState() == JobState.CANCELED) {
 				onFailure();
 			} else {
 				cleanUp();
@@ -279,10 +279,10 @@ abstract public class AbstractJob extends PriorityRunnable {
 			writeLog("Cleanup successful.");
 
 			if (canceled) {
-				setState(JobState.STATE_CANCELED);
+				setState(JobState.CANCELED);
 			}
 		} catch (Exception | Error e) {
-			setState(JobState.STATE_FAILED);
+			setState(JobState.FAILED);
 			log.error("[Job {}]: initialization failed.", getId(), e);
 
 			Writer writer = new StringWriter();
@@ -308,7 +308,7 @@ abstract public class AbstractJob extends PriorityRunnable {
 
 		canceled = true;
 		setEndTime(System.currentTimeMillis());
-		setState(JobState.STATE_CANCELED);
+		setState(JobState.CANCELED);
 	}
 
 	private void initStdOutFiles() throws FileNotFoundException {
@@ -425,9 +425,9 @@ abstract public class AbstractJob extends PriorityRunnable {
 	}
 
 	public boolean isRunning() {
-		return state == JobState.STATE_EXPORTING
-				|| state == JobState.STATE_RUNNING
-				|| state == JobState.STATE_WAITING;
+		return state == JobState.EXPORTING
+				|| state == JobState.RUNNING
+				|| state == JobState.WAITING;
 	}
 
 	public Download findDownloadByHash(String hash) {

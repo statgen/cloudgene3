@@ -47,7 +47,7 @@ public class CounterResponse {
 	public static CounterResponse build(WorkflowEngine workflowEngine, List<String> counters) {
 		CounterResponse response = new CounterResponse();
 
-		response.complete = workflowEngine.getCounters(JobState.STATE_SUCCESS, counters);
+		response.complete = workflowEngine.getCounters(JobState.SUCCESS, counters);
 		response.queue.put("size", (long) workflowEngine.getSize());
 
 		return response;

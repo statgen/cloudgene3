@@ -68,7 +68,7 @@ public class WorkflowEngine implements Runnable {
 		job.setSubmittedOn(System.currentTimeMillis());
 		job.setStartTime(0);
 		job.setEndTime(0);
-		job.setState(JobState.STATE_WAITING);
+		job.setState(JobState.WAITING);
 		statusUpdated(job);
 
 		if (job.afterSubmission()) {

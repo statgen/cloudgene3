@@ -208,7 +208,7 @@ public class ApiTokensTest {
 				.get("/api/v2/jobs/" + id)
 				.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()));
+				.body("state", equalTo(JobState.SUCCESS.getValue()));
 
 		// check if job list contains one job
 		Response response = RestAssured
@@ -288,7 +288,7 @@ public class ApiTokensTest {
 				.get("/api/v2/jobs/" + id)
 				.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()));
+				.body("state", equalTo(JobState.SUCCESS.getValue()));
 
 		// check if job list contains one job
 		Response response = RestAssured

@@ -109,7 +109,7 @@ public class SubmitJobTest {
 				.get("/api/v2/jobs/" + id)
 				.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()))
+				.body("state", equalTo(JobState.SUCCESS.getValue()))
 				.body("name", equalTo("my-job-name"));
 	}
 
@@ -139,7 +139,7 @@ public class SubmitJobTest {
 				.get("/api/v2/jobs/" + id)
 				.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()));
+				.body("state", equalTo(JobState.SUCCESS.getValue()));
 	}
 
 	@Test
@@ -168,7 +168,7 @@ public class SubmitJobTest {
 				.get("/api/v2/jobs/" + id)
 				.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_FAILED.getValue()));
+				.body("state", equalTo(JobState.FAILED.getValue()));
 
 	}
 
@@ -198,7 +198,7 @@ public class SubmitJobTest {
 				.get("/api/v2/jobs/" + id)
 				.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_FAILED.getValue()));
+				.body("state", equalTo(JobState.FAILED.getValue()));
 	}
 
 	@Test
@@ -230,7 +230,7 @@ public class SubmitJobTest {
 
 		response.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()));
+				.body("state", equalTo(JobState.SUCCESS.getValue()));
 
 		// get file details
 		String name = response.jsonPath().getString("outputParams[0].files[0].name");
@@ -274,7 +274,7 @@ public class SubmitJobTest {
 				.get("/api/v2/jobs/" + id)
 				.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()))
+				.body("state", equalTo(JobState.SUCCESS.getValue()))
 				.body("steps[0].logMessages[0].message", equalTo("cloudgene-task1"))
 				.body("steps[0].logMessages[0].type", equalTo(WorkflowContext.OK))
 				.body("steps[0].logMessages[1].message", equalTo("cloudgene-task2"))
@@ -309,7 +309,7 @@ public class SubmitJobTest {
 				.get("/api/v2/jobs/" + id)
 				.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()))
+				.body("state", equalTo(JobState.SUCCESS.getValue()))
 				.body("steps.size()", equalTo(6))
 				.body("steps[0].logMessages[0].message", equalTo("text1: my-value\n"))
 				.body("steps[1].logMessages[0].message", equalTo("checkbox1: true\n"))
@@ -348,7 +348,7 @@ public class SubmitJobTest {
 				.get("/api/v2/jobs/" + id)
 				.then()
 				.statusCode(200)
-				.body("state", equalTo(JobState.STATE_SUCCESS.getValue()))
+				.body("state", equalTo(JobState.SUCCESS.getValue()))
 				.body("steps[0].logMessages[0].message", not(containsString(html)));
 	}
 }

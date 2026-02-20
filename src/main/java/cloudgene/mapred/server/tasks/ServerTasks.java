@@ -35,20 +35,20 @@ public class ServerTasks {
 		long countRunning = 0;
 
 		for (AbstractJob job : jobs) {
-			if (job.getState() == JobState.STATE_RUNNING) {
+			if (job.getState() == JobState.RUNNING) {
 				countRunning++;
 			}
-			if (job.getState() == JobState.STATE_WAITING) {
+			if (job.getState() == JobState.WAITING) {
 				countWaiting++;
 			}
 		}
 
 		Map<String, Long> countersRunning = engine
-				.getCounters(JobState.STATE_RUNNING, null);
+				.getCounters(JobState.RUNNING, null);
 		Map<String, Long> countersWaiting = engine
-				.getCounters(JobState.STATE_WAITING, null);
+				.getCounters(JobState.WAITING, null);
 		Map<String, Long> countersComplete = engine
-				.getCounters(JobState.STATE_SUCCESS, null);
+				.getCounters(JobState.SUCCESS, null);
 
 		UserDao daoUser = new UserDao(database);
 		List<User> users = daoUser.findAll();

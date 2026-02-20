@@ -50,20 +50,20 @@ public class PriorityThreadPoolExecutorTest {
 
 		AbstractJob job1 = createJobFromWdl(app, "job_running", inputs);
 		engine.submit(job1);
-		while (job1.getState() == JobState.STATE_WAITING) {
+		while (job1.getState() == JobState.WAITING) {
 			Thread.sleep(1000);
 		}
 
-		assertEquals(JobState.STATE_RUNNING, job1.getState());
+		assertEquals(JobState.RUNNING, job1.getState());
 
 		List<AbstractJob> jobsAfterSubmit = engine.getAllJobsInLongTimeQueue();
 		assertEquals(jobsBeforeSubmit.size() + 1, jobsAfterSubmit.size());
 
 		engine.cancel(job1);
-		while (job1.getState() == JobState.STATE_RUNNING) {
+		while (job1.getState() == JobState.RUNNING) {
 			Thread.sleep(1000);
 		}
-		assertEquals(JobState.STATE_CANCELED, job1.getState());
+		assertEquals(JobState.CANCELED, job1.getState());
 		Thread.sleep(10000);
 
 		List<AbstractJob> jobsAfterCancel = engine.getAllJobsInLongTimeQueue();
@@ -91,7 +91,7 @@ public class PriorityThreadPoolExecutorTest {
 
 		AbstractJob job1 = createJobFromWdl(app, "job_running_a", inputs);
 		engine.submit(job1);
-		while (job1.getState() == JobState.STATE_WAITING) {
+		while (job1.getState() == JobState.WAITING) {
 			Thread.sleep(1000);
 		}
 
@@ -100,18 +100,18 @@ public class PriorityThreadPoolExecutorTest {
 
 		Thread.sleep(5000);
 
-		assertEquals(JobState.STATE_RUNNING, job1.getState());
-		assertEquals(JobState.STATE_WAITING, job2.getState());
+		assertEquals(JobState.RUNNING, job1.getState());
+		assertEquals(JobState.WAITING, job2.getState());
 
 		List<AbstractJob> jobsAfterSubmit = engine.getAllJobsInLongTimeQueue();
 		assertEquals(jobsBeforeSubmit.size() + 2, jobsAfterSubmit.size());
 
 		engine.cancel(job2);
-		while (job2.getState() == JobState.STATE_RUNNING) {
+		while (job2.getState() == JobState.RUNNING) {
 			Thread.sleep(1000);
 		}
 
-		assertEquals(JobState.STATE_CANCELED, job2.getState());
+		assertEquals(JobState.CANCELED, job2.getState());
 
 		List<AbstractJob> jobsAfterCancel = engine.getAllJobsInLongTimeQueue();
 		assertEquals(jobsAfterSubmit.size() - 1, jobsAfterCancel.size());
@@ -164,12 +164,12 @@ public class PriorityThreadPoolExecutorTest {
 
 		Thread.sleep(5000);
 
-		assertEquals(JobState.STATE_RUNNING, job1.getState());
-		assertEquals(JobState.STATE_WAITING, job2.getState());
+		assertEquals(JobState.RUNNING, job1.getState());
+		assertEquals(JobState.WAITING, job2.getState());
 		assertEquals(0, job2.getPositionInQueue());
-		assertEquals(JobState.STATE_WAITING, job3.getState());
+		assertEquals(JobState.WAITING, job3.getState());
 		assertEquals(1, job3.getPositionInQueue());
-		assertEquals(JobState.STATE_WAITING, job4.getState());
+		assertEquals(JobState.WAITING, job4.getState());
 		assertEquals(2, job4.getPositionInQueue());
 
 		assertTrue(job1.getPriority() < job2.getPriority() && job2.getPriority() < job3.getPriority()
@@ -188,40 +188,40 @@ public class PriorityThreadPoolExecutorTest {
 		Thread.sleep(WAIT_FOR_CANCEL);
 
 		assertEquals(3, engine.getAllJobsInLongTimeQueue().size());
-		assertEquals(JobState.STATE_CANCELED, job1.getState());
-		assertEquals(JobState.STATE_RUNNING, job2.getState());
-		assertEquals(JobState.STATE_WAITING, job3.getState());
+		assertEquals(JobState.CANCELED, job1.getState());
+		assertEquals(JobState.RUNNING, job2.getState());
+		assertEquals(JobState.WAITING, job3.getState());
 		assertEquals(0, job3.getPositionInQueue());
-		assertEquals(JobState.STATE_WAITING, job4.getState());
+		assertEquals(JobState.WAITING, job4.getState());
 		assertEquals(1, job4.getPositionInQueue());
 
 		engine.cancel(job2);
 		Thread.sleep(WAIT_FOR_CANCEL);
 
 		assertEquals(2, engine.getAllJobsInLongTimeQueue().size());
-		assertEquals(JobState.STATE_CANCELED, job1.getState());
-		assertEquals(JobState.STATE_CANCELED, job2.getState());
-		assertEquals(JobState.STATE_RUNNING, job3.getState());
-		assertEquals(JobState.STATE_WAITING, job4.getState());
+		assertEquals(JobState.CANCELED, job1.getState());
+		assertEquals(JobState.CANCELED, job2.getState());
+		assertEquals(JobState.RUNNING, job3.getState());
+		assertEquals(JobState.WAITING, job4.getState());
 		assertEquals(0, job4.getPositionInQueue());
 
 		engine.cancel(job3);
 		Thread.sleep(WAIT_FOR_CANCEL);
 
 		assertEquals(1, engine.getAllJobsInLongTimeQueue().size());
-		assertEquals(JobState.STATE_CANCELED, job1.getState());
-		assertEquals(JobState.STATE_CANCELED, job2.getState());
-		assertEquals(JobState.STATE_CANCELED, job3.getState());
-		assertEquals(JobState.STATE_RUNNING, job4.getState());
+		assertEquals(JobState.CANCELED, job1.getState());
+		assertEquals(JobState.CANCELED, job2.getState());
+		assertEquals(JobState.CANCELED, job3.getState());
+		assertEquals(JobState.RUNNING, job4.getState());
 
 		engine.cancel(job4);
 		Thread.sleep(WAIT_FOR_CANCEL);
 
 		assertEquals(0, engine.getAllJobsInLongTimeQueue().size());
-		assertEquals(JobState.STATE_CANCELED, job1.getState());
-		assertEquals(JobState.STATE_CANCELED, job2.getState());
-		assertEquals(JobState.STATE_CANCELED, job3.getState());
-		assertEquals(JobState.STATE_CANCELED, job4.getState());
+		assertEquals(JobState.CANCELED, job1.getState());
+		assertEquals(JobState.CANCELED, job2.getState());
+		assertEquals(JobState.CANCELED, job3.getState());
+		assertEquals(JobState.CANCELED, job4.getState());
 
 		while (engine.getAllJobsInLongTimeQueue().size() > 0) {
 			Thread.sleep(6000);
@@ -268,12 +268,12 @@ public class PriorityThreadPoolExecutorTest {
 
 		Thread.sleep(5000);
 
-		assertEquals(JobState.STATE_RUNNING, job1.getState());
-		assertEquals(JobState.STATE_WAITING, job2.getState());
+		assertEquals(JobState.RUNNING, job1.getState());
+		assertEquals(JobState.WAITING, job2.getState());
 		assertEquals(1, job2.getPositionInQueue());
-		assertEquals(JobState.STATE_WAITING, job3.getState());
+		assertEquals(JobState.WAITING, job3.getState());
 		assertEquals(2, job3.getPositionInQueue());
-		assertEquals(JobState.STATE_WAITING, job4.getState());
+		assertEquals(JobState.WAITING, job4.getState());
 		assertEquals(0, job4.getPositionInQueue());
 
 		assertTrue(job1.getPriority() < job2.getPriority() && job2.getPriority() < job3.getPriority()
@@ -292,40 +292,40 @@ public class PriorityThreadPoolExecutorTest {
 		Thread.sleep(WAIT_FOR_CANCEL);
 
 		assertEquals(3, engine.getAllJobsInLongTimeQueue().size());
-		assertEquals(JobState.STATE_CANCELED, job1.getState());
-		assertEquals(JobState.STATE_WAITING, job2.getState());
+		assertEquals(JobState.CANCELED, job1.getState());
+		assertEquals(JobState.WAITING, job2.getState());
 		assertEquals(0, job2.getPositionInQueue());
-		assertEquals(JobState.STATE_WAITING, job3.getState());
+		assertEquals(JobState.WAITING, job3.getState());
 		assertEquals(1, job3.getPositionInQueue());
-		assertEquals(JobState.STATE_RUNNING, job4.getState());
+		assertEquals(JobState.RUNNING, job4.getState());
 
 		engine.cancel(job4);
 		Thread.sleep(WAIT_FOR_CANCEL);
 
 		assertEquals(2, engine.getAllJobsInLongTimeQueue().size());
-		assertEquals(JobState.STATE_CANCELED, job1.getState());
-		assertEquals(JobState.STATE_RUNNING, job2.getState());
-		assertEquals(JobState.STATE_WAITING, job3.getState());
-		assertEquals(JobState.STATE_CANCELED, job4.getState());
+		assertEquals(JobState.CANCELED, job1.getState());
+		assertEquals(JobState.RUNNING, job2.getState());
+		assertEquals(JobState.WAITING, job3.getState());
+		assertEquals(JobState.CANCELED, job4.getState());
 		assertEquals(0, job3.getPositionInQueue());
 
 		engine.cancel(job2);
 		Thread.sleep(WAIT_FOR_CANCEL);
 
 		assertEquals(1, engine.getAllJobsInLongTimeQueue().size());
-		assertEquals(JobState.STATE_CANCELED, job1.getState());
-		assertEquals(JobState.STATE_CANCELED, job2.getState());
-		assertEquals(JobState.STATE_RUNNING, job3.getState());
-		assertEquals(JobState.STATE_CANCELED, job4.getState());
+		assertEquals(JobState.CANCELED, job1.getState());
+		assertEquals(JobState.CANCELED, job2.getState());
+		assertEquals(JobState.RUNNING, job3.getState());
+		assertEquals(JobState.CANCELED, job4.getState());
 
 		engine.cancel(job3);
 		Thread.sleep(WAIT_FOR_CANCEL);
 
 		assertEquals(0, engine.getAllJobsInLongTimeQueue().size());
-		assertEquals(JobState.STATE_CANCELED, job1.getState());
-		assertEquals(JobState.STATE_CANCELED, job2.getState());
-		assertEquals(JobState.STATE_CANCELED, job3.getState());
-		assertEquals(JobState.STATE_CANCELED, job4.getState());
+		assertEquals(JobState.CANCELED, job1.getState());
+		assertEquals(JobState.CANCELED, job2.getState());
+		assertEquals(JobState.CANCELED, job3.getState());
+		assertEquals(JobState.CANCELED, job4.getState());
 
 		while (engine.getAllJobsInLongTimeQueue().size() > 0) {
 			Thread.sleep(6000);
@@ -373,12 +373,12 @@ public class PriorityThreadPoolExecutorTest {
 
 		Thread.sleep(5000);
 
-		assertEquals(JobState.STATE_RUNNING, job1.getState());
-		assertEquals(JobState.STATE_WAITING, job2.getState());
+		assertEquals(JobState.RUNNING, job1.getState());
+		assertEquals(JobState.WAITING, job2.getState());
 		assertEquals(0, job2.getPositionInQueue());
-		assertEquals(JobState.STATE_WAITING, job3.getState());
+		assertEquals(JobState.WAITING, job3.getState());
 		assertEquals(1, job3.getPositionInQueue());
-		assertEquals(JobState.STATE_WAITING, job4.getState());
+		assertEquals(JobState.WAITING, job4.getState());
 		assertEquals(2, job4.getPositionInQueue());
 
 		assertTrue(job1.getPriority() < job2.getPriority() && job2.getPriority() < job3.getPriority()
@@ -398,12 +398,12 @@ public class PriorityThreadPoolExecutorTest {
 
 		Thread.sleep(5000);
 
-		assertEquals(JobState.STATE_RUNNING, job1.getState());
-		assertEquals(JobState.STATE_WAITING, job2.getState());
+		assertEquals(JobState.RUNNING, job1.getState());
+		assertEquals(JobState.WAITING, job2.getState());
 		assertEquals(1, job2.getPositionInQueue());
-		assertEquals(JobState.STATE_WAITING, job3.getState());
+		assertEquals(JobState.WAITING, job3.getState());
 		assertEquals(2, job3.getPositionInQueue());
-		assertEquals(JobState.STATE_WAITING, job4.getState());
+		assertEquals(JobState.WAITING, job4.getState());
 		assertEquals(0, job4.getPositionInQueue());
 
 		assertTrue(job1.getPriority() < job2.getPriority() && job2.getPriority() < job3.getPriority()
@@ -422,40 +422,40 @@ public class PriorityThreadPoolExecutorTest {
 		Thread.sleep(WAIT_FOR_CANCEL);
 
 		assertEquals(3, engine.getAllJobsInLongTimeQueue().size());
-		assertEquals(JobState.STATE_CANCELED, job1.getState());
-		assertEquals(JobState.STATE_WAITING, job2.getState());
+		assertEquals(JobState.CANCELED, job1.getState());
+		assertEquals(JobState.WAITING, job2.getState());
 		assertEquals(0, job2.getPositionInQueue());
-		assertEquals(JobState.STATE_WAITING, job3.getState());
+		assertEquals(JobState.WAITING, job3.getState());
 		assertEquals(1, job3.getPositionInQueue());
-		assertEquals(JobState.STATE_RUNNING, job4.getState());
+		assertEquals(JobState.RUNNING, job4.getState());
 
 		engine.cancel(job4);
 		Thread.sleep(WAIT_FOR_CANCEL);
 
 		assertEquals(2, engine.getAllJobsInLongTimeQueue().size());
-		assertEquals(JobState.STATE_CANCELED, job1.getState());
-		assertEquals(JobState.STATE_RUNNING, job2.getState());
-		assertEquals(JobState.STATE_WAITING, job3.getState());
-		assertEquals(JobState.STATE_CANCELED, job4.getState());
+		assertEquals(JobState.CANCELED, job1.getState());
+		assertEquals(JobState.RUNNING, job2.getState());
+		assertEquals(JobState.WAITING, job3.getState());
+		assertEquals(JobState.CANCELED, job4.getState());
 		assertEquals(0, job3.getPositionInQueue());
 
 		engine.cancel(job2);
 		Thread.sleep(WAIT_FOR_CANCEL);
 
 		assertEquals(1, engine.getAllJobsInLongTimeQueue().size());
-		assertEquals(JobState.STATE_CANCELED, job1.getState());
-		assertEquals(JobState.STATE_CANCELED, job2.getState());
-		assertEquals(JobState.STATE_RUNNING, job3.getState());
-		assertEquals(JobState.STATE_CANCELED, job4.getState());
+		assertEquals(JobState.CANCELED, job1.getState());
+		assertEquals(JobState.CANCELED, job2.getState());
+		assertEquals(JobState.RUNNING, job3.getState());
+		assertEquals(JobState.CANCELED, job4.getState());
 
 		engine.cancel(job3);
 		Thread.sleep(WAIT_FOR_CANCEL);
 
 		assertEquals(0, engine.getAllJobsInLongTimeQueue().size());
-		assertEquals(JobState.STATE_CANCELED, job1.getState());
-		assertEquals(JobState.STATE_CANCELED, job2.getState());
-		assertEquals(JobState.STATE_CANCELED, job3.getState());
-		assertEquals(JobState.STATE_CANCELED, job4.getState());
+		assertEquals(JobState.CANCELED, job1.getState());
+		assertEquals(JobState.CANCELED, job2.getState());
+		assertEquals(JobState.CANCELED, job3.getState());
+		assertEquals(JobState.CANCELED, job4.getState());
 
 		while (engine.getAllJobsInLongTimeQueue().size() > 0) {
 			Thread.sleep(6000);
