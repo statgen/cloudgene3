@@ -1,4 +1,4 @@
-package cloudgene.mapred.util;
+package cloudgene.mapred.util.config;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cloudgene.mapred.util.MenuItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +44,9 @@ public class Settings {
 	private Map<String, String> mail;
 
 	private Map<String, String> database;
-    
-    // TODO(Marc): The plugins concept seems to be abandoned. Perhaps we could remove it entirely.
+
+	// TODO(Marc): The plugins concept seems to be abandoned.
+	//             Perhaps we could remove it entirely.
 	private Map<String, Map<String, String>> plugins;
 
 	private List<Map<String, String>> errorHandlers = new ArrayList<>();
@@ -99,7 +101,6 @@ public class Settings {
 	private ApplicationRepository repository;
 
 	public Settings() {
-
 		repository = new ApplicationRepository();
 		repository.setAppsFolder(Configuration.getAppsDirectory());
 
@@ -113,35 +114,35 @@ public class Settings {
 		helpMenuItem.setLink(helpLink);
 		navigation.add(helpMenuItem);
 
-		database = new HashMap<String, String>();
+		database = new HashMap<>();
 		initDefaultDatabase(database, "data/cloudgene");
 
 		colors = getDefaultColors();
-
 	}
 
 	public static Settings load() throws IOException {
-
 		String filename = Configuration.getSettingsFilename();
 
 		if (!new File(filename).exists()) {
-			log.info("Loading default settings. File '" + filename + "' not found.");
+			log.info("Loading default settings. File '{}' not found.", filename);
 			return new Settings();
 		}
 
-		log.info("Loading settings from " + filename + "...");
+		log.info("Loading settings from {}...", filename);
 
 		YamlConfig yamlConfig = new YamlConfig();
 		yamlConfig.setPropertyElementType(Settings.class, "apps", Application.class);
 		yamlConfig.setClassTag("cloudgene.mapred.util.Application", Application.class);
+
 		YamlReader reader = new YamlReader(new FileReader(filename), yamlConfig);
 		Settings settings = reader.read(Settings.class);
+		reader.close();
 		log.info("Settings loaded.");
 
-		log.info("Auto retire: " + settings.isAutoRetire());
-		log.info("Retire jobs after " + settings.retireAfter + " days.");
-		log.info("Notify user after " + settings.notificationAfter + " days.");
-		log.info("Write statistics: " + settings.writeStatistics);
+		log.info("Auto retire: {}", settings.isAutoRetire());
+		log.info("Retire jobs after {} days.", settings.retireAfter);
+		log.info("Notify user after {} days.", settings.notificationAfter);
+		log.info("Write statistics: {}", settings.writeStatistics);
 
 		if (settings.getServerUrl() == null || settings.getServerUrl().trim().isEmpty()) {
 			throw new IOException("Error: serverUrl not set. Please set serverUrl in file '" + filename + "'");
@@ -167,7 +168,7 @@ public class Settings {
 	}
 
 	public static Map<String, String> getDefaultColors() {
-		Map<String, String> colors = new HashMap<String, String>();
+		Map<String, String> colors = new HashMap<>();
 		colors.put("background", "#343a40");
 		colors.put("foreground", "navbar-dark");
 		return colors;
@@ -182,7 +183,7 @@ public class Settings {
 				file.getParentFile().mkdirs();
 			}
 
-			log.info("Storing settings to file " + filename + " (" + getApps().size() + " apps installed)");
+			log.info("Storing settings to file {} ({} apps installed)", filename, getApps().size());
 			apps = repository.getAll();
 
 			YamlConfig yamlConfig = new YamlConfig();
@@ -196,7 +197,6 @@ public class Settings {
 		} catch (Exception e) {
 			log.error("Storing settings failed.", e);
 		}
-
 	}
 
 	public String getTempPath() {
@@ -469,7 +469,6 @@ public class Settings {
 		}
 
 		return externalWorkspace.get("location");
-
 	}
 
 	public String getExternalWorkspaceType() {
