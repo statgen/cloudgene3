@@ -19,29 +19,10 @@ public class BannerDaoTest {
 
 	@BeforeEach
 	public void setup() throws Exception {
-		// NOTE(Marc): This is a hack. What we need is a mock database for testing!
-		// Currently, the only way to get a properly initialized database is to
-		// instantiate the TestApplication. However, the TestApplication (and its
-		// superclass, the main Application) is a JavaBean, so it needs a constructor
-		// with no arguments. Since all the initialization code happens there (except
-		// for everything that happens first in StartServer), the Settings are passed as
-		// a hack: they're set to a static variable in [Test]Application.settings that
-		// is shared by all Application instances. Since [Test]Application initializes
-		// the database based on the settings, we need to quickly swap the settings and
-		// hope no race conditions happen.
-		//
-		// Ideally, we'd want two things:
-		// 1) A way to set up an IN-MEMORY test database without instantiating the
-		//    application.
-		// 2) A way to pass settings to whatever code initializes everything without
-		//    using a static variable.
-
-		Settings baseSettings = TestApplication.settings;
-		TestApplication.settings = TestApplication.loadSettings("BannerDaoTest");
-		TestApplication application = new TestApplication();
+		Settings settings = TestApplication.loadSettings("BannerDaoTest");
+		TestApplication application = new TestApplication(settings);
 		Database db = application.getDatabase();
 		dao = new BannerDao(db);
-		TestApplication.settings = baseSettings;
 	}
 
 	@Test

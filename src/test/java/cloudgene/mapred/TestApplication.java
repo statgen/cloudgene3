@@ -1,12 +1,10 @@
 package cloudgene.mapred;
 
-import java.io.FileNotFoundException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-
-import com.esotericsoftware.yamlbeans.YamlException;
 
 import cloudgene.mapred.apps.Application;
 import cloudgene.mapred.core.User;
@@ -17,26 +15,29 @@ import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.util.TestMailServer;
 import genepi.io.FileUtil;
 import io.micronaut.context.annotation.Context;
+import io.micronaut.context.annotation.Replaces;
+import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.env.Environment;
+import jakarta.inject.Inject;
 
 @Context
+@Replaces(cloudgene.mapred.server.Application.class)
+@Requires(env = Environment.TEST)
 public class TestApplication extends cloudgene.mapred.server.Application {
 
-	static {
-		try {
-			TestApplication.settings = loadSettings("primary");
-		} catch (FileNotFoundException | YamlException e) {
-			e.printStackTrace();
-		}
+	@Inject // Use this constructor for dependency injection.
+	public TestApplication() throws SQLException {
+		super(loadSettings("primary"));
 	}
 
-	public TestApplication() throws Exception {
-		super();
+	public TestApplication(Settings settings) throws SQLException {
+		super(settings);
 	}
 
-	public static Settings loadSettings(String prefix) throws FileNotFoundException, YamlException {
+	public static Settings loadSettings(String prefix) {
 		Settings settings = new Settings();
 
-		HashMap<String, String> mail = new HashMap<String, String>();
+		HashMap<String, String> mail = new HashMap<>();
 		mail.put("smtp", "localhost");
 		mail.put("port", TestMailServer.PORT + "");
 		mail.put("user", "");
@@ -47,7 +48,7 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 		// delete old database
 		FileUtil.deleteDirectory("test-database");
 
-		HashMap<String, String> database = new HashMap<String, String>();
+		HashMap<String, String> database = new HashMap<>();
 		database.put("driver", "h2");
 		database.put("database", "./test-database/mapred-" + prefix + "-" + UUID.randomUUID());
 		database.put("user", "mapred");
@@ -65,104 +66,90 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 		return settings;
 	}
 
-	protected static List<Application> registerApplications(Settings settings) {
+	protected static void registerApplications(Settings settings) {
 		List<Application> applications = new ArrayList<>();
 
-		Application app = new Application();
-		app.setFilename("test-data/return-true.yaml");
-		app.setPermission("public");
-		applications.add(app);
+		// -------- Applications -------- //
 
-		Application app2 = new Application();
-		app2.setFilename("test-data/return-false.yaml");
-		app2.setPermission("public");
-		applications.add(app2);
+		applications.add(new Application(
+				"test-data/return-true.yaml",
+				"public"));
 
-		Application app3 = new Application();
-		app3.setFilename("test-data/return-exception.yaml");
-		app3.setPermission("public");
-		applications.add(app3);
+		applications.add(new Application(
+				"test-data/return-false.yaml",
+				"public"));
 
-		Application app4 = new Application();
-		app4.setFilename("test-data/write-text-to-file.yaml");
-		app4.setPermission("public");
-		applications.add(app4);
+		applications.add(new Application(
+				"test-data/return-exception.yaml",
+				"public"));
 
-		Application app5 = new Application();
-		app5.setFilename("test-data/return-true-in-setup.yaml");
-		app5.setPermission("public");
-		applications.add(app5);
+		applications.add(new Application(
+				"test-data/write-text-to-file.yaml",
+				"public"));
 
-		Application app6 = new Application();
-		app6.setFilename("test-data/return-false-in-setup.yaml");
-		app6.setPermission("public");
-		applications.add(app6);
+		applications.add(new Application(
+				"test-data/return-true-in-setup.yaml",
+				"public"));
 
-		Application app7 = new Application();
-		app7.setFilename("test-data/all-possible-inputs.yaml");
-		app7.setPermission("public");
-		applications.add(app7);
+		applications.add(new Application(
+				"test-data/return-false-in-setup.yaml",
+				"public"));
 
-		Application app71 = new Application();
-		app71.setFilename("test-data/all-possible-inputs-private.yaml");
-		app71.setPermission("private");
-		applications.add(app71);
+		applications.add(new Application(
+				"test-data/all-possible-inputs.yaml",
+				"public"));
 
-		Application app8 = new Application();
-		app8.setFilename("test-data/long-sleep.yaml");
-		app8.setPermission("public");
-		applications.add(app8);
+		applications.add(new Application(
+				"test-data/all-possible-inputs-private.yaml",
+				"public"));
 
-		Application app9 = new Application();
-		app9.setFilename("test-data/write-files-to-folder.yaml");
-		app9.setPermission("public");
-		applications.add(app9);
+		applications.add(new Application(
+				"test-data/long-sleep.yaml",
+				"public"));
 
-		Application app13 = new Application();
-		app13.setFilename("test-data/three-tasks.yaml");
-		app13.setPermission("public");
-		applications.add(app13);
+		applications.add(new Application(
+				"test-data/write-files-to-folder.yaml",
+				"public"));
 
-		Application app14 = new Application();
-		app14.setFilename("test-data/write-text-to-std-out.yaml");
-		app14.setPermission("public");
-		applications.add(app14);
+		applications.add(new Application(
+				"test-data/three-tasks.yaml",
+				"public"));
 
-		// app links
+		applications.add(new Application(
+				"test-data/write-text-to-std-out.yaml",
+				"public"));
 
-		Application app17 = new Application();
-		app17.setFilename("test-data/app-links.yaml");
-		app17.setPermission("public");
-		applications.add(app17);
+		applications.add(new Application(
+				"test-data/write-text-to-std-out.yaml",
+				"public"));
 
-		Application app18 = new Application();
-		app18.setFilename("test-data/app-links-child.yaml");
-		app18.setPermission("public");
-		applications.add(app18);
+		// -------- Application Links -------- //
 
-		Application app19 = new Application();
-		app19.setFilename("test-data/app-links-child-protected.yaml");
-		app19.setPermission("protected");
-		applications.add(app19);
+		applications.add(new Application(
+				"test-data/app-links.yaml",
+				"public"));
 
-		Application app22 = new Application();
-		app22.setFilename("test-data/print-hidden-inputs.yaml");
-		app22.setPermission("public");
-		applications.add(app22);
+		applications.add(new Application(
+				"test-data/app-links-child.yaml",
+				"public"));
 
-		Application app23 = new Application();
-		app23.setFilename("test-data/app-version-test.yaml");
-		app23.setPermission("private");
-		applications.add(app23);
+		applications.add(new Application(
+				"test-data/app-links-child-protected.yaml",
+				"protected"));
 
-		Application app24 = new Application();
-		app24.setFilename("test-data/app-version-test2.yaml");
-		app24.setPermission("private");
-		applications.add(app24);
+		applications.add(new Application(
+				"test-data/print-hidden-inputs.yaml",
+				"public"));
+
+		applications.add(new Application(
+				"test-data/app-version-test.yaml",
+				"private"));
+
+		applications.add(new Application(
+				"test-data/app-version-test2.yaml",
+				"private"));
 
 		settings.setApps(applications);
-
-		return applications;
 	}
 
 	@Override
