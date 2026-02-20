@@ -16,11 +16,11 @@ public class WorkflowEngine implements Runnable {
 
 	private Thread threadLongTimeQueue;
 
-	private Queue longTimeQueue;
+	private final Queue longTimeQueue;
 
 	private boolean running = false;
 
-	private AtomicLong priorityCounter = new AtomicLong();
+	private final AtomicLong priorityCounter = new AtomicLong();
 
 	public WorkflowEngine(int ltqThreads) {
 

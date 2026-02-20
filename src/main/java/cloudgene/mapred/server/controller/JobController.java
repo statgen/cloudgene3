@@ -2,8 +2,6 @@ package cloudgene.mapred.server.controller;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Function;
 
@@ -42,7 +40,7 @@ import jakarta.inject.Inject;
 @Controller("/api/v2/jobs")
 public class JobController {
 
-	private static Logger log = LoggerFactory.getLogger(JobController.class);
+	private static final Logger log = LoggerFactory.getLogger(JobController.class);
 
 	private static final String MESSAGE_JOB_RESTARTED = "Your job was successfully added to the job queue.";
 
@@ -85,7 +83,11 @@ public class JobController {
 	@Post("/submit/{app}")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Secured(SecurityRule.IS_AUTHENTICATED)
-	public Publisher<HttpResponse<Object>> submit(Authentication authentication, HttpRequest<?> request, String app, @Body MultipartBody body) throws IOException {
+	public Publisher<HttpResponse<Object>> submit(
+			Authentication authentication,
+			HttpRequest<?> request,
+			String app,
+			@Body MultipartBody body) throws IOException {
 
 		String userAgent = request.getHeaders().get(HttpHeaders.USER_AGENT);
 
@@ -114,8 +116,8 @@ public class JobController {
 
 					log.debug("Job " + job.getId() + " submitted in " + (System.currentTimeMillis() - start) + " ms.");
 
-					String message = String.format("Job: Created job ID %s for user %s (ID %s - email %s)", user.getId(),
-							user.getUsername(), user.getId(), user.getMail());
+					String message = String.format("Job: Created job ID %s for user %s (ID %s - email %s)",
+							user.getId(), user.getUsername(), user.getId(), user.getMail());
 					if (user.isAccessedByApi()) {
 						message += " (via API token)";
 					}
@@ -134,7 +136,6 @@ public class JobController {
 			}
 		});
 	}
-
 
 	@Get("/")
 	@Secured(SecurityRule.IS_AUTHENTICATED)
@@ -168,7 +169,6 @@ public class JobController {
 		JobResponse response = JobResponse.build(job, user);
 
 		return response;
-
 	}
 
 	@Get("/{id}/status")
@@ -202,7 +202,6 @@ public class JobController {
 
 		JobResponse response = JobResponse.build(job, user);
 		return response;
-
 	}
 
 	@Get("/{id}/restart")
@@ -230,5 +229,4 @@ public class JobController {
 					"This functionality is currently under maintenance.");
 		}
 	}
-
 }
