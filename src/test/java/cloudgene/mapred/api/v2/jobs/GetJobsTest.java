@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import cloudgene.mapred.TestApplication;
 import cloudgene.mapred.jobs.state.JobState;
-import cloudgene.mapred.util.CloudgeneClientRestAssured;
+import cloudgene.mapred.test.CloudgeneClientRestAssured;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.restassured.RestAssured;
 import io.restassured.http.Header;

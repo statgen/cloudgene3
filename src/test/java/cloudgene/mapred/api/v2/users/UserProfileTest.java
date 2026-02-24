@@ -18,7 +18,7 @@ import cloudgene.mapred.TestApplication;
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.database.UserDao;
 import cloudgene.mapred.database.util.Database;
-import cloudgene.mapred.util.CloudgeneClientRestAssured;
+import cloudgene.mapred.test.CloudgeneClientRestAssured;
 import cloudgene.mapred.util.HashUtil;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.restassured.RestAssured;

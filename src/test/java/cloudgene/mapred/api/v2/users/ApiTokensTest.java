@@ -20,7 +20,7 @@ import cloudgene.mapred.core.User;
 import cloudgene.mapred.database.UserDao;
 import cloudgene.mapred.database.util.Database;
 import cloudgene.mapred.jobs.state.JobState;
-import cloudgene.mapred.util.CloudgeneClientRestAssured;
+import cloudgene.mapred.test.CloudgeneClientRestAssured;
 import cloudgene.mapred.util.HashUtil;
 import genepi.io.FileUtil;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;

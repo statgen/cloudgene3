@@ -1,6 +1,6 @@
 package cloudgene.mapred.api.v2.admin;
 
-import cloudgene.mapred.util.CloudgeneClientRestAssured;
+import cloudgene.mapred.test.CloudgeneClientRestAssured;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
