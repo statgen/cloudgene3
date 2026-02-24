@@ -5,7 +5,9 @@ import java.io.*;
 import com.esotericsoftware.yamlbeans.YamlConfig;
 import com.esotericsoftware.yamlbeans.YamlReader;
 
-public class WdlReader {
+public final class WdlReader {
+
+	private WdlReader() {}
 
 	public static WdlApp loadAppFromReader(String filename, Reader reader) throws IOException {
 		YamlReader yamlReader = new YamlReader(reader);

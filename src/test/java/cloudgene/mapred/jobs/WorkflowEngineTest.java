@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +24,12 @@ import genepi.io.FileUtil;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 
+// TODO(Marc): This seems to be a test suite of "what happens if we run X application?".
+//             Meanwhile, there is a separate test suite called
+//             PriorityThreadPoolExecutorTest that, instead of testing the obvious class
+//             (PriorityThreadPoolExecutor), actually tests WorkflowEngineTest.
+//             Rename!
+
 @MicronautTest
 public class WorkflowEngineTest {
 
@@ -36,13 +41,10 @@ public class WorkflowEngineTest {
 
 	@Test
 	public void testReturnTrueStep() throws Exception {
-
 		WorkflowEngine engine = application.getWorkflowEngine();
-
 		WdlApp app = WdlReader.loadAppFromFile("test-data/return-true.yaml");
 
-		Map<String, String> inputs = new HashMap<>();
-		inputs.put("input", "input-file");
+		Map<String, String> inputs = Map.of("input", "input-file");
 
 		AbstractJob job = createJobFromWdl(app, inputs);
 		engine.submit(job);
@@ -58,13 +60,10 @@ public class WorkflowEngineTest {
 
 	@Test
 	public void testReturnFalseStep() throws Exception {
-
 		WorkflowEngine engine = application.getWorkflowEngine();
-
 		WdlApp app = WdlReader.loadAppFromFile("test-data/return-false.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("input", "input-file");
+		Map<String, String> params = Map.of("input", "input-file");
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -79,13 +78,10 @@ public class WorkflowEngineTest {
 
 	@Test
 	public void testReturnExceptionStep() throws Exception {
-
 		WorkflowEngine engine = application.getWorkflowEngine();
-
 		WdlApp app = WdlReader.loadAppFromFile("test-data/return-exception.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("input", "input-file");
+		Map<String, String> params = Map.of("input", "input-file");
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -100,13 +96,10 @@ public class WorkflowEngineTest {
 
 	@Test
 	public void testReturnTrueInSetupStep() throws Exception {
-
 		WorkflowEngine engine = application.getWorkflowEngine();
-
 		WdlApp app = WdlReader.loadAppFromFile("test-data/return-true-in-setup.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("input", "input-file");
+		Map<String, String> params = Map.of("input", "input-file");
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -123,13 +116,10 @@ public class WorkflowEngineTest {
 
 	@Test
 	public void testReturnFalseInSetupStep() throws Exception {
-
 		WorkflowEngine engine = application.getWorkflowEngine();
-
 		WdlApp app = WdlReader.loadAppFromFile("test-data/return-false-in-setup.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("input", "input-file");
+		Map<String, String> params = Map.of("input", "input-file");
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -145,13 +135,10 @@ public class WorkflowEngineTest {
 
 	@Test
 	public void testReturnTrueInSecondSetupStep() throws Exception {
-
 		WorkflowEngine engine = application.getWorkflowEngine();
-
 		WdlApp app = WdlReader.loadAppFromFile("test-data/return-true-in-setup2.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("input", "input-file");
+		Map<String, String> params = Map.of("input", "input-file");
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -167,13 +154,10 @@ public class WorkflowEngineTest {
 
 	@Test
 	public void testReturnTrueInSecondSetupStepAndNormalStep() throws Exception {
-
 		WorkflowEngine engine = application.getWorkflowEngine();
-
 		WdlApp app = WdlReader.loadAppFromFile("test-data/return-true-in-setup3.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("input", "input-file");
+		Map<String, String> params = Map.of("input", "input-file");
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -190,12 +174,10 @@ public class WorkflowEngineTest {
 
 	@Test
 	public void testHiddenInputsAndDefaultValues() throws Exception {
-
 		WorkflowEngine engine = application.getWorkflowEngine();
-
 		WdlApp app = WdlReader.loadAppFromFile("test-data/print-hidden-inputs.yaml");
 
-		Map<String, String> inputs = new HashMap<>();
+		Map<String, String> inputs = Map.of();
 
 		AbstractJob job = createJobFromWdl(app, inputs);
 		engine.submit(job);
@@ -214,20 +196,16 @@ public class WorkflowEngineTest {
 		assertEquals("text2: my-value\n", job.getSteps().get(3).getLogMessages().get(0).getMessage());
 		assertEquals("checkbox2: true\n", job.getSteps().get(4).getLogMessages().get(0).getMessage());
 		assertEquals("list2: value1\n", job.getSteps().get(5).getLogMessages().get(0).getMessage());
-
 	}
 
 	@Test
 	public void testReturnWriteFileInSecondSetupStep() throws Exception {
-
 		WorkflowEngine engine = application.getWorkflowEngine();
+		WdlApp app = WdlReader.loadAppFromFile("test-data/write-file-in-setup.yaml");
 
 		String myContent = "test-test-test-test-text";
 
-		WdlApp app = WdlReader.loadAppFromFile("test-data/write-file-in-setup.yaml");
-
-		Map<String, String> params = new HashMap<>();
-		params.put("inputtext", myContent);
+		Map<String, String> params = Map.of("inputtext", myContent);
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -244,8 +222,7 @@ public class WorkflowEngineTest {
 
 		app = WdlReader.loadAppFromFile("test-data/write-file-in-setup-failure.yaml");
 
-		params = new HashMap<>();
-		params.put("inputtext", myContent);
+		params = Map.of("inputtext", myContent);
 
 		job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -271,8 +248,7 @@ public class WorkflowEngineTest {
 		WorkflowEngine engine = application.getWorkflowEngine();
 		WdlApp app = WdlReader.loadAppFromFile("test-data/no-steps.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("inputtext", "test");
+		Map<String, String> params = Map.of("inputtext", "test");
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -290,8 +266,7 @@ public class WorkflowEngineTest {
 		WorkflowEngine engine = application.getWorkflowEngine();
 		WdlApp app = WdlReader.loadAppFromFile("test-data/return-false-in-setup2.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("input", "input-file");
+		Map<String, String> params = Map.of("input", "input-file");
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -309,8 +284,7 @@ public class WorkflowEngineTest {
 		WorkflowEngine engine = application.getWorkflowEngine();
 		WdlApp app = WdlReader.loadAppFromFile("test-data/write-text-to-file.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("inputtext", "lukas_text");
+		Map<String, String> params = Map.of("inputtext", "lukas_text");
 
 		CloudgeneJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -334,8 +308,7 @@ public class WorkflowEngineTest {
 		WorkflowEngine engine = application.getWorkflowEngine();
 		WdlApp app = WdlReader.loadAppFromFile("test-data/write-text-to-file-on-failure.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("inputtext", "lukas_text");
+		Map<String, String> params = Map.of("inputtext", "lukas_text");
 
 		CloudgeneJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -360,8 +333,7 @@ public class WorkflowEngineTest {
 
 		WdlApp app = WdlReader.loadAppFromFile("test-data/write-text-to-file-on-failure2.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("inputtext", "lukas_text");
+		Map<String, String> params = Map.of("inputtext", "lukas_text");
 
 		CloudgeneJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -384,8 +356,7 @@ public class WorkflowEngineTest {
 		WorkflowEngine engine = application.getWorkflowEngine();
 		WdlApp app = WdlReader.loadAppFromFile("test-data/write-text-to-file-on-failure3.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("inputtext", "lukas_text");
+		Map<String, String> params = Map.of("inputtext", "lukas_text");
 
 		CloudgeneJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -409,8 +380,7 @@ public class WorkflowEngineTest {
 		WorkflowEngine engine = application.getWorkflowEngine();
 		WdlApp app = WdlReader.loadAppFromFile("test-data/three-tasks.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("input", "input-file");
+		Map<String, String> params = Map.of("input", "input-file");
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -438,8 +408,7 @@ public class WorkflowEngineTest {
 		WorkflowEngine engine = application.getWorkflowEngine();
 		WdlApp app = WdlReader.loadAppFromFile("test-data/write-text-to-std-out.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("input", "input-file");
+		Map<String, String> params = Map.of("input", "input-file");
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -471,8 +440,7 @@ public class WorkflowEngineTest {
 		WorkflowEngine engine = application.getWorkflowEngine();
 		WdlApp app = WdlReader.loadAppFromFile("test-data/app-links.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("app", "apps@app-links-child");
+		Map<String, String> params = Map.of("app", "apps@app-links-child");
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -497,8 +465,7 @@ public class WorkflowEngineTest {
 		WorkflowEngine engine = application.getWorkflowEngine();
 		WdlApp app = WdlReader.loadAppFromFile("test-data/app-links.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("app", "app-links-child");
+		Map<String, String> params = Map.of("app", "app-links-child");
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -523,7 +490,7 @@ public class WorkflowEngineTest {
 		WorkflowEngine engine = application.getWorkflowEngine();
 		WdlApp app = WdlReader.loadAppFromFile("test-data/app-links-optional.yaml");
 
-		Map<String, String> params = new HashMap<>();
+		Map<String, String> params = Map.of();
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -548,8 +515,7 @@ public class WorkflowEngineTest {
 		WorkflowEngine engine = application.getWorkflowEngine();
 		WdlApp app = WdlReader.loadAppFromFile("test-data/app-links.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("app", "apps@app-links-child-wrong-id");
+		Map<String, String> params = Map.of("app", "apps@app-links-child-wrong-id");
 
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
@@ -565,8 +531,7 @@ public class WorkflowEngineTest {
 		WorkflowEngine engine = application.getWorkflowEngine();
 		WdlApp app = WdlReader.loadAppFromFile("test-data/app-links.yaml");
 
-		Map<String, String> params = new HashMap<>();
-		params.put("app", "apps@app-links-child-protected");
+		Map<String, String> params = Map.of("app", "apps@app-links-child-protected");
 
 		AbstractJob job = createJobFromWdlAsUser(app, params);
 		engine.submit(job);
