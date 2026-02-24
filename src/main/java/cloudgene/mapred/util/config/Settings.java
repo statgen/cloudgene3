@@ -249,20 +249,12 @@ public class Settings {
 		return notificationAfter;
 	}
 
-	public int getNotificationAfterInSec() {
-		return notificationAfter * 24 * 60 * 60;
-	}
-
 	public void setRetireAfter(int retireAfter) {
 		this.retireAfter = retireAfter;
 	}
 
 	public int getRetireAfter() {
 		return retireAfter;
-	}
-
-	public int getRetireAfterInSec() {
-		return retireAfter * 24 * 60 * 60;
 	}
 
 	public void setAutoRetire(boolean autoRetire) {
