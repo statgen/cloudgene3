@@ -12,7 +12,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import cloudgene.mapred.jobs.state.SuccessState;
+import cloudgene.mapred.jobs.state.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +25,7 @@ import cloudgene.mapred.util.config.Settings;
 import genepi.io.FileUtil;
 
 abstract public class AbstractJob extends PriorityRunnable {
+
 	public static final String JOB_LOG = "job.txt";
 	public static final String JOB_OUT = "std.out";
 
@@ -42,6 +43,9 @@ abstract public class AbstractJob extends PriorityRunnable {
 
 	private String id;
 	private JobState state = JobState.WAITING;
+	private CompletionState completionState = CompletionState.SUBMITTED;
+	private SuccessState successState = SuccessState.PENDING;
+	private NotificationState notificationState = NotificationState.PENDING;
 	private long startTime = 0;
 	private long endTime = 0;
 	private long submittedOn = 0;
@@ -74,8 +78,60 @@ abstract public class AbstractJob extends PriorityRunnable {
 		return state;
 	}
 
+	/** 
+	 * Only sets {@code this.state}, leaving other state fields unchanged.
+	 * <p>
+	 * You should prefer {@link #setState(JobState)} whenever possible.
+	 */
+	public void setRawState(JobState state) {
+		this.state = state;
+	}
+
+	/** 
+	 * Sets {@code this.state}, and deduces other state fields from its value.
+	 * <p>
+	 * If you're sure you shouldn't synchronize fields, you can use {@link #setRawState(JobState)}.
+	 */
 	public void setState(JobState state) {
 		this.state = state;
+
+		StateTranslator.StateResult newState = StateTranslator.old2New(state);
+
+		if (newState.completion() != null) {
+			completionState = newState.completion();
+		}
+
+		if (newState.success() != null) {
+			successState = newState.success();
+		}
+
+		if (newState.notification() != null) {
+			notificationState = newState.notification();
+		}
+	}
+
+	public CompletionState getCompletionState() {
+		return completionState;
+	}
+
+	public void setCompletionState(CompletionState completionState) {
+		this.completionState = completionState;
+	}
+
+	public SuccessState getSuccessState() {
+		return successState;
+	}
+
+	public void setSuccessState(SuccessState successState) {
+		this.successState = successState;
+	}
+
+	public NotificationState getNotificationState() {
+		return notificationState;
+	}
+
+	public void setNotificationState(NotificationState notificationState) {
+		this.notificationState = notificationState;
 	}
 
 	public long getStartTime() {

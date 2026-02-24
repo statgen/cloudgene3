@@ -6,6 +6,9 @@ import java.util.List;
 
 import cloudgene.mapred.jobs.*;
 import cloudgene.mapred.jobs.state.JobState;
+import cloudgene.mapred.jobs.state.CompletionState;
+import cloudgene.mapred.jobs.state.NotificationState;
+import cloudgene.mapred.jobs.state.SuccessState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,11 +29,12 @@ public class JobDao extends JdbcDataAccessObject {
 	public boolean insert(AbstractJob job) {
 		String sql = "INSERT INTO job "
 				+ "(id, name, state, start_time, end_time, user_id, s3_url, type, application, "
-				+ "application_id, submitted_on, finished_on, setup_start_time, setup_end_time, user_agent) "
-				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				+ "application_id, submitted_on, finished_on, setup_start_time, setup_end_time, "
+				+ "completion_state, success_state, notification_state, user_agent) "
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		try {
-			Object[] params = new Object[15];
+			Object[] params = new Object[18];
 			params[0] = job.getId();
 			params[1] = job.getName();
 			params[2] = job.getState().getValue();
@@ -45,7 +49,10 @@ public class JobDao extends JdbcDataAccessObject {
 			params[11] = job.getEndTime();
 			params[12] = -1;
 			params[13] = -1;
-			params[14] = trimToLength(job.getUserAgent(), 350);
+			params[14] = job.getCompletionState().getValue();
+			params[15] = job.getSuccessState().getValue();
+			params[16] = job.getNotificationState().getValue();
+			params[17] = trimToLength(job.getUserAgent(), 350);
 
 			update(sql, params);
 
@@ -61,11 +68,12 @@ public class JobDao extends JdbcDataAccessObject {
 		String sql = "UPDATE job SET "
 				+ "name = ?, state = ?, start_time = ?, end_time = ?, user_id = ?, s3_url = ?, "
 				+ "type = ?, deleted_on = ?, application = ?, application_id = ?, submitted_on = ?, "
-				+ "finished_on = ?, setup_start_time = ?, setup_end_time = ? "
+				+ "finished_on = ?, setup_start_time = ?, setup_end_time = ?, completion_state = ?, "
+				+ "success_state = ?, notification_state = ?"
 				+ "WHERE id = ? ";
 
 		try {
-			Object[] params = new Object[15];
+			Object[] params = new Object[18];
 			params[0] = job.getName();
 			params[1] = job.getState().getValue();
 			params[2] = job.getStartTime();
@@ -80,7 +88,10 @@ public class JobDao extends JdbcDataAccessObject {
 			params[11] = job.getEndTime();
 			params[12] = -1;
 			params[13] = -1;
-			params[14] = job.getId();
+			params[14] = job.getCompletionState().getValue();
+			params[15] = job.getSuccessState().getValue();
+			params[16] = job.getNotificationState().getValue();
+			params[17] = job.getId();
 
 			update(sql, params);
 
@@ -357,7 +368,10 @@ public class JobDao extends JdbcDataAccessObject {
 
 			job.setId(rs.getString("job.id"));
 			job.setName(rs.getString("job.name"));
-			job.setState(JobState.of(rs.getInt("job.state")));
+			job.setRawState(JobState.of(rs.getInt("job.state")));
+			job.setCompletionState(CompletionState.of(rs.getString("job.completion_state")));
+			job.setSuccessState(SuccessState.of(rs.getString("job.success_state")));
+			job.setNotificationState(NotificationState.of(rs.getString("job.notification_state")));
 			job.setStartTime(rs.getLong("job.start_time"));
 			job.setEndTime(rs.getLong("job.end_time"));
 			job.setDeletedOn(rs.getLong("job.deleted_on"));
