@@ -152,6 +152,27 @@ public class JobCleanUpService {
 		}
 	}
 
+	/**
+	 * Mark {@code job} for retirement in the indicated number of {@code days}, and
+	 * send an email notification if applicable.
+	 * <p>
+	 * Valid job states for this operation are {@link JobState#SUCCESS},
+	 * {@link JobState#FAILED}, and {@link JobState#CANCELED}. Only
+	 * {@link JobState#SUCCESS} leads to an email notification (since other jobs
+	 * don't have downloadable data).
+	 * <p>
+	 * The retirement timestamp is found by converting {@code days} to millis and
+	 * offsetting from the current time.
+	 * <p>
+	 * This job never fails, it just returns different messages depending on the
+	 * action taken.
+	 *
+	 * @param job  This job will be marked for deletion, and a notification email
+	 *             may be sent to the user.
+	 * @param days How many days from now until the job is deleted?
+	 * @return A result message indicating if the job was marked for deletion, if a
+	 *         notification was sent, etc.
+	 */
 	public String sendNotification(AbstractJob job, int days) {
 		Settings settings = application.getSettings();
 		JobDao dao = new JobDao(application.getDatabase());
@@ -160,6 +181,23 @@ public class JobCleanUpService {
 		return getResultMessage(job, result);
 	}
 
+	/**
+	 * Mark all applicable jobs in the database for deletion, and notify the
+	 * appropriate users.
+	 * <p>
+	 * Jobs are processed if their state is one of {@link JobState#SUCCESS},
+	 * {@link JobState#FAILED}, or {@link JobState#CANCELED}; and it has been more
+	 * than {@link Settings#getNotificationAfter()} days since the job finished.
+	 * <p>
+	 * All processed jobs are marked for retirement in
+	 * {@link Settings#getRetireAfter()} days from the current time. Only jobs with
+	 * state {@link JobState#SUCCESS} lead to an email notification.
+	 * <p>
+	 * Day values are converted to millis and computed from the current time (so
+	 * there is no rounding to the beginning of the day or anything like that).
+	 *
+	 * @return Number of emails sent.
+	 */
 	public int sendNotifications() {
 		Database database = application.getDatabase();
 		Settings settings = application.getSettings();
