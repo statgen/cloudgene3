@@ -11,13 +11,13 @@ import cloudgene.mapred.wdl.WdlStep;
 
 public class Executor {
 
+	private static final Logger log = LoggerFactory.getLogger(Executor.class);
+
 	private ExecutableStep executableNode;
 
-	private static Logger log = LoggerFactory.getLogger(Executor.class);
-
 	public ExecutionResult execute(List<WdlStep> steps, CloudgeneContext context) throws Exception {
-
 		context.log("Execute " + steps.size() + " steps...");
+
 		for (WdlStep step : steps) {
 			executableNode = new ExecutableStep(step, context);
 			log.info("[Job {}] Executor: execute step '{}'...", context.getJobId(), step.getName());
@@ -45,5 +45,4 @@ public class Executor {
 	public ExecutableStep getCurrentNode() {
 		return executableNode;
 	}
-
 }

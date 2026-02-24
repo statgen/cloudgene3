@@ -30,77 +30,72 @@ public class FormUtil {
 	@Inject
 	protected cloudgene.mapred.server.Application application;
 
-	public Publisher<HttpResponse<Object>> processMultipartBody(MultipartBody body, File folder,
+	public Publisher<HttpResponse<Object>> processMultipartBody(
+			MultipartBody body,
+			File folder,
 			Function<List<Parameter>, HttpResponse<Object>> callback) {
 
-		return Mono.<HttpResponse<Object>>create(emitter -> {
+		return Mono.create(emitter -> body.subscribe(new Subscriber<>() {
 
-			body.subscribe(new Subscriber<CompletedPart>() {
+			private final List<Parameter> form = new ArrayList<>();
+			private Subscription s;
 
-				List<Parameter> form = new ArrayList<>();
+			@Override
+			public void onSubscribe(Subscription s) {
+				this.s = s;
+				s.request(1);
+			}
 
-				private Subscription s;
-
-				@Override
-				public void onSubscribe(Subscription s) {
-					this.s = s;
-					s.request(1);
+			@Override
+			public void onNext(CompletedPart completedPart) {
+				log.debug("Parse parameter {}...", completedPart.getName());
+				Parameter formParameter = processCompletedPart(completedPart, folder);
+				if (formParameter != null) {
+					form.add(formParameter);
 				}
+				log.debug("Parsed parameter {}.", completedPart.getName());
+				s.request(1);
+			}
 
-				@Override
-				public void onNext(CompletedPart completedPart) {
-					log.debug("Parse parameter " + completedPart.getName() + "...");
-					Parameter formParameter = processCompletedPart(completedPart, folder);
-					if (formParameter != null) {
-						form.add(formParameter);
-					}
-					log.debug("Parsed parameter " + completedPart.getName() + ".");
-					s.request(1);
-				}
+			@Override
+			public void onError(Throwable t) {
+				emitter.error(t);
+			}
 
-				@Override
-				public void onError(Throwable t) {
-					emitter.error(t);
-				}
-
-				@Override
-				public void onComplete() {
-					HttpResponse<Object> result = callback.apply(form);
-					emitter.success(result);
-				}
-			});
-		});
-
+			@Override
+			public void onComplete() {
+				HttpResponse<Object> result = callback.apply(form);
+				emitter.success(result);
+			}
+		}));
 	}
 
 	public Parameter processCompletedPart(CompletedPart completedPart, File folder) {
-
 		String partName = completedPart.getName();
 
 		if (completedPart instanceof CompletedFileUpload) {
-
 			String originalFileName = ((CompletedFileUpload) completedPart).getFilename();
 			File file = new File(folder, originalFileName);
 			String absolutePath = file.getAbsolutePath();
 
 			try {
 				long start = System.currentTimeMillis();
-				log.debug("Write data to " + absolutePath + "...");
+				log.debug("Write data to {}...", absolutePath);
 
+				// TODO(Marc): The LLMs suggest this might be undesirable behavior (clogging the
+				// event loop with heavy operations). Investigate.
 				InputStream stream = completedPart.getInputStream();
 				FileUtils.copyInputStreamToFile(stream, file);
 				stream.close();
 
 				long end = System.currentTimeMillis();
-				log.debug("Data written to " + absolutePath + " in " + (end - start) + " ms.");
+				log.debug("Data written to {} in {} ms.", absolutePath, end - start);
 
 				return new Parameter(partName, file);
 			} catch (IOException e) {
-				log.error("Write data to " + absolutePath + " failed", e);
+				log.error("Write data to {} failed", absolutePath, e);
 			}
-
 		} else {
-
 			try {
 				log.debug("Write data to string...");
 				InputStream stream = completedPart.getInputStream();
@@ -119,7 +114,6 @@ public class FormUtil {
 	public static class Parameter {
 
 		private String name;
-
 		private Object value;
 
 		public Parameter(String name, Object value) {

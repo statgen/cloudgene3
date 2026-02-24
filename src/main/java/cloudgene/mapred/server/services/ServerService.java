@@ -123,15 +123,15 @@ public class ServerService {
 			String adminMail,
 			String serverUrl,
 			String baseUrl,
-			String background_color,
-			String foreground_color,
-			String google_analytics,
+			String backgroundColor,
+			String foregroundColor,
+			String googleAnalytics,
 			String mail,
-			String mail_smtp,
-			String mail_port,
-			String mail_user,
-			String mail_password,
-			String mail_name,
+			String mailSmtp,
+			String mailPort,
+			String mailUser,
+			String mailPassword,
+			String mailName,
 			String workspaceType,
 			String workspaceLocation) {
 
@@ -141,19 +141,19 @@ public class ServerService {
 		settings.setAdminMail(adminMail);
 		settings.setServerUrl(serverUrl);
 		settings.setBaseUrl(baseUrl);
-		settings.getColors().put("background", background_color);
-		settings.getColors().put("foreground", foreground_color);
-		settings.setGoogleAnalytics(google_analytics);
+		settings.getColors().put("background", backgroundColor);
+		settings.getColors().put("foreground", foregroundColor);
+		settings.setGoogleAnalytics(googleAnalytics);
 		settings.getExternalWorkspace().put("type", workspaceType);
 		settings.getExternalWorkspace().put("location", workspaceLocation);
 
 		if (mail != null && mail.equals("true")) {
-			Map<String, String> mailConfig = new HashMap<String, String>();
-			mailConfig.put("smtp", mail_smtp);
-			mailConfig.put("port", mail_port);
-			mailConfig.put("user", mail_user);
-			mailConfig.put("password", mail_password);
-			mailConfig.put("name", mail_name);
+			Map<String, String> mailConfig = new HashMap<>();
+			mailConfig.put("smtp", mailSmtp);
+			mailConfig.put("port", mailPort);
+			mailConfig.put("user", mailUser);
+			mailConfig.put("password", mailPassword);
+			mailConfig.put("name", mailName);
 			application.getSettings().setMail(mailConfig);
 		} else {
 			application.getSettings().setMail(null);

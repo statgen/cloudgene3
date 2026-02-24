@@ -294,12 +294,9 @@ public class UserService {
 
 			String key = "";
 			if (user.getActivationCode() != null && !user.getActivationCode().isEmpty()) {
-
 				// resend the same activation token
 				key = user.getActivationCode();
-
 			} else {
-
 				// create activation token
 				key = HashUtil.getActivationHash(user);
 				user.setActivationCode(key);
@@ -402,7 +399,6 @@ public class UserService {
 			// activate user immediately.
 
 			if (application.getSettings().getMail() != null && mailProvided) {
-
 				String activationKey = HashUtil.getActivationHash(newUser);
 				newUser.setActive(false);
 				newUser.setActivationCode(activationKey);
@@ -414,12 +410,9 @@ public class UserService {
 				String body = application.getTemplate(Template.REGISTER_MAIL, fullName, appName, activationLink);
 
 				MailUtil.send(application.getSettings(), mail, subject, body);
-
 			} else {
-
 				newUser.setActive(true);
 				newUser.setActivationCode("");
-
 			}
 
 			log.info(String.format("Registration: New user %s (ID %s - email %s - roles %s)", newUser.getUsername(),
@@ -428,9 +421,7 @@ public class UserService {
 			dao.insert(newUser);
 
 			return MessageResponse.success(MESSAGE_USER_CREATED);
-
 		} catch (Exception e) {
-
 			return MessageResponse.error(e.getMessage());
 		}
 	}
@@ -440,9 +431,7 @@ public class UserService {
 		User user = dao.findByUsername(username);
 
 		if (user != null) {
-
 			if (user.getActivationCode() != null && user.getActivationCode().equals(code)) {
-
 				user.setActive(true);
 				user.setActivationCode("");
 				dao.update(user);
@@ -451,19 +440,14 @@ public class UserService {
 						user.getUsername(), user.getId(), user.getMail()));
 
 				return MessageResponse.success(MESSAGE_USER_ACTIVATED);
-
 			} else {
-
 				log.warn(String.format(
 						"User: code is either incorrect or has already been used for user %s (ID %s - email %s)",
 						user.getUsername(), user.getId(), user.getMail()));
 
 				return MessageResponse.error(MESSAGE_WRONG_ACTIVATION_CODE);
-
 			}
-
 		} else {
-
 			log.warn(String.format("User: used activation code for missing or unknown username '%s'", username));
 			return MessageResponse.error(MESSAGE_WRONG_USERNAME);
 		}

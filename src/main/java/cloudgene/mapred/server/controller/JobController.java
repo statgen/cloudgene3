@@ -3,7 +3,6 @@ package cloudgene.mapred.server.controller;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.function.Function;
 
 import io.micronaut.http.*;
 import org.reactivestreams.Publisher;
@@ -21,7 +20,6 @@ import cloudgene.mapred.server.responses.PageResponse;
 import cloudgene.mapred.server.responses.ResponseObject;
 import cloudgene.mapred.server.services.JobService;
 import cloudgene.mapred.util.FormUtil;
-import cloudgene.mapred.util.FormUtil.Parameter;
 import cloudgene.mapred.util.Page;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.annotation.Body;
@@ -45,8 +43,6 @@ public class JobController {
 	private static final String MESSAGE_JOB_RESTARTED = "Your job was successfully added to the job queue.";
 
 	public static final int DEFAULT_PAGE_SIZE = 15;
-
-	public static final long HIGH_PRIORITY = 0;
 
 	@Inject
 	protected cloudgene.mapred.server.Application application;
@@ -96,43 +92,38 @@ public class JobController {
 		File folder = application.getSettings().getTempFolder("upload_");
 		folder.deleteOnExit();
 
-		log.debug("Start submit process and parse multipart body. Folder for request: " + folder.getAbsolutePath());
+		log.debug("Start submit process and parse multipart body. Folder for request: {}", folder.getAbsolutePath());
 
-		return formUtil.processMultipartBody(body, folder, new Function<List<Parameter>, HttpResponse<Object>>() {
+		return formUtil.processMultipartBody(body, folder, form -> {
+			log.debug("Multi part parsed in {} ms.", System.currentTimeMillis() - start);
 
-			@Override
-			public HttpResponse<Object> apply(List<Parameter> form) {
+			User user = authenticationService.getUserByAuthentication(
+					authentication,
+					AuthenticationType.ALL_TOKENS);
 
-				log.debug("Multi part parsed in " + (System.currentTimeMillis() - start) + " ms.");
+			try {
+				blockInMaintenanceMode(user);
 
-				User user = authenticationService.getUserByAuthentication(authentication,
-						AuthenticationType.ALL_TOKENS);
+				AbstractJob job = jobService.submitJob(app, form, user, userAgent);
 
-				try {
+				log.debug("Job {} submitted in {} ms.", job.getId(), System.currentTimeMillis() - start);
 
-					blockInMaintenanceMode(user);
-
-					AbstractJob job = jobService.submitJob(app, form, user, userAgent);
-
-					log.debug("Job " + job.getId() + " submitted in " + (System.currentTimeMillis() - start) + " ms.");
-
-					String message = String.format("Job: Created job ID %s for user %s (ID %s - email %s)",
-							user.getId(), user.getUsername(), user.getId(), user.getMail());
-					if (user.isAccessedByApi()) {
-						message += " (via API token)";
-					}
-					log.info(message);
-
-					message = "Your job was successfully added to the job queue.";
-					return HttpResponse.ok(ResponseObject.build(job.getId(), message, true));
-				} catch (JsonHttpStatusException e) {
-					return HttpResponse.status(e.getStatus()).body(e.getObject());
-				} catch (Exception e) {
-					return HttpResponse.status(HttpStatus.BAD_REQUEST).body(e.toString());
-				} finally {
-					folder.delete();
-					log.debug("Deletes folder " + folder.getAbsolutePath() + ".");
+				String message = String.format("Job: Created job ID %s for user %s (ID %s - email %s)",
+						user.getId(), user.getUsername(), user.getId(), user.getMail());
+				if (user.isAccessedByApi()) {
+					message += " (via API token)";
 				}
+				log.info(message);
+
+				message = "Your job was successfully added to the job queue.";
+				return HttpResponse.ok(ResponseObject.build(job.getId(), message, true));
+			} catch (JsonHttpStatusException e) {
+				return HttpResponse.status(e.getStatus()).body(e.getObject());
+			} catch (Exception e) {
+				return HttpResponse.status(HttpStatus.BAD_REQUEST).body(e.toString());
+			} finally {
+				folder.delete();
+				log.debug("Deletes folder {}.", folder.getAbsolutePath());
 			}
 		});
 	}

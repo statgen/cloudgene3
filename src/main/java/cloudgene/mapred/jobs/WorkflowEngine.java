@@ -23,7 +23,6 @@ public class WorkflowEngine implements Runnable {
 	private final AtomicLong priorityCounter = new AtomicLong();
 
 	public WorkflowEngine(int ltqThreads) {
-
 		longTimeQueue = new Queue("LongTimeQueue", ltqThreads, true, true) {
 
 			@Override
@@ -36,9 +35,7 @@ public class WorkflowEngine implements Runnable {
 				job.setEndTime(System.currentTimeMillis());
 				jobCompleted(job);
 			}
-
 		};
-
 	}
 
 	public void submit(AbstractJob job) {
@@ -46,7 +43,6 @@ public class WorkflowEngine implements Runnable {
 	}
 
 	public void submit(AbstractJob job, long priority) {
-
 		job.setPriority(priority);
 		job.setSubmittedOn(System.currentTimeMillis());
 		jobSubmitted(job);

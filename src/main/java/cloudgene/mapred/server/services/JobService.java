@@ -410,19 +410,19 @@ public class JobService {
 	 * with {@link JobState}), where the options are:
 	 * <ul>
 	 *     <li>
-	 *         {@code running-ltq}: whatever the long time queue is (actual
-	 *         waiting and running jobs?)
+	 *         {@code running-ltq}: returns all queued and running jobs (everything in
+	 *         the server "queue").
 	 *     </li>
 	 *     <li>
-	 *         {@code running-stq}: legacy value. Doesn't return anything.
+	 *         {@code running-stq}: (deprecated) returns an empty list.
 	 *     </li>
 	 *     <li>
-	 *         {@code current}: whatever current is (finished jobs with data
-	 *         available?)
+	 *         {@code current}: returns all jobs with state SUCCESS, FAILED, CANCELED,
+	 *         SUCCESS_AND_NOTIFICATION_SENT, FAILED_AND_NOTIFICATION_SENT, DEAD that
+	 *         are not in the queue.
 	 *     </li>
 	 *     <li>
-	 *         {@code retired}: whatever retired is (old jobs that have been
-	 *         purged?)
+	 *         {@code retired}: returns all jobs with state RETIRED.
 	 *     </li>
 	 * </ul>
 	 */

@@ -21,7 +21,7 @@ public final class MailUtil {
 
 	private static final Logger log = LoggerFactory.getLogger(MailUtil.class);
 
-	public static void notifyAdmin(Settings settings, String subject, String text) throws Exception {
+	public static void notifyAdmin(Settings settings, String subject, String text) throws MessagingException {
 		String adminMail = settings.getAdminMail();
 
 		if (adminMail != null && !adminMail.isEmpty()) {
@@ -29,7 +29,8 @@ public final class MailUtil {
 		}
 	}
 
-	public static void send(Settings settings, String recipients, String subject, String text) throws Exception {
+	public static void send(Settings settings, String recipients, String subject, String text)
+			throws MessagingException {
 		Map<String, String> mail = settings.getMail();
 
 		send(
@@ -44,7 +45,7 @@ public final class MailUtil {
 	}
 
 	public static void send(final String smtp, final String port, final String username, final String password,
-			final String name, String recipients, String subject, String text) throws Exception {
+			final String name, String recipients, String subject, String text) throws MessagingException {
 
 		Properties props = new Properties();
 		props.put("mail.smtp.host", smtp);
@@ -75,10 +76,10 @@ public final class MailUtil {
 
 			Transport.send(message);
 
-			log.debug("E-Mail sent to " + recipients + ".");
+			log.debug("E-Mail sent to {}.", recipients);
 
 		} catch (MessagingException e) {
-			throw new Exception("mail could not be sent: " + e.getMessage());
+			throw new MessagingException("Failed to send mail", e);
 		}
 	}
 }

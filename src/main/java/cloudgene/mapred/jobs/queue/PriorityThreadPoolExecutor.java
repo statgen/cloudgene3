@@ -6,26 +6,23 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class PriorityThreadPoolExecutor {
-	private PausableThreadPoolExecutor executor;
-	private BlockingQueue<Runnable> queue;
 
-	private static final Logger log = LoggerFactory.getLogger(PriorityThreadPoolExecutor.class);
+	private final PausableThreadPoolExecutor executor;
+	private final BlockingQueue<Runnable> queue;
 
 	public PriorityThreadPoolExecutor(int threads, boolean priority) {
 		if (priority) {
-			queue = new PriorityBlockingQueue<Runnable>();
+			queue = new PriorityBlockingQueue<>();
 		} else {
-			queue = new LinkedBlockingQueue<Runnable>();
+			queue = new LinkedBlockingQueue<>();
 
 		}
+
 		executor = new PausableThreadPoolExecutor(threads, threads, 10, TimeUnit.SECONDS, queue);
 	}
 
-	public Future submit(PriorityRunnable runnable) {
+	public Future<?> submit(PriorityRunnable runnable) {
 		return executor.submit(runnable);
 	}
 
@@ -33,9 +30,9 @@ public class PriorityThreadPoolExecutor {
 		executor.remove(runnable);
 	}
 
-	public Future resubmit(PriorityRunnable runnable) {
+	public Future<?> resubmit(PriorityRunnable runnable) {
 		executor.remove(runnable);
-		Future future = executor.submit(runnable);
+		Future<?> future = executor.submit(runnable);
 		return future;
 	}
 

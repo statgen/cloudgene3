@@ -116,7 +116,6 @@ public class CloudgeneJob extends AbstractJob {
 
 		// create output directories
 		for (CloudgeneParameterOutput param : outputParams) {
-
 			switch (param.getType()) {
 				case LOCAL_FILE:
 					String filename = workspace.createFile(param.getName(), param.getName());

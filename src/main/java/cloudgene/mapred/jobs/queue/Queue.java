@@ -12,46 +12,39 @@ import cloudgene.mapred.jobs.AbstractJob;
 
 public abstract class Queue implements Runnable {
 
-	private static final int POLL_FRQUENCY_MS = 100;
+	private static final Logger log = LoggerFactory.getLogger(Queue.class);
+
+	private static final int POLL_FREQUENCY_MS = 100;
 
 	private final List<AbstractJob> queue;
-
 	private final HashMap<AbstractJob, Future<?>> futures;
-
 	private final HashMap<AbstractJob, PriorityRunnable> runnables;
-
 	private final PriorityThreadPoolExecutor scheduler;
-
-	private String name = "";
-
-	private boolean updatePositions = false;
-
-	private boolean priority = false;
-
-	private static final Logger log = LoggerFactory.getLogger(Queue.class);
+	private final String name;
+	private final boolean updatePositions;
+	private final boolean priority;
 
 	public Queue(String name, int threads, boolean updatePositions, boolean priority) {
 		this.name = name;
 		this.updatePositions = updatePositions;
 		this.priority = priority;
-		futures = new HashMap<AbstractJob, Future<?>>();
-		runnables = new HashMap<AbstractJob, PriorityRunnable>();
+
+		futures = new HashMap<>();
+		runnables = new HashMap<>();
 		queue = new ArrayList<>();
 		scheduler = new PriorityThreadPoolExecutor(threads, priority);
 	}
 
 	public void submit(AbstractJob job) {
-
 		synchronized (futures) {
 			synchronized (queue) {
-
 				PriorityRunnable runnable = createRunnable(job);
 				runnables.put(job, runnable);
 
 				Future<?> future = scheduler.submit(runnable);
 				futures.put(job, future);
 				queue.add(job);
-				log.info(name + ": Submit job" + (priority ? " (P: " + job.getPriority() + ")" : "") + "...");
+				log.info("{}: Submit job{}...", name, priority ? " (P: " + job.getPriority() + ")" : "");
 
 				if (priority) {
 					// sort by state and by priority
@@ -72,14 +65,13 @@ public abstract class Queue implements Runnable {
 			job.cancel();
 			job.kill();
 
-            log.info("{}: Job {} canceled.", name, job.getId());
+			log.info("{}: Job {} canceled.", name, job.getId());
 
 			if (updatePositions) {
 				updatePositionInQueue();
 			}
-
 		} else if (job.getState() == JobState.WAITING) {
-            log.info("{}: Cancel waiting job {}...", name, job.getId());
+			log.info("{}: Cancel waiting job {}...", name, job.getId());
 
 			synchronized (futures) {
 				synchronized (queue) {
@@ -146,7 +138,7 @@ public abstract class Queue implements Runnable {
 			}
 
 			try {
-				Thread.sleep(POLL_FRQUENCY_MS);
+				Thread.sleep(POLL_FREQUENCY_MS);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -221,6 +213,7 @@ public abstract class Queue implements Runnable {
 
 	public boolean updatePriority(AbstractJob job, long priority) {
 		log.info("Update priority");
+
 		if (!this.priority) {
 			return false;
 		}
@@ -243,8 +236,7 @@ public abstract class Queue implements Runnable {
 				Future<?> future = scheduler.resubmit(job);
 				if (future != null) {
 					futures.put(job, future);
-					log.info("{}: Update priority of {}{}...", name, job.getId(),
-							this.priority ? " (P: " + job.getPriority() + ")" : "");
+					log.info("{}: Update priority of {} (P: {})...", name, job.getId(), job.getPriority());
 
 					// sorty by state and by priority
 					queue.sort(new PriorityComparator());
@@ -267,6 +259,14 @@ public abstract class Queue implements Runnable {
 		}
 	}
 
+	public int getSize() {
+		return queue.size();
+	}
+
+	abstract public void onComplete(AbstractJob job);
+
+	abstract public PriorityRunnable createRunnable(AbstractJob job);
+
 	protected static class PriorityComparator implements Comparator<AbstractJob> {
 
 		@Override
@@ -282,12 +282,4 @@ public abstract class Queue implements Runnable {
 			return Long.compare(o1.getPriority(), o2.getPriority());
 		}
 	}
-
-	public int getSize() {
-		return queue.size();
-	}
-
-	abstract public void onComplete(AbstractJob job);
-
-	abstract public PriorityRunnable createRunnable(AbstractJob job);
 }
