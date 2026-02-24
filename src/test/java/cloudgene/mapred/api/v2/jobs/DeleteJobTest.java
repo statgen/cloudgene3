@@ -44,9 +44,6 @@ public class DeleteJobTest {
 		// wait until submitted job is complete
 		client.waitForJob(id, accessToken);
 
-		// TODO: check why file is not available without this sleep
-		Thread.sleep(5000);
-
 		// get details
 		Response response = RestAssured
 				.given()

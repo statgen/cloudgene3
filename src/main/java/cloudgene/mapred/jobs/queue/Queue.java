@@ -259,6 +259,12 @@ public abstract class Queue implements Runnable {
 		}
 	}
 
+	public Future<?> getFuture(AbstractJob job) {
+		synchronized (futures) {
+			return futures.get(job);
+		}
+	}
+
 	public int getSize() {
 		return queue.size();
 	}

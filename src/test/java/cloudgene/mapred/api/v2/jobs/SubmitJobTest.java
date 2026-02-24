@@ -219,9 +219,6 @@ public class SubmitJobTest {
 		// wait until job is complete
 		client.waitForJob(id, accessToken);
 
-		// TODO: change!
-		Thread.sleep(5000);
-
 		Response response = RestAssured
 				.given()
 				.header(accessToken)

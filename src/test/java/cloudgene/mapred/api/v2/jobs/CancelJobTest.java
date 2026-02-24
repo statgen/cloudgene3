@@ -23,7 +23,6 @@ public class CancelJobTest {
 
 	@Test
 	public void testCancelSleepJob() throws InterruptedException {
-		String app = "long-sleep";
 		Header accessToken = client.loginAsPublicUser();
 
 		// submit job
@@ -32,7 +31,7 @@ public class CancelJobTest {
 				.header(accessToken)
 				.multiPart("input", "dummy")
 				.when()
-				.post("/api/v2/jobs/submit/{app}", app)
+				.post("/api/v2/jobs/submit/long-sleep")
 				.then()
 				.statusCode(200)
 				.extract().jsonPath().getString("id");

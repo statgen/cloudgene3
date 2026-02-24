@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import cloudgene.mapred.jobs.workspace.IWorkspace;
+import cloudgene.mapred.test.TestUtil;
 import org.junit.jupiter.api.Test;
 
 import cloudgene.mapred.TestApplication;
@@ -47,9 +48,7 @@ public class TestCommand {
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
 
-		while (job.isRunning()) {
-			Thread.sleep(1_000); // TODO(Marc): WTF?
-		}
+		TestUtil.waitForJob(engine, job);
 
 		assertEquals(JobState.SUCCESS, job.getState());
 
@@ -64,11 +63,14 @@ public class TestCommand {
 		// simple ls result check
 		assertTrue(contentStdOut.contains("invalid-command.yaml"));
 
-		String jobLog = FileUtil.path(application.getSettings().getLocalWorkspace(), job.getId(), "logs", "job.txt");
-		String contentjobLog = FileUtil.readFileAsString(jobLog);
+		String jobLogPath = FileUtil.path(
+				application.getSettings().getLocalWorkspace(),
+				job.getId(), "logs", "job.txt");
+
+		String jobLogContents = FileUtil.readFileAsString(jobLogPath);
 
 		// simple check if exit code = 0
-		assertTrue(contentjobLog.contains("Exit Code: 0"));
+		assertTrue(jobLogContents.contains("Exit Code: 0"));
 	}
 
 	@Test
@@ -82,9 +84,7 @@ public class TestCommand {
 		AbstractJob job = createJobFromWdl(app, params);
 		engine.submit(job);
 
-		while (job.isRunning()) {
-			Thread.sleep(1_000); // TODO(Marc): WTF?
-		}
+		TestUtil.waitForJob(engine, job);
 
 		assertEquals(JobState.FAILED, job.getState());
 

@@ -3,6 +3,7 @@ package cloudgene.mapred.jobs;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
 import cloudgene.mapred.core.User;
@@ -170,13 +171,20 @@ public class WorkflowEngine implements Runnable {
 		return longTimeQueue.isInQueue(job);
 	}
 
-	protected void statusUpdated(AbstractJob job) {}
+	protected void statusUpdated(AbstractJob job) {
+	}
 
-	protected void jobCompleted(AbstractJob job) {}
+	protected void jobCompleted(AbstractJob job) {
+	}
 
-	protected void jobSubmitted(AbstractJob job) {}
+	protected void jobSubmitted(AbstractJob job) {
+	}
 
 	public int getSize() {
 		return longTimeQueue.getSize();
+	}
+
+	public Future<?> getFuture(AbstractJob job) {
+		return longTimeQueue.getFuture(job);
 	}
 }

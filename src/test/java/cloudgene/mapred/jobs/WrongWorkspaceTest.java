@@ -7,6 +7,7 @@ import java.util.Map;
 
 import cloudgene.mapred.jobs.state.JobState;
 import cloudgene.mapred.jobs.workspace.IWorkspace;
+import cloudgene.mapred.test.TestUtil;
 import org.junit.jupiter.api.Test;
 
 import cloudgene.mapred.TestApplication;
@@ -41,10 +42,7 @@ public class WrongWorkspaceTest {
 		AbstractJob job = createJobFromWdl(app, inputs);
 		engine.submit(job);
 
-		while (job.isRunning()) {
-			Thread.sleep(1_000);
-		}
-		Thread.sleep(10_000); // TODO(Marc): WTF?
+		TestUtil.waitForJob(engine, job);
 
 		JobDao dao = new JobDao(application.getDatabase());
 		AbstractJob jobFromDb = dao.findById(job.getId());
