@@ -56,7 +56,7 @@ public abstract class JdbcDataAccessObject {
 		return runner.query(sql, new MapHandler<>(mapper));
 	}
 
-	public <K, V> Map<K, V> queryForMap(String sql, Object[] params, IRowMapMapper<K, V> mapper) throws SQLException {
+	public <K, V> Map<K, V> queryForMap(String sql, IRowMapMapper<K, V> mapper, Object... params) throws SQLException {
 		return runner.query(sql, new MapHandler<>(mapper), params);
 	}
 

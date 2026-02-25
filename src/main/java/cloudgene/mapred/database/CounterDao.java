@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import cloudgene.mapred.core.User;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,15 +24,11 @@ public class CounterDao extends JdbcDataAccessObject {
 	}
 
 	public boolean insert(String name, long value, AbstractJob job) {
-		String sql = "INSERT INTO counters (name, job_id, `value`) VALUES (?,?,?)";
-
 		try {
-			Object[] params = new Object[3];
-			params[0] = name;
-			params[1] = job.getId();
-			params[2] = value;
+			update(
+					"INSERT INTO counters (name, job_id, `value`) VALUES (?,?,?)",
+					name, job.getId(), value);
 
-			update(sql, params);
 			log.debug("insert counter successful.");
 			return true;
 		} catch (SQLException e) {
@@ -39,15 +37,33 @@ public class CounterDao extends JdbcDataAccessObject {
 		}
 	}
 
+	@NotNull
 	public Map<String, Long> getAll() {
 		String sql = "SELECT name, SUM(`value`) FROM counters GROUP BY name";
 
 		try {
 			Map<String, Long> result = queryForMap(sql, new CounterMapper());
-			log.debug("find counters successful. results: {}", result);
+			log.debug("find all counters successful. results: {}", result);
 			return result;
 		} catch (SQLException e) {
 			log.error("find all counters failed", e);
+			return new HashMap<>();
+		}
+	}
+
+	@NotNull
+	public Map<String, Long> getByUser(User user) {
+		String sql = "SELECT counters.name AS name, SUM(counters.`value`) AS `value` "
+				+ "FROM counters INNER JOIN job ON counters.job_id = job.id "
+				+ "WHERE job.user_id = ? "
+				+ "GROUP BY counters.name";
+
+		try {
+			Map<String, Long> result = queryForMap(sql, new CounterMapper(), user.getId());
+			log.debug("Find counters by user successful. Results: {}", result);
+			return result;
+		} catch (SQLException e) {
+			log.error("Find counters by user failed", e);
 			return new HashMap<>();
 		}
 	}
