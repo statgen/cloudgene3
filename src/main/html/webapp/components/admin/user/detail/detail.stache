@@ -9,73 +9,84 @@
   <a href="#!pages/users"><i class="fas fa-caret-left"></i> Back to Users</a>
 </div>
 
-<h3 class="mb-3">Details</h3>
-
 <div class="container mb-4">
-
   <div class="row">
-    <div class="col-sm-2">
-      <strong>Status</strong>
+    <div class="col-6">
+
+      <h3 class="mb-3">Details</h3>
+      <div class="container">
+
+        <div class="row">
+          <div class="col-sm-4">
+            <strong>Status</strong>
+          </div>
+          <div class="col-sm-8">
+            {{#if user.lockedUntil }}
+              <i class="fas fa-lock"></i> Locked until {{user.lockedUntil}} (too many failed login attempts)
+            {{else}}
+              {{#if user.active }}
+                <i class="fas fa-check-circle"></i> Active
+              {{else}}
+                <i class="fas fa-user-clock"></i> Pending email verification
+              {{/if}}
+            {{/if}}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-4">
+            <strong>Full Name</strong>
+          </div>
+          <div class="col-sm-8">
+            {{#if user.fullName}}
+              {{user.fullName}}
+            {{else}}
+              <span class="text-muted">&mdash;</span>
+            {{/if}}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-4">
+            <strong>Mail</strong>
+          </div>
+          <div class="col-sm-8">
+            {{#if user.mail}}
+              {{user.mail}}
+            {{else}}
+              <span class="text-muted">&mdash;</span>
+            {{/if}}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-4">
+            <strong>User Groups</strong>
+          </div>
+          <div class="col-sm-8">
+            {{#is(user.readOnly,false)}}
+              <span class="btn btn-sm btn-outline-secondary edit-role-btn ">
+                <i class="fas fa-users"></i> {{user.role}}
+              </span>
+            {{else}}
+              {{user.role}}
+            {{/is}}
+          </div>
+        </div>
+
+        {{#is(user.readOnly,false)}}
+          <a id="delete-user-btn" class="btn btn-danger my-3" role="button" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete user">
+            <i class="fas fa-trash"></i> Delete User
+          </a>
+        {{/is}}
+
+      </div>
     </div>
-    <div class="col-sm-5">
-      {{#if user.lockedUntil }}
-        <i class="fas fa-lock"></i> Locked until {{user.lockedUntil}} (too many failed login attempts)
-      {{else}}
-        {{#if user.active }}
-          <i class="fas fa-check-circle"></i> Active
-        {{else}}
-          <i class="fas fa-user-clock"></i> Pending email verification
-        {{/if}}
-      {{/if}}
+
+    <div class="col-6">
+      <div id="counters"></div>
     </div>
   </div>
-
-  <div class="row">
-    <div class="col-sm-2">
-      <strong>Full Name</strong>
-    </div>
-    <div class="col-sm-5">
-      {{#if user.fullName}}
-        {{user.fullName}}
-      {{else}}
-        <span class="text-muted">&mdash;</span>
-      {{/if}}
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-sm-2">
-      <strong>Mail</strong>
-    </div>
-    <div class="col-sm-5">
-      {{#if user.mail}}
-        {{user.mail}}
-      {{else}}
-        <span class="text-muted">&mdash;</span>
-      {{/if}}
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-sm-2">
-      <strong>User Groups</strong>
-    </div>
-    <div class="col-sm-5">
-      {{#is(user.readOnly,false)}}
-        <span class="btn btn-sm btn-outline-secondary edit-role-btn ">
-          <i class="fas fa-users"></i> {{user.role}}
-        </span>
-      {{else}}
-        {{user.role}}
-      {{/is}}
-    </div>
-  </div>
-
-  {{#is(user.readOnly,false)}}
-    <a id="delete-user-btn" class="btn btn-danger my-3" role="button" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete user">
-      <i class="fas fa-trash"></i> Delete User
-    </a>
-  {{/is}}
 </div>
 
 <h3>Jobs</h3>

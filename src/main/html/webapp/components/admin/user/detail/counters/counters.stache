@@ -1,0 +1,18 @@
+<h3 class="mb-3">Counters</h3>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th class="text-end">Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each counters}}
+      <tr>
+        <td>{{key}}</td>
+        <td class="text-end">{{value}}</td>
+      </tr>
+    {{/each}}
+  </tbody>
+</table>
