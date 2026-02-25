@@ -2,7 +2,10 @@ package cloudgene.mapred.server.services;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import cloudgene.mapred.database.CounterDao;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,11 +58,10 @@ public class UserService {
 	}
 
 	public Page<User> getAll(String query, String page, int pageSize) {
-
 		int offset = 0;
-		if (page != null) {
 
-			offset = Integer.valueOf(page);
+		if (page != null) {
+			offset = Integer.parseInt(page);
 			if (offset < 1) {
 				offset = 1;
 			}
@@ -68,8 +70,8 @@ public class UserService {
 
 		UserDao dao = new UserDao(application.getDatabase());
 
-		List<User> users = null;
-		int count = 0;
+		List<User> users;
+		int count;
 
 		if (query != null && !query.isEmpty()) {
 			users = dao.findByQuery(query);
@@ -88,7 +90,8 @@ public class UserService {
 			}
 		}
 
-		Page<User> result = new Page<User>();
+		Page<User> result = new Page<>();
+
 		result.setCount(count);
 		result.setPage(Integer.parseInt(page));
 		result.setPageSize(pageSize);
@@ -100,9 +103,11 @@ public class UserService {
 	public User getByUsername(String username) {
 		UserDao dao = new UserDao(application.getDatabase());
 		User user = dao.findByUsername(username);
+
 		if (user == null) {
 			throw new JsonHttpStatusException(HttpStatus.NOT_FOUND, String.format(MESSAGE_USER_NOT_FOUND, username));
 		}
+
 		return user;
 	}
 
@@ -119,8 +124,13 @@ public class UserService {
 		return user;
 	}
 
-	public MessageResponse updateProfile(User user, String username, String full_name, String mail, String new_password,
-			String confirm_new_password) {
+	public MessageResponse updateProfile(
+			User user,
+			String username,
+			String fullName,
+			String mail,
+			String newPassword,
+			String confirmNewPassword) {
 
 		String error = User.checkUsername(username);
 		if (error != null) {
@@ -130,13 +140,13 @@ public class UserService {
 		// check if user is admin or it is his username
 		if (!user.getUsername().equals(username) && !user.isAdmin()) {
 
-			log.error(String.format("User: ID %s ('%s') attempted to change profile of a different user '%s'",
-					user.getId(), user.getUsername(), username));
+			log.error("User: ID {} ('{}') attempted to change profile of a different username '{}'",
+					user.getId(), user.getUsername(), username);
 
 			return MessageResponse.error(MESSAGE_NOT_ALLOWED);
 		}
 
-		error = User.checkFullName(full_name);
+		error = User.checkFullName(fullName);
 		if (error != null) {
 			return MessageResponse.error(error);
 		}
@@ -152,12 +162,11 @@ public class UserService {
 
 		UserDao dao = new UserDao(application.getDatabase());
 		User newUser = dao.findByUsername(username);
-		newUser.setFullName(full_name);
+		newUser.setFullName(fullName);
 		newUser.setMail(mail);
 
 		if (user.getMail() != null && !user.getMail().equals(newUser.getMail())) {
-			log.info(String.format("User: changed email address for user %s (ID %s)", newUser.getUsername(),
-					newUser.getId()));
+			log.info("User: changed email address for user {} (ID {})", newUser.getUsername(), newUser.getId());
 		}
 
 		String roleMessage = "";
@@ -168,41 +177,32 @@ public class UserService {
 			if (!newMailAvailable & user.hasRole(DEFAULT_ROLE)) {
 				newUser.replaceRole(DEFAULT_ROLE, DEFAULT_ANONYMOUS_ROLE);
 
-				log.info(String.format(
-						"User: changed role to %s for user %s (ID %s)",
-						DEFAULT_ANONYMOUS_ROLE,
-						newUser.getUsername(),
-						newUser.getId()));
+				log.info("User: changed role to {} for user {} (ID {})",
+						DEFAULT_ANONYMOUS_ROLE, newUser.getUsername(), newUser.getId());
 
 				roleMessage += "<br><br>Your account has been <b>downgraded</b>.<br>To apply these changes, please log out and log back in.";
 			} else if (newMailAvailable && user.hasRole(DEFAULT_ANONYMOUS_ROLE)) {
 				newUser.replaceRole(DEFAULT_ANONYMOUS_ROLE, DEFAULT_ROLE);
 
-				log.info(String.format(
-						"User: changed role to %s for user %s (ID %s)",
-						DEFAULT_ROLE,
-						newUser.getUsername(),
-						newUser.getId()));
+				log.info("User: changed role to {} for user {} (ID {})",
+						DEFAULT_ROLE, newUser.getUsername(), newUser.getId());
 
 				roleMessage += "<br><br>Your account has been <b>upgraded</b>.<br>To apply these changes, please log out and log back in.";
 			}
 		}
 
 		// update password only when it's not empty
-		if (new_password != null && !new_password.isEmpty()) {
-			error = User.checkPassword(new_password, confirm_new_password);
+		if (newPassword != null && !newPassword.isEmpty()) {
+			error = User.checkPassword(newPassword, confirmNewPassword);
 
 			if (error != null) {
 				return MessageResponse.error(error);
 			}
 
-			newUser.setPassword(HashUtil.hashPassword(new_password));
+			newUser.setPassword(HashUtil.hashPassword(newPassword));
 
-			log.info(String.format(
-					"User: changed password for user %s (ID %s - email %s)",
-					newUser.getUsername(),
-					newUser.getId(),
-					newUser.getMail()));
+			log.info("User: changed password for user {} (ID {} - email {})",
+					newUser.getUsername(), newUser.getId(), newUser.getMail());
 		}
 
 		dao.update(newUser);
@@ -220,8 +220,8 @@ public class UserService {
 
 			UserDao dao = new UserDao(application.getDatabase());
 
-			log.info(String.format("User: requested deletion of account %s (ID %s - email %s)", user.getUsername(),
-					user.getId(), user.getMail()));
+			log.info("User: requested deletion of account {} (ID {} - email {})",
+					user.getUsername(), user.getId(), user.getMail());
 
 			boolean deleted = dao.delete(user);
 			if (deleted) {
@@ -238,8 +238,8 @@ public class UserService {
 	public MessageResponse updatePassword(
 			String username,
 			String token,
-			String new_password,
-			String confirm_new_password) {
+			String newPassword,
+			String confirmNewPassword) {
 
 		if (username == null || username.isEmpty()) {
 			return MessageResponse.error(MESSAGE_NO_USERNAME_SET);
@@ -260,23 +260,23 @@ public class UserService {
 			return MessageResponse.error(MESSAGE_INVALID_RECOVERY_REQUEST);
 		}
 
-		String error = User.checkPassword(new_password, confirm_new_password);
+		String error = User.checkPassword(newPassword, confirmNewPassword);
 		if (error != null) {
 			return MessageResponse.error(error);
 		}
 
-		user.setPassword(HashUtil.hashPassword(new_password));
+		user.setPassword(HashUtil.hashPassword(newPassword));
 		user.setActivationCode("");
 		dao.update(user);
 
-		log.info(String.format("User: changed password via account recovery mechanism for user %s (ID %s - email %s)",
-				user.getUsername(), user.getId(), user.getMail()));
+		log.info("User: changed password via account recovery mechanism for user {} (ID {} - email {})",
+				user.getUsername(), user.getId(), user.getMail());
 
 		return MessageResponse.success(MESSAGE_PASSWORD_UPDATED);
 	}
 
 	public MessageResponse resetPassword(String username) {
-		if (username == null || username.trim().isEmpty()) {
+		if (username == null || username.isBlank()) {
 			return MessageResponse.error(MESSAGE_INVALID_USERNAME);
 		}
 
@@ -292,7 +292,7 @@ public class UserService {
 				return MessageResponse.error(MESSAGE_ACCOUNT_IS_INACTIVE);
 			}
 
-			String key = "";
+			String key;
 			if (user.getActivationCode() != null && !user.getActivationCode().isEmpty()) {
 				// resend the same activation token
 				key = user.getActivationCode();
@@ -316,7 +316,7 @@ public class UserService {
 			try {
 				if (user.getMail() != null && !user.getMail().isEmpty()) {
 
-					log.info(String.format("Password reset link requested for user '%s'", username));
+					log.info("Password reset link requested for user '{}'", username);
 
 					MailUtil.send(application.getSettings(), user.getMail(), subject, body);
 
@@ -335,8 +335,8 @@ public class UserService {
 	public MessageResponse registerUser(
 			String username,
 			String mail,
-			String new_password,
-			String confirm_new_password,
+			String newPassword,
+			String confirmNewPassword,
 			String fullName) {
 
 		// ==== USERNAME ==== //
@@ -373,7 +373,7 @@ public class UserService {
 		String[] roles = new String[] { mailProvided ? DEFAULT_ROLE : DEFAULT_ANONYMOUS_ROLE };
 
 		// check password format
-		error = User.checkPassword(new_password, confirm_new_password);
+		error = User.checkPassword(newPassword, confirmNewPassword);
 		if (error != null) {
 			return MessageResponse.error(error);
 		}
@@ -389,7 +389,7 @@ public class UserService {
 		newUser.setFullName(fullName);
 		newUser.setMail(mail);
 		newUser.setRoles(roles);
-		newUser.setPassword(HashUtil.hashPassword(new_password));
+		newUser.setPassword(HashUtil.hashPassword(newPassword));
 
 		try {
 			String hostname = application.getSettings().getServerUrl();
@@ -415,8 +415,8 @@ public class UserService {
 				newUser.setActivationCode("");
 			}
 
-			log.info(String.format("Registration: New user %s (ID %s - email %s - roles %s)", newUser.getUsername(),
-					newUser.getId(), newUser.getMail(), Arrays.toString(newUser.getRoles())));
+			log.info("Registration: New user {} (ID {} - email {} - roles {})", newUser.getUsername(), newUser.getId(),
+					newUser.getMail(), Arrays.toString(newUser.getRoles()));
 
 			dao.insert(newUser);
 
@@ -426,7 +426,8 @@ public class UserService {
 		}
 	}
 
-	public MessageResponse activateUser(String username, String code) {
+	@NotNull
+	public MessageResponse activateUser(@NotNull String username, @NotNull String code) {
 		UserDao dao = new UserDao(application.getDatabase());
 		User user = dao.findByUsername(username);
 
@@ -436,20 +437,32 @@ public class UserService {
 				user.setActivationCode("");
 				dao.update(user);
 
-				log.info(String.format("User: activated user %s (ID %s - email %s)",
-						user.getUsername(), user.getId(), user.getMail()));
+				log.info("User: activated user {} (ID {} - email {})",
+						user.getUsername(), user.getId(), user.getMail());
 
 				return MessageResponse.success(MESSAGE_USER_ACTIVATED);
 			} else {
-				log.warn(String.format(
-						"User: code is either incorrect or has already been used for user %s (ID %s - email %s)",
-						user.getUsername(), user.getId(), user.getMail()));
+				log.warn("User: code is either incorrect or has already been used for user {} (ID {} - email {})",
+						user.getUsername(), user.getId(), user.getMail());
 
 				return MessageResponse.error(MESSAGE_WRONG_ACTIVATION_CODE);
 			}
 		} else {
-			log.warn(String.format("User: used activation code for missing or unknown username '%s'", username));
+			log.warn("User: used activation code for missing or unknown username '{}'", username);
 			return MessageResponse.error(MESSAGE_WRONG_USERNAME);
 		}
+	}
+
+	/**
+	 * Queries the database for all counters related to this user.
+	 * <p>
+	 * Since the database only stores counters for successfully completed jobs, this
+	 * method does not show data for ongoing or failed jobs.
+	 */
+	@NotNull
+	public Map<String, Long> getUserCounters(@NotNull User user) {
+		CounterDao counterDao = new CounterDao(application.getDatabase());
+		Map<String, Long> counters = counterDao.getByUser(user);
+		return counters;
 	}
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cloudgene.mapred.core.User;
 import cloudgene.mapred.database.*;
 import cloudgene.mapred.jobs.engine.handler.IJobErrorHandler;
 import cloudgene.mapred.jobs.state.JobState;
@@ -177,6 +178,10 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 		} else {
 			return super.getCounters(state, null);
 		}
+	}
+
+	public Map<String, Long> getCountersByUser(User user) {
+		return counterDao.getByUser(user);
 	}
 
 	public void addJobErrorHandler(IJobErrorHandler handler) {

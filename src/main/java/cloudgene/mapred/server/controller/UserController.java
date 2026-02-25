@@ -1,7 +1,9 @@
 package cloudgene.mapred.server.controller;
 
 import java.util.List;
+import java.util.Map;
 
+import cloudgene.mapred.server.responses.UserCounterResponse;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.http.HttpStatus;
 import org.slf4j.Logger;
@@ -104,6 +106,21 @@ public class UserController {
 		User updatedSubject = dao.findByUsername(subject.getUsername());
 
 		UserResponse response = UserResponse.build(updatedSubject);
+		return HttpResponse.ok(response);
+	}
+
+	@Get("/api/v2/users/{username}/counters")
+	@Secured(User.ROLE_ADMIN)
+	public HttpResponse<UserCounterResponse> getCounters(String username) {
+		User user = userService.getByUsername(username);
+
+		if (user == null) {
+			return HttpResponse.notFound();
+		}
+
+		Map<String, Long> counters = userService.getUserCounters(user);
+
+		UserCounterResponse response = UserCounterResponse.build(user, counters);
 		return HttpResponse.ok(response);
 	}
 
