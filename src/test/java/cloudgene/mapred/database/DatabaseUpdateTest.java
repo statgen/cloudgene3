@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.InputStream;
 
+import cloudgene.mapred.BuildInfo;
 import org.junit.jupiter.api.Test;
 
 import cloudgene.mapred.TestApplication;
@@ -24,7 +25,7 @@ public class DatabaseUpdateTest {
 		Database database = application.getDatabase();
 		InputStream is = Application.class.getResourceAsStream("/updates.sql");
 
-		DatabaseUpdater databaseUpdater = new DatabaseUpdater(database, null, is, Application.VERSION);
+		DatabaseUpdater databaseUpdater = new DatabaseUpdater(database, null, is, BuildInfo.VERSION);
 
 		assertFalse(databaseUpdater.needUpdate());
 	}

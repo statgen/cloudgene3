@@ -12,6 +12,7 @@ import io.micronaut.runtime.event.annotation.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cloudgene.mapred.BuildInfo;
 import cloudgene.mapred.database.TemplateDao;
 import cloudgene.mapred.database.updates.BcryptHashUpdate;
 import cloudgene.mapred.database.util.Database;
@@ -28,8 +29,6 @@ import io.micronaut.context.annotation.Context;
 
 @Context
 public class Application {
-
-	public static final String VERSION = "3.1.4-statgen.13";
 
 	private static final Logger log = LoggerFactory.getLogger(Application.class);
 
@@ -75,7 +74,8 @@ public class Application {
 		log.info("Setup Database...");
 		InputStream is = Application.class.getResourceAsStream("/updates.sql");
 
-		DatabaseUpdater updater = new DatabaseUpdater(database, Configuration.getVersionFilename(), is, VERSION);
+		DatabaseUpdater updater = new DatabaseUpdater(database, Configuration.getVersionFilename(), is,
+				BuildInfo.VERSION);
 		updater.addUpdate("2.3.0", new BcryptHashUpdate());
 
 		if (!updater.updateDB()) {
@@ -116,8 +116,8 @@ public class Application {
 
 	@EventListener
 	public void stop(final ApplicationShutdownEvent event) throws SQLException {
-		System.out.println("Shutting down Cloudgene...");
-		log.info("Shutting down Cloudgene...");
+		System.out.println("Shutting down " + BuildInfo.APP_NAME + "...");
+		log.info("Shutting down " + BuildInfo.APP_NAME + "...");
 		engine.block();
 		database.disconnect();
 	}

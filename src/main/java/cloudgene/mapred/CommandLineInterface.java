@@ -9,7 +9,6 @@ import cloudgene.mapred.cli.ShowPlugins;
 import cloudgene.mapred.cli.ShowVersion;
 import cloudgene.mapred.cli.StartServer;
 import cloudgene.mapred.cli.ValidateApplication;
-import cloudgene.mapred.server.Application;
 import genepi.base.Toolbox;
 
 public class CommandLineInterface extends Toolbox {
@@ -21,14 +20,15 @@ public class CommandLineInterface extends Toolbox {
 
 	private void printHeader() {
 		System.out.println();
-		System.out.println("Cloudgene " + Application.VERSION);
-		System.out.println("http://www.cloudgene.io");
-		System.out.println("(c) 2009-2024 Lukas Forer and Sebastian Schoenherr");
+		System.out.println(BuildInfo.APP_NAME + " " + BuildInfo.VERSION);
+		System.out.println(BuildInfo.URL);
+		System.out.println("(c) 2009-2026 " + BuildInfo.ORG_NAME);
 		System.out.println();
 	}
 
 	public static void main(String[] args) throws Exception {
 		CommandLineInterface toolbox = new CommandLineInterface("cloudgene", args);
+
 		toolbox.addTool("install", InstallApplication.class);
 		toolbox.addTool("gh", InstallGitHubApplication.class);
 		toolbox.addTool("github-install", InstallGitHubApplication.class);
@@ -39,7 +39,7 @@ public class CommandLineInterface extends Toolbox {
 		toolbox.addTool("validate", ValidateApplication.class);
 		toolbox.addTool("plugins", ShowPlugins.class);
 		toolbox.addTool("version", ShowVersion.class);
-		toolbox.start();
 
+		toolbox.start();
 	}
 }
