@@ -1,4 +1,4 @@
-package cloudgene.mapred.util;
+package cloudgene.mapred.util.config;
 
 import genepi.io.FileUtil;
 
@@ -21,14 +21,11 @@ public class Configuration {
 	}
 
 	public static String get(String variable, String defaultValue) {
-
 		String value = System.getenv(variable);
 		if (value != null && !value.isEmpty()) {
 			return value;
 		}
 
 		return defaultValue;
-
 	}
-
 }

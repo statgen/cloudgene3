@@ -21,9 +21,7 @@ public class JobValueDao extends JdbcDataAccessObject {
 	}
 
 	public boolean insert(String name, String value, AbstractJob job) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("insert into job_values (name, job_id, `value`) ");
-		sql.append("values (?,?,?)");
+		String sql = "INSERT INTO job_values (name, job_id, `value`) VALUES (?,?,?)";
 
 		try {
 			Object[] params = new Object[3];
@@ -31,41 +29,31 @@ public class JobValueDao extends JdbcDataAccessObject {
 			params[1] = job.getId();
 			params[2] = value;
 
-			update(sql.toString(), params);
+			update(sql, params);
 
 			log.debug("insert value successful.");
-
+			return true;
 		} catch (SQLException e) {
 			log.error("insert value failed.", e);
 			return false;
 		}
-
-		return true;
 	}
 
 	public List<JobValue> getAll() {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select name, `value`, count(*) as n ");
-		sql.append("from job_values ");
-		sql.append("group by name, `value` ");
-		sql.append("order by name, `value` ");
+		String sql = "SELECT name, `value`, COUNT(*) AS n FROM job_values "
+				+ "GROUP BY name, `value` ORDER BY name, `value`";
 
 		try {
-			List<JobValue> result = query(sql.toString(), new ValueMapper());
-
-			log.debug("find counters successful. results: " + result);
-
+			List<JobValue> result = query(sql, new ValueMapper());
+			log.debug("find counters successful. results: {}", result);
 			return result;
 		} catch (SQLException e) {
 			log.error("find all counters failed", e);
+			return new ArrayList<>(); // TODO(Marc): This is inconsistent with JobDao. There, we return null
 		}
-
-		return new ArrayList<>();
 	}
 
 	public static class JobValue {
-
 		private String name;
 		private String value;
 		private int count;

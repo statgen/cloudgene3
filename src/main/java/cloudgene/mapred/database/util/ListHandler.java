@@ -19,8 +19,8 @@ package cloudgene.mapred.database.util;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.commons.dbutils.ResultSetHandler;
 
@@ -33,7 +33,7 @@ public class ListHandler<T> implements ResultSetHandler<List<T>> {
 	}
 
 	public List<T> toBeanList(ResultSet rs) throws SQLException {
-		List<T> result = new Vector<T>();
+		List<T> result = new ArrayList<>();
 
 		int row = 0;
 		while (rs.next()) {

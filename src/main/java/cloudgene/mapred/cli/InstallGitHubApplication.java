@@ -6,16 +6,12 @@ import cloudgene.mapred.util.GitHubUtil.Repository;
 
 public class InstallGitHubApplication extends BaseTool {
 
-	private String cmd = "cloudgene";
-
 	public InstallGitHubApplication(String[] args) {
 		super(args);
 	}
 
 	@Override
-	public void createParameters() {
-
-	}
+	public void createParameters() {}
 
 	@Override
 	public int run() {
@@ -24,12 +20,11 @@ public class InstallGitHubApplication extends BaseTool {
 
 	@Override
 	public int start() {
-
-		// call init manualy
+		// call init manually
 		init();
 
 		if (args.length < 1) {
-			System.out.println("Usage: " + cmd + " gh <GitHub repo>");
+			System.out.println("Usage: cloudgene gh <GitHub repo>");
 			System.out.println();
 			System.exit(1);
 		}
@@ -40,31 +35,21 @@ public class InstallGitHubApplication extends BaseTool {
 		// create the command line parser
 
 		try {
-
 			Repository repository = GitHubUtil.parseShorthand(repo);
-			if (repository == null) {
-				printlnInRed("[ERROR] " + repo + " is not a valid GitHub repo.\n");
-				return 1;
-			}
-
 			Application application = this.repository.installFromGitHub(repository);
 
 			if (application != null) {
 				settings.save();
 				printlnInGreen("[OK] Application installed: \n");
-				//ListApplications.printApplicationList(applications);(installed);
 				return 0;
 			} else {
 				printlnInRed("[ERROR] No valid Application found.\n");
 				return 1;
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
-			printlnInRed("[ERROR] Application not installed:" + e.toString() + "\n");
+			printlnInRed("[ERROR] Application not installed:" + e + "\n");
 			return 1;
-
 		}
 	}
-
 }

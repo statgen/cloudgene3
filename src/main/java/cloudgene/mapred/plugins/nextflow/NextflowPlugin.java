@@ -2,8 +2,8 @@ package cloudgene.mapred.plugins.nextflow;
 
 import cloudgene.mapred.jobs.CloudgeneStepFactory;
 import cloudgene.mapred.plugins.IPlugin;
-import cloudgene.mapred.util.Configuration;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Configuration;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.wdl.WdlApp;
 import com.esotericsoftware.yamlbeans.YamlReader;
 import com.esotericsoftware.yamlbeans.YamlWriter;

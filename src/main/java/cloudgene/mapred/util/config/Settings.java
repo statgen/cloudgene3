@@ -1,30 +1,31 @@
-package cloudgene.mapred.util;
+package cloudgene.mapred.util.config;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
+import cloudgene.mapred.util.MenuItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.esotericsoftware.yamlbeans.YamlConfig;
-import com.esotericsoftware.yamlbeans.YamlException;
 import com.esotericsoftware.yamlbeans.YamlReader;
 import com.esotericsoftware.yamlbeans.YamlWriter;
 
 import cloudgene.mapred.apps.Application;
 import cloudgene.mapred.apps.ApplicationRepository;
 import cloudgene.mapred.jobs.Environment;
-import cloudgene.mapred.jobs.workspace.LocalWorkspace;
 import genepi.io.FileUtil;
 
 public class Settings {
 
 	private static final Logger log = LoggerFactory.getLogger(Settings.class);
+
+	private final ArrayList<Map<String, String>> maps = new ArrayList<>();
 
 	private String serverUrl = "http://localhost:8082";
 
@@ -44,11 +45,13 @@ public class Settings {
 
 	private Map<String, String> database;
 
+	// TODO(Marc): The plugins concept seems to be abandoned.
+	//             Perhaps we could remove it entirely.
 	private Map<String, Map<String, String>> plugins;
 
-	private List<Map<String, String>> errorHandlers = new Vector<Map<String, String>>();
+	private List<Map<String, String>> errorHandlers = new ArrayList<>();
 
-	private List<Map<String, String>> resources = new Vector<>();
+	private List<Map<String, String>> resources = maps;
 
 	private int autoRetireInterval = 5;
 
@@ -74,7 +77,7 @@ public class Settings {
 
 	private boolean showLogs = false;
 
-	private List<MenuItem> navigation = new Vector<MenuItem>();
+	private List<MenuItem> navigation = new ArrayList<>();
 
 	private Map<String, String> externalWorkspace = null;
 
@@ -88,17 +91,16 @@ public class Settings {
 
 	private boolean workspaceCleanup = true;
 
-	private List<String> counters = new Vector<String>();
+	private List<String> counters = new ArrayList<>();
 
 	public static final String DEFAULT_SECURITY_KEY = "default-key-change-me-immediately";
 
 	// fake!
-	private List<Application> apps = new Vector<Application>();
+	private List<Application> apps = new ArrayList<>();
 
 	private ApplicationRepository repository;
 
 	public Settings() {
-
 		repository = new ApplicationRepository();
 		repository.setAppsFolder(Configuration.getAppsDirectory());
 
@@ -112,42 +114,41 @@ public class Settings {
 		helpMenuItem.setLink(helpLink);
 		navigation.add(helpMenuItem);
 
-		database = new HashMap<String, String>();
+		database = new HashMap<>();
 		initDefaultDatabase(database, "data/cloudgene");
 
 		colors = getDefaultColors();
-
 	}
 
 	public static Settings load() throws IOException {
-
 		String filename = Configuration.getSettingsFilename();
 
-		if (!new File(filename).exists()){
-			log.info("Loading default settings. File '" + filename + "' not found.");
+		if (!new File(filename).exists()) {
+			log.info("Loading default settings. File '{}' not found.", filename);
 			return new Settings();
 		}
 
-		log.info("Loading settings from " + filename + "...");
+		log.info("Loading settings from {}...", filename);
 
 		YamlConfig yamlConfig = new YamlConfig();
 		yamlConfig.setPropertyElementType(Settings.class, "apps", Application.class);
 		yamlConfig.setClassTag("cloudgene.mapred.util.Application", Application.class);
+
 		YamlReader reader = new YamlReader(new FileReader(filename), yamlConfig);
 		Settings settings = reader.read(Settings.class);
+		reader.close();
 		log.info("Settings loaded.");
 
-		log.info("Auto retire: " + settings.isAutoRetire());
-		log.info("Retire jobs after " + settings.retireAfter + " days.");
-		log.info("Notify user after " + settings.notificationAfter + " days.");
-		log.info("Write statistics: " + settings.writeStatistics);
+		log.info("Auto retire: {}", settings.isAutoRetire());
+		log.info("Retire jobs after {} days.", settings.retireAfter);
+		log.info("Notify user after {} days.", settings.notificationAfter);
+		log.info("Write statistics: {}", settings.writeStatistics);
 
 		if (settings.getServerUrl() == null || settings.getServerUrl().trim().isEmpty()) {
 			throw new IOException("Error: serverUrl not set. Please set serverUrl in file '" + filename + "'");
 		}
 
 		return settings;
-
 	}
 
 	public List<Application> getApps() {
@@ -167,7 +168,7 @@ public class Settings {
 	}
 
 	public static Map<String, String> getDefaultColors() {
-		Map<String, String> colors = new HashMap<String, String>();
+		Map<String, String> colors = new HashMap<>();
 		colors.put("background", "#343a40");
 		colors.put("foreground", "navbar-dark");
 		return colors;
@@ -182,7 +183,7 @@ public class Settings {
 				file.getParentFile().mkdirs();
 			}
 
-			log.info("Storing settings to file " + filename + " (" + getApps().size() + " apps installed)");
+			log.info("Storing settings to file {} ({} apps installed)", filename, getApps().size());
 			apps = repository.getAll();
 
 			YamlConfig yamlConfig = new YamlConfig();
@@ -196,7 +197,6 @@ public class Settings {
 		} catch (Exception e) {
 			log.error("Storing settings failed.", e);
 		}
-
 	}
 
 	public String getTempPath() {
@@ -249,20 +249,12 @@ public class Settings {
 		return notificationAfter;
 	}
 
-	public int getNotificationAfterInSec() {
-		return notificationAfter * 24 * 60 * 60;
-	}
-
 	public void setRetireAfter(int retireAfter) {
 		this.retireAfter = retireAfter;
 	}
 
 	public int getRetireAfter() {
 		return retireAfter;
-	}
-
-	public int getRetireAfterInSec() {
-		return retireAfter * 24 * 60 * 60;
 	}
 
 	public void setAutoRetire(boolean autoRetire) {
@@ -429,9 +421,13 @@ public class Settings {
 		return port;
 	}
 
-	public void setWorkspaceCleanup(boolean workspaceCleanup) { this.workspaceCleanup = workspaceCleanup; }
+	public void setWorkspaceCleanup(boolean workspaceCleanup) {
+		this.workspaceCleanup = workspaceCleanup;
+	}
 
-	public boolean getWorkspaceCleanup() { return workspaceCleanup; }
+	public boolean getWorkspaceCleanup() {
+		return workspaceCleanup;
+	}
 
 	public void setShowLogs(boolean showLogs) {
 		this.showLogs = showLogs;
@@ -465,7 +461,6 @@ public class Settings {
 		}
 
 		return externalWorkspace.get("location");
-
 	}
 
 	public String getExternalWorkspaceType() {
@@ -480,7 +475,6 @@ public class Settings {
 		}
 
 		return externalWorkspace.get("type");
-
 	}
 
 	public List<String> getCounters() {
@@ -518,5 +512,4 @@ public class Settings {
 	public void setEmailRequired(boolean emailRequired) {
 		this.emailRequired = emailRequired;
 	}
-
 }

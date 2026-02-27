@@ -1,7 +1,9 @@
 package cloudgene.mapred.server.controller;
 
 import java.util.List;
+import java.util.Map;
 
+import cloudgene.mapred.server.responses.UserCounterResponse;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.http.HttpStatus;
 import org.slf4j.Logger;
@@ -34,7 +36,7 @@ import jakarta.inject.Inject;
 @Controller
 public class UserController {
 
-	private static Logger log = LoggerFactory.getLogger(UserController.class);
+	private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
 	public static final int DEFAULT_PAGE_SIZE = 100;
 
@@ -107,6 +109,21 @@ public class UserController {
 		return HttpResponse.ok(response);
 	}
 
+	@Get("/api/v2/users/{username}/counters")
+	@Secured(User.ROLE_ADMIN)
+	public HttpResponse<UserCounterResponse> getCounters(String username) {
+		User user = userService.getByUsername(username);
+
+		if (user == null) {
+			return HttpResponse.notFound();
+		}
+
+		Map<String, Long> counters = userService.getUserCounters(user);
+
+		UserCounterResponse response = UserCounterResponse.build(user, counters);
+		return HttpResponse.ok(response);
+	}
+
 	@Post("/api/v2/users/{user2}/profile")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Secured(SecurityRule.IS_AUTHENTICATED)
@@ -125,7 +142,6 @@ public class UserController {
 				confirm_new_password);
 
 		return HttpResponse.ok(response);
-
 	}
 
 	@Delete("/api/v2/users/{username}/profile")
@@ -137,11 +153,8 @@ public class UserController {
 			@QueryValue String password) {
 
 		User user = authenticationService.getUserByAuthentication(authentication);
-
 		MessageResponse response = userService.deleteProfile(user, username, password);
-
 		return HttpResponse.ok(response);
-
 	}
 
 	@Post("/api/v2/users/update-password")
@@ -154,9 +167,7 @@ public class UserController {
 			@Parameter("confirm-new-password") String confirm_new_password) {
 
 		MessageResponse response = userService.updatePassword(username, token, new_password, confirm_new_password);
-
 		return HttpResponse.ok(response);
-
 	}
 
 	@Post("/api/v2/users/reset")
@@ -164,9 +175,7 @@ public class UserController {
 	@Secured(SecurityRule.IS_ANONYMOUS)
 	public HttpResponse<MessageResponse> resetPassword(@Nullable String username) {
 		MessageResponse response = userService.resetPassword(username);
-
 		return HttpResponse.ok(response);
-
 	}
 
 	@Post("/api/v2/users/register")
@@ -179,19 +188,15 @@ public class UserController {
 			@Nullable @Parameter("new-password") String newPassword,
 			@Nullable @Parameter("confirm-new-password") String confirmNewPassword) {
 
-		MessageResponse response = userService.registerUser(username, mail, newPassword, confirmNewPassword,
-				fullName);
+		MessageResponse response = userService.registerUser(username, mail, newPassword, confirmNewPassword, fullName);
 
 		return HttpResponse.ok(response);
-
 	}
 
 	@Get("/users/activate/{username}/{code}")
 	@Secured(SecurityRule.IS_ANONYMOUS)
 	public HttpResponse<MessageResponse> activate(String username, String code) {
-
 		MessageResponse response = userService.activateUser(username, code);
 		return HttpResponse.ok(response);
-
 	}
 }

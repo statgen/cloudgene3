@@ -9,6 +9,7 @@ import User from 'models/user';
 import Group from 'models/group';
 
 import JobTable from 'components/admin/job/list/table/';
+import UserCounters from './counters/';
 import template from './detail.stache';
 
 export default Control.extend({
@@ -26,6 +27,7 @@ export default Control.extend({
         }));
         $(element).fadeIn();
 
+        new UserCounters('#counters', { username: user.username });
         new JobTable('#job-list', { user: user.username });
       },
     );

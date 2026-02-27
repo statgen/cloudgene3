@@ -5,6 +5,10 @@ import java.sql.SQLException;
 import java.util.List;
 
 import cloudgene.mapred.jobs.*;
+import cloudgene.mapred.jobs.state.JobState;
+import cloudgene.mapred.jobs.state.CompletionState;
+import cloudgene.mapred.jobs.state.NotificationState;
+import cloudgene.mapred.jobs.state.SuccessState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,17 +27,17 @@ public class JobDao extends JdbcDataAccessObject {
 	}
 
 	public boolean insert(AbstractJob job) {
-		StringBuilder sql = new StringBuilder();
-		sql.append(
-				"insert into job (id, name, state, start_time, end_time, user_id, s3_url, type, application, application_id, submitted_on, finished_on, setup_start_time, setup_end_time, user_agent) ");
-		sql.append("values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		String sql = "INSERT INTO job "
+				+ "(id, name, state, start_time, end_time, user_id, s3_url, type, application, "
+				+ "application_id, submitted_on, finished_on, setup_start_time, setup_end_time, "
+				+ "completion_state, success_state, notification_state, user_agent) "
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		try {
-
-			Object[] params = new Object[15];
+			Object[] params = new Object[18];
 			params[0] = job.getId();
 			params[1] = job.getName();
-			params[2] = job.getState();
+			params[2] = job.getState().getValue();
 			params[3] = job.getStartTime();
 			params[4] = job.getEndTime();
 			params[5] = job.getUser().getId();
@@ -45,34 +49,33 @@ public class JobDao extends JdbcDataAccessObject {
 			params[11] = job.getEndTime();
 			params[12] = -1;
 			params[13] = -1;
-			params[14] = trimToLength(job.getUserAgent(), 350);
+			params[14] = job.getCompletionState().getValue();
+			params[15] = job.getSuccessState().getValue();
+			params[16] = job.getNotificationState().getValue();
+			params[17] = trimToLength(job.getUserAgent(), 350);
 
-			update(sql.toString(), params);
+			update(sql, params);
 
-			log.debug("insert job '" + job.getId() + "' successful.");
-
+			log.debug("insert job '{}' successful.", job.getId());
+			return true;
 		} catch (SQLException e) {
-			log.error("insert job '" + job.getId() + "' failed.", e);
+			log.error("insert job '{}' failed.", job.getId(), e);
 			return false;
 		}
-
-		return true;
 	}
 
 	public boolean update(AbstractJob job) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("update job set ");
-		sql.append("  name = ?, state = ?, ");
-		sql.append("  start_time = ?, end_time = ?, ");
-		sql.append("  user_id = ?, s3_url = ?, type = ?, deleted_on = ?, ");
-		sql.append("  application = ?, application_id = ?, submitted_on = ?, ");
-		sql.append("  finished_on = ?, setup_start_time = ?, setup_end_time = ? ");
-		sql.append("where id = ? ");
-		try {
+		String sql = "UPDATE job SET "
+				+ "name = ?, state = ?, start_time = ?, end_time = ?, user_id = ?, s3_url = ?, "
+				+ "type = ?, deleted_on = ?, application = ?, application_id = ?, submitted_on = ?, "
+				+ "finished_on = ?, setup_start_time = ?, setup_end_time = ?, completion_state = ?, "
+				+ "success_state = ?, notification_state = ?"
+				+ "WHERE id = ? ";
 
-			Object[] params = new Object[15];
+		try {
+			Object[] params = new Object[18];
 			params[0] = job.getName();
-			params[1] = job.getState();
+			params[1] = job.getState().getValue();
 			params[2] = job.getStartTime();
 			params[3] = job.getEndTime();
 			params[4] = job.getUser().getId();
@@ -85,154 +88,118 @@ public class JobDao extends JdbcDataAccessObject {
 			params[11] = job.getEndTime();
 			params[12] = -1;
 			params[13] = -1;
-			params[14] = job.getId();
+			params[14] = job.getCompletionState().getValue();
+			params[15] = job.getSuccessState().getValue();
+			params[16] = job.getNotificationState().getValue();
+			params[17] = job.getId();
 
-			update(sql.toString(), params);
+			update(sql, params);
 
-			log.debug("update job successful.");
-
+			log.debug("update job '{}' successful.", job.getId());
+			return true;
 		} catch (SQLException e) {
-			log.error("update job '" + job.getId() + "' failed", e);
+			log.error("update job '{}' failed", job.getId(), e);
 			return false;
 		}
-
-		return true;
 	}
 
 	public boolean updateUser(User oldUser, User newUser) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("update job set user_id = ?, name = ? ");
-		sql.append("where user_id = ?");
-		try {
+		String sql = "UPDATE job SET user_id = ?, name = ? WHERE user_id = ?";
 
+		try {
 			Object[] params = new Object[3];
 			params[0] = newUser.getId();
 			params[1] = "";
 			params[2] = oldUser.getId();
 
-			update(sql.toString(), params);
+			update(sql, params);
 
-			log.error("move all jobs from '" + oldUser.getUsername() + "' to '" + newUser.getUsername()
-					+ "' successful.");
-
+			log.error("move all jobs from '{}' to '{}' successful.", oldUser.getUsername(), newUser.getUsername());
+			return true;
 		} catch (SQLException e) {
-			log.error("move all jobs from '" + oldUser.getUsername() + "' to '" + newUser.getUsername() + "' failed",
-					e);
+			log.error("move all jobs from '{}' to '{}' failed", oldUser.getUsername(), newUser.getUsername(), e);
 			return false;
 		}
-
-		return true;
 	}
 
 	public boolean delete(AbstractJob job) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("delete from job ");
-		sql.append("where id = ?");
-		try {
+		String sql = "DELETE FROM job WHERE id = ?";
 
+		try {
 			Object[] params = new Object[1];
 			params[0] = job.getId();
 
-			update(sql.toString(), params);
+			update(sql, params);
 
 			log.debug("delete job successful.");
-
+			return true;
 		} catch (SQLException e) {
 			log.error("delete job failed", e);
 			return false;
 		}
-
-		return true;
 	}
 
 	public List<AbstractJob> findAllByUser(User user) {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from job ");
-		sql.append("where user_id = ? and state != ? ");
-		sql.append("order by id desc ");
+		String sql = "SELECT * FROM job WHERE user_id = ? AND state != ? ORDER BY id DESC";
 
 		Object[] params = new Object[2];
 		params[0] = user.getId();
-		params[1] = AbstractJob.STATE_DELETED;
+		params[1] = JobState.DELETED.getValue();
 
 		try {
-			List<AbstractJob> result = query(sql.toString(), params, new JobMapper());
-
-			log.debug("find all jobs successful. results: " + result.size());
-
+			List<AbstractJob> result = query(sql, params, new JobMapper());
+			log.debug("find all jobs by user successful. results: {}", result.size());
 			return result;
 		} catch (SQLException e) {
-			log.error("find all jobs failed", e);
+			log.error("find all jobs by user failed", e);
 			return null;
 		}
 	}
 
 	public List<AbstractJob> findAllByUser(User user, int offset, int limit) {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from job ");
-		sql.append("where user_id = ? and state != ? ");
-		sql.append("order by id desc ");
-		sql.append("limit ?,?");
+		String sql = "SELECT * FROM job WHERE user_id = ? AND state != ? ORDER BY id DESC LIMIT ?,?";
 
 		Object[] params = new Object[4];
 		params[0] = user.getId();
-		params[1] = AbstractJob.STATE_DELETED;
+		params[1] = JobState.DELETED.getValue();
 		params[2] = offset;
 		params[3] = limit;
 
 		try {
-			List<AbstractJob> result = query(sql.toString(), params, new JobMapper());
-
-			log.debug("find all jobs successful. results: " + result.size());
-
+			List<AbstractJob> result = query(sql, params, new JobMapper());
+			log.debug("find all jobs by user (paged) successful. results: {}", result.size());
 			return result;
 		} catch (SQLException e) {
-			log.error("find all jobs failed", e);
+			log.error("find all jobs by user (paged) failed", e);
 			return null;
 		}
 	}
 
 	public int countAllByUser(User user) {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select count(*) ");
-		sql.append("from job ");
-		sql.append("where user_id = ? and state != ? ");
+		String sql = "SELECT COUNT(*) FROM job WHERE user_id = ? AND state != ?";
 
 		Object[] params = new Object[2];
 		params[0] = user.getId();
-		params[1] = AbstractJob.STATE_DELETED;
+		params[1] = JobState.DELETED.getValue();
 
 		try {
-			int result = queryForObject(sql.toString(), params, new IntegerMapper());
-
-			log.debug("count all jobs successful. results: " + result);
-
+			int result = queryForObject(sql, params, new IntegerMapper());
+			log.debug("count all jobs by user successful. results: {}", result);
 			return result;
 		} catch (SQLException e) {
-			log.error("count all jobs failed", e);
+			log.error("count all jobs by user failed", e);
 			return 0;
 		}
 	}
 
 	public List<AbstractJob> findAll() {
-		// log.info("finding all jobs");
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from job ");
-		sql.append("join `user` on job.user_id = `user`.id ");
-		sql.append("order by job.id asc ");
+		String sql = "SELECT * FROM job "
+				+ "JOIN `user` ON job.user_id = `user`.id "
+				+ "ORDER BY job.id ASC";
 
 		try {
-			List<AbstractJob> result = query(sql.toString(), new JobAndUserMapper());
-
-			log.debug("find all jobs successful. results: " + result.size());
-
+			List<AbstractJob> result = query(sql, new JobAndUserMapper());
+			log.debug("find all jobs successful. results: {}", result.size());
 			return result;
 		} catch (SQLException e) {
 			log.error("find all jobs failed", e);
@@ -241,105 +208,87 @@ public class JobDao extends JdbcDataAccessObject {
 	}
 
 	public List<AbstractJob> findAllNotRetiredJobs() {
+		String sql = "SELECT * FROM job "
+				+ "JOIN `user` ON job.user_id = `user`.id "
+				+ "WHERE state NOT IN (?,?,?,?,?,?,?) "
+				+ "ORDER BY job.id DESC";
 
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from job ");
-		sql.append("join `user` on job.user_id = `user`.id ");
-		sql.append("where state  not in (?,?,?,?,?,?,?) ");
-		sql.append("order by job.id desc ");
-
+		// TODO(Marc): Looks like RETIRED and DELETED are duplicated for no reason.
+		// Remove?
 		Object[] params = new Object[7];
-		params[0] = AbstractJob.STATE_WAITING;
-		params[1] = AbstractJob.STATE_RUNNING;
-		params[2] = AbstractJob.STATE_EXPORTING;
-		params[3] = AbstractJob.STATE_RETIRED;
-		params[4] = AbstractJob.STATE_DELETED;
-		params[5] = AbstractJob.STATE_RETIRED;
-		params[6] = AbstractJob.STATE_DELETED;
+		params[0] = JobState.WAITING.getValue();
+		params[1] = JobState.RUNNING.getValue();
+		params[2] = JobState.EXPORTING.getValue();
+		params[3] = JobState.RETIRED.getValue();
+		params[4] = JobState.DELETED.getValue();
+		params[5] = JobState.RETIRED.getValue();
+		params[6] = JobState.DELETED.getValue();
 
 		try {
-			List<AbstractJob> result = query(sql.toString(), params, new JobAndUserMapper());
-
-			log.debug("find all jobs successful. results: " + result.size());
-
+			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
+			log.debug("find all non-retired jobs successful. results: {}", result.size());
 			return result;
 		} catch (SQLException e) {
-			log.error("find all jobs failed", e);
+			log.error("find all non-retired jobs failed", e);
 			return null;
 		}
 	}
 
 	public List<AbstractJob> findAllNotNotifiedJobs() {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from job ");
-		sql.append("join `user` on job.user_id = `user`.id ");
-		sql.append("where state != ? AND state != ? AND state != ? AND state != ? ");
-		sql.append("order by job.id desc ");
+		String sql = "SELECT * FROM job "
+				+ "JOIN `user` ON job.user_id = `user`.id "
+				+ "WHERE state != ? AND state != ? AND state != ? AND state != ? "
+				+ "ORDER BY job.id DESC";
 
 		Object[] params = new Object[4];
-		params[0] = AbstractJob.STATE_RETIRED;
-		params[1] = AbstractJob.STATE_SUCESS_AND_NOTIFICATION_SEND;
-		params[2] = AbstractJob.STATE_FAILED_AND_NOTIFICATION_SEND;
-		params[3] = AbstractJob.STATE_DELETED;
+		params[0] = JobState.RETIRED.getValue();
+		params[1] = JobState.SUCCESS_AND_NOTIFICATION_SENT.getValue();
+		params[2] = JobState.FAILED_AND_NOTIFICATION_SENT.getValue();
+		params[3] = JobState.DELETED.getValue();
 
 		try {
-			List<AbstractJob> result = query(sql.toString(), params, new JobAndUserMapper());
-
-			log.debug("find all jobs successful. results: " + result.size());
-
+			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
+			log.debug("find all non-notified jobs successful. results: {}", result.size());
 			return result;
 		} catch (SQLException e) {
-			log.error("find all jobs failed", e);
+			log.error("find all non-notified jobs failed", e);
 			return null;
 		}
 	}
 
 	public List<AbstractJob> findAllNotifiedJobs() {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from job ");
-		sql.append("join `user` on job.user_id = `user`.id ");
-		sql.append("where  state = ? or state = ? ");
-		sql.append("order by job.id desc ");
+		String sql = "SELECT * FROM job "
+				+ "JOIN `user` ON job.user_id = `user`.id "
+				+ "WHERE state = ? OR state = ? "
+				+ "ORDER BY job.id DESC";
 
 		Object[] params = new Object[2];
-		params[0] = AbstractJob.STATE_SUCESS_AND_NOTIFICATION_SEND;
-		params[1] = AbstractJob.STATE_FAILED_AND_NOTIFICATION_SEND;
+		params[0] = JobState.SUCCESS_AND_NOTIFICATION_SENT.getValue();
+		params[1] = JobState.FAILED_AND_NOTIFICATION_SENT.getValue();
 
 		try {
-			List<AbstractJob> result = query(sql.toString(), params, new JobAndUserMapper());
-
-			log.debug("find all old jobs successful. results: " + result.size());
-
+			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
+			log.debug("find all notified jobs successful. results: {}", result.size());
 			return result;
 		} catch (SQLException e) {
-			log.error("find all old jobs failed", e);
+			log.error("find all notified jobs failed", e);
 			return null;
 		}
 	}
 
-	public List<AbstractJob> findAllOlderThan(long time, int state) {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from job ");
-		sql.append("join `user` on job.user_id = `user`.id ");
-		sql.append("where  state = ? AND finished_on != 0 AND finished_on < ? ");
-		sql.append("order by job.id desc ");
+	public List<AbstractJob> findAllOlderThan(long time, JobState state) {
+		String sql = "SELECT * FROM job "
+				+ "JOIN `user` ON job.user_id = `user`.id "
+				+ "WHERE state = ? AND finished_on != 0 AND finished_on < ? "
+				+ "ORDER BY job.id DESC ";
 
 		Object[] params = new Object[2];
-		params[0] = state;
+		params[0] = state.getValue();
 		params[1] = time;
 
 		try {
-			List<AbstractJob> result = query(sql.toString(), params, new JobAndUserMapper());
-
-			log.debug("find all old jobs successful. results: " + result.size());
-
+			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
+			log.debug("find all old jobs successful. results: {}", result.size());
 			return result;
 		} catch (SQLException e) {
 			log.error("find all old jobs failed", e);
@@ -347,56 +296,41 @@ public class JobDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public List<AbstractJob> findAllByState(int state) {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from job ");
-		sql.append("join `user` on job.user_id = `user`.id ");
-		sql.append("where state = ? ");
-		sql.append("order by job.id desc ");
+	public List<AbstractJob> findAllByState(JobState state) {
+		String sql = "SELECT * FROM job "
+				+ "JOIN `user` ON job.user_id = `user`.id "
+				+ "WHERE state = ? ORDER BY job.id DESC";
 
 		Object[] params = new Object[1];
-		params[0] = state;
+		params[0] = state.getValue();
 
 		try {
-			List<AbstractJob> result = query(sql.toString(), params, new JobAndUserMapper());
-
-			log.debug("find all old jobs successful. results: " + result.size());
-
+			List<AbstractJob> result = query(sql, params, new JobAndUserMapper());
+			log.debug("find all jobs by state successful. results: {}", result.size());
 			return result;
 		} catch (SQLException e) {
-			log.error("find all old jobs failed", e);
+			log.error("find all jobs by state failed", e);
 			return null;
 		}
 	}
 
 	public AbstractJob findById(String id) {
-
 		return findById(id, true);
-
 	}
 
 	public AbstractJob findById(String id, boolean loadParams) {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from job ");
-		sql.append("join `user` on job.user_id = `user`.id ");
-		sql.append("where job.id = ? and state != ? ");
+		String sql = "SELECT * FROM job "
+				+ "JOIN `user` ON job.user_id = `user`.id "
+				+ "WHERE job.id = ? AND state != ?";
 
 		Object[] params = new Object[2];
 		params[0] = id;
-		params[1] = AbstractJob.STATE_DELETED;
-
-		AbstractJob job = null;
+		params[1] = JobState.DELETED.getValue();
 
 		try {
-
-			job = (AbstractJob) queryForObject(sql.toString(), params, new JobAndUserMapper());
+			AbstractJob job = queryForObject(sql, params, new JobAndUserMapper());
 
 			if (loadParams && job != null) {
-
 				ParameterDao parameterDao = new ParameterDao(database);
 				List<CloudgeneParameterInput> inputParams = parameterDao.findAllInputByJob(job);
 				List<CloudgeneParameterOutput> outputParams = parameterDao.findAllOutputByJob(job);
@@ -404,13 +338,10 @@ public class JobDao extends JdbcDataAccessObject {
 				job.setOutputParams(outputParams);
 
 				if (job instanceof CloudgeneJob) {
-
 					StepDao stepDao = new StepDao(database);
 					List<Step> steps = stepDao.findAllByJob((CloudgeneJob) job);
 					job.setSteps(steps);
-
 				}
-
 			}
 
 			if (job instanceof CloudgeneJob) {
@@ -418,14 +349,14 @@ public class JobDao extends JdbcDataAccessObject {
 			}
 
 			if (job != null) {
-				log.debug("find job by id '" + id + "' successful.");
+				log.debug("find job by id '{}' successful.", id);
 			} else {
-				log.debug("job '" + id + "' not found");
+				log.debug("job '{}' not found", id);
 			}
 
 			return job;
 		} catch (SQLException e) {
-			log.error("find job by id '" + id + "' failed", e);
+			log.error("find job by id '{}' failed", id, e);
 			return null;
 		}
 	}
@@ -437,7 +368,10 @@ public class JobDao extends JdbcDataAccessObject {
 
 			job.setId(rs.getString("job.id"));
 			job.setName(rs.getString("job.name"));
-			job.setState(rs.getInt("job.state"));
+			job.setRawState(JobState.of(rs.getInt("job.state")));
+			job.setCompletionState(CompletionState.of(rs.getString("job.completion_state")));
+			job.setSuccessState(SuccessState.of(rs.getString("job.success_state")));
+			job.setNotificationState(NotificationState.of(rs.getString("job.notification_state")));
 			job.setStartTime(rs.getLong("job.start_time"));
 			job.setEndTime(rs.getLong("job.end_time"));
 			job.setDeletedOn(rs.getLong("job.deleted_on"));
@@ -452,12 +386,12 @@ public class JobDao extends JdbcDataAccessObject {
 
 	static class JobAndUserMapper implements IRowMapper<AbstractJob> {
 
-		private final JobMapper jobMaper = new JobMapper();
+		private final JobMapper jobMapper = new JobMapper();
 		private final UserMapper userMapper = new UserMapper();
 
 		@Override
 		public AbstractJob mapRow(ResultSet rs, int row) throws SQLException {
-			AbstractJob job = jobMaper.mapRow(rs, row);
+			AbstractJob job = jobMapper.mapRow(rs, row);
 
 			User user = userMapper.mapRow(rs, row);
 			job.setUser(user);

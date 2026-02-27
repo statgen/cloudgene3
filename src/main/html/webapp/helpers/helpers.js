@@ -59,6 +59,8 @@ stache.registerHelper('floor', function (value) {
   return Math.floor(value);
 });
 
+stache.registerHelper('formatNumber', number => number.toLocaleString());
+
 stache.registerHelper('prettyTime', function (executionTime) {
   if (!executionTime || executionTime <= 0) {
     return '-';

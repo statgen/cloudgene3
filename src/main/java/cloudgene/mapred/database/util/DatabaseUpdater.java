@@ -60,22 +60,22 @@ public class DatabaseUpdater {
 
 		if (isVersionTableAvailable(database)) {
 			String oldVersion = readVersionDB();
-			log.info("Read current DB version: " + oldVersion);
+			log.info("Read current DB version: {}", oldVersion);
 
 			// Should not happen, since an entry is created when metadata table exists.
 			if (oldVersion == null) {
 				oldVersion = readVersion(filename);
-				log.info("Read curent version from DB was not successful, read it from file: " + oldVersion);
+				log.info("Read curent version from DB was not successful, read it from file: {}", oldVersion);
 			}
 
 			this.oldVersion = oldVersion;
 		} else {
 			// check also file for backwards compatibility
 			this.oldVersion = readVersion(filename);
-			log.info("Read current version from file: " + oldVersion);
+			log.info("Read current version from file: {}", oldVersion);
 		}
 
-		log.info("Current app version: " + currentVersion);
+		log.info("Current app version: {}", currentVersion);
 		needUpdate = (compareVersion(currentVersion, oldVersion) > 0);
 	}
 
@@ -107,8 +107,8 @@ public class DatabaseUpdater {
 
 		String dbVersion = readVersionDB();
 		if (!dbVersion.equals(currentVersion)) {
-			log.error("App version (v" + currentVersion + ") and DB version (v" + dbVersion
-					+ ") does not match. Update Application to latest version.");
+			log.error("App version (v{}) and DB version (v{}) does not match. Update Application to latest version.",
+					currentVersion, dbVersion);
 			return false;
 		}
 
@@ -117,7 +117,7 @@ public class DatabaseUpdater {
 
 	public boolean update() {
 		if (needUpdate) {
-			log.info("Updating database from " + oldVersion + " to " + currentVersion + "...");
+			log.info("Updating database from {} to {}...", oldVersion, currentVersion);
 
 			try {
 				readAndPrepareSqlClasspath(updateFileAsStream, oldVersion, currentVersion);
@@ -156,7 +156,7 @@ public class DatabaseUpdater {
 			PreparedStatement ps = connection.prepareStatement("INSERT INTO database_versions (version) VALUES (?)");
 			ps.setString(1, newVersion);
 			ps.executeUpdate();
-			log.info("Version in DB updated to: " + newVersion);
+			log.info("Version in DB updated to: {}", newVersion);
 
 			if (new File(filename).exists()) {
 				FileUtil.deleteFile(filename);
@@ -164,7 +164,6 @@ public class DatabaseUpdater {
 			}
 
 			connection.close();
-
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -186,13 +185,15 @@ public class DatabaseUpdater {
 	}
 
 	public String readVersionDB() {
+		String sql = "SELECT version FROM database_versions "
+				+ "WHERE updated_on = (SELECT MAX(updated_on) FROM database_versions) "
+				+ "ORDER BY updated_on, id DESC";
+
 		String version = null;
 
 		try {
 			Connection connection = connector.getDataSource().getConnection();
-			PreparedStatement ps = connection.prepareStatement(
-					"select version from database_versions where updated_on = (SELECT MAX(updated_on) from database_versions) "
-							+ "order by updated_on, id DESC");
+			PreparedStatement ps = connection.prepareStatement(sql);
 			ResultSet result = ps.executeQuery();
 
 			if (result.next()) {
@@ -216,8 +217,8 @@ public class DatabaseUpdater {
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String strLine;
 		StringBuilder builder = new StringBuilder();
+
 		while ((strLine = br.readLine()) != null) {
-			// builder.append("\n");
 			builder.append(strLine);
 		}
 
@@ -283,7 +284,7 @@ public class DatabaseUpdater {
 			PreparedStatement ps = connection.prepareStatement(sqlContent);
 			ps.executeUpdate();
 			connection.close();
-			log.info("DB SQL Update " + version + " finished");
+			log.info("DB SQL Update {} finished", version);
 			writeVersion(version);
 		}
 	}
@@ -330,14 +331,15 @@ public class DatabaseUpdater {
 	}
 
 	public void createVersionTable(Database database) {
+		String sql = "CREATE TABLE database_versions ("
+				+ "id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, "
+				+ "version VARCHAR(255) NOT NULL, "
+				+ "updated_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)";
+
 		try {
 			Connection connection = connector.getDataSource().getConnection();
-			String statement = "create table database_versions ( \r\n"
-					+ "	id          integer not null auto_increment primary key,\r\n"
-					+ "	version	varchar(255) not null,\r\n"
-					+ "    updated_on timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP \r\n" + ")";
-			PreparedStatement ps = connection.prepareStatement(statement);
-			ps.executeUpdate();
+			PreparedStatement statement = connection.prepareStatement(sql);
+			statement.executeUpdate();
 			connection.close();
 			log.info("Table database_versions created.");
 		} catch (SQLException e) {

@@ -1,5 +1,7 @@
 package cloudgene.mapred.core;
 
+import jakarta.annotation.Nullable;
+
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -38,7 +40,7 @@ public class User {
 	private int loginAttempts;
 
 	private Date apiTokenExpiresOn = null;
-	
+
 	private boolean accessedByApi = false;
 
 	public static final String ROLE_SEPARATOR = ",";
@@ -99,11 +101,13 @@ public class User {
 		if (roles == null) {
 			return false;
 		}
-		for (int i = 0; i < roles.length; i++) {
-			if (roles[i].equalsIgnoreCase(role)) {
+
+		for (String s : roles) {
+			if (s.equalsIgnoreCase(role)) {
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -111,11 +115,13 @@ public class User {
 		if (this.roles == null || roles == null) {
 			return false;
 		}
-		for (int i = 0; i < roles.length; i++) {
-			if (hasRole(roles[i])) {
+
+		for (String role : roles) {
+			if (hasRole(role)) {
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -192,7 +198,25 @@ public class User {
 		return apiTokenExpiresOn;
 	}
 
-	public static String checkUsername(String username) {
+	public void setAccessedByApi(boolean accessedByApi) {
+		this.accessedByApi = accessedByApi;
+	}
+
+	public boolean isAccessedByApi() {
+		return accessedByApi;
+	}
+
+	/**
+	 * Checks if the provided {@code username} follows the formatting requirements.
+	 * <p>
+	 * Must be between 4 and 16 characters and follow lowercase identifier rules
+	 * (starts with {@code a-z}, continues with {@code a-z_0-9}, and ends with
+	 * {@code a-z0-9}).
+	 *
+	 * @param username String to check for username format compliance.
+	 * @return {@code null} if no errors were found; error message otherwise.
+	 */
+	public static String checkUsername(@Nullable String username) {
 
 		if (username == null || username.isEmpty()) {
 			return "The username is required.";
@@ -208,21 +232,27 @@ public class User {
 		}
 
 		return null;
-
-	}
-	
-	public void setAccessedByApi(boolean accessedByApi) {
-		this.accessedByApi = accessedByApi;
-	}
-	
-	public boolean isAccessedByApi() {
-		return accessedByApi;
 	}
 
-	public static String checkPassword(String password, String confirmPassword) {
+	/**
+	 * Checks if the provided {@code password} follows the formatting requirements,
+	 * and matches {@code confirmPassword}.
+	 * <p>
+	 * Needs to be at least 14 characters, contain a number {@code 0-9}, contain a
+	 * lowercase letter {@code a-z}, contain an uppercase letter {@code A-Z}, and
+	 * contain a special character {@code !"#$%&'()*+,-./:;<=>?@[]\^_`{|}~}
+	 *
+	 * @param password        Proposed password string.
+	 * @param confirmPassword Password verification string.
+	 * @return {@code null} if no errors were found; error message otherwise.
+	 */
+	public static String checkPassword(@Nullable String password, @Nullable String confirmPassword) {
+		if (password == null || password.isEmpty()) {
+			return "Please provide a password.";
+		}
 
-		if (password == null || password.isEmpty() || !password.equals(confirmPassword)) {
-			return "Please check your passwords.";
+		if (!password.equals(confirmPassword)) {
+			return "Please ensure the passwords match.";
 		}
 
 		if (password.length() < 14) {
@@ -238,7 +268,7 @@ public class User {
 		}
 
 		if (!UPPERCASE.matcher(password).find()) {
-			return "Password must contain at least one uppercase letter: A-Z";
+			return "Password must contain at least one UPPERCASE letter: A-Z";
 		}
 
 		if (!SPECIAL.matcher(password).find()) {
@@ -246,12 +276,18 @@ public class User {
 		}
 
 		return null;
-
 	}
 
-	public static String checkMail(String mail) {
-
-		if (mail == null || mail.isEmpty()) {
+	/**
+	 * Checks if the provided {@code mail} follows the formatting requirements.
+	 * <p>
+	 * Needs to be a valid email address.
+	 *
+	 * @param mail String to check for email format compliance.
+	 * @return {@code null} if no errors were found; error message otherwise.
+	 */
+	public static String checkMail(@Nullable String mail) {
+		if (mail == null || mail.isBlank()) {
 			return "E-Mail is required.";
 		}
 
@@ -262,9 +298,16 @@ public class User {
 		return null;
 	}
 
-	public static String checkName(String name) {
-
-		if (name == null || name.isEmpty()) {
+	/**
+	 * Checks if the provided {@code fullName} follows the formatting requirements.
+	 * <p>
+	 * Just needs to be non-blank.
+	 *
+	 * @param fullName String to check for email format compliance.
+	 * @return {@code null} if no errors were found; error message otherwise.
+	 */
+	public static String checkFullName(@Nullable String fullName) {
+		if (fullName == null || fullName.isBlank()) {
 			return "The full name is required.";
 		}
 
@@ -273,7 +316,10 @@ public class User {
 
 	@Override
 	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+
 		return ((User) obj).getUsername().equals(username);
 	}
-
 }

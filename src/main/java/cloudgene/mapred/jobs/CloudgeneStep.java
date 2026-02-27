@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class CloudgeneStep {
 
-	private static Logger log = LoggerFactory.getLogger(CloudgeneStep.class);
+	private static final Logger log = LoggerFactory.getLogger(CloudgeneStep.class);
 
 	private CloudgeneJob job;
 
@@ -27,7 +27,7 @@ public abstract class CloudgeneStep {
 
 	}
 
-	public String getFolder(Class clazz) {
+	public String getFolder(Class<?> clazz) {
 		return new File(clazz.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent();
 	}
 
@@ -95,11 +95,11 @@ public abstract class CloudgeneStep {
 		InputStream is = process.getInputStream();
 		InputStreamReader isr = new InputStreamReader(is, "ISO-8859-1");
 		BufferedReader br = new BufferedReader(isr);
-		String line = null;
+		String line;
 		while ((line = br.readLine()) != null) {
 			context.println(line);
 			if (output != null) {
-				output.append(line + "\n");
+				output.append(line).append("\n");
 			}
 		}
 		br.close();
@@ -131,5 +131,4 @@ public abstract class CloudgeneStep {
 			}
 		}
 	}
-
 }

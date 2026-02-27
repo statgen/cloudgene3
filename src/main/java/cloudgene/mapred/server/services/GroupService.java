@@ -1,23 +1,24 @@
 package cloudgene.mapred.server.services;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import cloudgene.mapred.apps.Application;
 import cloudgene.mapred.apps.ApplicationRepository;
 import cloudgene.mapred.core.Group;
 import cloudgene.mapred.core.User;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 
 @Singleton
 public class GroupService {
+
 	@Inject
 	protected cloudgene.mapred.server.Application application;
 
 	public List<Group> getAll() {
+		List<Group> groups = new ArrayList<>();
 
-		List<Group> groups = new Vector<Group>();
 		groups.add(new Group(User.ROLE_ADMIN));
 		groups.add(new Group(User.ROLE_USER));
 		groups.add(new Group(UserService.DEFAULT_ANONYMOUS_ROLE.toLowerCase()));
@@ -25,7 +26,7 @@ public class GroupService {
 		ApplicationRepository repository = application.getSettings().getApplicationRepository();
 
 		for (Application application : repository.getAll()) {
-			for (String permission: application.getPermissions()) {
+			for (String permission : application.getPermissions()) {
 				Group group = new Group(permission);
 				if (!groups.contains(group)) {
 					group.addApp(application.getId());
@@ -39,7 +40,5 @@ public class GroupService {
 		}
 
 		return groups;
-
 	}
-
 }

@@ -34,20 +34,26 @@ public class RegisterUserTest {
 
 	@Test
 	public void testWithCorrectData() {
-
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
 		// register new user
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "unique_user");
 		form.put("full-name", "full name");
 		form.put("mail", "test-uniquent@test.com");
 		form.put("new-password", "LongPassword@1714");
 		form.put("confirm-new-password", "LongPassword@1714");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(true)).and().body("message", equalTo("User successfully created."));
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(true))
+				.body("message", equalTo("User successfully created."));
 
 		// check if one mail was sent to user
 		assertEquals(mailsBefore + 1, mailServer.getReceivedEmailSize());
@@ -55,19 +61,34 @@ public class RegisterUserTest {
 		mailsBefore = mailServer.getReceivedEmailSize();
 
 		// test with same username
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", equalTo("Username already exists."));
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", equalTo("Username already exists."));
+
 		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 
 		// test with same email but different username
 		form.put("username", "unique_again");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", equalTo("E-Mail is already registered."));
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", equalTo("E-Mail is already registered."));
 
 		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 
-		//check role
+		// check role
 		UserDao dao = new UserDao(application.getDatabase());
 		User user = dao.findByUsername("unique_user");
 		assertEquals(1, user.getRoles().length);
@@ -76,106 +97,143 @@ public class RegisterUserTest {
 
 	@Test
 	public void testWithEmptyUsername() {
-
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "");
 		form.put("full-name", "full name");
 		form.put("mail", "test@test.com");
 		form.put("new-password", "LongPassword@1714");
 		form.put("confirm-new-password", "LongPassword@1714");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", containsString("username is required"));
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", containsString("username is required"));
 
 		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
-
 	}
 
 	@Test
 	public void testWithWrongUsername() {
-
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "username-");
 		form.put("full-name", "full name");
 		form.put("mail", "test@test.com");
 		form.put("new-password", "LongPassword@1714");
 		form.put("confirm-new-password", "LongPassword@1714");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", containsString("Your username is not valid"));
+		RestAssured
+				.given().formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", containsString("Your username is not valid"));
+
 		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 
-		form = new HashMap<String, String>();
+		form = new HashMap<>();
 		form.put("username", "username.");
 		form.put("full-name", "full name");
 		form.put("mail", "test@test.com");
 		form.put("new-password", "LongPassword@1714");
 		form.put("confirm-new-password", "LongPassword@1714");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", containsString("Your username is not valid"));
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", containsString("Your username is not valid"));
+
 		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 
-		form = new HashMap<String, String>();
+		form = new HashMap<>();
 		form.put("username", "username#");
 		form.put("full-name", "full name");
 		form.put("mail", "test@test.com");
 		form.put("new-password", "LongPassword@1714");
 		form.put("confirm-new-password", "LongPassword@1714");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", containsString("Your username is not valid"));
-		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", containsString("Your username is not valid"));
 
+		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 	}
 
 	@Test
 	public void testWithShortUsername() {
-
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "abc");
 		form.put("full-name", "full name");
 		form.put("mail", "test@test.com");
 		form.put("new-password", "LongPassword@1714");
 		form.put("confirm-new-password", "LongPassword@1714");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", containsString("username must contain between"));
-		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", containsString("username must contain between"));
 
+		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 	}
 
 	@Test
 	public void testWithEmptyName() {
-
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "abcde");
 		form.put("full-name", "");
 		form.put("mail", "test@test.com");
 		form.put("new-password", "LongPassword@1714");
 		form.put("confirm-new-password", "LongPassword@1714");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", containsString("full name is required"));
-		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", containsString("full name is required"));
 
+		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 	}
 
 	@Test
 	public void testWithEmptyMail() {
-
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
@@ -186,34 +244,46 @@ public class RegisterUserTest {
 		form.put("new-password", "LongPassword@1714");
 		form.put("confirm-new-password", "LongPassword@1714");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", containsString("E-Mail is required."));
-		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", containsString("E-Mail is required."));
 
+		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 	}
 
 	@Test
 	public void testWithWrongMail() {
-
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "abcde");
 		form.put("full-name", "abcdefgh abcgd");
 		form.put("mail", "test");
 		form.put("new-password", "LongPassword@1714");
 		form.put("confirm-new-password", "LongPassword@1714");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", containsString("a valid mail address"));
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", containsString("a valid mail address"));
+
 		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
-		
 	}
 
 	@Test
 	public void testWithWrongConfirmPassword() {
-
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
@@ -224,15 +294,21 @@ public class RegisterUserTest {
 		form.put("new-password", "password");
 		form.put("confirm-new-password", "password1");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", equalTo("Please check your passwords."));
-		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", equalTo("Please ensure the passwords match."));
 
+		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 	}
 
 	@Test
 	public void testWithWrongPasswordLength() {
-
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
@@ -243,29 +319,42 @@ public class RegisterUserTest {
 		form.put("new-password", "pass");
 		form.put("confirm-new-password", "pass");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", containsString("contain at least"));
-		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", containsString("contain at least"));
 
+		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 	}
 
 	@Test
 	public void testWithPasswordWithMissingUppercase() {
-
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
-		Map<String, String> form = new HashMap<String, String>();
-		form.put("username", "abcde");
-		form.put("full-name", "abcdefgh abcgd");
-		form.put("mail", "test@test.com");
-		form.put("new-password", "passwordword27");
-		form.put("confirm-new-password", "passwordword27");
+		Map<String, String> form = Map.of(
+				"username", "abcde",
+				"full-name", "abcdefgh abcgd",
+				"mail", "test@test.com",
+				"new-password", "passwordword27",
+				"confirm-new-password", "passwordword27");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", containsString("least one uppercase"));
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", containsString("least one UPPERCASE"));
+
 		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
-
 	}
 
 	@Test
@@ -281,15 +370,21 @@ public class RegisterUserTest {
 		form.put("new-password", "PASSWORD[]2727");
 		form.put("confirm-new-password", "PASSWORD[]2727");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", containsString("least one lowercase"));
-		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", containsString("least one lowercase"));
 
+		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 	}
 
 	@Test
 	public void testWithPasswordWithMissingNumber() {
-
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
@@ -300,23 +395,27 @@ public class RegisterUserTest {
 		form.put("new-password", "PASSWORDpassword");
 		form.put("confirm-new-password", "PASSWORDpassword");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", containsString("least one number"));
-		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", containsString("least one number"));
 
+		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 	}
 
 	@Test
 	public void testWithEmptyMailAndNoMailRequired() {
-
-		//set email required to false.
-
 		application.getSettings().setEmailRequired(false);
 
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "abcdefgh");
 		form.put("full-name", "abcdefgh abcgd");
 		form.put("mail", "");
@@ -324,13 +423,21 @@ public class RegisterUserTest {
 		form.put("confirm-new-password", "LongPassword@1714");
 
 		// register user
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(true)).and().body("message", equalTo("User successfully created."));
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(true))
+				.body("message", equalTo("User successfully created."));
+
 		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
 
 		application.getSettings().setEmailRequired(true);
 
-		//check role
+		// check role
 		UserDao dao = new UserDao(application.getDatabase());
 		User user = dao.findByUsername("abcdefgh");
 		assertEquals(1, user.getRoles().length);
@@ -338,16 +445,13 @@ public class RegisterUserTest {
 	}
 
 	@Test
-	public void testWithMailAndNoMailRequired()  {
-
-		//set email required to false.
-
+	public void testWithMailAndNoMailRequired() {
 		application.getSettings().setEmailRequired(false);
 
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "abcdefghi");
 		form.put("full-name", "abcdefgh abcgd");
 		form.put("mail", "test-blabla@test.com");
@@ -355,17 +459,24 @@ public class RegisterUserTest {
 		form.put("confirm-new-password", "LongPassword@1714");
 
 		// register user
-		RestAssured.given().formParams(form).when().post("/api/v2/users/register").then().statusCode(200).and()
-				.body("success", equalTo(true)).and().body("message", equalTo("User successfully created."));
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/register")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(true))
+				.body("message", equalTo("User successfully created."));
+
 		assertEquals(mailsBefore + 1, mailServer.getReceivedEmailSize());
 
 		application.getSettings().setEmailRequired(true);
 
-		//check role
+		// check role
 		UserDao dao = new UserDao(application.getDatabase());
 		User user = dao.findByUsername("abcdefghi");
 		assertEquals(1, user.getRoles().length);
 		assertEquals(UserService.DEFAULT_ROLE, user.getRoles()[0]);
 	}
-
 }

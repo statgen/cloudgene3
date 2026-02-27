@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ public class LocalWorkspace implements IWorkspace {
 
 	private static final Logger log = LoggerFactory.getLogger(LocalWorkspace.class);
 
-	private String location;
+	private final String location;
 
 	private String workspace;
 
@@ -92,11 +92,10 @@ public class LocalWorkspace implements IWorkspace {
 
 	@Override
 	public String downloadLog(String name) throws IOException {
-		
 		if (workspace == null) {
 			throw new IOException("No job id provided.");
 		}
-		
+
 		return FileUtil.readFileAsString(download(FileUtil.path(workspace, LOGS_DIRECTORY, name)));
 	}
 
@@ -112,7 +111,6 @@ public class LocalWorkspace implements IWorkspace {
 
 	@Override
 	public void delete(String job) throws IOException {
-
 		try {
 			log.debug("Deleting " + job + " on local workspace...");
 			String workspace = FileUtil.path(location, job);
@@ -124,7 +122,6 @@ public class LocalWorkspace implements IWorkspace {
 			log.error("Deleting " + job + " failed.", e);
 			throw new IOException("Deleting " + job + " failed.", e);
 		}
-
 	}
 
 	@Override
@@ -146,7 +143,6 @@ public class LocalWorkspace implements IWorkspace {
 			log.error("Deleting " + job + " failed.", e);
 			throw new IOException("Deleting " + job + " failed.", e);
 		}
-
 	}
 
 	@Override
@@ -190,7 +186,7 @@ public class LocalWorkspace implements IWorkspace {
 	@Override
 	public List<Download> getDownloads(String url) {
 		File folder = new File(url);
-		List<Download> downloads = new Vector<Download>();
+		List<Download> downloads = new ArrayList<>();
 		exportFolder("", folder, downloads);
 		return downloads;
 	}
@@ -211,27 +207,28 @@ public class LocalWorkspace implements IWorkspace {
 
 		for (File file : files) {
 			if (file.isFile()) {
-				if (file.getName().equals("cloudgene.out")){
+				if (file.getName().equals("cloudgene.out")) {
 					continue;
 				}
 				Download download = createDownload(prefix, file);
 				downloads.add(download);
 			} else {
-				exportFolder(prefix.equals("") ? file.getName() : prefix + "/" + file.getName(), file, downloads);
+				exportFolder(prefix.isEmpty() ? file.getName() : prefix + "/" + file.getName(), file, downloads);
 			}
 		}
-
 	}
 
 	protected Download createDownload(String prefix, File file) {
-		String filename = prefix.equals("") ? file.getName() : prefix + "/" + file.getName();
+		String filename = prefix.isEmpty() ? file.getName() : prefix + "/" + file.getName();
 		String size = FileUtils.byteCountToDisplaySize(file.length());
 		String hash = HashUtil.getSha256(filename + size + (Math.random() * 100000));
+
 		Download download = new Download();
 		download.setName(filename);
 		download.setPath(relative(file.getAbsolutePath()));
 		download.setSize(size);
 		download.setHash(hash);
+
 		return download;
 	}
 

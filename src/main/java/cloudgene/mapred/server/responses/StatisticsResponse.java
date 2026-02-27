@@ -2,10 +2,10 @@ package cloudgene.mapred.server.responses;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 @JsonClassDescription
 public class StatisticsResponse extends HashMap<String, String> {
@@ -17,7 +17,7 @@ public class StatisticsResponse extends HashMap<String, String> {
 	public static List<Map<String, String>> build(List<Map<String, String>> stats) {
 
 		// minimize points
-		List<Map<String, String>> toRemove = new Vector<Map<String, String>>();
+		List<Map<String, String>> toRemove = new ArrayList<>();
 		for (int i = 1; i < stats.size() - 1; i++) {
 			Map<String, String> prev = stats.get(i - 1);
 			Map<String, String> current = stats.get(i);
@@ -31,13 +31,10 @@ public class StatisticsResponse extends HashMap<String, String> {
 		stats.removeAll(toRemove);
 
 		return stats;
-
 	}
 
 	private static boolean equals(Map<String, String> a, Map<String, String> b, String[] counters) {
-
 		for (String key : counters) {
-
 			if (a.get(key) == null) {
 				return false;
 			}
@@ -50,7 +47,7 @@ public class StatisticsResponse extends HashMap<String, String> {
 				return false;
 			}
 		}
+
 		return true;
 	}
-
 }

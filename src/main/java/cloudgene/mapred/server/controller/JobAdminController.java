@@ -15,8 +15,7 @@ import cloudgene.mapred.server.responses.JobResponse;
 import cloudgene.mapred.server.responses.MessageResponse;
 import cloudgene.mapred.server.services.JobCleanUpService;
 import cloudgene.mapred.server.services.JobService;
-import cloudgene.mapred.util.FormUtil;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Controller;
@@ -31,11 +30,10 @@ import jakarta.inject.Inject;
 @Secured(User.ROLE_ADMIN)
 public class JobAdminController {
 
-	private static Logger log = LoggerFactory.getLogger(JobAdminController.class);
+	private static final Logger log = LoggerFactory.getLogger(JobAdminController.class);
 
-	public static final int DEFAULT_PAGE_SIZE = 15;
-
-	public static final long HIGH_PRIORITY = 0;
+	private static final int DEFAULT_PAGE_SIZE = 15;
+	private static final long HIGH_PRIORITY = 0;
 
 	@Inject
 	protected cloudgene.mapred.server.Application application;
@@ -43,8 +41,8 @@ public class JobAdminController {
 	@Inject
 	protected JobService jobService;
 
-    @Inject
-    protected UserService userService;
+	@Inject
+	protected UserService userService;
 
 	@Inject
 	protected AuthenticationService authenticationService;
@@ -52,12 +50,8 @@ public class JobAdminController {
 	@Inject
 	protected JobCleanUpService cleanUpService;
 
-	@Inject
-	protected FormUtil formUtil;
-
 	@Get("/{id}/reset")
 	public MessageResponse reset(Authentication authentication, String id, @Nullable @QueryValue("max") Integer max) {
-
 		User admin = authenticationService.getUserByAuthentication(authentication);
 
 		int maxDownloads = application.getSettings().getMaxDownloads();
@@ -68,15 +62,14 @@ public class JobAdminController {
 		AbstractJob job = jobService.getById(id);
 		int count = jobService.reset(job, maxDownloads);
 
-		log.info(String.format("Job: Resetting download counters for job %s (by ADMIN user ID %s - email %s)",
-				job.getId(), admin.getId(), admin.getMail()));
+		log.info("Job: Resetting download counters for job {} (by ADMIN user ID {} - email {})", job.getId(),
+				admin.getId(), admin.getMail());
 
 		return MessageResponse.success(id + ": counter of " + count + " downloads reset to " + maxDownloads);
 	}
 
 	@Get("/{id}/retire")
 	public MessageResponse retire(Authentication authentication, String id) {
-
 		User admin = authenticationService.getUserByAuthentication(authentication);
 
 		Settings settings = application.getSettings();
@@ -84,103 +77,94 @@ public class JobAdminController {
 		AbstractJob job = jobService.getById(id);
 		String message = cleanUpService.sendNotification(job, days);
 
-		log.info(String.format("Job: Set retire date for job %s (by ADMIN user ID %s - email %s)", job.getId(),
-				admin.getId(), admin.getMail()));
+		log.info("Job: Set retire date for job {} (by ADMIN user ID {} - email {})", job.getId(), admin.getId(),
+				admin.getMail());
 
 		return MessageResponse.success(message);
-
 	}
 
 	@Get("/{id}/priority")
 	public MessageResponse changePriority(Authentication authentication, String id) {
-
 		User admin = authenticationService.getUserByAuthentication(authentication);
 
 		AbstractJob job = jobService.getById(id);
 		jobService.changePriority(job, HIGH_PRIORITY);
 
-		log.info(String.format("Job: Update priority for job %s (by ADMIN user ID %s - email %s)", job.getId(),
-				admin.getId(), admin.getMail()));
+		log.info("Job: Update priority for job {} (by ADMIN user ID {} - email {})", job.getId(), admin.getId(),
+				admin.getMail());
 
 		return MessageResponse.success("Update priority for job " + job.getId() + ".");
-
 	}
 
 	@Get("/{id}/archive")
 	public MessageResponse archive(Authentication authentication, String id) {
-
 		User admin = authenticationService.getUserByAuthentication(authentication);
 
 		AbstractJob job = jobService.getById(id);
 		String message = jobService.archive(job);
 
-		log.info(String.format("Job: Immediately retired job %s (by ADMIN user ID %s - email %s)", job.getId(),
-				admin.getId(), admin.getMail()));
+		log.info("Job: Immediately retired job {} (by ADMIN user ID {} - email {})",
+				job.getId(), admin.getId(), admin.getMail());
 
 		return MessageResponse.success(message);
-
 	}
 
 	@Get("/{id}/change-retire/{days}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String increaseRetireDate(Authentication authentication, String id, Integer days) {
-
 		User admin = authenticationService.getUserByAuthentication(authentication);
 
 		AbstractJob job = jobService.getById(id);
 		String message = jobService.increaseRetireDate(job, days);
 
-		log.info(String.format("Job: Extended retire date for job %s (by ADMIN user ID %s - email %s)", job.getId(),
-				admin.getId(), admin.getMail()));
+		log.info("Job: Extended retire date for job {} (by ADMIN user ID {} - email {})",
+				job.getId(), admin.getId(), admin.getMail());
 
 		return message;
-
 	}
 
 	@Get("/retire")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String retireJobs(Authentication authentication) {
-
 		User admin = authenticationService.getUserByAuthentication(authentication);
 
 		int notifications = cleanUpService.sendNotifications();
 		int retired = cleanUpService.executeRetire();
 
-		log.info(String.format("Job: Manually triggered retiring of all eligible jobs (by ADMIN user ID %s - email %s)",
-				admin.getId(), admin.getMail()));
+		log.info("Job: Manually triggered retiring of all eligible jobs (by ADMIN user ID {} - email {})",
+				admin.getId(), admin.getMail());
 
-		return "NotificationJob:\n" + notifications + " notifications sent." + "\n\nRetireJob:\n" + retired
-				+ " jobs retired.";
-
+		return "NotificationJob:\n" + notifications + " notifications sent.\n\n"
+				+ "RetireJob:\n" + retired + " jobs retired.";
 	}
 
 	@Get("/")
 	public JobAdminResponse getJobs(Authentication authentication, @Nullable @QueryValue("state") String state) {
-
 		User admin = authenticationService.getUserByAuthentication(authentication);
 
 		List<AbstractJob> jobs = jobService.getJobs(state);
 		List<JobResponse> responses = JobResponse.build(jobs, admin);
 		String workspace = application.getSettings().getLocalWorkspace();
 
-		log.info("Job: list all jobs from all users (by ADMIN user ID {} - email {})", admin.getId(), admin.getMail());
-		
-		return JobAdminResponse.build(responses, workspace);
+		log.info("Job: list all jobs from all users (by ADMIN user ID {} - email {})",
+				admin.getId(), admin.getMail());
 
+		return JobAdminResponse.build(responses, workspace);
 	}
 
-    @Get("/user/{username}")
-    public JobAdminResponse getUserJobs(Authentication authentication, String username, @QueryValue @Nullable Integer page) {
+	@Get("/user/{username}")
+	public JobAdminResponse getUserJobs(Authentication authentication, String username,
+			@QueryValue @Nullable Integer page) {
+		User admin = authenticationService.getUserByAuthentication(authentication);
+		User user = userService.getByUsername(username);
 
-        User admin = authenticationService.getUserByAuthentication(authentication);
-        User user = userService.getByUsername(username);
+		Page<AbstractJob> jobs = jobService.getAllByUserAndPage(user, page, DEFAULT_PAGE_SIZE);
+		List<JobResponse> responses = JobResponse.build(jobs.getData(), admin);
+		String workspace = application.getSettings().getLocalWorkspace();
 
-        Page<AbstractJob> jobs = jobService.getAllByUserAndPage(user, page, DEFAULT_PAGE_SIZE);
-        List<JobResponse> responses = JobResponse.build(jobs.getData(), admin);
-        String workspace = application.getSettings().getLocalWorkspace();
+		log.info("Job: list all jobs from user ID {} (by ADMIN user ID {} - email {})",
+				user.getId(), admin.getId(), admin.getMail());
 
-        log.info("Job: list all jobs from user ID {} (by ADMIN user ID {} - email {})", user.getId(), admin.getId(), admin.getMail());
-
-        return JobAdminResponse.build(responses, workspace);
-    }
+		return JobAdminResponse.build(responses, workspace);
+	}
 }

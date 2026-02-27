@@ -2,8 +2,8 @@ package cloudgene.mapred.wdl;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 @JsonClassDescription
 public class WdlParameterOutput implements WdlParameter {
@@ -12,9 +12,10 @@ public class WdlParameterOutput implements WdlParameter {
 
 	private String description;
 
-	//needed, because yamlbeans expects property AND getter/setter methods.
+	// needed, because yamlbeans expects property AND getter/setter methods.
+	@SuppressWarnings("unused")
 	private String type;
-	
+
 	private WdlParameterOutputType typeEnum;
 
 	private boolean download = true;
@@ -25,9 +26,9 @@ public class WdlParameterOutput implements WdlParameter {
 
 	private boolean serialize = true;
 
-	private List<String> includes = new Vector<String>();
+	private List<String> includes = new ArrayList<>();
 
-	private List<String> excludes = new Vector<String>();
+	private List<String> excludes = new ArrayList<>();
 
 	public String getId() {
 		return id;

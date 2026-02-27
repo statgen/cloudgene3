@@ -6,7 +6,7 @@ import java.util.*;
 
 import cloudgene.mapred.jobs.engine.handler.IJobErrorHandler;
 import cloudgene.mapred.jobs.engine.handler.JobErrorHandlerFactory;
-import cloudgene.mapred.util.Configuration;
+import cloudgene.mapred.util.config.Configuration;
 import io.micronaut.runtime.event.ApplicationShutdownEvent;
 import io.micronaut.runtime.event.annotation.EventListener;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ import cloudgene.mapred.database.util.Fixtures;
 import cloudgene.mapred.jobs.PersistentWorkflowEngine;
 import cloudgene.mapred.jobs.WorkflowEngine;
 import cloudgene.mapred.plugins.PluginManager;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import genepi.io.FileUtil;
 import io.micronaut.context.annotation.Context;
 
@@ -33,23 +33,30 @@ public class Application {
 
 	private static final Logger log = LoggerFactory.getLogger(Application.class);
 
-	public static Settings settings; // HACK! Used to pass data to constructor (but becomes shared state).
-
+	private final Settings settings;
 	private final Database database;
+	private final WorkflowEngine engine;
+	private final Map<String, String> templates;
 
-	private WorkflowEngine engine;
+	public Application(Settings settings) throws SQLException {
+		// ================ SETTINGS ================ //
 
-	private Map<String, String> cacheTemplates;
+		this.settings = settings;
 
-	public Application() throws Exception {
+		// Init plugins
 		PluginManager pluginManager = PluginManager.getInstance();
 		pluginManager.initPlugins(settings);
+
+		// Create directories
+		FileUtil.createDirectory(settings.getTempPath());
+		FileUtil.createDirectory(settings.getLocalWorkspace());
+
+		// ================ DATABASE ================ //
 
 		database = new Database();
 
 		// create h2 or mysql connector
 		DatabaseConnector connector = DatabaseConnectorFactory.createConnector(settings.getDatabase());
-
 		if (connector == null) {
 			log.error("Unknown database driver");
 			System.exit(1);
@@ -75,37 +82,36 @@ public class Application {
 			System.exit(-1);
 		}
 
-		// create directories
-		FileUtil.createDirectory(settings.getTempPath());
-		FileUtil.createDirectory(settings.getLocalWorkspace());
-
-		// insert fixtures
 		Fixtures.insert(database);
 
+		// Template stuff done halfway through DB stuff (because they touch DB I guess?)
+		templates = new HashMap<>();
 		reloadTemplates();
 
 		afterDatabaseConnection(database);
 
-		// start workflow engine
+		// ================ WORKFLOW ENGINE ================ //
+
+		PersistentWorkflowEngine engine = null; // Dummy so we can try-catch and still make engine final.
+
 		try {
-			PersistentWorkflowEngine persistentWorkflowEngine = new PersistentWorkflowEngine(
-					database,
-					settings.getThreadsQueue());
+			engine = new PersistentWorkflowEngine(database, settings.getThreadsQueue());
 
 			for (Map<String, String> map : settings.getErrorHandlers()) {
 				IJobErrorHandler handler = JobErrorHandlerFactory.createByMap(map);
-				persistentWorkflowEngine.addJobErrorHandler(handler);
+				engine.addJobErrorHandler(handler);
+
 				log.info("Created Job Error handler `{}`.", handler.getName());
 			}
-			engine = persistentWorkflowEngine;
 			new Thread(engine).start();
-
 		} catch (Exception e) {
 			log.error("Can't launch the web server.\nAn unexpected exception occurred:", e);
 
 			database.disconnect();
 			System.exit(1);
 		}
+
+		this.engine = engine;
 	}
 
 	@EventListener
@@ -128,18 +134,27 @@ public class Application {
 		return database;
 	}
 
+	/**
+	 * Forces a full reload of all cached templates (accesses DB).
+	 */
 	public void reloadTemplates() {
 		TemplateDao dao = new TemplateDao(database);
-		List<cloudgene.mapred.core.Template> templates = dao.findAll();
+		List<cloudgene.mapred.core.Template> dbTemplates = dao.findAll();
 
-		cacheTemplates = new HashMap<>();
-		for (cloudgene.mapred.core.Template snippet : templates) {
-			cacheTemplates.put(snippet.getKey(), snippet.getText());
+		templates.clear();
+		for (cloudgene.mapred.core.Template snippet : dbTemplates) {
+			templates.put(snippet.getKey(), snippet.getText());
 		}
 	}
 
+	/**
+	 * If a template is cached under the given {@code key}, it is returned.
+	 * Otherwise, {@code "!<key>"} is returned.
+	 * <p>
+	 * This version does not take any parameters and returns the raw template.
+	 */
 	public String getTemplate(String key) {
-		String template = cacheTemplates.get(key);
+		String template = templates.get(key);
 
 		if (template != null) {
 			return template;
@@ -148,8 +163,16 @@ public class Application {
 		}
 	}
 
+	/**
+	 * If a template is cached under the given {@code key}, returns a rendered
+	 * version of the template, using the provided {@code strings} as interpolation
+	 * parameters. Otherwise, {@code "!<key>"} is returned.
+	 * <p>
+	 * The number of provided parameters must match the number of {@code %s} in the
+	 * template, otherwise an error is thrown.
+	 */
 	public String getTemplate(String key, Object... strings) {
-		String template = cacheTemplates.get(key);
+		String template = templates.get(key);
 
 		if (template != null) {
 			try {
@@ -166,6 +189,10 @@ public class Application {
 		}
 	}
 
+	/**
+	 * Callback invoked in the constructor, after the database is fully initialized.
+	 * Subclasses can overwrite it to insert custom behavior.
+	 */
 	protected void afterDatabaseConnection(Database database) {
 	}
 }

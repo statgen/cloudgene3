@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.util.*;
 
 import cloudgene.mapred.util.GlobUtil;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,30 +21,32 @@ import cloudgene.mapred.wdl.WdlStep;
 
 public class CloudgeneJob extends AbstractJob {
 
+	public static final int MAX_DOWNLOAD = 10;
+
+	private static final Logger log = LoggerFactory.getLogger(CloudgeneJob.class);
 	private static final String CLOUDGENE_LOGS_PARAM = "cloudgene_logs";
 
 	private WdlApp app;
-
 	private String workingDirectory;
-
 	private Executor executor;
-
-	public static final int MAX_DOWNLOAD = 10;
-
-	private static Logger log = LoggerFactory.getLogger(CloudgeneJob.class);
 
 	public CloudgeneJob() {
 		super();
 	}
 
-	public CloudgeneJob(User user, String id, WdlApp app, Map<String, String> params) {
+	public CloudgeneJob(
+			User user,
+			String id,
+			@NotNull WdlApp app,
+			@NotNull Map<String, String> params) {
+
 		this.app = app;
 		setId(id);
 		setUser(user);
 		workingDirectory = app.getPath();
 
 		// init parameters
-		inputParams = new Vector<CloudgeneParameterInput>();
+		inputParams = new ArrayList<>();
 		for (WdlParameterInput input : app.getWorkflow().getInputs()) {
 			CloudgeneParameterInput newInput = new CloudgeneParameterInput(input);
 			newInput.setJob(this);
@@ -55,7 +58,7 @@ public class CloudgeneJob extends AbstractJob {
 			inputParams.add(newInput);
 		}
 
-		outputParams = new Vector<CloudgeneParameterOutput>();
+		outputParams = new ArrayList<>();
 		for (WdlParameterOutput output : app.getWorkflow().getOutputs()) {
 			CloudgeneParameterOutput newOutput = new CloudgeneParameterOutput(output);
 			newOutput.initHash();
@@ -65,11 +68,9 @@ public class CloudgeneJob extends AbstractJob {
 		}
 
 		initLogOutput();
-
 	}
 
-	public void loadApp(WdlApp app) {
-
+	public void loadApp(@NotNull WdlApp app) {
 		this.app = app;
 		workingDirectory = app.getPath();
 
@@ -83,12 +84,11 @@ public class CloudgeneJob extends AbstractJob {
 		if (logOutput != null) {
 			getOutputParams().remove(logOutput);
 		}
-
 	}
 
 	protected void initLogOutput() {
 		logOutput = new CloudgeneParameterOutput();
-		logOutput.setAdminOnly(true); //!getSettings().isShowLogs());
+		logOutput.setAdminOnly(true);
 		logOutput.setDownload(true);
 		logOutput.setDescription("Logs");
 		logOutput.setName(CLOUDGENE_LOGS_PARAM);
@@ -99,7 +99,6 @@ public class CloudgeneJob extends AbstractJob {
 
 	@Override
 	public boolean setup() throws Exception {
-
 		context = new CloudgeneContext(this);
 		context.resolveAppLinks();
 
@@ -117,38 +116,33 @@ public class CloudgeneJob extends AbstractJob {
 
 		// create output directories
 		for (CloudgeneParameterOutput param : outputParams) {
-
 			switch (param.getType()) {
-			case LOCAL_FILE:
-				String filename = workspace.createFile(param.getName(), param.getName());
-				param.setValue(filename);
-				log.info("[Job {}] Set output file '{}' to '{}'", getId(), param.getName(), param.getValue());
-				break;
+				case LOCAL_FILE:
+					String filename = workspace.createFile(param.getName(), param.getName());
+					param.setValue(filename);
+					log.info("[Job {}] Set output file '{}' to '{}'", getId(), param.getName(), param.getValue());
+					break;
 
-			case LOCAL_FOLDER:
-				String folder = workspace.createFolder(param.getName());
-				param.setValue(folder);
-				log.info("[Job {}] Set output folder '{}' to '{}'", getId(), param.getName(), param.getValue());
-				break;
+				case LOCAL_FOLDER:
+					String folder = workspace.createFolder(param.getName());
+					param.setValue(folder);
+					log.info("[Job {}] Set output folder '{}' to '{}'", getId(), param.getName(), param.getValue());
+					break;
 			}
-
 		}
 
 		return true;
-
 	}
 
 	@Override
 	public boolean execute() {
-
 		try {
-
 			// evaluate WDL and replace all variables (e.g. ${job_id})
 			Planner planner = new Planner();
 			WdlApp app = planner.evaluateWDL(this.app, context, getSettings());
 
 			// merge setup steps and normal steps
-			List<WdlStep> steps = new Vector<WdlStep>(app.getWorkflow().getSetups());
+			List<WdlStep> steps = new ArrayList<>(app.getWorkflow().getSetups());
 			steps.addAll(app.getWorkflow().getSteps());
 			log.info("[Job {}] execute {} steps", getId(), steps.size());
 
@@ -174,21 +168,16 @@ public class CloudgeneJob extends AbstractJob {
 			log.error("[Job {}] execution failed.", getId(), e);
 			return false;
 		}
-
 	}
 
 	@Override
 	public boolean onFailure() {
-
 		after();
-
 		cleanUp();
-
 		return true;
 	}
 
 	public boolean executeFailureStep() {
-
 		WdlStep step = app.getWorkflow().getOnFailure();
 		cleanUp();
 
@@ -214,12 +203,10 @@ public class CloudgeneJob extends AbstractJob {
 			setError(e.getMessage());
 			return false;
 		}
-
 	}
 
 	@Override
 	public boolean cleanUp() {
-
 		Settings settings = getSettings();
 		boolean shouldCleanUp = settings.getWorkspaceCleanup();
 		if (!shouldCleanUp) {
@@ -244,8 +231,8 @@ public class CloudgeneJob extends AbstractJob {
 
 	@Override
 	public boolean after() {
-
 		log.info("[Job {}] Export parameters...", getId());
+
 		try {
 			for (WdlParameterOutput output : getApp().getWorkflow().getOutputs()) {
 				if (output.isDownload()) {
@@ -264,20 +251,25 @@ public class CloudgeneJob extends AbstractJob {
 			log.error("[Job {}] Export parameters failed.", getId(), e);
 			return false;
 		}
+
 		return true;
 	}
 
-	public void exportParameter(CloudgeneParameterOutput out,List<String> includes, List<String> excludes) throws IOException {
+	public void exportParameter(
+			@NotNull CloudgeneParameterOutput out,
+			@NotNull List<String> includes,
+			@NotNull List<String> excludes) throws IOException {
 
 		writeLog("  Exporting parameter " + out.getName() + "...");
 		out.setJobId(getId());
+
 		List<Download> downloads = workspace.getDownloads(out.getValue());
 		for (Download download : downloads) {
 			download.setParameter(out);
 			download.setCount(MAX_DOWNLOAD);
 
 			// check if it is on excludes or not in includes
-			if (!GlobUtil.isFileIncluded(download.getName(), includes, excludes)){
+			if (!GlobUtil.isFileIncluded(download.getName(), includes, excludes)) {
 				writeLog("  Ignore download " + download.getName() + ".");
 				continue;
 			}
@@ -289,6 +281,7 @@ public class CloudgeneJob extends AbstractJob {
 				writeLog("  Download " + download.getName() + " already added.");
 			}
 		}
+
 		Collections.sort(out.getFiles());
 	}
 
@@ -308,11 +301,8 @@ public class CloudgeneJob extends AbstractJob {
 	}
 
 	public void updateProgress() {
-
 		if (executor != null) {
 			executor.updateProgress();
 		}
-
 	}
-
 }

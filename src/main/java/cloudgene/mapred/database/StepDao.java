@@ -23,12 +23,9 @@ public class StepDao extends JdbcDataAccessObject {
 	}
 
 	public boolean insert(Step step) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("insert into steps (state, name, start_time, end_time, job_id) ");
-		sql.append("values (?,?,?,?,?)");
+		String sql = "INSERT INTO steps (state, name, start_time, end_time, job_id) VALUES (?,?,?,?,?)";
 
 		try {
-
 			Object[] params = new Object[5];
 			params[0] = 0;
 			params[1] = step.getName();
@@ -36,7 +33,7 @@ public class StepDao extends JdbcDataAccessObject {
 			params[3] = System.currentTimeMillis();
 			params[4] = step.getJob().getId();
 
-			int id = insert(sql.toString(), params);
+			int id = insert(sql, params);
 			step.setId(id);
 
 			log.debug("insert step successful.");
@@ -50,17 +47,13 @@ public class StepDao extends JdbcDataAccessObject {
 	}
 
 	public List<Step> findAllByJob(CloudgeneJob job) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from steps ");
-		sql.append("where job_id = ? ");
-		sql.append("order by start_time ");
+		String sql = "SELECT * FROM steps WHERE job_id = ? ORDER BY start_time";
 
 		Object[] params = new Object[1];
 		params[0] = job.getId();
 
 		try {
-			List<Step> result = query(sql.toString(), params, new CloudgeneStepMapper());
+			List<Step> result = query(sql, params, new CloudgeneStepMapper());
 
 			// load messages for all steps
 			MessageDao messageDao = new MessageDao(database);
@@ -70,8 +63,7 @@ public class StepDao extends JdbcDataAccessObject {
 				step.setJob(job);
 			}
 
-			log.debug("find all log step successful. results: " + result.size());
-
+			log.debug("find all log step successful. results: {}", result.size());
 			return result;
 		} catch (SQLException e) {
 			log.error("find all log step failed", e);

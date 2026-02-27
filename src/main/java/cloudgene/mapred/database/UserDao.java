@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,13 +25,13 @@ public class UserDao extends JdbcDataAccessObject {
 	}
 
 	public boolean insert(User user) {
-		StringBuilder sql = new StringBuilder();
-		sql.append(
-				"insert into `user` (username, password, full_name, aws_key, aws_secret_key, save_keys, export_to_s3, s3_bucket, mail, role, export_input_to_s3, activation_code, active, api_token, last_login, locked_until, login_attempts, api_token_expires_on) ");
-		sql.append("values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		String sql = "INSERT INTO `user` "
+				+ "(username, password, full_name, aws_key, aws_secret_key, save_keys, export_to_s3, s3_bucket, mail, "
+				+ "role, export_input_to_s3, activation_code, active, api_token, last_login, locked_until, "
+				+ "login_attempts, api_token_expires_on) "
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		try {
-
 			Object[] params = new Object[18];
 			params[0] = user.getUsername().toLowerCase();
 			params[1] = user.getPassword();
@@ -50,23 +52,24 @@ public class UserDao extends JdbcDataAccessObject {
 			params[16] = user.getLoginAttempts();
 			params[17] = user.getApiTokenExpiresOn();
 
-			int id = insert(sql.toString(), params);
-
+			int id = insert(sql, params);
 			user.setId(id);
 
-			log.debug("insert user '" + user.getUsername() + "' successful.");
+			log.debug("insert user '{}' successful.", user.getUsername());
 			return true;
 		} catch (SQLException e) {
-			log.error("insert user '" + user.getUsername() + "' failed.", e);
+			log.error("insert user '{}' failed.", user.getUsername(), e);
 			return false;
 		}
 	}
 
 	public boolean update(User user) {
-		StringBuilder sql = new StringBuilder();
-		sql.append(
-				"update `user` set username = ?, password = ?, full_name = ?, aws_key = ?, aws_secret_key = ?, save_keys = ? , export_to_s3 = ?, s3_bucket = ?, mail = ?, role = ?, export_input_to_s3 = ?, active = ?, activation_code = ?, api_token = ?, last_login = ?, locked_until = ?, login_attempts = ?, api_token_expires_on = ? ");
-		sql.append("where id = ?");
+		String sql = "UPDATE `user` SET "
+				+ "username = ?, password = ?, full_name = ?, aws_key = ?, aws_secret_key = ?, save_keys = ?, "
+				+ "export_to_s3 = ?, s3_bucket = ?, mail = ?, role = ?, export_input_to_s3 = ?, active = ?, "
+				+ "activation_code = ?, api_token = ?, last_login = ?, locked_until = ?, login_attempts = ?, "
+				+ "api_token_expires_on = ? "
+				+ "WHERE id = ?";
 
 		try {
 			Object[] params = new Object[19];
@@ -90,67 +93,57 @@ public class UserDao extends JdbcDataAccessObject {
 			params[17] = user.getApiTokenExpiresOn();
 			params[18] = user.getId();
 
-			update(sql.toString(), params);
-
-			log.debug("update user '" + user.getUsername() + "' successful.");
+			update(sql, params);
+			log.debug("update user '{}' successful.", user.getUsername());
 			return true;
 		} catch (SQLException e) {
-			log.error("update user '" + user.getUsername() + "' failed.", e);
+			log.error("update user '{}' failed.", user.getUsername(), e);
 			return false;
 		}
 	}
 
-	public User findByUsername(String user) {
-		StringBuffer sql = new StringBuffer();
-		sql.append("select * ");
-		sql.append("from `user` ");
-		sql.append("where username = ?");
-
-		Object[] params = new Object[1];
-		params[0] = user.toLowerCase();
+	public @Nullable User findByUsername(@NotNull String username) {
+		String sql = "SELECT * FROM `user` WHERE username = ?";
 
 		try {
-			User result = queryForObject(sql.toString(), params, new UserMapper());
-			log.debug("find user by username '" + user + "' successful.");
-			return result;
+			Object[] params = new Object[1];
+			params[0] = username.toLowerCase();
+
+			User user = queryForObject(sql, params, new UserMapper());
+			log.debug("find user by username '{}' successful.", username);
+			return user;
 		} catch (SQLException e1) {
-			log.error("find user by username " + user + "' failed.", e1);
+			log.error("find user by username {}' failed.", username, e1);
 			return null;
 		}
 	}
 
-	public User findByMail(String mail) {
-		StringBuffer sql = new StringBuffer();
-		sql.append("select * ");
-		sql.append("from `user` ");
-		sql.append("where mail = ?");
-
-		Object[] params = new Object[1];
-		params[0] = mail.toLowerCase();
+	public @Nullable User findByMail(@NotNull String mail) {
+		String sql = "SELECT * FROM `user` WHERE mail = ?";
 
 		try {
-			User result = (User) queryForObject(sql.toString(), params, new UserMapper());
-			log.debug("find user by mail '" + mail + "' successful.");
-			return result;
+			Object[] params = new Object[1];
+			params[0] = mail.toLowerCase();
+
+			User user = queryForObject(sql, params, new UserMapper());
+			log.debug("find user by mail '{}' successful.", mail);
+			return user;
 		} catch (SQLException e1) {
-			log.error("find user by mail " + mail + "' failed.", e1);
+			log.error("find user by mail {}' failed.", mail, e1);
 			return null;
 		}
 	}
 
 	public User findById(int id) {
-		StringBuffer sql = new StringBuffer();
-		sql.append("select * ");
-		sql.append("from `user` ");
-		sql.append("where id = ?");
-
-		Object[] params = new Object[1];
-		params[0] = id;
+		String sql = "SELECT * FROM `user` WHERE id = ?";
 
 		try {
-			User result = (User) queryForObject(sql.toString(), params, new UserMapper());
-			log.debug("find user by id '" + id + "' successful.");
-			return result;
+			Object[] params = new Object[1];
+			params[0] = id;
+
+			User user = queryForObject(sql, params, new UserMapper());
+			log.debug("find user by id '{}' successful.", id);
+			return user;
 		} catch (SQLException e1) {
 			log.error("find user by id failed.", e1);
 			return null;
@@ -158,29 +151,25 @@ public class UserDao extends JdbcDataAccessObject {
 	}
 
 	public List<User> findAll() {
-		StringBuffer sql = new StringBuffer();
-		sql.append("select * ");
-		sql.append("from `user` ");
-		sql.append("order by username");
+		String sql = "SELECT * FROM `user` ORDER BY username";
 
 		try {
-			List<User> result = query(sql.toString(), new UserMapper());
-			log.debug("find all user successful. size = " + result.size());
+			List<User> result = query(sql, new UserMapper());
+			log.debug("find all users successful. size = {}", result.size());
 			return result;
 		} catch (SQLException e1) {
-			log.error("find all user failed.", e1);
-			return new ArrayList<>();
+			log.error("find all users failed.", e1);
+			return new ArrayList<>(); // TODO(Marc): This is inconsistent with other DAOs (return null).
 		}
 	}
 
 	public int countAll() {
-		StringBuilder sql = new StringBuilder();
-		sql.append("select count(*) ");
-		sql.append("from `user` ");
+		String sql = "SELECT COUNT(*) FROM `user`";
 
 		try {
-			int result = queryForObject(sql.toString(), new IntegerMapper());
-			log.debug("count all users successful. results: " + result);
+			// TODO(Marc): We might be forcing null -> 0 here. Is that correct?
+			int result = queryForObject(sql, new IntegerMapper());
+			log.debug("count all users successful. results: {}", result);
 			return result;
 		} catch (SQLException e) {
 			log.error("count all users failed", e);
@@ -189,45 +178,39 @@ public class UserDao extends JdbcDataAccessObject {
 	}
 
 	public List<User> findByQuery(String query) {
-		StringBuffer sql = new StringBuffer();
-		sql.append("select * ");
-		sql.append("from `user` ");
-		sql.append("where mail like ? or username like ? or full_name like ? ");
-		sql.append("order by username");
-
-		Object[] params = new Object[3];
-		params[0] = "%" + query + "%";
-		params[1] = params[0];
-		params[2] = params[0];
+		String sql = "SELECT * FROM `user` "
+				+ "WHERE mail LIKE ? OR username LIKE ? OR full_name LIKE ? "
+				+ "ORDER BY username";
 
 		try {
-			List<User> result = query(sql.toString(), params, new UserMapper());
-			log.debug("find all user successful. size = " + result.size());
+			Object[] params = new Object[3];
+			params[0] = "%" + query + "%";
+			params[1] = params[0];
+			params[2] = params[0];
+
+			List<User> result = query(sql, params, new UserMapper());
+			log.debug("find users by query successful. size = {}", result.size());
 			return result;
 		} catch (SQLException e1) {
-			log.error("find all user failed.", e1);
-			return new ArrayList<>();
+			log.error("find users by query failed.", e1);
+			return new ArrayList<>(); // TODO(Marc): This is inconsistent with other DAOs (return null).
 		}
 	}
 
 	public List<User> findAll(int offset, int limit) {
-		StringBuffer sql = new StringBuffer();
-		sql.append("select * ");
-		sql.append("from `user` ");
-		sql.append("order by username ");
-		sql.append("limit ?,?");
-
-		Object[] params = new Object[2];
-		params[0] = offset;
-		params[1] = limit;
+		String sql = "SELECT * FROM `user` ORDER BY username LIMIT ?,?";
 
 		try {
-			List<User> result = query(sql.toString(), params, new UserMapper());
-			log.debug("find all user successful. size = " + result.size());
+			Object[] params = new Object[2];
+			params[0] = offset;
+			params[1] = limit;
+
+			List<User> result = query(sql, params, new UserMapper());
+			log.debug("find all users (paged) successful. size = {}", result.size());
 			return result;
 		} catch (SQLException e1) {
-			log.error("find all user failed.", e1);
-			return new ArrayList<>();
+			log.error("find all users (paged) failed.", e1);
+			return new ArrayList<>(); // TODO(Marc): This is inconsistent with other DAOs (return null).
 		}
 	}
 
@@ -242,23 +225,19 @@ public class UserDao extends JdbcDataAccessObject {
 			return false;
 		}
 
-		StringBuilder sql = new StringBuilder();
-		sql.append("delete from `user` ");
-		sql.append("where id = ? ");
+		String sql = "DELETE from `user` WHERE id = ?";
 
 		try {
 			Object[] params = new Object[1];
 			params[0] = user.getId();
 
-			update(sql.toString(), params);
-
+			update(sql, params);
 			log.debug("delete user successful.");
+			return true;
 		} catch (SQLException e) {
 			log.error("delete user failed", e);
 			return false;
 		}
-
-		return true;
 	}
 
 	public static class UserMapper implements IRowMapper<User> {

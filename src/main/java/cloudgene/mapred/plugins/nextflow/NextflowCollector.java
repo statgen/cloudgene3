@@ -1,19 +1,18 @@
 package cloudgene.mapred.plugins.nextflow;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import cloudgene.mapred.jobs.Step;
 import cloudgene.mapred.util.IpFetcher;
-import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cloudgene.mapred.jobs.CloudgeneContext;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 
 public class NextflowCollector {
 
@@ -21,11 +20,11 @@ public class NextflowCollector {
 
 	private static NextflowCollector instance;
 
-	private Map<String, List<NextflowProcess>> data;
+	private final Map<String, List<NextflowProcess>> data;
 
-	private Map<String, CloudgeneContext> contexts;
+	private final Map<String, CloudgeneContext> contexts;
 
-	private Map<String, Map<String, NextflowProcessConfig>> configs;
+	private final Map<String, Map<String, NextflowProcessConfig>> configs;
 
 	private static final Logger log = LoggerFactory.getLogger(NextflowCollector.class);
 
@@ -48,7 +47,8 @@ public class NextflowCollector {
 		configs.put(context.getPublicJobId(), config);
 		Settings settings = context.getSettings();
 		log.info("[Job {}] Register collector for public job id '{}'", context.getJobId(), context.getPublicJobId());
-        return "http://" + IpFetcher.fetchServerIp() + ":" + settings.getPort() + settings.getBaseUrl() + COLLECTOR_ENDPOINT + context.getPublicJobId();
+		return "http://" + IpFetcher.fetchServerIp() + ":" + settings.getPort() + settings.getBaseUrl()
+				+ COLLECTOR_ENDPOINT + context.getPublicJobId();
 	}
 
 	public void addEvent(String job, Map<String, Object> event) throws IOException {
@@ -62,7 +62,7 @@ public class NextflowCollector {
 
 		List<NextflowProcess> processes = data.get(job);
 		if (processes == null) {
-			processes = new Vector<NextflowProcess>();
+			processes = new ArrayList<>();
 			data.put(job, processes);
 		}
 
@@ -95,7 +95,7 @@ public class NextflowCollector {
 	public List<NextflowProcess> getProcesses(CloudgeneContext context) {
 		List<NextflowProcess> processes = data.get(context.getPublicJobId());
 		if (processes == null) {
-			return new Vector<NextflowProcess>();
+			return new ArrayList<>();
 		}
 		return processes;
 
@@ -106,5 +106,4 @@ public class NextflowCollector {
 		contexts.remove(context.getPublicJobId());
 		log.info("[Job {}] Removed collector for public job id '{}'", context.getJobId(), context.getPublicJobId());
 	}
-
 }

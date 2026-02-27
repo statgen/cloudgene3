@@ -5,7 +5,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 
 @JsonClassDescription
 @JsonInclude(JsonInclude.Include.ALWAYS)

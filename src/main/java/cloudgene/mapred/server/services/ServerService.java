@@ -7,7 +7,7 @@ import cloudgene.mapred.plugins.IPlugin;
 import cloudgene.mapred.plugins.PluginManager;
 import cloudgene.mapred.plugins.nextflow.NextflowPlugin;
 import cloudgene.mapred.server.Application;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.util.command.Command;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -16,8 +16,6 @@ import genepi.io.FileUtil;
 import io.micronaut.security.oauth2.configuration.OauthClientConfigurationProperties;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,17 +27,17 @@ import java.util.jar.Manifest;
 @Singleton
 public class ServerService {
 
-	private static final Logger log = LoggerFactory.getLogger(ServerService.class);
-
 	public static final String IMAGE_DATA = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"96\" height=\"20\">"
-			+ "	<linearGradient id=\"b\" x2=\"0\" y2=\"100%\"><stop offset=\"0\" stop-color=\"#bbb\" stop-opacity=\".1\"/><stop offset=\"1\" stop-opacity=\".1\"/></linearGradient>"
-			+ "	<mask id=\"a\"><rect width=\"96\" height=\"20\" rx=\"3\" fill=\"#fff\"/></mask>"
-			+ "	<g mask=\"url(#a)\"><path fill=\"#555\" d=\"M0 0h55v20H0z\"/><path fill=\"#97CA00\" d=\"M55 0h41v20H55z\"/><path fill=\"url(#b)\" d=\"M0 0h96v20H0z\"/></g>"
-			+ "	<g fill=\"#fff\" text-anchor=\"middle\" font-family=\"DejaVu Sans,Verdana,Geneva,sans-serif\" font-size=\"11\">"
-			+ "		<text x=\"27.5\" y=\"15\" fill=\"#010101\" fill-opacity=\".3\">version</text>"
-			+ "		<text x=\"27.5\" y=\"14\">version</text>"
-			+ "		<text x=\"74.5\" y=\"15\" fill=\"#010101\" fill-opacity=\".3\">" + Application.VERSION + "</text>"
-			+ "		<text x=\"74.5\" y=\"14\">" + Application.VERSION + "</text>" + "	</g>" + "</svg>";
+			+ "  <linearGradient id=\"b\" x2=\"0\" y2=\"100%\"><stop offset=\"0\" stop-color=\"#bbb\" stop-opacity=\".1\"/><stop offset=\"1\" stop-opacity=\".1\"/></linearGradient>"
+			+ "  <mask id=\"a\"><rect width=\"96\" height=\"20\" rx=\"3\" fill=\"#fff\"/></mask>"
+			+ "  <g mask=\"url(#a)\"><path fill=\"#555\" d=\"M0 0h55v20H0z\"/><path fill=\"#97CA00\" d=\"M55 0h41v20H55z\"/><path fill=\"url(#b)\" d=\"M0 0h96v20H0z\"/></g>"
+			+ "  <g fill=\"#fff\" text-anchor=\"middle\" font-family=\"DejaVu Sans,Verdana,Geneva,sans-serif\" font-size=\"11\">"
+			+ "    <text x=\"27.5\" y=\"15\" fill=\"#010101\" fill-opacity=\".3\">version</text>"
+			+ "    <text x=\"27.5\" y=\"14\">version</text>"
+			+ "    <text x=\"74.5\" y=\"15\" fill=\"#010101\" fill-opacity=\".3\">" + Application.VERSION + "</text>"
+			+ "    <text x=\"74.5\" y=\"14\">" + Application.VERSION + "</text>"
+			+ "  </g>"
+			+ "</svg>";
 
 	@Inject
 	protected Application application;
@@ -60,7 +58,7 @@ public class ServerService {
 		data.put("userEmailDescription", application.getTemplate(Template.USER_EMAIL_DESCRIPTION));
 		data.put("userWithoutEmailDescription", application.getTemplate(Template.USER_WITHOUT_EMAIL_DESCRIPTION));
 
-		List<String> authClients = new Vector<String>();
+		List<String> authClients = new ArrayList<>();
 		for (OauthClientConfigurationProperties client : clients) {
 			authClients.add(client.getName());
 		}
@@ -78,9 +76,9 @@ public class ServerService {
 			List<cloudgene.mapred.apps.Application> apps = repository.getAllByUser(user, ApplicationRepository.APPS);
 			data.putPOJO("apps", apps);
 
-			List<ObjectNode> appsJson = new Vector<ObjectNode>();
-			List<ObjectNode> deprecatedAppsJson = new Vector<ObjectNode>();
-			List<ObjectNode> experimentalAppsJson = new Vector<ObjectNode>();
+			List<ObjectNode> appsJson = new ArrayList<>();
+			List<ObjectNode> deprecatedAppsJson = new ArrayList<>();
+			List<ObjectNode> experimentalAppsJson = new ArrayList<>();
 
 			for (cloudgene.mapred.apps.Application app : apps) {
 				ObjectNode appJson = mapper.createObjectNode();
@@ -104,7 +102,7 @@ public class ServerService {
 			data.put("loggedIn", true);
 
 		} else {
-			data.putPOJO("apps", new Vector<ObjectNode>());
+			data.putPOJO("apps", new ArrayList<>());
 			data.put("loggedIn", false);
 		}
 
@@ -119,8 +117,23 @@ public class ServerService {
 		return data.toString();
 	}
 
-	public void updateSettings(String name, String adminName, String adminMail, String serverUrl, String baseUrl, String background_color, String foreground_color, String google_analytics,
-			String mail, String mail_smtp, String mail_port, String mail_user, String mail_password, String mail_name, String workspaceType, String workspaceLocation) {
+	public void updateSettings(
+			String name,
+			String adminName,
+			String adminMail,
+			String serverUrl,
+			String baseUrl,
+			String backgroundColor,
+			String foregroundColor,
+			String googleAnalytics,
+			String mail,
+			String mailSmtp,
+			String mailPort,
+			String mailUser,
+			String mailPassword,
+			String mailName,
+			String workspaceType,
+			String workspaceLocation) {
 
 		Settings settings = application.getSettings();
 		settings.setName(name);
@@ -128,19 +141,19 @@ public class ServerService {
 		settings.setAdminMail(adminMail);
 		settings.setServerUrl(serverUrl);
 		settings.setBaseUrl(baseUrl);
-		settings.getColors().put("background", background_color);
-		settings.getColors().put("foreground", foreground_color);
-		settings.setGoogleAnalytics(google_analytics);
+		settings.getColors().put("background", backgroundColor);
+		settings.getColors().put("foreground", foregroundColor);
+		settings.setGoogleAnalytics(googleAnalytics);
 		settings.getExternalWorkspace().put("type", workspaceType);
 		settings.getExternalWorkspace().put("location", workspaceLocation);
-		
+
 		if (mail != null && mail.equals("true")) {
-			Map<String, String> mailConfig = new HashMap<String, String>();
-			mailConfig.put("smtp", mail_smtp);
-			mailConfig.put("port", mail_port);
-			mailConfig.put("user", mail_user);
-			mailConfig.put("password", mail_password);
-			mailConfig.put("name", mail_name);
+			Map<String, String> mailConfig = new HashMap<>();
+			mailConfig.put("smtp", mailSmtp);
+			mailConfig.put("port", mailPort);
+			mailConfig.put("user", mailUser);
+			mailConfig.put("password", mailPassword);
+			mailConfig.put("name", mailName);
 			application.getSettings().setMail(mailConfig);
 		} else {
 			application.getSettings().setMail(null);
@@ -205,8 +218,8 @@ public class ServerService {
 			plugins.add(pluginObject);
 		}
 
-		//check user defined resources
-		for (Map<String, String> resource: application.getSettings().getResources()){
+		// check user defined resources
+		for (Map<String, String> resource : application.getSettings().getResources()) {
 			String name = resource.get("name");
 			ObjectNode pluginObject = mapper.createObjectNode();
 			pluginObject.put("name", name);
@@ -226,9 +239,9 @@ public class ServerService {
 			if (exitCode == 0) {
 				pluginObject.put("enabled", true);
 				pluginObject.put("details", output.toString());
-			}else {
+			} else {
 				pluginObject.put("enabled", false);
-				pluginObject.put("error",  output.toString()+ "\n" + error.toString());
+				pluginObject.put("error", output.toString() + "\n" + error.toString());
 			}
 			plugins.add(pluginObject);
 		}
@@ -255,5 +268,4 @@ public class ServerService {
 		String filename = plugin.getNextflowEnv();
 		FileUtil.writeStringBufferToFile(filename, new StringBuffer(content));
 	}
-
 }

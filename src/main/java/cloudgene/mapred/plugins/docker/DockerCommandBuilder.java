@@ -1,11 +1,11 @@
 package cloudgene.mapred.plugins.docker;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class DockerCommandBuilder {
 
-	private DockerBinary docker;
+	private final DockerBinary docker;
 
 	private String image;
 
@@ -33,7 +33,7 @@ public class DockerCommandBuilder {
 	}
 
 	public List<String> build() {
-		List<String> commands = new Vector<>();
+		List<String> commands = new ArrayList<>();
 		commands.add(docker.getBinary());
 		commands.add("run");
 
@@ -49,7 +49,7 @@ public class DockerCommandBuilder {
 		for (String a : cmd) {
 			commands.add(a);
 		}
+
 		return commands;
 	}
-
 }

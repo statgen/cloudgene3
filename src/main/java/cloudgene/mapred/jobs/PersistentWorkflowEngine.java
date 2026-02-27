@@ -1,12 +1,16 @@
 package cloudgene.mapred.jobs;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
+import cloudgene.mapred.core.User;
 import cloudgene.mapred.database.*;
 import cloudgene.mapred.jobs.engine.handler.IJobErrorHandler;
+import cloudgene.mapred.jobs.state.JobState;
+import io.micronaut.core.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,15 +20,15 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 
 	private static final Logger log = LoggerFactory.getLogger(PersistentWorkflowEngine.class);
 
-	private Database database;
+	private final Database database;
 
-	private JobDao dao;
+	private final JobDao jobDao;
 
-	private CounterDao counterDao;
+	private final CounterDao counterDao;
 
-	private Map<String, Long> counters;
+	private final Map<String, Long> counters;
 
-	private List<IJobErrorHandler> handlers = new Vector<IJobErrorHandler>();
+	private final List<IJobErrorHandler> handlers = new ArrayList<>();
 
 	public PersistentWorkflowEngine(Database database, int ltqThreads) {
 		super(ltqThreads);
@@ -35,103 +39,92 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 		counterDao = new CounterDao(database);
 		counters = counterDao.getAll();
 
-		dao = new JobDao(database);
+		jobDao = new JobDao(database);
 
-		List<AbstractJob> deadJobs = dao.findAllByState(AbstractJob.STATE_WAITING);
-		deadJobs.addAll(dao.findAllByState(AbstractJob.STATE_RUNNING));
-		deadJobs.addAll(dao.findAllByState(AbstractJob.STATE_EXPORTING));
+		List<AbstractJob> deadJobs = jobDao.findAllByState(JobState.WAITING);
+		deadJobs.addAll(jobDao.findAllByState(JobState.RUNNING));
+		deadJobs.addAll(jobDao.findAllByState(JobState.EXPORTING));
 
 		for (AbstractJob job : deadJobs) {
-			log.info("lost control over job " + job.getId() + " -> Dead");
-			job.setState(AbstractJob.STATE_DEAD);
-			dao.update(job);
+			log.info("lost control over job {} -> Dead", job.getId());
+			job.setState(JobState.DEAD);
+			jobDao.update(job);
 		}
-
 	}
 
 	@Override
-	protected void statusUpdated(AbstractJob job) {
+	protected void statusUpdated(@NotNull AbstractJob job) {
 		super.statusUpdated(job);
-		dao.update(job);
+		jobDao.update(job);
 	}
 
 	@Override
-	protected void jobCompleted(AbstractJob job) {
+	protected void jobCompleted(@NotNull AbstractJob job) {
 		super.jobCompleted(job);
 
 		DownloadDao downloadDao = new DownloadDao(database);
 
 		for (CloudgeneParameterOutput parameter : job.getOutputParams()) {
-
 			if (parameter.isDownload()) {
-
 				if (parameter.getFiles() != null) {
-
 					for (Download download : parameter.getFiles()) {
 						download.setParameter(parameter);
 						downloadDao.insert(download);
 					}
-
 				}
-
 			}
-
 		}
 
 		if (job.getLogOutput().getFiles() != null) {
-
 			for (Download download : job.getLogOutput().getFiles()) {
 				download.setParameter(job.getLogOutput());
 				downloadDao.insert(download);
 			}
-
 		}
 
 		if (job.getSteps() != null) {
-			StepDao dao2 = new StepDao(database);
+			StepDao stepDao = new StepDao(database);
 			for (Step step : job.getSteps()) {
-				dao2.insert(step);
-
+				stepDao.insert(step);
 				MessageDao messageDao = new MessageDao(database);
 				if (step.getLogMessages() != null) {
 					for (Message logMessage : step.getLogMessages()) {
 						messageDao.insert(logMessage);
 					}
 				}
-
 			}
 		}
 
 		// count all runs when counter was not set by application
-		Map<String, Integer> submittedCounters = job.getContext().getSubmittedCounters();
+		Map<String, Long> submittedCounters = job.getContext().getSubmittedCounters();
 		if (!submittedCounters.containsKey("runs")) {
-			if (job.getState() == AbstractJob.STATE_SUCCESS) {
-				submittedCounters.put("runs", 1);
+			if (job.getState() == JobState.SUCCESS) {
+				submittedCounters.put("runs", 1L);
 			}
 		}
 
 		// write all submitted counters into database
 		for (String name : submittedCounters.keySet()) {
-			Integer value = submittedCounters.get(name);
+			Long value = submittedCounters.get(name);
 
 			if (value != null) {
-
 				Long counterValue = counters.get(name);
+
 				if (counterValue == null) {
-					counterValue = 0L + value;
+					counterValue = value;
 				} else {
 					counterValue = counterValue + value;
 				}
+
 				counters.put(name, counterValue);
-
 				counterDao.insert(name, value, job);
-
 			}
 		}
 
 		// write all submitted values into database
 		JobValueDao jobValueDao = new JobValueDao(database);
 		Map<String, String> submittedValues = job.getContext().getSubmittedValues();
+
 		for (String name : submittedValues.keySet()) {
 			String value = submittedValues.get(name);
 
@@ -141,52 +134,57 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 		}
 
 		// update job updates (state, endtime, ....)
-		dao.update(job);
+		jobDao.update(job);
 
-		if (job.getState() == AbstractJob.STATE_FAILED) {
-			for (IJobErrorHandler handler: handlers) {
+		if (job.getState() == JobState.FAILED) {
+			for (IJobErrorHandler handler : handlers) {
 				handler.handle(this, job);
 			}
 		}
-
 	}
 
 	@Override
-	protected void jobSubmitted(AbstractJob job) {
+	protected void jobSubmitted(@NotNull AbstractJob job) {
 		super.jobSubmitted(job);
-		dao.insert(job);
+		jobDao.insert(job);
 
-		ParameterDao dao = new ParameterDao(database);
+		ParameterDao parameterDao = new ParameterDao(database);
 
 		for (CloudgeneParameterInput parameter : job.getInputParams()) {
 			parameter.setJobId(job.getId());
-			dao.insert(parameter);
+			parameterDao.insert(parameter);
 		}
 
 		for (CloudgeneParameterOutput parameter : job.getOutputParams()) {
 			parameter.setJobId(job.getId());
-			dao.insert(parameter);
+			parameterDao.insert(parameter);
 		}
 
-		dao.insert(job.getLogOutput());
+		parameterDao.insert(job.getLogOutput());
 	}
 
 	@Override
-	public Map<String, Long> getCounters(int state, List<String> names) {
-		if (state == AbstractJob.STATE_SUCCESS) {
+	@NotNull
+	public Map<String, Long> getCounters(JobState state, @Nullable List<String> names) {
+		if (state == JobState.SUCCESS) {
 			List<String> keys = (names == null) ? counters.keySet().stream().toList() : names;
 			Map<String, Long> counters = new HashMap<>();
-			for (String name: keys) {
+
+			for (String name : keys) {
 				counters.put(name, this.counters.get(name));
 			}
+
 			return counters;
 		} else {
 			return super.getCounters(state, null);
 		}
 	}
 
+	public Map<String, Long> getCountersByUser(User user) {
+		return counterDao.getByUser(user);
+	}
+
 	public void addJobErrorHandler(IJobErrorHandler handler) {
 		this.handlers.add(handler);
 	}
-
 }

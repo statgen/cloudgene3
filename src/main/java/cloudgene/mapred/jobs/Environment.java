@@ -1,12 +1,12 @@
 package cloudgene.mapred.jobs;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Vector;
 
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.wdl.WdlApp;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 
@@ -14,13 +14,14 @@ public class Environment {
 
 	public static String PREFIX = "CLOUDGENE_";
 
-	private Map<String, String> env = new HashMap<String, String>();
+	private final Map<String, String> env = new HashMap<>();
 
 	public Environment(Settings settings) {
 		add("SERVICE_NAME", settings.getName());
 		add("SERVICE_URL", settings.getServerUrl() + settings.getBaseUrl());
 		add("CONTACT_EMAIL", settings.getAdminMail());
 		add("CONTACT_NAME", settings.getAdminName());
+
 		if (settings.getMail() != null) {
 			add("SMTP_HOST", settings.getMail().get("smtp"));
 			add("SMTP_PORT", settings.getMail().get("port"));
@@ -29,6 +30,7 @@ public class Environment {
 			add("SMTP_NAME", settings.getMail().get("name"));
 			add("SMTP_SENDER", settings.getMail().get("name"));
 		}
+
 		add("WORKSPACE_TYPE", settings.getExternalWorkspaceType());
 		add("WORKSPACE_HOME", settings.getExternalWorkspaceLocation());
 	}
@@ -36,23 +38,28 @@ public class Environment {
 	public Environment addContext(CloudgeneContext context) {
 		add("JOB_ID", context.getJobId());
 		add("JOB_NAME", context.getJobName());
+
 		if (context.getJob() != null) {
 			add("JOB_PRIORITY", context.getJob().getPriority() + "");
 			add("JOB_SUBMITTED_ON", context.getJob().getSubmittedOn() + "");
 		}
+
 		add("JOB_LOCATION", context.getLocalTemp());
 		add("USER_NAME", context.getUser().getUsername());
 		add("USER_EMAIL", context.getUser().getMail());
 		add("USER_FULL_NAME", context.getUser().getFullName());
+
 		return this;
 	}
 
 	public Environment addApplication(WdlApp application) {
 		String localFolder = application.getPath();
+
 		add("APP_LOCATION", localFolder);
 		add("APP_ID", application.getId());
 		add("APP_NAME", application.getName());
 		add("APP_VERSION", application.getVersion());
+
 		return this;
 	}
 
@@ -66,7 +73,8 @@ public class Environment {
 	}
 
 	public List<Variable> toList() {
-		List<Variable> variables = new Vector<Variable>();
+		List<Variable> variables = new ArrayList<>();
+
 		for (Entry<String, String> entry : env.entrySet()) {
 			if (entry.getKey().endsWith("_PASSWORD")) {
 				variables.add(new Variable(entry.getKey(), "************"));
@@ -74,14 +82,15 @@ public class Environment {
 				variables.add(new Variable(entry.getKey(), entry.getValue()));
 			}
 		}
+
 		return variables;
 	}
-	
-	
+
 	public static String resolve(String value, Map<String, String> variables) {
 		for (String key : variables.keySet()) {
 			value = value.replaceAll("\\$\\{" + key + "\\}", variables.get(key));
 		}
+
 		return value;
 	}
 
@@ -89,6 +98,7 @@ public class Environment {
 		for (String key : env.keySet()) {
 			value = value.replaceAll("\\$\\{" + key + "\\}", env.get(key));
 		}
+
 		return value;
 	}
 
@@ -119,7 +129,5 @@ public class Environment {
 		public String getValue() {
 			return value;
 		}
-
 	}
-
 }

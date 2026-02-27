@@ -1,7 +1,7 @@
 package cloudgene.mapred.server.responses;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -117,7 +117,7 @@ public class JobResponse {
 	public void setUserAgent(String userAgent) {
 		this.userAgent = userAgent;
 	}
-	
+
 	public long getStartTime() {
 		return startTime;
 	}
@@ -157,11 +157,11 @@ public class JobResponse {
 	public void setLogs(String logs) {
 		this.logs = logs;
 	}
-	
+
 	public void setCurrentTime(long currentTime) {
 		this.currentTime = currentTime;
 	}
-	
+
 	public long getCurrentTime() {
 		return currentTime;
 	}
@@ -182,7 +182,7 @@ public class JobResponse {
 		}
 
 		// removes outputs that are for admin only
-		List<CloudgeneParameterOutput> adminParams = new Vector<>();
+		List<CloudgeneParameterOutput> adminParams = new ArrayList<>();
 		if (!user.isAdmin()) {
 			for (CloudgeneParameterOutput param : job.getOutputParams()) {
 				if (param.isAdminOnly()) {
@@ -197,6 +197,7 @@ public class JobResponse {
 				adminParams.add(param);
 			}
 		}
+
 		job.getOutputParams().removeAll(adminParams);
 
 		JobResponse response = new JobResponse();
@@ -205,7 +206,9 @@ public class JobResponse {
 		response.setName(job.getName());
 		response.setId(job.getId());
 
-		response.setState(job.getState());
+		// TODO(Marc): Send job state to front end as human-readable string? (might
+		//             break tooling).
+		response.setState(job.getState().getValue());
 
 		response.setPositionInQueue(job.getPositionInQueue());
 		response.setUserAgent(job.getUserAgent());
@@ -215,6 +218,7 @@ public class JobResponse {
 		response.setStartTime(job.getStartTime());
 		response.setEndTime(job.getEndTime());
 		response.setSubmittedOn(job.getSubmittedOn());
+
 		List<StepResponse> responses = StepResponse.build(job.getSteps());
 		response.setStepResponses(responses);
 
@@ -232,17 +236,18 @@ public class JobResponse {
 		if (job.getUser() != null) {
 			response.setUsername(job.getUser().getUsername());
 		}
-		
+
 		response.setCurrentTime(System.currentTimeMillis());
 		return response;
 	}
 
 	public static List<JobResponse> build(List<AbstractJob> data, User user) {
-		List<JobResponse> responses = new Vector<JobResponse>();
+		List<JobResponse> responses = new ArrayList<>();
+
 		for (AbstractJob job : data) {
 			responses.add(JobResponse.build(job, user));
 		}
+
 		return responses;
 	}
-
 }

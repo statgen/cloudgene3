@@ -21,18 +21,14 @@ public class TemplateDao extends JdbcDataAccessObject {
 	}
 
 	public boolean insert(Template snippet) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("insert into html_snippets (`key`, text) ");
-		sql.append("values (?,?)");
+		String sql = "INSERT INTO html_snippets (`key`, text) VALUES (?,?)";
 
 		try {
-
 			Object[] params = new Object[2];
 			params[0] = snippet.getKey();
 			params[1] = snippet.getText();
 
-			update(sql.toString(), params);
-
+			update(sql, params);
 			log.debug("insert html snippet successful.");
 			return true;
 		} catch (SQLException e) {
@@ -42,16 +38,14 @@ public class TemplateDao extends JdbcDataAccessObject {
 	}
 
 	public boolean update(Template snippet) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("update html_snippets SET text = ? where `key` = ? ");
+		String sql = "UPDATE html_snippets SET text = ? WHERE `key` = ?";
 
 		try {
 			Object[] params = new Object[2];
 			params[0] = snippet.getText();
 			params[1] = snippet.getKey();
 
-			update(sql.toString(), params);
-
+			update(sql, params);
 			log.debug("update html snippet successful.");
 			return true;
 		} catch (SQLException e) {
@@ -61,16 +55,11 @@ public class TemplateDao extends JdbcDataAccessObject {
 	}
 
 	public List<Template> findAll() {
-		StringBuilder sql = new StringBuilder();
-		sql.append("select * ");
-		sql.append("from html_snippets ");
+		String sql = "SELECT * FROM html_snippets";
 
 		try {
-			List<Template> result = query(sql.toString(), new TemplateMapper());
-
-			log.debug("find all html snippets successful. results: "
-					+ result.size());
-
+			List<Template> result = query(sql, new TemplateMapper());
+			log.debug("find all html snippets successful. results: " + result.size());
 			return result;
 		} catch (SQLException e) {
 			log.error("find all html snippets failed", e);
@@ -79,21 +68,17 @@ public class TemplateDao extends JdbcDataAccessObject {
 	}
 
 	public Template findByKey(String key) {
-		StringBuffer sql = new StringBuffer();
-
-		sql.append("select * ");
-		sql.append("from html_snippets ");
-		sql.append("where `key` = ?");
-
-		Object[] params = new Object[1];
-		params[0] = key;
+		String sql = "SELECT * FROM html_snippets WHERE `key` = ?";
 
 		try {
-			Template result = queryForObject(sql.toString(), params, new TemplateMapper());
-			log.debug("find html snippet by key '" + key + "' successful.");
+			Object[] params = new Object[1];
+			params[0] = key;
+
+			Template result = queryForObject(sql, params, new TemplateMapper());
+			log.debug("find html snippet by key '{}' successful.", key);
 			return result;
 		} catch (SQLException e1) {
-			log.error("find html snippet by key '" + key + "'  failed.", e1);
+			log.error("find html snippet by key '{}'  failed.", key, e1);
 			return null;
 		}
 	}

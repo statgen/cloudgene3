@@ -28,7 +28,6 @@ import java.util.Map;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.MapListHandler;
 
 public abstract class JdbcDataAccessObject {
 
@@ -41,38 +40,32 @@ public abstract class JdbcDataAccessObject {
 		runner = new QueryRunner(database.getDataSource());
 	}
 
-	public <T> T queryForObject(String sql, IRowMapper<T> mapper)
-			throws SQLException {
+	public <T> T queryForObject(String sql, IRowMapper<T> mapper) throws SQLException {
 		return runner.query(sql, new ObjectHandler<>(mapper));
 	}
 
-	public <T> T queryForObject(String sql, Object[] params, IRowMapper<T> mapper)
-			throws SQLException {
+	public <T> T queryForObject(String sql, Object[] params, IRowMapper<T> mapper) throws SQLException {
 		return runner.query(sql, new ObjectHandler<>(mapper), params);
 	}
 
-	public <T> List<T> query(String sql, Object[] params, IRowMapper<T> mapper)
-			throws SQLException {
+	public <T> List<T> query(String sql, Object[] params, IRowMapper<T> mapper) throws SQLException {
 		return runner.query(sql, new ListHandler<>(mapper), params);
 	}
 
-	public <K, V> Map<K, V> queryForMap(String sql, IRowMapMapper<K, V> mapper)
-			throws SQLException {
+	public <K, V> Map<K, V> queryForMap(String sql, IRowMapMapper<K, V> mapper) throws SQLException {
 		return runner.query(sql, new MapHandler<>(mapper));
 	}
 
-	public <K, V> Map<K, V> queryForMap(String sql, Object[] params, IRowMapMapper<K, V> mapper)
-			throws SQLException {
+	public <K, V> Map<K, V> queryForMap(String sql, IRowMapMapper<K, V> mapper, Object... params) throws SQLException {
 		return runner.query(sql, new MapHandler<>(mapper), params);
 	}
 
-	public <K, V> Map<K, List<V>> queryForGroupedList(String sql, Object[] params,
-			IRowMapMapper<K, V> mapper) throws SQLException {
+	public <K, V> Map<K, List<V>> queryForGroupedList(String sql, Object[] params, IRowMapMapper<K, V> mapper)
+			throws SQLException {
 		return runner.query(sql, new GroupedListHandler<>(mapper), params);
 	}
 
-	public <K, V> Map<K, List<V>> queryForGroupedList(String sql, IRowMapMapper<K, V> mapper)
-			throws SQLException {
+	public <K, V> Map<K, List<V>> queryForGroupedList(String sql, IRowMapMapper<K, V> mapper) throws SQLException {
 		return runner.query(sql, new GroupedListHandler<>(mapper));
 	}
 
@@ -115,17 +108,14 @@ public abstract class JdbcDataAccessObject {
 
 	// DBUtils 1.6 method
 	public List<Integer> batchGeneratedKeys(String sql, Object[][] params) throws SQLException {
-		ResultSetHandler<List<Integer>> handler = new ResultSetHandler<List<Integer>>() {
-			@Override
-			public List<Integer> handle(ResultSet rs) throws SQLException {
-				List<Integer> identifiers = new ArrayList<Integer>();
+		ResultSetHandler<List<Integer>> handler = rs -> {
+			List<Integer> identifiers = new ArrayList<>();
 
-				while (rs.next()) {
-					identifiers.add(rs.getInt(1));
-				}
-
-				return identifiers;
+			while (rs.next()) {
+				identifiers.add(rs.getInt(1));
 			}
+
+			return identifiers;
 		};
 
 		return runner.insertBatch(sql, handler, params);
@@ -133,10 +123,10 @@ public abstract class JdbcDataAccessObject {
 
 	public boolean callProcedure(String sql, Object[] params) throws SQLException {
 		try (Connection connection = database.getDataSource().getConnection()) {
-			CallableStatement cstmt = connection.prepareCall(sql);
-			runner.fillStatement(cstmt, params);
-			boolean state = cstmt.execute();
-			cstmt.close();
+			CallableStatement statement = connection.prepareCall(sql);
+			runner.fillStatement(statement, params);
+			boolean state = statement.execute();
+			statement.close();
 			connection.close();
 			return state;
 		}

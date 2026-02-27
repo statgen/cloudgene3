@@ -2,13 +2,14 @@ package cloudgene.mapred.server.services;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import cloudgene.mapred.database.ParameterDao;
 import cloudgene.mapred.jobs.*;
+import cloudgene.mapred.jobs.state.JobState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,11 +23,10 @@ import cloudgene.mapred.server.Application;
 import cloudgene.mapred.server.exceptions.JsonHttpStatusException;
 import cloudgene.mapred.util.FormUtil.Parameter;
 import cloudgene.mapred.util.Page;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.wdl.WdlApp;
 import genepi.io.FileUtil;
 import io.micronaut.http.HttpStatus;
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 @Singleton
@@ -34,14 +34,26 @@ public class JobService {
 
 	private static final Logger log = LoggerFactory.getLogger(JobService.class);
 
-	@Inject
-	protected Application application;
+	private static final SimpleDateFormat ID_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS");
 
-	@Inject
+	protected Application application;
 	protected WorkspaceFactory workspaceFactory;
 
-	public AbstractJob getById(String id) {
+	public JobService(Application application, WorkspaceFactory workspaceFactory) {
+		this.application = application;
+		this.workspaceFactory = workspaceFactory;
+	}
 
+	/**
+	 * Attempts to retrieve the requested job from:
+	 * <ol>
+	 *     <li>The current workflow engine (in-memory data).</li>
+	 *     <li>The database.</li>
+	 * </ol>
+	 *
+	 * If the job cannot be found, a {@link JsonHttpStatusException} is thrown.
+	 */
+	public AbstractJob getById(String id) {
 		// TODO: better to go via database? only load from engine when running?
 
 		AbstractJob job = application.getWorkflowEngine().getJobById(id);
@@ -50,9 +62,7 @@ public class JobService {
 			// finished job is in database
 			JobDao dao = new JobDao(application.getDatabase());
 			job = dao.findById(id, true);
-
 		} else {
-
 			if (job instanceof CloudgeneJob) {
 				((CloudgeneJob) job).updateProgress();
 			}
@@ -65,8 +75,12 @@ public class JobService {
 		return job;
 	}
 
+	/**
+	 * Similar to {@link #getById(String)}, but also throws a
+	 * {@link JsonHttpStatusException} if {@code user} is not authorized to view
+	 * this job.
+	 */
 	public AbstractJob getByIdAndUser(String id, User user) {
-
 		if (user == null) {
 			throw new JsonHttpStatusException(HttpStatus.UNAUTHORIZED, "Access denied.");
 		}
@@ -81,8 +95,25 @@ public class JobService {
 		return job;
 	}
 
+	/**
+	 * Submits the requested job for running, if applicable.
+	 * <p>
+	 * {@code appId} must be a valid application identifier for an installed app.
+	 * Requesting an unknown ID raises an exception.
+	 * <p>
+	 * Non-admin users are limited to {@code maxRunningJobsPerUser} simultaneous
+	 * queued and/or running jobs. Attempting to submit beyond this limit raises an
+	 * exception.
+	 *
+	 * @param appId     String of form {@code <name>[@version]} identifying which
+	 *                  installed Cloudgene application to run.
+	 * @param form      Input parameters for the job.
+	 * @param user      Who is submitting this job?
+	 * @param userAgent Web user agent used to perform this request (stored with job
+	 *                  data).
+	 * @return The submitted job.
+	 */
 	public AbstractJob submitJob(String appId, List<Parameter> form, User user, String userAgent) {
-
 		if (user == null) {
 			throw new JsonHttpStatusException(HttpStatus.UNAUTHORIZED, "Access denied.");
 		}
@@ -109,12 +140,11 @@ public class JobService {
 
 		String id = createId();
 
-		Map<String, String> inputParams = null;
+		Map<String, String> inputParams;
 
 		IWorkspace workspace = workspaceFactory.getDefault();
 
 		try {
-
 			// setup workspace
 			workspace.setJob(id);
 			workspace.setup();
@@ -128,7 +158,7 @@ public class JobService {
 
 		String name = id;
 		String jobName = inputParams.get("job-name");
-		if (jobName != null && !jobName.trim().isEmpty()) {
+		if (jobName != null && !jobName.isBlank()) {
 			name = jobName;
 		}
 
@@ -149,11 +179,9 @@ public class JobService {
 		engine.submit(job);
 
 		return job;
-
 	}
 
 	public Page<AbstractJob> getAllByUserAndPage(User user, Integer page, int pageSize) {
-
 		int offset = 0;
 		if (page != null) {
 
@@ -170,7 +198,7 @@ public class JobService {
 		// count all jobs
 		int count = dao.countAllByUser(user);
 
-		List<AbstractJob> jobs = null;
+		List<AbstractJob> jobs;
 		if (page != null) {
 			jobs = dao.findAllByUser(user, offset, pageSize);
 		} else {
@@ -181,7 +209,7 @@ public class JobService {
 		}
 
 		// if job is running, use in memory instance
-		List<AbstractJob> finalJobs = new Vector<AbstractJob>();
+		List<AbstractJob> finalJobs = new ArrayList<>();
 		for (AbstractJob job : jobs) {
 			AbstractJob runningJob = application.getWorkflowEngine().getJobById(job.getId());
 			if (runningJob != null) {
@@ -189,30 +217,28 @@ public class JobService {
 			} else {
 				finalJobs.add(job);
 			}
-
 		}
 
-		Page<AbstractJob> result = new Page<AbstractJob>();
+		Page<AbstractJob> result = new Page<>();
 		result.setCount(count);
 		result.setPage(page);
 		result.setPageSize(pageSize);
 		result.setData(finalJobs);
 
 		return result;
-
 	}
 
 	public AbstractJob delete(AbstractJob job) {
 		Settings settings = application.getSettings();
+
+		JobDao dao = new JobDao(application.getDatabase());
 
 		// delete local directory
 		String localOutput = FileUtil.path(settings.getLocalWorkspace(), job.getId());
 		FileUtil.deleteDirectory(localOutput);
 
 		// delete job from database
-		job.setState(AbstractJob.STATE_DELETED);
-
-		JobDao dao = new JobDao(application.getDatabase());
+		job.setState(JobState.DELETED);
 		dao.update(job);
 
 		// When a user manually deletes a job, clear sensitive data immediately
@@ -220,27 +246,30 @@ public class JobService {
 		parameterDao.deleteSensitiveByJob(job);
 
 		// delete all results that are stored on external workspaces
-
 		IWorkspace workspace = workspaceFactory.getByJob(job);
 		try {
 			workspace.delete(job.getId());
 		} catch (Exception e) {
-			log.error("Deleting " + job.getId() + " form workspace failed.", e);
+			log.error("Deleting {} form workspace failed.", job.getId(), e);
 		}
 
 		return job;
 	}
 
+	/**
+	 * If the {@code job} is in the long time queue (WAITING or RUNNING, basically),
+	 * it is canceled. This is reflected by a change in its {@code state}.
+	 * Otherwise, nothing is done. Returns the passed {@code job}.
+	 */
 	public AbstractJob cancel(AbstractJob job) {
 		application.getWorkflowEngine().cancel(job);
 		return job;
 	}
 
 	public AbstractJob restart(AbstractJob job) {
-
 		Settings settings = application.getSettings();
 
-		if (job.getState() != AbstractJob.STATE_DEAD) {
+		if (job.getState() != JobState.DEAD) {
 			throw new JsonHttpStatusException(HttpStatus.BAD_REQUEST, "Job " + job.getId() + " is not pending.");
 		}
 
@@ -274,13 +303,18 @@ public class JobService {
 		this.application.getWorkflowEngine().restart(job);
 
 		return job;
-
 	}
 
+	/**
+	 * Sets the download attempt counter for each downloadable artifact in the
+	 * provided {@code job} to {@code maxDownloads} (the download counter counts
+	 * DOWN to zero; after that no more download attempts are allowed for the
+	 * specific artifact).
+	 */
 	public int reset(AbstractJob job, int maxDownloads) {
-
 		DownloadDao downloadDao = new DownloadDao(application.getDatabase());
 		int count = 0;
+
 		for (CloudgeneParameterOutput param : job.getOutputParams()) {
 			if (param.isDownload()) {
 				List<Download> downloads = param.getFiles();
@@ -295,7 +329,6 @@ public class JobService {
 		}
 
 		return count;
-
 	}
 
 	public AbstractJob changePriority(AbstractJob job, long priority) {
@@ -308,49 +341,47 @@ public class JobService {
 
 		JobDao dao = new JobDao(application.getDatabase());
 
-		if (job.getState() != AbstractJob.STATE_SUCCESS && job.getState() != AbstractJob.STATE_FAILED
-				&& job.getState() != AbstractJob.STATE_CANCELED) {
+		if (job.getState() != JobState.SUCCESS
+				&& job.getState() != JobState.FAILED
+				&& job.getState() != JobState.CANCELED) {
 			return "Job " + job.getId() + " has wrong state for this operation.";
 		}
 
 		try {
-
-			// delete local directory and hdfs directory
+			// delete local directory
 			String localOutput = FileUtil.path(settings.getLocalWorkspace(), job.getId());
 			FileUtil.deleteDirectory(localOutput);
 
-			job.setState(AbstractJob.STATE_RETIRED);
+			job.setState(JobState.RETIRED);
 			dao.update(job);
 
 			// When an admin manually deletes a job, clear sensitive data immediately
 			ParameterDao parameterDao = new ParameterDao(application.getDatabase());
 			parameterDao.deleteSensitiveByJob(job);
 
+			// delete all results that are stored on external workspaces
 			IWorkspace workspace = workspaceFactory.getByJob(job);
-
 			try {
 				workspace.delete(job.getId());
 			} catch (Exception e) {
-				log.error("Deleting " + job.getId() + " from workspace failed.", e);
+				log.error("Deleting {} from workspace failed.", job.getId(), e);
 			}
 
 			return "Retired job " + job.getId();
-
 		} catch (Exception e) {
 			return "Retire " + job.getId() + " failed.";
 		}
-
 	}
 
 	public String increaseRetireDate(AbstractJob job, int days) {
-
 		JobDao dao = new JobDao(application.getDatabase());
-		if (job.getState() == AbstractJob.STATE_SUCESS_AND_NOTIFICATION_SEND
-				|| job.getState() == AbstractJob.STATE_FAILED_AND_NOTIFICATION_SEND) {
+
+		if (job.getState() == JobState.SUCCESS_AND_NOTIFICATION_SENT
+				|| job.getState() == JobState.FAILED_AND_NOTIFICATION_SENT) {
 
 			try {
 
-				job.setDeletedOn(job.getDeletedOn() + (days * 24 * 60 * 60 * 1000));
+				job.setDeletedOn(job.getDeletedOn() + (days * 24L * 60L * 60L * 1000L));
 
 				dao.update(job);
 
@@ -364,55 +395,71 @@ public class JobService {
 		} else {
 			return "Job " + job.getId() + " has wrong state for this operation.";
 		}
-
 	}
 
+	/**
+	 * Returns a hopefully unique ID based on a timestamp, with form
+	 * {@code job-yyyyMMdd-HHmmss-SSS}.
+	 */
 	public String createId() {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS");
-		return "job-" + sdf.format(new Date());
+		return "job-" + ID_DATE_FORMAT.format(new Date());
 	}
 
-
+	/**
+	 * Returns all available jobs from the given {@code state} (not to be confused
+	 * with {@link JobState}), where the options are:
+	 * <ul>
+	 *     <li>
+	 *         {@code running-ltq}: returns all queued and running jobs (everything in
+	 *         the server "queue").
+	 *     </li>
+	 *     <li>
+	 *         {@code running-stq}: (deprecated) returns an empty list.
+	 *     </li>
+	 *     <li>
+	 *         {@code current}: returns all jobs with state SUCCESS, FAILED, CANCELED,
+	 *         SUCCESS_AND_NOTIFICATION_SENT, FAILED_AND_NOTIFICATION_SENT, DEAD that
+	 *         are not in the queue.
+	 *     </li>
+	 *     <li>
+	 *         {@code retired}: returns all jobs with state RETIRED.
+	 *     </li>
+	 * </ul>
+	 */
 	public List<AbstractJob> getJobs(String state) {
-
-		List<AbstractJob> jobs = new Vector<AbstractJob>();
+		List<AbstractJob> jobs = new ArrayList<>();
 
 		WorkflowEngine engine = application.getWorkflowEngine();
 		JobDao dao = new JobDao(application.getDatabase());
 
 		if (state != null) {
 			switch (state) {
+				case "running-ltq":
+					jobs = engine.getAllJobsInLongTimeQueue();
+					break;
 
-			case "running-ltq":
+				case "running-stq":
+					// TODO: remove!
+					jobs = new ArrayList<>();
+					break;
 
-				jobs = engine.getAllJobsInLongTimeQueue();
-				break;
-
-			case "running-stq":
-
-				// TODO: remove!
-				jobs = new Vector<AbstractJob>();
-				break;
-
-			case "current":
-
-				jobs = dao.findAllNotRetiredJobs();
-				List<AbstractJob> toRemove = new Vector<AbstractJob>();
-				for (AbstractJob job : jobs) {
-					if (engine.isInQueue(job)) {
-						toRemove.add(job);
+				case "current":
+					jobs = dao.findAllNotRetiredJobs();
+					List<AbstractJob> toRemove = new ArrayList<>();
+					for (AbstractJob job : jobs) {
+						if (engine.isInQueue(job)) {
+							toRemove.add(job);
+						}
 					}
-				}
-				jobs.removeAll(toRemove);
-				break;
+					jobs.removeAll(toRemove);
+					break;
 
-			case "retired":
-
-				jobs = dao.findAllByState(AbstractJob.STATE_RETIRED);
-				break;
-
+				case "retired":
+					jobs = dao.findAllByState(JobState.RETIRED);
+					break;
 			}
 		}
+
 		return jobs;
 	}
 
@@ -425,5 +472,4 @@ public class JobService {
 			return workspace.downloadLog(name);
 		}
 	}
-
 }

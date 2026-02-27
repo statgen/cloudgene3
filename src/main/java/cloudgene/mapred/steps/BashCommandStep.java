@@ -1,8 +1,9 @@
 package cloudgene.mapred.steps;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Vector;
 
 import cloudgene.mapred.jobs.CloudgeneContext;
 import cloudgene.mapred.jobs.CloudgeneStep;
@@ -16,17 +17,21 @@ public class BashCommandStep extends CloudgeneStep {
 
 		context.createStep(step.getName());
 
-		String cmd = step.getString("exec");
-		if (cmd == null) {
-			cmd = step.getString("cmd");
+		String originalCommand = step.getString("exec");
+		if (originalCommand == null) {
+			originalCommand = step.getString("cmd");
 		}
 
-		if (cmd == null) {
+		if (originalCommand == null) {
 			context.error("No 'exec' or 'cmd' parameter found.");
+			return false;
 		}
 
-		if (cmd.isEmpty()) {
+		originalCommand = originalCommand.strip();
+
+		if (originalCommand.isEmpty()) {
 			context.error("'exec' or 'cmd' parameter cannot be an empty string.");
+			return false;
 		}
 
 		String bash = step.getString("bash", "false");
@@ -35,9 +40,9 @@ public class BashCommandStep extends CloudgeneStep {
 		boolean useBash = bash.equals("true");
 		boolean streamStdout = stdout.equals("true");
 
-		String[] params = cmd.split(" ");
+		List<String> params = Arrays.asList(originalCommand.split(" "));
 
-		File file = new File(params[0]);
+		File file = new File(params.get(0));
 
 		if (!file.exists()) {
 			context.error("Command '" + file.getAbsolutePath()
@@ -51,25 +56,14 @@ public class BashCommandStep extends CloudgeneStep {
 			return false;
 		}
 
-		List<String> command = new Vector<String>();
+		List<String> executedCommand = new ArrayList<>();
 
 		if (useBash) {
-			command.add("/bin/bash");
-			command.add("-c");
-		}
-
-		String bashCommand = "";
-		for (String param : params) {
-
-			if (useBash) {
-				bashCommand += param + " ";
-			} else {
-				command.add(param);
-			}
-
-		}
-		if (useBash) {
-			command.add(bashCommand);
+			executedCommand.add("/bin/bash");
+			executedCommand.add("-c");
+			executedCommand.add(originalCommand);
+		} else {
+			executedCommand.addAll(params);
 		}
 
 		StringBuilder output = null;
@@ -79,7 +73,7 @@ public class BashCommandStep extends CloudgeneStep {
 
 		try {
 			context.beginTask("Running Command...");
-			boolean successful = executeCommand(command, context, output);
+			boolean successful = executeCommand(executedCommand, context, output);
 			if (successful) {
 				if (streamStdout) {
 					context.endTask(output.toString(), Message.OK);
@@ -101,7 +95,5 @@ public class BashCommandStep extends CloudgeneStep {
 			context.log("Execution failed.", e);
 			return false;
 		}
-
 	}
-
 }

@@ -79,7 +79,7 @@ public class UpdatePasswordTest {
 
 		RestAssured.given().formParams(form).when().post("/api/v2/users/update-password").then().statusCode(200).and()
 				.body("success", equalTo(false)).and()
-				.body("message", equalTo("Password must contain at least one uppercase letter: A-Z"));
+				.body("message", equalTo("Password must contain at least one UPPERCASE letter: A-Z"));
 
 		// try to update password
 		form = new HashMap<String, String>();

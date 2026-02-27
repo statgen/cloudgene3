@@ -1,7 +1,9 @@
 package cloudgene.mapred.util;
 
 import java.util.Properties;
+import java.util.Map;
 
+import cloudgene.mapred.util.config.Settings;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.PasswordAuthentication;
@@ -13,30 +15,37 @@ import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MailUtil {
+public final class MailUtil {
+
+	private MailUtil() {}
 
 	private static final Logger log = LoggerFactory.getLogger(MailUtil.class);
 
-	public static void notifyAdmin(Settings settings, String subject, String text) throws Exception {
+	public static void notifyAdmin(Settings settings, String subject, String text) throws MessagingException {
+		String adminMail = settings.getAdminMail();
 
-		if (settings.getAdminMail() != null && !settings.getAdminMail().isEmpty()) {
-
-			send(settings.getMail().get("smtp"), settings.getMail().get("port"), settings.getMail().get("user"),
-					settings.getMail().get("password"), settings.getMail().get("name"), settings.getAdminMail(),
-					subject, text);
+		if (adminMail != null && !adminMail.isEmpty()) {
+			send(settings, adminMail, subject, text);
 		}
-
 	}
 
-	public static void send(Settings settings, String tos, String subject, String text) throws Exception {
+	public static void send(Settings settings, String recipients, String subject, String text)
+			throws MessagingException {
+		Map<String, String> mail = settings.getMail();
 
-		send(settings.getMail().get("smtp"), settings.getMail().get("port"), settings.getMail().get("user"),
-				settings.getMail().get("password"), settings.getMail().get("name"), tos, subject, text);
-
+		send(
+				mail.get("smtp"),
+				mail.get("port"),
+				mail.get("user"),
+				mail.get("password"),
+				mail.get("name"),
+				recipients,
+				subject,
+				text);
 	}
 
 	public static void send(final String smtp, final String port, final String username, final String password,
-			final String name, String tos, String subject, String text) throws Exception {
+			final String name, String recipients, String subject, String text) throws MessagingException {
 
 		Properties props = new Properties();
 		props.put("mail.smtp.host", smtp);
@@ -45,7 +54,6 @@ public class MailUtil {
 		Session session = null;
 
 		if (username != null && !username.isEmpty()) {
-
 			props.put("mail.smtp.auth", "true");
 			props.put("mail.smtp.starttls.enable", "true");
 			session = Session.getInstance(props, new jakarta.mail.Authenticator() {
@@ -54,14 +62,11 @@ public class MailUtil {
 				}
 			});
 		} else {
-
 			session = Session.getInstance(props);
-
 		}
 
 		try {
-
-			InternetAddress[] addresses = InternetAddress.parse(tos);
+			InternetAddress[] addresses = InternetAddress.parse(recipients);
 
 			Message message = new MimeMessage(session);
 			message.setFrom(new InternetAddress(name));
@@ -71,10 +76,10 @@ public class MailUtil {
 
 			Transport.send(message);
 
-			log.debug("E-Mail sent to " + tos + ".");
+			log.debug("E-Mail sent to {}.", recipients);
 
 		} catch (MessagingException e) {
-			throw new Exception("mail could not be sent: " + e.getMessage());
+			throw new MessagingException("Failed to send mail", e);
 		}
 	}
 }

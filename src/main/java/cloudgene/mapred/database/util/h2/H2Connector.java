@@ -1,16 +1,16 @@
 /*******************************************************************************
  * Copyright (C) 2009-2016 Lukas Forer and Sebastian Schönherr
- *  
+ *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by 
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
- *  
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- *  
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
@@ -55,14 +55,13 @@ public class H2Connector implements DatabaseConnector {
 		this.multiuser = multiuser;
 	}
 
-    @Override
+	@Override
 	public void connect() throws SQLException {
 		log.debug("Establishing connection to " + user + "@" + path);
 
 		if (DbUtils.loadDriver("org.h2.Driver")) {
 			try {
 				dataSource = new BasicDataSource();
-
 				dataSource.setDriverClassName("org.h2.Driver");
 
 				String newPath;
@@ -77,11 +76,11 @@ public class H2Connector implements DatabaseConnector {
 				} else {
 					dataSource.setUrl("jdbc:h2:" + newPath + ";MODE=MySQL");
 				}
+
 				dataSource.setUsername(user);
 				dataSource.setPassword(password);
 				dataSource.setMaxIdle(10_000);
 				dataSource.setDefaultAutoCommit(true);
-
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -91,12 +90,12 @@ public class H2Connector implements DatabaseConnector {
 	}
 
 	@Override
-    public void disconnect() throws SQLException {
+	public void disconnect() throws SQLException {
 		dataSource.close();
 	}
 
 	@Override
-    public void executeSQL(@NotNull InputStream is) throws SQLException, IOException, URISyntaxException {
+	public void executeSQL(@NotNull InputStream is) throws SQLException, IOException, URISyntaxException {
 		String sqlContent = readFileAsString(is);
 
 		if (!sqlContent.isEmpty()) {
@@ -113,7 +112,7 @@ public class H2Connector implements DatabaseConnector {
 		String strLine;
 		StringBuilder builder = new StringBuilder();
 
-        while ((strLine = br.readLine()) != null) {
+		while ((strLine = br.readLine()) != null) {
 			builder.append("\n");
 			builder.append(strLine);
 		}
@@ -128,7 +127,6 @@ public class H2Connector implements DatabaseConnector {
 
 	@Override
 	public String getSchema() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

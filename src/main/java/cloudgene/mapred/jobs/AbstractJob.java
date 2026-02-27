@@ -12,6 +12,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import cloudgene.mapred.jobs.state.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,97 +21,47 @@ import cloudgene.mapred.core.User;
 import cloudgene.mapred.jobs.queue.PriorityRunnable;
 import cloudgene.mapred.jobs.workspace.IWorkspace;
 import cloudgene.mapred.util.HashUtil;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import genepi.io.FileUtil;
 
 abstract public class AbstractJob extends PriorityRunnable {
 
 	public static final String JOB_LOG = "job.txt";
-
 	public static final String JOB_OUT = "std.out";
 
 	private static final Logger log = LoggerFactory.getLogger(AbstractJob.class);
+	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yy/MM/dd HH:mm:ss");
 
-	private DateFormat formatter = new SimpleDateFormat("yy/MM/dd HH:mm:ss");
-
-	// states
-
-	public static final int STATE_WAITING = 1;
-
-	public static final int STATE_RUNNING = 2;
-
-	public static final int STATE_EXPORTING = 3;
-
-	public static final int STATE_SUCCESS = 4;
-
-	public static final int STATE_FAILED = 5;
-
-	public static final int STATE_CANCELED = 6;
-
-	public static final int STATE_RETIRED = 7;
-
-	public static final int STATE_SUCESS_AND_NOTIFICATION_SEND = 8;
-
-	public static final int STATE_FAILED_AND_NOTIFICATION_SEND = 9;
-
-	public static final int STATE_DEAD = -1;
-
-	public static final int STATE_DELETED = 10;
-
-	// properties
-
-	private String id;
-
-	private int state = STATE_WAITING;
-
-	private long startTime = 0;
-
-	private long endTime = 0;
-
-	private long submittedOn = 0;
-
-	private String name;
-
-	private User user;
-
-	private String userAgent = "";
-
-	private long deletedOn = -1;
-
-	private String application;
-
-	private String applicationId;
-
-	private String error = "";
-
-	private int positionInQueue = -1;
-
-	protected List<CloudgeneParameterInput> inputParams = new Vector<CloudgeneParameterInput>();
-
-	protected List<CloudgeneParameterOutput> outputParams = new Vector<CloudgeneParameterOutput>();
-
-	protected Map<String, CloudgeneParameterOutput> outputParamsIndex = new HashMap<String, CloudgeneParameterOutput>();
-
+	protected List<CloudgeneParameterInput> inputParams = new ArrayList<>();
+	protected List<CloudgeneParameterOutput> outputParams = new ArrayList<>();
+	protected Map<String, CloudgeneParameterOutput> outputParamsIndex = new HashMap<>();
 	protected CloudgeneParameterOutput logOutput = null;
-
-	protected List<Step> steps = new Vector<Step>();
-
+	protected List<Step> steps = new ArrayList<>();
 	protected BufferedOutputStream stdOutStream;
-
-	private BufferedOutputStream logStream;
-
 	protected CloudgeneContext context;
-
-	private Settings settings;
-
-	private String localWorkspace;
-
-	private boolean canceld = false;
-
 	protected IWorkspace workspace;
 
+	private String id;
+	private JobState state = JobState.WAITING;
+	private CompletionState completionState = CompletionState.SUBMITTED;
+	private SuccessState successState = SuccessState.PENDING;
+	private NotificationState notificationState = NotificationState.PENDING;
+	private long startTime = 0;
+	private long endTime = 0;
+	private long submittedOn = 0;
+	private String name;
+	private User user;
+	private String userAgent = "";
+	private long deletedOn = -1;
+	private String application;
+	private String applicationId;
+	private String error = "";
+	private int positionInQueue = -1;
+	private BufferedOutputStream logStream;
+	private Settings settings;
+	private String localWorkspace;
+	private boolean canceled = false;
 	private String workspaceSize = null;
-
 	private String publicJobId;
 
 	public String getId() {
@@ -123,12 +74,64 @@ abstract public class AbstractJob extends PriorityRunnable {
 		this.publicJobId = HashUtil.getSha256(id + salt);
 	}
 
-	public int getState() {
+	public JobState getState() {
 		return state;
 	}
 
-	public void setState(int state) {
+	/** 
+	 * Only sets {@code this.state}, leaving other state fields unchanged.
+	 * <p>
+	 * You should prefer {@link #setState(JobState)} whenever possible.
+	 */
+	public void setRawState(JobState state) {
 		this.state = state;
+	}
+
+	/** 
+	 * Sets {@code this.state}, and deduces other state fields from its value.
+	 * <p>
+	 * If you're sure you shouldn't synchronize fields, you can use {@link #setRawState(JobState)}.
+	 */
+	public void setState(JobState state) {
+		this.state = state;
+
+		StateTranslator.StateResult newState = StateTranslator.old2New(state);
+
+		if (newState.completion() != null) {
+			completionState = newState.completion();
+		}
+
+		if (newState.success() != null) {
+			successState = newState.success();
+		}
+
+		if (newState.notification() != null) {
+			notificationState = newState.notification();
+		}
+	}
+
+	public CompletionState getCompletionState() {
+		return completionState;
+	}
+
+	public void setCompletionState(CompletionState completionState) {
+		this.completionState = completionState;
+	}
+
+	public SuccessState getSuccessState() {
+		return successState;
+	}
+
+	public void setSuccessState(SuccessState successState) {
+		this.successState = successState;
+	}
+
+	public NotificationState getNotificationState() {
+		return notificationState;
+	}
+
+	public void setNotificationState(NotificationState notificationState) {
+		this.notificationState = notificationState;
 	}
 
 	public long getStartTime() {
@@ -147,8 +150,8 @@ abstract public class AbstractJob extends PriorityRunnable {
 		this.endTime = endTime;
 	}
 
-	public void setSubmittedOn(long submitedOn) {
-		this.submittedOn = submitedOn;
+	public void setSubmittedOn(long submittedOn) {
+		this.submittedOn = submittedOn;
 	}
 
 	public long getSubmittedOn() {
@@ -236,44 +239,36 @@ abstract public class AbstractJob extends PriorityRunnable {
 
 	public boolean afterSubmission() {
 		try {
-
 			initStdOutFiles();
-
 			setup();
 			return true;
-
 		} catch (Exception e1) {
-
-			log.error("Job " + getId() + ": initialization failed.", e1);
+			log.error("Job {}: initialization failed.", getId(), e1);
 			writeLog("Initialization failed: " + e1.getLocalizedMessage());
-			setState(STATE_FAILED);
+			setState(JobState.FAILED);
 			return false;
-
 		}
 	}
 
 	@Override
 	public void run() {
-
-		if (canceld) {
+		if (canceled) {
 			return;
 		}
 
-		log.info("[Job {}] Setup job...", getId());
-		setState(AbstractJob.STATE_RUNNING);
-		setStartTime(System.currentTimeMillis());
-
 		log.info("[Job {}] Running job...", getId());
+		setState(JobState.RUNNING);
 		setStartTime(System.currentTimeMillis());
 
 		try {
 			writeLog("Details:");
 			writeLog("  Name: " + getName());
 			writeLog("  Job-Id: " + getId());
-			writeLog("  Submitted On: " + new Date(getSubmittedOn()).toString());
+			writeLog("  Submitted On: " + new Date(getSubmittedOn()));
 			writeLog("  Submitted By: " + getUser().getUsername());
 			writeLog("  User-Agent: " + getUserAgent());
 			writeLog("  Inputs:");
+
 			for (CloudgeneParameterInput parameter : inputParams) {
 				writeLog("    " + parameter.getDescription() + ": " + context.get(parameter.getName()));
 			}
@@ -290,69 +285,57 @@ abstract public class AbstractJob extends PriorityRunnable {
 			boolean successful = execute();
 
 			if (successful) {
-
 				log.info("[Job {}] Execution successful.", getId());
 
 				writeLog("Job Execution successful.");
 				writeLog("Exporting Data...");
 
-				setState(AbstractJob.STATE_EXPORTING);
+				setState(JobState.EXPORTING);
 
 				try {
-
 					boolean successfulAfter = after();
 
 					if (successfulAfter) {
-
-						setState(AbstractJob.STATE_SUCCESS);
+						setState(JobState.SUCCESS);
 						log.info("[Job {}]  data export successful.", getId());
 						writeLog("Data Export successful.");
-
 					} else {
-
-						setState(AbstractJob.STATE_FAILED);
+						setState(JobState.FAILED);
 						log.error("[Job {}]  data export failed.", getId());
 						writeLog("Data Export failed.");
-
 					}
-
 				} catch (Error | Exception e) {
-
 					Writer writer = new StringWriter();
 					PrintWriter printWriter = new PrintWriter(writer);
 					e.printStackTrace(printWriter);
 					String s = writer.toString();
 
-					setState(AbstractJob.STATE_FAILED);
+					setState(JobState.FAILED);
 					log.error("[Job {}]  data export failed.", getId(), e);
 					writeLog("Data Export failed: " + e.getLocalizedMessage() + "\n" + s);
-
 				}
-
 			} else {
-
-				setState(AbstractJob.STATE_FAILED);
+				setState(JobState.FAILED);
 				log.error("[Job {}] Execution failed. {}", getId(), getError());
 				writeLog("Job Execution failed: " + getError());
-
 			}
 
 			writeLog("Cleaning up...");
-			if (getState() == AbstractJob.STATE_FAILED || getState() == AbstractJob.STATE_CANCELED) {
+
+			if (getState() == JobState.FAILED || getState() == JobState.CANCELED) {
 				onFailure();
 			} else {
 				cleanUp();
 			}
+
 			log.info("[Job {}]cleanup successful.", getId());
 			writeLog("Cleanup successful.");
 
-			if (canceld) {
-				setState(AbstractJob.STATE_CANCELED);
+			if (canceled) {
+				setState(JobState.CANCELED);
 			}
-
 		} catch (Exception | Error e) {
-
-			setState(AbstractJob.STATE_FAILED);
+			setState(JobState.FAILED);
 			log.error("[Job {}]: initialization failed.", getId(), e);
 
 			Writer writer = new StringWriter();
@@ -366,7 +349,6 @@ abstract public class AbstractJob extends PriorityRunnable {
 			onFailure();
 			log.info("[Job {}]: cleanup successful.", getId());
 			writeLog("Cleanup successful.");
-
 		}
 
 		closeStdOutFiles();
@@ -374,14 +356,12 @@ abstract public class AbstractJob extends PriorityRunnable {
 	}
 
 	public void cancel() {
-
 		writeLog("Canceled by user.");
 		log.info("[Job {}]: canceld by user.", getId());
 
-		canceld = true;
+		canceled = true;
 		setEndTime(System.currentTimeMillis());
-		setState(AbstractJob.STATE_CANCELED);
-
+		setState(JobState.CANCELED);
 	}
 
 	private void initStdOutFiles() throws FileNotFoundException {
@@ -390,9 +370,7 @@ abstract public class AbstractJob extends PriorityRunnable {
 	}
 
 	private void closeStdOutFiles() {
-
 		try {
-
 			stdOutStream.close();
 			logStream.close();
 
@@ -402,25 +380,20 @@ abstract public class AbstractJob extends PriorityRunnable {
 
 			FileUtil.deleteFile(FileUtil.path(localWorkspace, JOB_OUT));
 			FileUtil.deleteFile(FileUtil.path(localWorkspace, JOB_LOG));
-
 		} catch (IOException e) {
 			log.error("[Job {}]: Staging log files failed.", getId(), e);
 		}
-
 	}
 
 	public void writeOutput(String line) {
-
 		try {
 			if (stdOutStream != null && line != null) {
 				stdOutStream.write(line.getBytes("UTF-8"));
 				stdOutStream.flush();
-
 			}
 		} catch (IOException e) {
 			log.error("[Job {}]: Write output failed.", getId(), e);
 		}
-
 	}
 
 	public void writeOutputln(String line) {
@@ -428,13 +401,12 @@ abstract public class AbstractJob extends PriorityRunnable {
 	}
 
 	public void writeLog(String line) {
-
 		try {
 			if (logStream == null) {
 				initStdOutFiles();
 			}
 
-			logStream.write((formatter.format(new Date()) + " ").getBytes());
+			logStream.write((DATE_FORMAT.format(new Date()) + " ").getBytes());
 			logStream.write(line.getBytes("UTF-8"));
 			logStream.write("\n".getBytes("UTF-8"));
 			logStream.flush();
@@ -442,7 +414,6 @@ abstract public class AbstractJob extends PriorityRunnable {
 		} catch (IOException e) {
 			log.error("[Job {}]: Write output failed.", getId(), e);
 		}
-
 	}
 
 	public List<Step> getSteps() {
@@ -459,13 +430,11 @@ abstract public class AbstractJob extends PriorityRunnable {
 
 	@Override
 	public boolean equals(Object obj) {
-
 		if (!(obj instanceof AbstractJob)) {
 			return false;
 		}
 
 		return ((AbstractJob) obj).getId().equals(id);
-
 	}
 
 	public Settings getSettings() {
@@ -509,7 +478,9 @@ abstract public class AbstractJob extends PriorityRunnable {
 	}
 
 	public boolean isRunning() {
-		return state == STATE_EXPORTING || state == STATE_RUNNING || state == STATE_WAITING;
+		return state == JobState.EXPORTING
+				|| state == JobState.RUNNING
+				|| state == JobState.WAITING;
 	}
 
 	public Download findDownloadByHash(String hash) {
@@ -537,7 +508,6 @@ abstract public class AbstractJob extends PriorityRunnable {
 	abstract public boolean cleanUp();
 
 	public void kill() {
-
 	}
 
 	public String getPublicJobId() {
@@ -548,5 +518,4 @@ abstract public class AbstractJob extends PriorityRunnable {
 		String logFilename = FileUtil.path(settings.getLocalWorkspace(), getId(), name);
 		return FileUtil.readFileAsString(logFilename);
 	}
-
 }

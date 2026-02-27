@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import cloudgene.mapred.core.User;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,48 +23,49 @@ public class CounterDao extends JdbcDataAccessObject {
 		super(database);
 	}
 
-	public boolean insert(String name, int value, AbstractJob job) {
-		StringBuilder sql = new StringBuilder();
-		sql.append("insert into counters (name, job_id, `value`) ");
-		sql.append("values (?,?,?)");
-
+	public boolean insert(String name, long value, AbstractJob job) {
 		try {
-
-			Object[] params = new Object[3];
-			params[0] = name;
-			params[1] = job.getId();
-			params[2] = value;
-
-			update(sql.toString(), params);
+			update(
+					"INSERT INTO counters (name, job_id, `value`) VALUES (?,?,?)",
+					name, job.getId(), value);
 
 			log.debug("insert counter successful.");
-
+			return true;
 		} catch (SQLException e) {
 			log.error("insert counter failed.", e);
 			return false;
 		}
-
-		return true;
 	}
 
+	@NotNull
 	public Map<String, Long> getAll() {
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("select name, sum(`value`) ");
-		sql.append("from counters ");
-		sql.append("group by name");
-
-		Map<String, Long> result = new HashMap<>();
+		String sql = "SELECT name, SUM(`value`) FROM counters GROUP BY name";
 
 		try {
-			result = queryForMap(sql.toString(), new CounterMapper());
-			log.debug("find counters successful. results: {}", result);
+			Map<String, Long> result = queryForMap(sql, new CounterMapper());
+			log.debug("find all counters successful. results: {}", result);
 			return result;
 		} catch (SQLException e) {
 			log.error("find all counters failed", e);
+			return new HashMap<>();
 		}
+	}
 
-		return result;
+	@NotNull
+	public Map<String, Long> getByUser(User user) {
+		String sql = "SELECT counters.name AS name, SUM(counters.`value`) AS `value` "
+				+ "FROM counters INNER JOIN job ON counters.job_id = job.id "
+				+ "WHERE job.user_id = ? "
+				+ "GROUP BY counters.name";
+
+		try {
+			Map<String, Long> result = queryForMap(sql, new CounterMapper(), user.getId());
+			log.debug("Find counters by user successful. Results: {}", result);
+			return result;
+		} catch (SQLException e) {
+			log.error("Find counters by user failed", e);
+			return new HashMap<>();
+		}
 	}
 
 	static class CounterMapper implements IRowMapMapper<String, Long> {

@@ -1,8 +1,8 @@
 package cloudgene.mapred.server.responses;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import cloudgene.mapred.plugins.PluginManager;
 import cloudgene.mapred.plugins.nextflow.NextflowPlugin;
@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import cloudgene.mapred.jobs.Environment.Variable;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import genepi.io.FileUtil;
 
 @JsonInclude(JsonInclude.Include.ALWAYS)
@@ -18,13 +18,10 @@ import genepi.io.FileUtil;
 public class NextflowConfigResponse {
 
 	private String config = "";
-
 	private String env = "";
-
-	private List<Variable> variables = new Vector<Variable>();
+	private List<Variable> variables = new ArrayList<>();
 
 	public static NextflowConfigResponse build(Settings settings) {
-
 		NextflowPlugin plugin = (NextflowPlugin) PluginManager.getInstance().getPlugin(NextflowPlugin.ID);
 
 		NextflowConfigResponse response = new NextflowConfigResponse();
@@ -66,5 +63,4 @@ public class NextflowConfigResponse {
 	public List<Variable> getVariables() {
 		return variables;
 	}
-
 }

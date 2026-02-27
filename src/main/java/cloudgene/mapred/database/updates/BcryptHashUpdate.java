@@ -15,24 +15,23 @@ public class BcryptHashUpdate implements IUpdateListener {
 
 	private static final Logger log = LoggerFactory.getLogger(BcryptHashUpdate.class);
 
-	
 	@Override
-	public void afterUpdate(Database database) {
-
-	}
+	public void afterUpdate(Database database) {}
 
 	@Override
 	public void beforeUpdate(Database database) {
 		log.info("Updating all hashes to new bcrypt method...");
+
 		UserDao dao = new UserDao(database);
 		List<User> users = dao.findAll();
-		for (User user: users) {
+
+		for (User user : users) {
 			String oldHash = user.getPassword();
 			String newHash = BCrypt.hashpw(oldHash, BCrypt.gensalt());
 			user.setPassword(newHash);
 			dao.update(user);
 		}
+
 		log.info("All hashes updated.");
 	}
-
 }

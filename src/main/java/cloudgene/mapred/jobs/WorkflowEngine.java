@@ -3,11 +3,15 @@ package cloudgene.mapred.jobs;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.jobs.queue.PriorityRunnable;
 import cloudgene.mapred.jobs.queue.Queue;
+import cloudgene.mapred.jobs.state.JobState;
+import io.micronaut.core.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 
 public class WorkflowEngine implements Runnable {
 
@@ -20,7 +24,6 @@ public class WorkflowEngine implements Runnable {
 	private final AtomicLong priorityCounter = new AtomicLong();
 
 	public WorkflowEngine(int ltqThreads) {
-
 		longTimeQueue = new Queue("LongTimeQueue", ltqThreads, true, true) {
 
 			@Override
@@ -41,13 +44,11 @@ public class WorkflowEngine implements Runnable {
 	}
 
 	public void submit(AbstractJob job, long priority) {
-
 		job.setPriority(priority);
 		job.setSubmittedOn(System.currentTimeMillis());
 		jobSubmitted(job);
 
-		boolean okey = job.afterSubmission();
-		if (okey) {
+		if (job.afterSubmission()) {
 			longTimeQueue.submit(job);
 		} else {
 			job.setEndTime(System.currentTimeMillis());
@@ -60,16 +61,14 @@ public class WorkflowEngine implements Runnable {
 	}
 
 	public void restart(AbstractJob job, long priority) {
-
 		job.setPriority(priority);
 		job.setSubmittedOn(System.currentTimeMillis());
 		job.setStartTime(0);
 		job.setEndTime(0);
-		job.setState(AbstractJob.STATE_WAITING);
+		job.setState(JobState.WAITING);
 		statusUpdated(job);
 
-		boolean okey = job.afterSubmission();
-		if (okey) {
+		if (job.afterSubmission()) {
 			longTimeQueue.submit(job);
 		} else {
 			job.setEndTime(System.currentTimeMillis());
@@ -120,20 +119,22 @@ public class WorkflowEngine implements Runnable {
 		return longTimeQueue.getJobById(id);
 	}
 
-	public Map<String, Long> getCounters(int state, List<String> names) {
-		Map<String, Long> result = new HashMap<String, Long>();
+	@NotNull
+	public Map<String, Long> getCounters(JobState state, @Nullable List<String> names) {
+		Map<String, Long> result = new HashMap<>();
 		List<AbstractJob> jobs = longTimeQueue.getAllJobs();
+
 		for (AbstractJob job : jobs) {
 			if (job.getState() == state) {
-				Map<String, Integer> counters = job.getContext().getCounters();
+				Map<String, Long> counters = job.getContext().getCounters();
 				List<String> keys = (names == null) ? counters.keySet().stream().toList() : names;
 				for (String name : keys) {
-					Integer value = counters.get(name);
-					Long oldvalue = result.get(name);
-					if (oldvalue == null) {
-						oldvalue = 0L;
+					Long value = counters.get(name);
+					Long oldValue = result.get(name);
+					if (oldValue == null) {
+						oldValue = 0L;
 					}
-					result.put(name, oldvalue + value);
+					result.put(name, oldValue + value);
 				}
 			}
 		}
@@ -180,5 +181,9 @@ public class WorkflowEngine implements Runnable {
 
 	public int getSize() {
 		return longTimeQueue.getSize();
+	}
+
+	public Future<?> getFuture(AbstractJob job) {
+		return longTimeQueue.getFuture(job);
 	}
 }

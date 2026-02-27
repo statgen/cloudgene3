@@ -1,7 +1,7 @@
 package cloudgene.mapred.server.responses;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import cloudgene.mapred.jobs.Message;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
@@ -10,15 +10,11 @@ import com.fasterxml.jackson.annotation.JsonClassDescription;
 public class MessageResponse {
 
 	private boolean success = true;
-
 	private String message = "";
-
 	private int type;
-
 	private long time;
 
-	protected MessageResponse() {
-	}
+	protected MessageResponse() {}
 
 	protected MessageResponse(String message, boolean success) {
 		this.message = message;
@@ -59,14 +55,16 @@ public class MessageResponse {
 
 	public static MessageResponse build(Message message) {
 		MessageResponse response = new MessageResponse();
+
 		response.setMessage(message.getMessage());
 		response.setTime(message.getTime());
 		response.setType(message.getType());
+
 		return response;
 	}
 
 	public static List<MessageResponse> build(List<Message> messages) {
-		List<MessageResponse> response = new Vector<MessageResponse>();
+		List<MessageResponse> response = new ArrayList<>();
 
 		if (messages != null) {
 			for (Message message : messages) {
@@ -75,6 +73,7 @@ public class MessageResponse {
 				}
 			}
 		}
+
 		return response;
 	}
 
@@ -85,5 +84,4 @@ public class MessageResponse {
 	public void setType(int type) {
 		this.type = type;
 	}
-
 }

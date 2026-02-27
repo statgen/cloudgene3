@@ -1,26 +1,26 @@
 package cloudgene.mapred.plugins;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cloudgene.mapred.plugins.docker.DockerPlugin;
 import cloudgene.mapred.plugins.nextflow.NextflowPlugin;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 
 public class PluginManager {
 
-	private List<IPlugin> plugins;
+	private final List<IPlugin> plugins;
 
 	private Map<String, IPlugin> pluginsIndex;
 
 	private static PluginManager instance = null;
 
-	private static Logger log = LoggerFactory.getLogger(PluginManager.class);
+	private static final Logger log = LoggerFactory.getLogger(PluginManager.class);
 
 	public static PluginManager getInstance() {
 		if (instance == null) {
@@ -30,20 +30,21 @@ public class PluginManager {
 	}
 
 	private PluginManager() {
-		plugins = new Vector<IPlugin>();
+		plugins = new ArrayList<>();
 		plugins.add(new DockerPlugin());
 		plugins.add(new NextflowPlugin());
 	}
 
 	public boolean initPlugins(Settings settings) {
-		pluginsIndex = new HashMap<String, IPlugin>();
+		pluginsIndex = new HashMap<>();
+
 		for (IPlugin plugin : plugins) {
 			plugin.configure(settings);
 			pluginsIndex.put(plugin.getId(), plugin);
 			log.info("Plugin " + plugin.getName() + " (" + plugin.getId() + "): "
 					+ (plugin.isInstalled() ? "Enabled" : "Disabled"));
-
 		}
+
 		return true;
 	}
 
@@ -64,10 +65,10 @@ public class PluginManager {
 		return plugins;
 	}
 
-    public IPlugin getPlugin(String id) {
+	public IPlugin getPlugin(String id) {
 		if (!pluginsIndex.containsKey(id)) {
 			throw new RuntimeException("Plugin '" + id + "' not found.");
 		}
 		return pluginsIndex.get(id);
-    }
+	}
 }

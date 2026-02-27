@@ -2,8 +2,8 @@ package cloudgene.mapred.jobs;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 @JsonClassDescription
 public class JobResultsTreeItem {
@@ -18,7 +18,7 @@ public class JobResultsTreeItem {
 
 	private boolean folder = true;
 
-	private List<JobResultsTreeItem> childs = new Vector<JobResultsTreeItem>();
+	private List<JobResultsTreeItem> children = new ArrayList<>();
 
 	public String getName() {
 		return name;
@@ -52,12 +52,12 @@ public class JobResultsTreeItem {
 		this.size = size;
 	}
 
-	public List<JobResultsTreeItem> getChilds() {
-		return childs;
+	public List<JobResultsTreeItem> getChildren() {
+		return children;
 	}
 
-	public void setChilds(List<JobResultsTreeItem> childs) {
-		this.childs = childs;
+	public void setChildren(List<JobResultsTreeItem> children) {
+		this.children = children;
 	}
 
 	public void setFolder(boolean folder) {

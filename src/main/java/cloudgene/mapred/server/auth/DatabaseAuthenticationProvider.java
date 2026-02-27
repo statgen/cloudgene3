@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 @Singleton
 public class DatabaseAuthenticationProvider implements AuthenticationProvider<HttpRequest<?>> {
 
-	private static Logger log = LoggerFactory.getLogger(DatabaseAuthenticationProvider.class);
+	private static final Logger log = LoggerFactory.getLogger(DatabaseAuthenticationProvider.class);
 	
 	private static final String MESSAGE_LOGIN_FAILED = "Login Failed! Wrong Username or Password.";
 

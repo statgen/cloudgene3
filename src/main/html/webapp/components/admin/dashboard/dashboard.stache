@@ -55,7 +55,7 @@
       {{#each counter.complete}}
         <tr>
           <td><b>{{@key}}</b></td>
-          <td style="width: 150px;">{{.}}</td>
+          <td style="width: 150px;">{{formatNumber(.)}}</td>
         </tr>
       {{/each}}
     </tbody>
@@ -80,7 +80,7 @@
         <tr>
           <td><b>{{name}}</b></td>
           <td style="width: 250px;">{{value}}</td>
-          <td style="width: 150px;">{{count}}</td>
+          <td style="width: 150px;">{{formatNumber(count)}}</td>
         </tr>
       {{/each}}
     </tbody>

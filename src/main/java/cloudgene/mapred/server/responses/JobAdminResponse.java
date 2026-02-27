@@ -3,10 +3,10 @@ package cloudgene.mapred.server.responses;
 import java.io.File;
 import java.util.List;
 
+import cloudgene.mapred.jobs.state.JobState;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import org.apache.commons.io.FileUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import cloudgene.mapred.jobs.AbstractJob;
 import genepi.io.FileUtil;
 
 @JsonInclude(JsonInclude.Include.ALWAYS)
@@ -69,59 +69,64 @@ public class JobAdminResponse {
 	public void setCanceled(int canceled) {
 		this.canceled = canceled;
 	}
-	
+
 	public static JobAdminResponse build(List<JobResponse> responses, String workspace) {
-		
 		int success = 0;
 		int failed = 0;
 		int pending = 0;
 		int waiting = 0;
 		int canceled = 0;
 		int running = 0;
-		
+
 		JobAdminResponse response = new JobAdminResponse();
 		response.setData(responses);
 		response.setCount(responses.size());
-		for (JobResponse job: responses) {
 
+		for (JobResponse job : responses) {
 			String folder = FileUtil.path(workspace, job.getId());
 			File file = new File(folder);
+
 			if (file.exists()) {
 				long size = FileUtils.sizeOfDirectory(file);
 				job.setWorkspaceSize(FileUtils.byteCountToDisplaySize(size));
 			}
 
-			if (job.getState() == AbstractJob.STATE_EXPORTING || job.getState() == AbstractJob.STATE_RUNNING) {
+			if (job.getState() == JobState.EXPORTING.getValue()
+					|| job.getState() == JobState.RUNNING.getValue()) {
 				running++;
 			}
-			if (job.getState() == AbstractJob.STATE_SUCCESS
-					|| job.getState() == AbstractJob.STATE_SUCESS_AND_NOTIFICATION_SEND) {
+
+			if (job.getState() == JobState.SUCCESS.getValue()
+					|| job.getState() == JobState.SUCCESS_AND_NOTIFICATION_SENT.getValue()) {
 				success++;
 			}
-			if (job.getState() == AbstractJob.STATE_FAILED
-					|| job.getState() == AbstractJob.STATE_FAILED_AND_NOTIFICATION_SEND) {
+
+			if (job.getState() == JobState.FAILED.getValue()
+					|| job.getState() == JobState.FAILED_AND_NOTIFICATION_SENT.getValue()) {
 				failed++;
 			}
-			if (job.getState() == AbstractJob.STATE_DEAD) {
+
+			if (job.getState() == JobState.DEAD.getValue()) {
 				pending++;
 			}
-			if (job.getState() == AbstractJob.STATE_WAITING) {
+
+			if (job.getState() == JobState.WAITING.getValue()) {
 				waiting++;
 			}
-			if (job.getState() == AbstractJob.STATE_CANCELED) {
+
+			if (job.getState() == JobState.CANCELED.getValue()) {
 				canceled++;
 			}
 		}
-		
+
 		response.setSuccess(success);
 		response.setFailed(failed);
 		response.setPending(pending);
 		response.setWaiting(waiting);
 		response.setCanceled(canceled);
 		response.setRunning(running);
-		
-		return response;
 
+		return response;
 	}
 
 	public List<JobResponse> getData() {
@@ -139,6 +144,4 @@ public class JobAdminResponse {
 	public void setCount(int count) {
 		this.count = count;
 	}
-
-
 }

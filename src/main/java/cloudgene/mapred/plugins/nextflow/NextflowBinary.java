@@ -1,13 +1,12 @@
 package cloudgene.mapred.plugins.nextflow;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import cloudgene.mapred.util.BinaryFinder;
-import cloudgene.mapred.util.Settings;
+import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.util.command.Command;
-import genepi.io.FileUtil;
 
 public class NextflowBinary {
 
@@ -19,7 +18,7 @@ public class NextflowBinary {
 
 	private String profile;
 
-	private List<File> configFiles = new Vector<File>();
+	private final List<File> configFiles = new ArrayList<>();
 
 	private String work;
 
@@ -37,11 +36,16 @@ public class NextflowBinary {
 
 	private String name;
 
-	private List<File> envScripts = new Vector<>();
+	private final List<File> envScripts = new ArrayList<>();
 
 	public static NextflowBinary build(Settings settings) {
-		String binary = new BinaryFinder("nextflow").settings(settings, "nextflow", "home").env("NEXTFLOW_HOME")
-				.envPath().path("/usr/local/bin").find();
+		String binary = new BinaryFinder("nextflow")
+				.settings(settings, "nextflow", "home")
+				.env("NEXTFLOW_HOME")
+				.envPath()
+				.path("/usr/local/bin")
+				.find();
+
 		return new NextflowBinary(binary);
 	}
 
@@ -94,7 +98,7 @@ public class NextflowBinary {
 	public void addConfig(String configFilename) {
 		this.configFiles.add(new File(configFilename));
 	}
-	
+
 	public void setWork(String work) {
 		this.work = work;
 	}
@@ -133,19 +137,18 @@ public class NextflowBinary {
 
 	public List<String> buildCommand() {
 
-		List<String> nextflow = new Vector<String>();
+		List<String> nextflow = new ArrayList<>();
 		nextflow.add("PATH=$PATH:/usr/local/bin");
-		for (File envScript: envScripts) {
+		for (File envScript : envScripts) {
 			if (envScript != null && envScript.exists()) {
 				nextflow.add("source " + envScript.getAbsolutePath() + ";");
 			}
 		}
 		nextflow.add(getBinary());
-		
+
 		nextflow.add("-log");
 		nextflow.add(log);
 
-		
 		nextflow.add("run");
 		nextflow.add(script);
 
@@ -186,23 +189,23 @@ public class NextflowBinary {
 
 		nextflow.add("-with-trace");
 		nextflow.add(trace);
-		if (new File(trace).exists()){
+		if (new File(trace).exists()) {
 			new File(trace).delete();
 		}
 
 		nextflow.add("-with-report");
 		nextflow.add(report);
-		if (new File(report).exists()){
+		if (new File(report).exists()) {
 			new File(report).delete();
 		}
-		
+
 		nextflow.add("-with-timeline");
 		nextflow.add(timeline);
-		if (new File(timeline).exists()){
+		if (new File(timeline).exists()) {
 			new File(timeline).delete();
 		}
-		
-		List<String> command = new Vector<String>();
+
+		List<String> command = new ArrayList<>();
 		command.add("/bin/bash");
 		command.add("-c");
 		command.add(join(nextflow));
@@ -222,7 +225,7 @@ public class NextflowBinary {
 		return result;
 	}
 
-    public void setRevision(String revision) {
+	public void setRevision(String revision) {
 		this.revision = revision;
-    }
+	}
 }

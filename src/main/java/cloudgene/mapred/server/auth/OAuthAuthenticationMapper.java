@@ -29,14 +29,10 @@ import reactor.core.publisher.Mono;
 @Replaces(DefaultOpenIdAuthenticationMapper.class)
 public class OAuthAuthenticationMapper extends DefaultOpenIdAuthenticationMapper {
 
-	private static final String MESSAGE_LOGIN_FAILED = "Login Failed! Wrong Username or Password.";
-
 	private static final String MESSAGE_ACCOUNT_IS_INACTIVE = "Login Failed! User account is not activated.";
-
 	private static final String MESSAGE_ACCOUNT_LOCKED = "The user account is locked for %d minutes. Too many failed logins.";
 
 	public static final int MAX_LOGIN_ATTEMPTS = 5;
-
 	public static final int LOCKING_TIME_MIN = 30;
 
 	@Inject
@@ -57,7 +53,7 @@ public class OAuthAuthenticationMapper extends DefaultOpenIdAuthenticationMapper
 			OpenIdClaims openIdClaims,
 			@Nullable State state) {
 
-		return Mono.<AuthenticationResponse>create(emitter -> {
+		return Mono.create(emitter -> {
 			String email = openIdClaims.getEmail();
 
 			UserDao dao = new UserDao(application.getDatabase());
@@ -70,9 +66,7 @@ public class OAuthAuthenticationMapper extends DefaultOpenIdAuthenticationMapper
 
 				if (user.getLoginAttempts() >= MAX_LOGIN_ATTEMPTS) {
 					if (user.getLockedUntil() == null || user.getLockedUntil().after(new Date())) {
-
 						throw AuthenticationResponse.exception(String.format(MESSAGE_ACCOUNT_LOCKED, LOCKING_TIME_MIN));
-
 					} else {
 						// penalty time is over. set to zero
 						user.setLoginAttempts(0);

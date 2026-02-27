@@ -3,10 +3,9 @@ package cloudgene.mapred.server.responses;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
-import cloudgene.mapred.jobs.AbstractJob;
 import cloudgene.mapred.jobs.WorkflowEngine;
+import cloudgene.mapred.jobs.state.JobState;
 import cloudgene.mapred.server.Application;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import jakarta.inject.Inject;
@@ -17,10 +16,8 @@ public class CounterResponse {
 	@Inject
 	protected Application application;
 
-	private Map<String, Long> complete = new HashMap<String, Long>();
-
-	private Map<String, Long> queue = new HashMap<String, Long>();
-
+	private Map<String, Long> complete = new HashMap<>();
+	private Map<String, Long> queue = new HashMap<>();
 	private int users = 0;
 
 	public Map<String, Long> getComplete() {
@@ -49,9 +46,10 @@ public class CounterResponse {
 
 	public static CounterResponse build(WorkflowEngine workflowEngine, List<String> counters) {
 		CounterResponse response = new CounterResponse();
-		response.complete = workflowEngine.getCounters(AbstractJob.STATE_SUCCESS, counters);
+
+		response.complete = workflowEngine.getCounters(JobState.SUCCESS, counters);
 		response.queue.put("size", (long) workflowEngine.getSize());
+
 		return response;
 	}
-	
 }
