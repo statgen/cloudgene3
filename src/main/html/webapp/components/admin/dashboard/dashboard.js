@@ -26,11 +26,19 @@ export default Control.extend({
         $.getJSON('api/v2/admin/server/statistics', {
           days: 1,
         }, function (mydata) {
-          $('#new_users').html(mydata[0].users - mydata[mydata.length - 1].users);
-          $('#total_users').html(mydata[0].users);
+          const totalUsers = mydata[0].users;
+          const previousUsers = mydata[mydata.length - 1].users;
+          const newUsers = totalUsers - previousUsers;
 
-          $('#new_jobs').html(mydata[0].completeJobs - mydata[mydata.length - 1].completeJobs);
-          $('#total_jobs').html(mydata[0].completeJobs);
+          $('#new_users').html(newUsers.toLocaleString());
+          $('#total_users').html(totalUsers.toLocaleString());
+
+          const totalJobs = mydata[0].completeJobs;
+          const previousJobs = mydata[mydata.length - 1].completeJobs;
+          const newJobs = totalJobs - previousJobs;
+
+          $('#new_jobs').html(newJobs.toLocaleString());
+          $('#total_jobs').html(totalJobs.toLocaleString());
 
           that.options.running = Morris.Area({
             element: 'morris-area-chart',

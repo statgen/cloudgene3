@@ -10,8 +10,8 @@
   <tbody>
     {{#each counters}}
       <tr>
-        <td>{{key}}</td>
-        <td class="text-end">{{value}}</td>
+        <td>{{@key}}</td>
+        <td class="text-end">{{formatNumber(.)}}</td>
       </tr>
     {{/each}}
   </tbody>
