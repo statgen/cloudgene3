@@ -31,7 +31,7 @@ public final class IpFetcher {
             while (networkInterfaces.hasMoreElements()) {
                 NetworkInterface iface = networkInterfaces.nextElement();
 
-                if (!iface.isUp() || iface.isLoopback() || iface.isVirtual()) {
+                if (!iface.isUp() || iface.isLoopback() || iface.isVirtual() || iface.isPointToPoint()) {
                     continue;
                 }
 
