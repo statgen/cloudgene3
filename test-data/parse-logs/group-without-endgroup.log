@@ -1,0 +1,3 @@
+If you have an unmatched ::group::, it raises an IOException:
+
+::group::

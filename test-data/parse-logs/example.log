@@ -1,0 +1,53 @@
+Welcome to the test log!
+
+# Lines that don't start with :: are ignored.
+
+Here is a command with name 'foo', param 'bar' set to 'baz', and param 'value' set to 'Hello, world!':
+::foo bar=baz::Hello, world!
+
+A command with no parameters (parameter 'value' set to '' if no text present after the second '::'):
+::one::
+
+A command with only the implicit 'value' parameter (anything after the second '::', trimmed):
+::two:: three
+
+A command with only a named parameter (whitespace trimmed from name, param keys, param values):
+:: four five =  six::
+
+A command with multiple parameters (comma-separated: don't rely on spaces!)
+::a b=c,d=e,f=g::h
+
+Commands cannot be indented, otherwise they're ignored:
+ ::nope::
+
+This dangling open tag gets ignored.
+::
+
+This empty command generates... an empty command! (should probably be ignored).
+::::
+
+Same for this one with whitespace:
+:: ::
+
+Commands named 'group' are a special case used for multi-line values.
+They run from the start (::group::) to the end (::endgroup::), and the command name ('group')
+is replaced by the value of the parameter 'type', if present (otherwise defaults to 'message').
+
+::group::
+This is a group named 'message' (default value).
+
+Everything between ::group:: and ::endgroup:: is parsed as the 'value'.
+::endgroup::
+
+----------------------------------------------------------------
+
+::group type=foo::
+
+
+This is a group named 'foo' (specified by the 'type' parameter).
+
+
+Lines with content are kept separate, but empty lines are collapsed into a single newline.
+
+
+::endgroup::

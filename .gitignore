@@ -12,6 +12,7 @@
 /workspace
 *.log
 *.log.*
+!/test-data/**/*.log
 /job-*
 /src/main/html/webapp/tmp
 /src/main/html/webapp/dist

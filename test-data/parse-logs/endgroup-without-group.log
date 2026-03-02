@@ -1,0 +1,2 @@
+If you have an unmatched ::endgroup:: block, it raises an IOException:
+::endgroup::
