@@ -9,7 +9,7 @@ import cloudgene.mapred.util.config.Settings;
 
 @JsonClassDescription
 @JsonInclude(JsonInclude.Include.ALWAYS)
-public class ServerResponse {
+public class ServerSettingsResponse {
 
 	private String name;
 	private String backgroundColor;
@@ -28,8 +28,8 @@ public class ServerResponse {
 	private String workspaceLocation;
 	private String baseUrl;
 
-	public static ServerResponse build(Settings settings) {
-		ServerResponse response = new ServerResponse();
+	public static ServerSettingsResponse build(Settings settings) {
+		ServerSettingsResponse response = new ServerSettingsResponse();
 		response.setName(settings.getName());
 		response.setAdminName(settings.getAdminName());
 		response.setAdminMail(settings.getAdminMail());
@@ -191,5 +191,4 @@ public class ServerResponse {
 	public String getWorkspaceType() {
 		return workspaceType;
 	}
-
 }

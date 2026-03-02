@@ -9,7 +9,7 @@ import cloudgene.mapred.database.CounterHistoryDao;
 import cloudgene.mapred.server.Application;
 import cloudgene.mapred.server.auth.AuthenticationService;
 import cloudgene.mapred.server.responses.NextflowConfigResponse;
-import cloudgene.mapred.server.responses.ServerResponse;
+import cloudgene.mapred.server.responses.ServerSettingsResponse;
 import cloudgene.mapred.server.responses.StatisticsResponse;
 import cloudgene.mapred.server.services.ServerService;
 import cloudgene.mapred.util.TextUtil;
@@ -88,12 +88,12 @@ public class ServerAdminController {
 	}
 
 	@Get("/settings")
-	public ServerResponse getSettings() {
-		return ServerResponse.build(application.getSettings());
+	public ServerSettingsResponse getSettings() {
+		return ServerSettingsResponse.build(application.getSettings());
 	}
 
 	@Post("/settings/update")
-	public ServerResponse updateSettings(
+	public ServerSettingsResponse updateSettings(
 			String name,
 			String adminName,
 			String adminMail,
@@ -115,7 +115,7 @@ public class ServerAdminController {
 				googleAnalytics, String.valueOf(mail), mailSmtp, mailPort, mailUser, mailPassword, mailName,
 				workspaceType, workspaceLocation);
 
-		return ServerResponse.build(application.getSettings());
+		return ServerSettingsResponse.build(application.getSettings());
 	}
 
 	@Get("/nextflow/config")
