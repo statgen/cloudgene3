@@ -1,0 +1,11 @@
+If you put a command inside a ::group:: block, it raises an IOException:
+
+::group::
+
+Bla bla bla
+
+::foo:: <- Error raised here
+
+Bla bla bla bla
+
+::endgroup::
