@@ -210,4 +210,4 @@ CREATE TABLE banners (
 
 ALTER TABLE job ADD COLUMN completion_state ENUM('submitted', 'running', 'complete', 'retired', 'deleted') NULL DEFAULT NULL;
 ALTER TABLE job ADD COLUMN success_state ENUM('pending', 'succeeded', 'failed', 'canceled', 'dead') NULL DEFAULT NULL;
-ALTER TABLE job ADD COLUMN notification_state ENUM('pending', 'notified_completion', 'sent_retirement_reminder', 'notified_retirement') NULL DEFAULT NULL;
+ALTER TABLE job ADD COLUMN notification_state ENUM('pending', 'notified_retirement') NULL DEFAULT NULL;

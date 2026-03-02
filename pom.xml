@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cloudgene</groupId>
 	<artifactId>cloudgene</artifactId>
-	<version>3.1.4-statgen.13</version>
+	<version>3.1.4-statgen.14</version>
 	<packaging>${packaging}</packaging>
 
 	<parent>
@@ -16,7 +16,7 @@
 	<name>Cloudgene</name>
 	<url>http://www.cloudgene.io</url>
 	<organization>
-		<name>Lukas Forer and Sebastian Schoenherr</name>
+		<name>Imputation Server Team</name>
 	</organization>
 
 	<developers>
@@ -33,6 +33,12 @@
 			<email>sebastian.schoenherr@i-med.ac.at</email>
 			<url>https://seppinho.github.io</url>
 			<organization>Medical University of Innsbruck</organization>
+		</developer>
+		<developer>
+			<id>marcfra</id>
+			<name>Marc Fraile</name>
+			<email>marcfra@umich.edu</email>
+			<organization>University of Michigan</organization>
 		</developer>
 	</developers>
 
@@ -381,6 +387,56 @@
 						</manifestEntries>
 					</archive>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.4.0</version>
+				<executions>
+					<execution>
+						<id>generate-build-info</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/generated-sources/build-info</outputDirectory>
+
+							<resources>
+								<resource>
+									<directory>src/main/templates</directory>
+									<includes>
+										<include>**/*.java</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+
+							<encoding>${project.build.sourceEncoding}</encoding>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.6.1</version>
+				<executions>
+					<execution>
+						<id>add-generated-sources</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/generated-sources/build-info</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 
 			<plugin>

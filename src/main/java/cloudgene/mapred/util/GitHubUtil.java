@@ -6,6 +6,7 @@ import static io.micronaut.http.HttpHeaders.USER_AGENT;
 import java.net.URI;
 import java.util.Map;
 
+import cloudgene.mapred.BuildInfo;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.netty.DefaultHttpClient;
@@ -60,8 +61,8 @@ public class GitHubUtil {
 	 * Parses a GitHub repo string like {@code username/repo[/path/to/cloudgene.yaml][@git-ref]}
 	 * into its component parts.
 	 *
-	 * @param shorthand String identifying a GitHub repo (and possibly a git tag, and the
-	 *                  path to the YAML config).
+	 * @param shorthand String identifying a GitHub repo (and possibly a git tag,
+	 *                  and the path to the YAML config).
 	 * @return The parsed repo details.
 	 */
 	public static Repository parseShorthand(@NotNull String shorthand) throws IllegalArgumentException {
@@ -135,7 +136,7 @@ public class GitHubUtil {
 			URI uri = new URI(urlString);
 
 			HttpRequest<?> req = HttpRequest.GET(uri)
-					.header(USER_AGENT, "Cloudgene")
+					.header(USER_AGENT, BuildInfo.APP_ID + "/" + BuildInfo.VERSION)
 					.header(ACCEPT, "application/vnd.github.v3+json, application/json");
 
 			String tag = Mono.from(httpClient.retrieve(req, Map.class))

@@ -1,5 +1,6 @@
 package cloudgene.mapred.server.services;
 
+import cloudgene.mapred.BuildInfo;
 import cloudgene.mapred.apps.ApplicationRepository;
 import cloudgene.mapred.core.Template;
 import cloudgene.mapred.core.User;
@@ -18,11 +19,9 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.*;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
+
+import org.apache.commons.dbcp.BasicDataSource;
 
 @Singleton
 public class ServerService {
@@ -34,8 +33,8 @@ public class ServerService {
 			+ "  <g fill=\"#fff\" text-anchor=\"middle\" font-family=\"DejaVu Sans,Verdana,Geneva,sans-serif\" font-size=\"11\">"
 			+ "    <text x=\"27.5\" y=\"15\" fill=\"#010101\" fill-opacity=\".3\">version</text>"
 			+ "    <text x=\"27.5\" y=\"14\">version</text>"
-			+ "    <text x=\"74.5\" y=\"15\" fill=\"#010101\" fill-opacity=\".3\">" + Application.VERSION + "</text>"
-			+ "    <text x=\"74.5\" y=\"14\">" + Application.VERSION + "</text>"
+			+ "    <text x=\"74.5\" y=\"15\" fill=\"#010101\" fill-opacity=\".3\">" + BuildInfo.VERSION + "</text>"
+			+ "    <text x=\"74.5\" y=\"14\">" + BuildInfo.VERSION + "</text>"
 			+ "  </g>"
 			+ "</svg>";
 
@@ -172,32 +171,26 @@ public class ServerService {
 		// general settings
 		object.put("maintenance", application.getSettings().isMaintenance());
 		object.put("blocked", !application.getWorkflowEngine().isRunning());
-		object.put("version", Application.VERSION);
+		object.put("version", BuildInfo.VERSION);
 		object.put("maintenance", application.getSettings().isMaintenance());
 		object.put("blocked", !application.getWorkflowEngine().isRunning());
 		object.put("threads", application.getSettings().getThreadsQueue());
 		object.put("max_jobs_user", application.getSettings().getMaxRunningJobsPerUser());
-		try {
-			URL url = ServerService.class.getClassLoader().getResource("META-INF/MANIFEST.MF");
-			Manifest manifest = new Manifest(url.openStream());
-			Attributes attr = manifest.getMainAttributes();
-			String buildTime = attr.getValue("Build-Time");
-			String builtBy = attr.getValue("Built-By");
-			object.put("built_by", builtBy);
-			object.put("built_time", buildTime);
-
-		} catch (IOException E) {
-			object.put("built_by", "Development");
-			object.put("built_time", new Date().toGMTString());
-		}
+		object.put("built_by", BuildInfo.BUILT_BY);
+		object.put("built_time", BuildInfo.BUILD_TIME);
 
 		// workspace and hdd
 		File workspace = new File(application.getSettings().getLocalWorkspace());
-		object.put("workspace_path", workspace.getAbsolutePath());
-		object.put("free_disc_space", workspace.getUsableSpace() / 1024 / 1024 / 1024);
-		object.put("total_disc_space", workspace.getTotalSpace() / 1024 / 1024 / 1024);
-		object.put("used_disc_space",
-				(workspace.getTotalSpace() / 1024 / 1024 / 1024) - (workspace.getUsableSpace() / 1024 / 1024 / 1024));
+
+		String workspacePath = workspace.getAbsolutePath();
+		long freeDiskSpace = workspace.getUsableSpace() / (1024L * 1024L * 1024L);
+		long totalDiskSpace = workspace.getTotalSpace() / (1024L * 1024L * 1024L);
+		long usedDiskSpace = totalDiskSpace - freeDiskSpace;
+
+		object.put("workspace_path", workspacePath);
+		object.put("free_disc_space", freeDiskSpace);
+		object.put("total_disc_space", totalDiskSpace);
+		object.put("used_disc_space", usedDiskSpace);
 
 		// plugins
 		PluginManager manager = PluginManager.getInstance();
@@ -241,18 +234,18 @@ public class ServerService {
 				pluginObject.put("details", output.toString());
 			} else {
 				pluginObject.put("enabled", false);
-				pluginObject.put("error", output.toString() + "\n" + error.toString());
+				pluginObject.put("error", output + "\n" + error);
 			}
 			plugins.add(pluginObject);
 		}
 
 		// database
-		object.put("db_max_active", application.getDatabase().getDataSource().getMaxActive());
-		object.put("db_active", application.getDatabase().getDataSource().getNumActive());
-		object.put("db_max_idle", application.getDatabase().getDataSource().getMaxIdle());
-		object.put("db_idle", application.getDatabase().getDataSource().getNumIdle());
-		object.put("db_max_open_prep_statements",
-				application.getDatabase().getDataSource().getMaxOpenPreparedStatements());
+		BasicDataSource dbSrc = application.getDatabase().getDataSource();
+		object.put("db_max_active", dbSrc.getMaxActive());
+		object.put("db_active", dbSrc.getNumActive());
+		object.put("db_max_idle", dbSrc.getMaxIdle());
+		object.put("db_idle", dbSrc.getNumIdle());
+		object.put("db_max_open_prep_statements", dbSrc.getMaxOpenPreparedStatements());
 
 		return object.toString();
 	}
