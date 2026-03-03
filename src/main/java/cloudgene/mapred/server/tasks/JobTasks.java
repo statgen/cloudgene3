@@ -17,20 +17,15 @@ public class JobTasks {
 
 	@Scheduled(fixedDelay = "${micronaut.autoRetireInterval:1m}")
 	public void executeRetire() {
-
 		if (application.getSettings().isAutoRetire()) {
 			cleanUpService.executeRetire();
 		}
-
 	}
 
 	@Scheduled(fixedDelay = "${micronaut.autoRetireInterval:1m}")
 	public void sendNotifications() {
-
 		if (application.getSettings().isAutoRetire()) {
 			cleanUpService.sendNotifications();
 		}
-
 	}
-
 }

@@ -1,5 +1,7 @@
 package cloudgene.mapred.jobs.state;
 
+import io.micronaut.core.annotation.Nullable;
+
 /**
  * String enum encoding the success state of a particular job:
  * <ul>
@@ -47,9 +49,17 @@ public enum SuccessState {
 		return value;
 	}
 
-	public static SuccessState of(String value) {
+	/**
+	 * Parses the given {@code value} into a {@link SuccessState}.
+	 * <p>
+	 * If {@code value} is blank or null, returns null. Otherwise, {@code value}
+	 * should match one of the existing states (ignoring case and surrounding
+	 * whitespace).
+	 */
+	@Nullable
+	public static SuccessState of(@Nullable String value) {
 		if (value == null || value.isBlank()) {
-			throw new IllegalArgumentException("value must be non-null and non-blank.");
+			return null;
 		}
 
 		value = value.trim().toLowerCase();
