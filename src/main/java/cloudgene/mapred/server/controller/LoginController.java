@@ -1,15 +1,13 @@
 package cloudgene.mapred.server.controller;
 
+import cloudgene.mapred.server.Application;
+import io.micronaut.security.authentication.AuthenticationResponse;
+import io.micronaut.security.event.SecurityEvent;
 import jakarta.validation.Valid;
-
-import org.reactivestreams.Publisher;
 
 import cloudgene.mapred.server.auth.DatabaseAuthenticationProvider;
 import io.micronaut.context.event.ApplicationEventPublisher;
-import io.micronaut.core.async.annotation.SingleResult;
 import io.micronaut.http.HttpRequest;
-import io.micronaut.http.HttpResponse;
-import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.MutableHttpResponse;
 import io.micronaut.http.annotation.Body;
@@ -22,38 +20,41 @@ import io.micronaut.security.event.LoginFailedEvent;
 import io.micronaut.security.event.LoginSuccessfulEvent;
 import io.micronaut.security.token.bearer.AccessRefreshTokenLoginHandler;
 import jakarta.inject.Inject;
-import reactor.core.publisher.Flux;
+
+import java.util.Locale;
 
 @Controller
 public class LoginController {
 
 	@Inject
-	protected AccessRefreshTokenLoginHandler loginHandler;
-	
+	private Application application;
+
 	@Inject
-	protected ApplicationEventPublisher eventPublisher;
-	
+	protected AccessRefreshTokenLoginHandler loginHandler;
+
+	@Inject
+	protected ApplicationEventPublisher<SecurityEvent> eventPublisher;
+
 	@Inject
 	protected DatabaseAuthenticationProvider authenticator;
 
 	@Consumes({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON })
 	@Post("/login")
-	@SingleResult
-	public Publisher<MutableHttpResponse<?>> login(@Valid @Body UsernamePasswordCredentials usernamePasswordCredentials,
+	public MutableHttpResponse<?> login(
+			@Valid @Body UsernamePasswordCredentials usernamePasswordCredentials,
 			HttpRequest<?> request) {
 
-		return Flux.from(authenticator.authenticate(request, usernamePasswordCredentials))
-				.map(authenticationResponse -> {
-					if (authenticationResponse.isAuthenticated()
-							&& authenticationResponse.getAuthentication().isPresent()) {
-						Authentication authentication = authenticationResponse.getAuthentication().get();
-						eventPublisher.publishEvent(new LoginSuccessfulEvent(authentication));
-						return loginHandler.loginSuccess(authentication, request);
-					} else {
-						eventPublisher.publishEvent(new LoginFailedEvent(authenticationResponse));
-						return loginHandler.loginFailed(authenticationResponse, request);
-					}
-				}).defaultIfEmpty(HttpResponse.status(HttpStatus.UNAUTHORIZED));
-	}
+		AuthenticationResponse authResponse = authenticator.authenticate(request, usernamePasswordCredentials);
+		String url = application.getSettings().getServerUrl();
+		Locale locale = request.getLocale().orElse(Locale.US);
 
+		if (authResponse.isAuthenticated() && authResponse.getAuthentication().isPresent()) {
+			Authentication auth = authResponse.getAuthentication().get();
+			eventPublisher.publishEvent(new LoginSuccessfulEvent(auth, url, locale));
+			return loginHandler.loginSuccess(auth, request);
+		} else {
+			eventPublisher.publishEvent(new LoginFailedEvent(authResponse, usernamePasswordCredentials, url, locale));
+			return loginHandler.loginFailed(authResponse, request);
+		}
+	}
 }
