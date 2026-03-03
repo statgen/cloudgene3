@@ -12,8 +12,6 @@ import cloudgene.mapred.util.config.Settings;
 public class ServerSettingsResponse {
 
 	private String name;
-	private String backgroundColor;
-	private String foregroundColor;
 	private String googleAnalytics;
 	private String mailSmtp;
 	private String mailPort;
@@ -35,8 +33,6 @@ public class ServerSettingsResponse {
 		response.setAdminMail(settings.getAdminMail());
 		response.setServerUrl(settings.getServerUrl());
 		response.setBaseUrl(settings.getBaseUrl());
-		response.setBackgroundColor(settings.getColors().get("background"));
-		response.setForegroundColor(settings.getColors().get("foreground"));
 		response.setGoogleAnalytics(settings.getGoogleAnalytics());
 		response.setWorkspaceType(settings.getExternalWorkspaceType());
 		response.setWorkspaceLocation(settings.getExternalWorkspaceLocation());
@@ -50,7 +46,6 @@ public class ServerSettingsResponse {
 			response.setMailPassword(mail.get("password"));
 			response.setMailUser(mail.get("user"));
 			response.setMailName(mail.get("name"));
-
 		} else {
 			response.setMail(false);
 			response.setMailSmtp("");
@@ -58,7 +53,6 @@ public class ServerSettingsResponse {
 			response.setMailUser("");
 			response.setMailPassword("");
 			response.setMailName("");
-
 		}
 
 		return response;
@@ -102,22 +96,6 @@ public class ServerSettingsResponse {
 
 	public void setServerUrl(String serverUrl) {
 		this.serverUrl = serverUrl;
-	}
-
-	public String getBackgroundColor() {
-		return backgroundColor;
-	}
-
-	public void setBackgroundColor(String backgroundColor) {
-		this.backgroundColor = backgroundColor;
-	}
-
-	public String getForegroundColor() {
-		return foregroundColor;
-	}
-
-	public void setForegroundColor(String foregroundColor) {
-		this.foregroundColor = foregroundColor;
 	}
 
 	public String getGoogleAnalytics() {

@@ -46,8 +46,6 @@ public class BinaryFinder {
 		return this;
 	}
 
-	// TODO(Marc): The plugins concept seems to be abandoned. Perhaps we could
-	// remove it entirely.
 	/**
 	 * Checks available plugin information for a binary file path, based on the
 	 * current {@code settings}.

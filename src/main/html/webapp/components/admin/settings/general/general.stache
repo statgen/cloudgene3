@@ -88,27 +88,7 @@
 
   <hr/>
 
-  <h5>Appearance</h5>
-
-  <div class="mb-3">
-    <label for="background-color" class="form-label mb-2">Background Color:</label>
-    <div class="row">
-      <div class="col-md-4">
-        <input id="background-color" name="background-color" type="text" class="form-control" value="{{settings.backgroundColor}}" autocomplete="off">
-      </div>
-    </div>
-  </div>
-
-
-  <div class="mb-3">
-    <label for="foreground-color" class="form-label mb-2">Foreground Color:</label>
-    <div class="row">
-      <div class="col-md-4">
-        <input id="foreground-color" name="foreground-color" type="text" class="form-control" value="{{settings.foregroundColor}}" autocomplete="off">
-      </div>
-    </div>
-    <small class="form-text text-muted">Choose from <b>navbar-light</b> for use with light background colors, or <b>navbar-dark</b> for dark background colors.</small>
-  </div>
+  <h5>Tracking</h5>
 
   <div class="mb-3">
     <label for="google-analytics" class="form-label mb-2">Google Analytics:</label>
@@ -120,7 +100,7 @@
     <small class="form-text text-muted">Enter your Google Analytics web tracking code (e.g. UA-2110908-2) to activate tracking.</small>
   </div>
 
-<hr>
+  <hr/>
 
   <div class="mb-3">
     <button id="save" class="btn btn-primary" data-loading-text="please wait...">

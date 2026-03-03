@@ -9,8 +9,6 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ServerResponse(
 		String name,
-		String background,
-		String foreground,
 		boolean emailRequired,
 
 		// TODO(Marc): maybe we should get rid of these two.
@@ -33,9 +31,11 @@ public record ServerResponse(
 
 	@JsonClassDescription
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public record User(String username, String fullName, String mail, boolean admin) {}
+	public record User(String username, String fullName, String mail, boolean admin) {
+	}
 
 	@JsonClassDescription
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public record App(String id, String name, String version) {}
+	public record App(String id, String name, String version) {
+	}
 }

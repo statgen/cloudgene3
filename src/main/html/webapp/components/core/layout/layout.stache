@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-md fixed-top {{foreground}}" style="background: {{background}};">
+<nav class="navbar navbar-expand-md fixed-top navbar-light" style="background: #f4f4f6;">
   <div class="container d-flex justify-content-between">
     <a class="navbar-brand" href="#!pages/home" aria-label="TOPMed Imputation Server">
       <img src="/static/images/tis-logo.png" height="60px" alt="NHLBI BioData Catalyst Logo">
@@ -55,25 +55,9 @@
           </li>
         {{/if}}
 
-        {{#navigation}}
-          {{#if(link)}}
-            <li class="nav-item">
-              <a class="nav-link" href="{{link}}"> {{name}}</a>
-            </li>
-          {{else}}
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="{{id}}" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                {{name}}
-              </a>
-
-              <div class="dropdown-menu" aria-labelledby="{{id}}">
-                {{#items}}
-                  <a class="dropdown-item" href="{{link}}">{{name}}</a>
-                {{/items}}
-              </div>
-            </li>
-          {{/if}}
-        {{/navigation}}
+        <li class="nav-item">
+          <a class="nav-link" href="#!pages/about">About</a>
+        </li>
 
         <li class="nav-item">
           <a class="nav-link" href="https://topmed.dev.imputationserver.org/" data-bs-toggle="modal" data-bs-target="#helpModal">

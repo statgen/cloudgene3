@@ -99,8 +99,6 @@ public class ServerAdminController {
 			String adminMail,
 			String serverUrl,
 			String baseUrl,
-			String backgroundColor,
-			String foregroundColor,
 			@Nullable String googleAnalytics,
 			boolean mail,
 			String mailSmtp,
@@ -111,9 +109,8 @@ public class ServerAdminController {
 			String workspaceType,
 			String workspaceLocation) {
 
-		serverService.updateSettings(name, adminName, adminMail, serverUrl, baseUrl, backgroundColor, foregroundColor,
-				googleAnalytics, String.valueOf(mail), mailSmtp, mailPort, mailUser, mailPassword, mailName,
-				workspaceType, workspaceLocation);
+		serverService.updateSettings(name, adminName, adminMail, serverUrl, baseUrl, googleAnalytics, mail, mailSmtp,
+				mailPort, mailUser, mailPassword, mailName, workspaceType, workspaceLocation);
 
 		return ServerSettingsResponse.build(application.getSettings());
 	}

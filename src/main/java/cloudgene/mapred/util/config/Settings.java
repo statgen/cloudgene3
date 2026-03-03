@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cloudgene.mapred.util.MenuItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,16 +36,12 @@ public class Settings {
 
 	private String name = "Cloudgene";
 
-	private Map<String, String> colors;
-
 	private String secretKey = "";
 
 	private Map<String, String> mail;
 
 	private Map<String, String> database;
 
-	// TODO(Marc): The plugins concept seems to be abandoned.
-	//             Perhaps we could remove it entirely.
 	private Map<String, Map<String, String>> plugins;
 
 	private List<Map<String, String>> errorHandlers = new ArrayList<>();
@@ -77,8 +72,6 @@ public class Settings {
 
 	private boolean showLogs = false;
 
-	private List<MenuItem> navigation = new ArrayList<>();
-
 	private Map<String, String> externalWorkspace = null;
 
 	private int uploadLimit = 5000;
@@ -107,17 +100,8 @@ public class Settings {
 		// read default settings from env variables when set
 		this.name = Configuration.get("CG_SERVICE_NAME", this.name);
 
-		MenuItem helpMenuItem = new MenuItem();
-		helpMenuItem.setId("help");
-		helpMenuItem.setName("Help");
-		String helpLink = Configuration.get("CG_HELP_PAGE", "http://docs.cloudgene.io");
-		helpMenuItem.setLink(helpLink);
-		navigation.add(helpMenuItem);
-
 		database = new HashMap<>();
 		initDefaultDatabase(database, "data/cloudgene");
-
-		colors = getDefaultColors();
 	}
 
 	public static Settings load() throws IOException {
@@ -165,13 +149,6 @@ public class Settings {
 		database.put("database", defaultSchema);
 		database.put("user", "cloudgene");
 		database.put("password", "cloudgene");
-	}
-
-	public static Map<String, String> getDefaultColors() {
-		Map<String, String> colors = new HashMap<>();
-		colors.put("background", "#343a40");
-		colors.put("foreground", "navbar-dark");
-		return colors;
 	}
 
 	public void save() {
@@ -329,14 +306,6 @@ public class Settings {
 		this.secretKey = secretKey;
 	}
 
-	public void setNavigation(List<MenuItem> navigation) {
-		this.navigation = navigation;
-	}
-
-	public List<MenuItem> getNavigation() {
-		return navigation;
-	}
-
 	public int getUploadLimit() {
 		return uploadLimit;
 	}
@@ -351,14 +320,6 @@ public class Settings {
 
 	public void setAutoRetireInterval(int autoRetireInterval) {
 		this.autoRetireInterval = autoRetireInterval;
-	}
-
-	public Map<String, String> getColors() {
-		return colors;
-	}
-
-	public void setColors(Map<String, String> colors) {
-		this.colors = colors;
 	}
 
 	public void setPlugins(Map<String, Map<String, String>> plugins) {

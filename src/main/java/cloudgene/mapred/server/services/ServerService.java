@@ -47,8 +47,6 @@ public class ServerService {
 
 	public ServerResponse getRoot(User user) {
 		String name = application.getSettings().getName();
-		String background = application.getSettings().getColors().get("background");
-		String foreground = application.getSettings().getColors().get("foreground");
 		boolean emailRequired = application.getSettings().isEmailRequired();
 
 		String userEmailDescription = application.getTemplate(Template.USER_EMAIL_DESCRIPTION);
@@ -105,8 +103,6 @@ public class ServerService {
 
 		return new ServerResponse(
 				name,
-				background,
-				foreground,
 				emailRequired,
 				userEmailDescription,
 				userWithoutEmailDescription,
@@ -126,10 +122,8 @@ public class ServerService {
 			String adminMail,
 			String serverUrl,
 			String baseUrl,
-			String backgroundColor,
-			String foregroundColor,
 			String googleAnalytics,
-			String mail,
+			boolean mail,
 			String mailSmtp,
 			String mailPort,
 			String mailUser,
@@ -144,13 +138,11 @@ public class ServerService {
 		settings.setAdminMail(adminMail);
 		settings.setServerUrl(serverUrl);
 		settings.setBaseUrl(baseUrl);
-		settings.getColors().put("background", backgroundColor);
-		settings.getColors().put("foreground", foregroundColor);
 		settings.setGoogleAnalytics(googleAnalytics);
 		settings.getExternalWorkspace().put("type", workspaceType);
 		settings.getExternalWorkspace().put("location", workspaceLocation);
 
-		if (mail != null && mail.equals("true")) {
+		if (mail) {
 			Map<String, String> mailConfig = new HashMap<>();
 			mailConfig.put("smtp", mailSmtp);
 			mailConfig.put("port", mailPort);
