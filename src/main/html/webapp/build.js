@@ -6,9 +6,6 @@ stealTools.build(
   },
   {
     bundleSteal: true,
-    bundleAssets: {
-      infer: true,
-      glob: ['public/*'],
-    },
+    bundleAssets: true,
   },
 );
