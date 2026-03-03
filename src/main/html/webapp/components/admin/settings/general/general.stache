@@ -68,7 +68,7 @@
     <label for="workspaceType" class="form-label mb-2">Type:</label>
     <div class="row">
       <div class="col-md-4">
-        <select id="workspaceType" name="workspaceType" type="text" class="form-control" value="{{settings.workspaceType}}" autocomplete="off">
+        <select id="workspaceType" name="workspaceType" type="text" class="form-select" value="{{settings.workspaceType}}" autocomplete="off">
           <option value="local">Local</option>
           <option value="s3">S3</option>
         </select>
