@@ -5,7 +5,10 @@ stealTools.build(
     main: ['cloudgene/index', 'cloudgene/admin'],
   },
   {
-    bundleAssets: true,
     bundleSteal: true,
+    bundleAssets: {
+      infer: true,
+      glob: ['public/*'],
+    },
   },
 );
