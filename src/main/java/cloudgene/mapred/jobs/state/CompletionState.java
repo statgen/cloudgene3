@@ -1,5 +1,7 @@
 package cloudgene.mapred.jobs.state;
 
+import io.micronaut.core.annotation.Nullable;
+
 /**
  * String enum encoding the completion state of a particular job:
  * <ul>
@@ -11,15 +13,15 @@ package cloudgene.mapred.jobs.state;
  *     </li>
  *     <li>
  *         {@code COMPLETE}: The job has already stopped running, independent of success status.
- * 	       It could also have been canceled (see {@link SuccessState}).
+ *         It could also have been canceled (see {@link SuccessState}).
  *     </li>
  *     <li>
  *         {@code RETIRED}: The job is still visible, but its data is no longer available
- * 	       (the job was automatically retired due to age, or an admin archived it).
+ *         (the job was automatically retired due to age, or an admin archived it).
  *     </li>
  *     <li>
  *         {@code DELETED}: The job was deleted (by the user o an admin) and can no longer be
- * 	       seen in the UI or API. Some information may remain in the database (soft-delete).
+ *         seen in the UI or API. Some information may remain in the database (soft-delete).
  *     </li>
  * </ul>
  */
@@ -59,9 +61,17 @@ public enum CompletionState {
 		return value;
 	}
 
-	public static CompletionState of(String value) {
+	/**
+	 * Parses the given {@code value} into a {@link CompletionState}.
+	 * <p>
+	 * If {@code value} is blank or null, returns null. Otherwise, {@code value}
+	 * should match one of the existing states (ignoring case and surrounding
+	 * whitespace).
+	 */
+	@Nullable
+	public static CompletionState of(@Nullable String value) {
 		if (value == null || value.isBlank()) {
-			throw new IllegalArgumentException("value must be non-null and non-blank.");
+			return null;
 		}
 
 		value = value.trim().toLowerCase();

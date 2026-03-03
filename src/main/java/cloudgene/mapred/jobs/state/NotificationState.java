@@ -1,5 +1,7 @@
 package cloudgene.mapred.jobs.state;
 
+import io.micronaut.core.annotation.Nullable;
+
 /**
  * String enum encoding the email notifications sent for a particular job:
  * <ul>
@@ -35,9 +37,17 @@ public enum NotificationState {
 		return value;
 	}
 
-	public static NotificationState of(String value) {
+	/**
+	 * Parses the given {@code value} into a {@link NotificationState}.
+	 * <p>
+	 * If {@code value} is blank or null, returns null. Otherwise, {@code value}
+	 * should match one of the existing states (ignoring case and surrounding
+	 * whitespace).
+	 */
+	@Nullable
+	public static NotificationState of(@Nullable String value) {
 		if (value == null || value.isBlank()) {
-			throw new IllegalArgumentException("value must be non-null and non-blank.");
+			return null;
 		}
 
 		value = value.trim().toLowerCase();
