@@ -35,6 +35,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.micronaut.core.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +52,12 @@ public class DatabaseUpdater {
 	private final boolean needUpdate;
 	private final Map<String, IUpdateListener> listeners;
 
-	public DatabaseUpdater(Database database, String filename, InputStream updateFileAsStream, String currentVersion) {
+	public DatabaseUpdater(
+			@NonNull Database database,
+			@NonNull String filename,
+			@NonNull InputStream updateFileAsStream,
+			@NonNull String currentVersion) {
+
 		this.filename = filename;
 		this.database = database;
 		this.connector = database.getConnector();
@@ -59,7 +65,7 @@ public class DatabaseUpdater {
 		this.currentVersion = currentVersion;
 		this.listeners = new HashMap<>();
 
-		if (isVersionTableAvailable(database)) {
+		if (isVersionTableAvailable()) {
 			String oldVersion = readVersionDB();
 			log.info("Read current DB version: {}", oldVersion);
 
@@ -85,7 +91,6 @@ public class DatabaseUpdater {
 	}
 
 	public boolean updateDB() {
-
 		if (needUpdate()) {
 			log.info("Database needs update...");
 			if (!update()) {
@@ -101,7 +106,7 @@ public class DatabaseUpdater {
 			log.info("Update database done.");
 		} else {
 			log.info("Database is already up-to-date.");
-			if (!isVersionTableAvailable(database)) {
+			if (!isVersionTableAvailable()) {
 				writeVersion(currentVersion);
 			}
 		}
@@ -128,7 +133,7 @@ public class DatabaseUpdater {
 			}
 
 			// check if DB version match with Main version
-			if (isVersionTableAvailable(database)) {
+			if (isVersionTableAvailable()) {
 				String currentDBVersion = readVersionDB();
 				if ((compareVersion(currentVersion, currentDBVersion) > 0)) {
 					writeVersion(currentVersion);
@@ -149,8 +154,8 @@ public class DatabaseUpdater {
 
 	public void writeVersion(String newVersion) {
 		try {
-			if (!isVersionTableAvailable(database)) {
-				createVersionTable(database);
+			if (!isVersionTableAvailable()) {
+				createVersionTable();
 			}
 
 			Connection connection = connector.getDataSource().getConnection();
@@ -171,7 +176,8 @@ public class DatabaseUpdater {
 		}
 	}
 
-	public String readVersion(String versionFile) {
+	@NonNull
+	public String readVersion(@NonNull String versionFile) {
 		File file = new File(versionFile);
 
 		if (file.exists()) {
@@ -211,7 +217,8 @@ public class DatabaseUpdater {
 		return version;
 	}
 
-	public static String readFileAsString(String filename) throws java.io.IOException, URISyntaxException {
+	@NonNull
+	public static String readFileAsString(@NonNull String filename) throws java.io.IOException, URISyntaxException {
 		InputStream is = new FileInputStream(filename);
 
 		DataInputStream in = new DataInputStream(is);
@@ -227,7 +234,11 @@ public class DatabaseUpdater {
 		return builder.toString();
 	}
 
-	public String readAndPrepareSqlClasspath(InputStream filestream, String minVersion, String maxVersion)
+	@NonNull
+	public String readAndPrepareSqlClasspath(
+			@NonNull InputStream filestream,
+			@NonNull String minVersion,
+			@NonNull String maxVersion)
 			throws java.io.IOException, URISyntaxException, SQLException {
 
 		DataInputStream in = new DataInputStream(filestream);
@@ -251,7 +262,7 @@ public class DatabaseUpdater {
 				version = strLine.replace("--", "").trim();
 				reading = (compareVersion(version, minVersion) > 0 && compareVersion(version, maxVersion) <= 0);
 				if (reading) {
-					log.info("Loading SQL update for version " + version);
+					log.info("Loading SQL update for version {}", version);
 					IUpdateListener listener = listeners.get(version);
 					if (listener != null) {
 						listener.beforeUpdate(database);
@@ -272,7 +283,7 @@ public class DatabaseUpdater {
 		return builder.toString();
 	}
 
-	public void executeSQLFile(String sqlContent, String version) throws SQLException {
+	public void executeSQLFile(@NonNull String sqlContent, String version) throws SQLException {
 		String cleanedSQL = sqlContent
 				.replaceAll("(?s)/\\*.*?\\*/", "") // remove block comments
 				.replaceAll("(?m)^\\s*--.*?$", "") // remove full line comments
@@ -297,7 +308,7 @@ public class DatabaseUpdater {
 		return v1.compareTo(v2);
 	}
 
-	public boolean isVersionTableAvailable(Database database) {
+	public boolean isVersionTableAvailable() {
 		try {
 			return database.getConnector().existsTable("database_versions");
 		} catch (SQLException e) {
@@ -307,7 +318,7 @@ public class DatabaseUpdater {
 		}
 	}
 
-	public void createVersionTable(Database database) {
+	public void createVersionTable() {
 		String sql = "CREATE TABLE database_versions ("
 				+ "id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, "
 				+ "version VARCHAR(255) NOT NULL, "
