@@ -17,6 +17,7 @@
 
 package cloudgene.mapred.database.util;
 
+import cloudgene.mapred.util.SemVer;
 import genepi.io.FileUtil;
 
 import java.io.BufferedReader;
@@ -289,35 +290,11 @@ public class DatabaseUpdater {
 		}
 	}
 
-	public static int compareVersion(String version1, String version2) {
-		String[] parts1 = version1.split("-", 2);
-		String[] parts2 = version2.split("-", 2);
+	public static int compareVersion(@NonNull String first, @NonNull String second) {
+		SemVer v1 = SemVer.of(first);
+		SemVer v2 = SemVer.of(second);
 
-		String[] tiles1 = parts1[0].split("\\.");
-		String[] tiles2 = parts2[0].split("\\.");
-
-		for (int i = 0; i < tiles1.length; i++) {
-			int number1 = Integer.parseInt(tiles1[i].trim());
-			int number2 = Integer.parseInt(tiles2[i].trim());
-
-			if (number1 != number2) {
-				return number1 > number2 ? 1 : -1;
-			}
-		}
-
-		if (parts1.length > 1) {
-			if (parts2.length > 1) {
-				return parts1[1].compareTo(parts2[1]);
-			} else {
-				return -1;
-			}
-		} else {
-			if (parts2.length > 1) {
-				return 1;
-			}
-		}
-
-		return 0;
+		return v1.compareTo(v2);
 	}
 
 	public boolean isVersionTableAvailable(Database database) {
