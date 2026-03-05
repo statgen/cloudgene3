@@ -40,7 +40,7 @@ public class H2Connector implements DatabaseConnector {
 
 	@Override
 	public void connect() throws SQLException {
-		log.debug("Establishing connection to " + user + "@" + path);
+		log.debug("Establishing connection to {}@{}", user, path);
 
 		if (DbUtils.loadDriver("org.h2.Driver")) {
 			try {
@@ -125,7 +125,7 @@ public class H2Connector implements DatabaseConnector {
 		connection.close();
 
 		if (!exists) {
-			log.warn("Table '" + table + "' not found'");
+			log.warn("Table '{}' not found'", table);
 		}
 
 		return exists;

@@ -42,7 +42,7 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 
 	@Override
 	public void connect() throws SQLException {
-		log.debug("Establishing connection to " + user + "@" + host + ":" + port);
+		log.debug("Establishing connection to {}@{}:{}", user, host, port);
 
 		if (DbUtils.loadDriver("com.mysql.cj.jdbc.Driver")) {
 
@@ -53,15 +53,15 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 			dataSource.setUsername(user);
 			dataSource.setPassword(password);
 
-			log.debug("Max Active Connections: " + dataSource.getMaxActive());
-			log.debug("Max Idle Connections: " + dataSource.getMaxIdle());
-			log.debug("Min Idle Connections: " + dataSource.getMinIdle());
-			log.debug("Initial Size: " + dataSource.getInitialSize());
-			log.debug("Max Wait: " + dataSource.getMaxWait());
-			log.debug("Default Auto-Commit: " + dataSource.getDefaultAutoCommit());
-			log.debug("Validation Query: " + dataSource.getValidationQuery());
-			log.debug("Test on Borrow: " + dataSource.getTestOnBorrow());
-			log.debug("Test on Return: " + dataSource.getTestOnReturn());
+			log.debug("Max Active Connections: {}", dataSource.getMaxActive());
+			log.debug("Max Idle Connections: {}", dataSource.getMaxIdle());
+			log.debug("Min Idle Connections: {}", dataSource.getMinIdle());
+			log.debug("Initial Size: {}", dataSource.getInitialSize());
+			log.debug("Max Wait: {}", dataSource.getMaxWait());
+			log.debug("Default Auto-Commit: {}", dataSource.getDefaultAutoCommit());
+			log.debug("Validation Query: {}", dataSource.getValidationQuery());
+			log.debug("Test on Borrow: {}", dataSource.getTestOnBorrow());
+			log.debug("Test on Return: {}", dataSource.getTestOnReturn());
 
 		} else {
 			throw new SQLException("MySQL Driver class not found.");
@@ -93,15 +93,16 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 	public static String readFileAsString(@NotNull InputStream is) throws IOException, URISyntaxException {
 		DataInputStream in = new DataInputStream(is);
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
 		String strLine;
 		StringBuilder builder = new StringBuilder();
+
 		while ((strLine = br.readLine()) != null) {
 			builder.append("\n");
 			builder.append(strLine);
 		}
 
 		in.close();
-
 		return builder.toString();
 	}
 
@@ -122,7 +123,7 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 		connection.close();
 
 		if (!exists) {
-			log.warn("Table '" + table + "' not found'");
+			log.warn("Table '{}' not found'", table);
 		}
 
 		return exists;
