@@ -114,16 +114,20 @@ public class H2Connector implements DatabaseConnector {
 	}
 
 	@Override
-	public boolean existsTable(String table) throws SQLException {
+	public boolean tableExists(String table) throws SQLException {
 		Connection connection = dataSource.getConnection();
 		DatabaseMetaData meta = connection.getMetaData();
+
 		ResultSet res = meta.getTables(null, null, table.toUpperCase(), new String[] { "TABLE" });
 		boolean exists = res.next();
+
 		res.close();
 		connection.close();
+
 		if (!exists) {
 			log.warn("Table '" + table + "' not found'");
 		}
+
 		return exists;
 	}
 }

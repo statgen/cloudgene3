@@ -64,7 +64,7 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 			log.debug("Test on Return: " + dataSource.getTestOnReturn());
 
 		} else {
-			throw  new SQLException("MySQL Driver class not found.");
+			throw new SQLException("MySQL Driver class not found.");
 		}
 	}
 
@@ -79,7 +79,7 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 	}
 
 	@Override
-    public void executeSQL(@NotNull InputStream is) throws SQLException, IOException, URISyntaxException {
+	public void executeSQL(@NotNull InputStream is) throws SQLException, IOException, URISyntaxException {
 		String sqlContent = readFileAsString(is);
 
 		if (!sqlContent.isEmpty()) {
@@ -111,16 +111,20 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 	}
 
 	@Override
-	public boolean existsTable(String table) throws SQLException {
+	public boolean tableExists(String table) throws SQLException {
 		Connection connection = dataSource.getConnection();
 		DatabaseMetaData meta = connection.getMetaData();
+
 		ResultSet res = meta.getTables(null, null, table, new String[] { "TABLE" });
 		boolean exists = res.next();
+
 		res.close();
 		connection.close();
+
 		if (!exists) {
 			log.warn("Table '" + table + "' not found'");
 		}
+
 		return exists;
 	}
 }

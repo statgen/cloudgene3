@@ -15,11 +15,10 @@ public interface DatabaseConnector {
 
 	public BasicDataSource getDataSource();
 
-	public void executeSQL(InputStream is) throws SQLException, IOException,
-			URISyntaxException;
+	public void executeSQL(InputStream is)
+			throws SQLException, IOException, URISyntaxException;
 
 	public String getSchema();
 
-	boolean existsTable(String table) throws SQLException;
+	boolean tableExists(String table) throws SQLException;
 }
-
