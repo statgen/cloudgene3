@@ -73,7 +73,7 @@ public class JobDao extends JdbcDataAccessObject {
 				+ "name = ?, state = ?, start_time = ?, end_time = ?, user_id = ?, s3_url = ?, "
 				+ "type = ?, deleted_on = ?, application = ?, application_id = ?, submitted_on = ?, "
 				+ "finished_on = ?, setup_start_time = ?, setup_end_time = ?, completion_state = ?, "
-				+ "success_state = ?, notification_state = ?"
+				+ "success_state = ?, notification_state = ? "
 				+ "WHERE id = ? ";
 
 		CompletionState completion = job.getCompletionState();
