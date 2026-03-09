@@ -33,6 +33,10 @@ public class JobDao extends JdbcDataAccessObject {
 				+ "completion_state, success_state, notification_state, user_agent) "
 				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
+		CompletionState completion = job.getCompletionState();
+		SuccessState success = job.getSuccessState();
+		NotificationState notification = job.getNotificationState();
+
 		try {
 			Object[] params = new Object[18];
 			params[0] = job.getId();
@@ -49,9 +53,9 @@ public class JobDao extends JdbcDataAccessObject {
 			params[11] = job.getEndTime();
 			params[12] = -1;
 			params[13] = -1;
-			params[14] = job.getCompletionState().getValue();
-			params[15] = job.getSuccessState().getValue();
-			params[16] = job.getNotificationState().getValue();
+			params[14] = (completion == null) ? null : completion.getValue();
+			params[15] = (success == null) ? null : success.getValue();
+			params[16] = (notification == null) ? null : notification.getValue();
 			params[17] = trimToLength(job.getUserAgent(), 350);
 
 			update(sql, params);
@@ -72,6 +76,10 @@ public class JobDao extends JdbcDataAccessObject {
 				+ "success_state = ?, notification_state = ?"
 				+ "WHERE id = ? ";
 
+		CompletionState completion = job.getCompletionState();
+		SuccessState success = job.getSuccessState();
+		NotificationState notification = job.getNotificationState();
+
 		try {
 			Object[] params = new Object[18];
 			params[0] = job.getName();
@@ -88,9 +96,9 @@ public class JobDao extends JdbcDataAccessObject {
 			params[11] = job.getEndTime();
 			params[12] = -1;
 			params[13] = -1;
-			params[14] = job.getCompletionState().getValue();
-			params[15] = job.getSuccessState().getValue();
-			params[16] = job.getNotificationState().getValue();
+			params[14] = (completion == null) ? null : completion.getValue();
+			params[15] = (success == null) ? null : success.getValue();
+			params[16] = (notification == null) ? null : notification.getValue();
 			params[17] = job.getId();
 
 			update(sql, params);
