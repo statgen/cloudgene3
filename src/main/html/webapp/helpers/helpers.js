@@ -59,7 +59,7 @@ stache.registerHelper('floor', function (value) {
   return Math.floor(value);
 });
 
-stache.registerHelper('formatNumber', number => number.toLocaleString());
+stache.registerHelper('formatNumber', number => Number.isFinite(number) ? number.toLocaleString() : 'NaN');
 
 stache.registerHelper('prettyTime', function (executionTime) {
   if (!executionTime || executionTime <= 0) {
