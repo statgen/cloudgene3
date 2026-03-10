@@ -223,72 +223,66 @@ public class DatabaseUpdater {
 
 	// TODO(Marc): Why is this here???
 	private static String readFileAsString(File file) throws IOException {
-		InputStream is = new FileInputStream(file);
-		InputStreamReader sr = new InputStreamReader(is);
-		BufferedReader br = new BufferedReader(sr);
+		try (InputStream is = new FileInputStream(file);
+				InputStreamReader sr = new InputStreamReader(is);
+				BufferedReader br = new BufferedReader(sr)) {
 
-		String strLine;
-		StringBuilder builder = new StringBuilder();
+			String strLine;
+			StringBuilder builder = new StringBuilder();
 
-		while ((strLine = br.readLine()) != null) {
-			builder.append(strLine);
+			while ((strLine = br.readLine()) != null) {
+				builder.append(strLine);
+			}
+
+			return builder.toString();
 		}
-
-		br.close();
-		sr.close();
-		is.close();
-
-		return builder.toString();
 	}
 
 	private String readAndPrepareSqlClasspath(String minVersion, String maxVersion)
 			throws IOException, URISyntaxException, SQLException {
 
-		InputStream is = updatesFile.openStream();
-		InputStreamReader sr = new InputStreamReader(is);
-		BufferedReader br = new BufferedReader(sr);
+		try (InputStream is = updatesFile.openStream();
+				InputStreamReader sr = new InputStreamReader(is);
+				BufferedReader br = new BufferedReader(sr)) {
 
-		String strLine;
-		StringBuilder builder = new StringBuilder();
-		boolean reading = false;
-		String version = null;
+			String strLine;
+			StringBuilder builder = new StringBuilder();
+			boolean reading = false;
+			String version = null;
 
-		while ((strLine = br.readLine()) != null) {
-			if (strLine.startsWith("--")) {
-				if (builder.length() > 0) {
-					executeSQLFile(builder.toString(), version);
-					builder.setLength(0);
-					IUpdateListener listener = listeners.get(version);
-					if (listener != null) {
-						listener.afterUpdate(database);
+			while ((strLine = br.readLine()) != null) {
+				if (strLine.startsWith("--")) {
+					if (builder.length() > 0) {
+						executeSQLFile(builder.toString(), version);
+						builder.setLength(0);
+						IUpdateListener listener = listeners.get(version);
+						if (listener != null) {
+							listener.afterUpdate(database);
+						}
+					}
+
+					version = strLine.replace("--", "").trim();
+					reading = (compareVersion(version, minVersion) > 0 && compareVersion(version, maxVersion) <= 0);
+					if (reading) {
+						log.info("Loading SQL update for version {}", version);
+						IUpdateListener listener = listeners.get(version);
+						if (listener != null) {
+							listener.beforeUpdate(database);
+						}
 					}
 				}
 
-				version = strLine.replace("--", "").trim();
-				reading = (compareVersion(version, minVersion) > 0 && compareVersion(version, maxVersion) <= 0);
 				if (reading) {
-					log.info("Loading SQL update for version {}", version);
-					IUpdateListener listener = listeners.get(version);
-					if (listener != null) {
-						listener.beforeUpdate(database);
-					}
+					builder.append("\n");
+					builder.append(strLine);
 				}
 			}
 
-			if (reading) {
-				builder.append("\n");
-				builder.append(strLine);
-			}
+			// last block
+			executeSQLFile(builder.toString(), version);s
+
+			return builder.toString();
 		}
-
-		// last block
-		executeSQLFile(builder.toString(), version);
-
-		br.close();
-		sr.close();
-		is.close();
-
-		return builder.toString();
 	}
 
 	public void executeSQLFile(String sqlContent, String version) throws SQLException {
