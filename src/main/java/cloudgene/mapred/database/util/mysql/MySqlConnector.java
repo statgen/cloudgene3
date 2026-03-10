@@ -1,7 +1,6 @@
 package cloudgene.mapred.database.util.mysql;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -45,8 +44,8 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 		log.debug("Establishing connection to {}@{}:{}", user, host, port);
 
 		if (DbUtils.loadDriver("com.mysql.cj.jdbc.Driver")) {
-
 			dataSource = createDataSource();
+
 			dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
 			dataSource.setUrl("jdbc:mysql://" + host + "/" + database
 					+ "?autoReconnect=true&allowMultiQueries=true&rewriteBatchedStatements=true");
@@ -62,7 +61,6 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 			log.debug("Validation Query: {}", dataSource.getValidationQuery());
 			log.debug("Test on Borrow: {}", dataSource.getTestOnBorrow());
 			log.debug("Test on Return: {}", dataSource.getTestOnReturn());
-
 		} else {
 			throw new SQLException("MySQL Driver class not found.");
 		}
@@ -76,34 +74,6 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 	@Override
 	public BasicDataSource getDataSource() {
 		return dataSource;
-	}
-
-	@Override
-	public void executeSQL(@NotNull InputStream is) throws SQLException, IOException, URISyntaxException {
-		String sqlContent = readFileAsString(is);
-
-		if (!sqlContent.isEmpty()) {
-			Connection connection = dataSource.getConnection();
-			PreparedStatement ps = connection.prepareStatement(sqlContent);
-			ps.executeUpdate();
-			connection.close();
-		}
-	}
-
-	public static String readFileAsString(@NotNull InputStream is) throws IOException, URISyntaxException {
-		DataInputStream in = new DataInputStream(is);
-		BufferedReader br = new BufferedReader(new InputStreamReader(in));
-
-		String strLine;
-		StringBuilder builder = new StringBuilder();
-
-		while ((strLine = br.readLine()) != null) {
-			builder.append("\n");
-			builder.append(strLine);
-		}
-
-		in.close();
-		return builder.toString();
 	}
 
 	@Override

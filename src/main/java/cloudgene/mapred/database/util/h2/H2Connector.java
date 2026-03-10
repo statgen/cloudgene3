@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import io.micronaut.core.annotation.NonNull;
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.dbutils.DbUtils;
@@ -26,16 +27,30 @@ public class H2Connector implements DatabaseConnector {
 
 	private BasicDataSource dataSource;
 
-	private final String path;
+	private final @NonNull String path;
 	private final String user;
 	private final String password;
-	private final boolean multiuser;
+	private final boolean multiUser;
 
-	public H2Connector(String path, String user, String password, boolean multiuser) {
-		this.path = path;
+	public H2Connector(@NonNull String path, String user, String password, boolean multiUser) {
 		this.user = user;
 		this.password = password;
-		this.multiuser = multiuser;
+		this.multiUser = multiUser;
+
+		if (path == null || path.isEmpty()) {
+			throw new IllegalArgumentException("path must be non-null and non-empty");
+		}
+
+		if (path.startsWith("mem:")) {
+			// In-memory database
+			this.path = path;
+		} else if (path.startsWith("/")) {
+			// Absolute path
+			this.path = path;
+		} else {
+			// Relative path
+			this.path = "./" + path;
+		}
 	}
 
 	@Override
@@ -47,17 +62,10 @@ public class H2Connector implements DatabaseConnector {
 				dataSource = new BasicDataSource();
 				dataSource.setDriverClassName("org.h2.Driver");
 
-				String newPath;
-				if (!path.startsWith("/")) {
-					newPath = "./" + path;
+				if (multiUser) {
+					dataSource.setUrl("jdbc:h2:" + path + ";AUTO_SERVER=TRUE;MODE=MySQL");
 				} else {
-					newPath = path;
-				}
-
-				if (multiuser) {
-					dataSource.setUrl("jdbc:h2:" + newPath + ";AUTO_SERVER=TRUE;MODE=MySQL");
-				} else {
-					dataSource.setUrl("jdbc:h2:" + newPath + ";MODE=MySQL");
+					dataSource.setUrl("jdbc:h2:" + path + ";MODE=MySQL");
 				}
 
 				dataSource.setUsername(user);
@@ -77,33 +85,6 @@ public class H2Connector implements DatabaseConnector {
 		dataSource.close();
 	}
 
-	@Override
-	public void executeSQL(@NotNull InputStream is) throws SQLException, IOException, URISyntaxException {
-		String sqlContent = readFileAsString(is);
-
-		if (!sqlContent.isEmpty()) {
-			Connection connection = dataSource.getConnection();
-			PreparedStatement ps = connection.prepareStatement(sqlContent);
-			ps.executeUpdate();
-			connection.close();
-		}
-	}
-
-	public static String readFileAsString(@NotNull InputStream is) throws java.io.IOException, URISyntaxException {
-		DataInputStream in = new DataInputStream(is);
-		BufferedReader br = new BufferedReader(new InputStreamReader(in));
-		String strLine;
-		StringBuilder builder = new StringBuilder();
-
-		while ((strLine = br.readLine()) != null) {
-			builder.append("\n");
-			builder.append(strLine);
-		}
-
-		in.close();
-		return builder.toString();
-	}
-
 	public BasicDataSource getDataSource() {
 		return dataSource;
 	}
@@ -118,7 +99,7 @@ public class H2Connector implements DatabaseConnector {
 		Connection connection = dataSource.getConnection();
 		DatabaseMetaData meta = connection.getMetaData();
 
-		ResultSet res = meta.getTables(null, null, table.toUpperCase(), new String[] { "TABLE" });
+		ResultSet res = meta.getTables(null, null, table.toUpperCase(), new String[]{"TABLE"});
 		boolean exists = res.next();
 
 		res.close();

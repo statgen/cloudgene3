@@ -1,6 +1,7 @@
 package cloudgene.mapred.server;
 
-import java.io.InputStream;
+import java.io.File;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -72,11 +73,19 @@ public class Application {
 
 		// update database schema if needed
 		log.info("Setup Database...");
-		InputStream is = Application.class.getResourceAsStream("/updates.sql");
 
-		DatabaseUpdater updater = new DatabaseUpdater(database, Configuration.getVersionFilename(), is,
+		String versionFilename = Configuration.getVersionFilename();
+		File versionFile = new File(versionFilename);
+
+		URL updatesFile = Application.class.getResource("/updates.sql");
+
+		DatabaseUpdater updater = new DatabaseUpdater(
+				database,
+				versionFile,
+				updatesFile,
 				BuildInfo.VERSION);
-		updater.addUpdate("2.3.0", new BcryptHashUpdate());
+
+		updater.addListener("2.3.0", new BcryptHashUpdate());
 
 		if (!updater.updateDB()) {
 			System.exit(-1);

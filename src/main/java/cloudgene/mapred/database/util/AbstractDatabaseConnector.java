@@ -6,23 +6,18 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractDatabaseConnector implements DatabaseConnector {
 
-	protected static final Logger log = LoggerFactory.getLogger(DatabaseUpdater.class);
+	protected static final Logger log = LoggerFactory.getLogger(AbstractDatabaseConnector.class);
 
 	private int maxActive = 10;
-
-	private int maxWait = 10000;
-
+	private int maxWait = 10_000;
 	private boolean defaultAutoCommit = true;
-
 	private boolean testWhileIdle = true;
-
-	private int minEvictableIdleTimeMillis = 1800000;
-
-	private int timeBetweenEvictionRunsMillis = 1800000;
+	private int minEvictableIdleTimeMillis = 1_800_000;
+	private int timeBetweenEvictionRunsMillis = 1_800_000;
 
 	protected BasicDataSource createDataSource() {
-
 		BasicDataSource dataSource = new BasicDataSource();
+
 		dataSource.setMaxActive(maxActive);
 		dataSource.setMaxWait(maxWait);
 		dataSource.setMaxIdle(maxActive);

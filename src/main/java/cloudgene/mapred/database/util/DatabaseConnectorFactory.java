@@ -4,10 +4,25 @@ import java.util.Map;
 
 import cloudgene.mapred.database.util.h2.H2Connector;
 import cloudgene.mapred.database.util.mysql.MySqlConnector;
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 
-public class DatabaseConnectorFactory {
+/**
+ * Provides {@link #createConnector(Map)} to configure and return a
+ * {@link DatabaseConnector}.
+ */
+public final class DatabaseConnectorFactory {
 
-	public static DatabaseConnector createConnector(Map<String, String> settings) {
+	private DatabaseConnectorFactory() {
+	}
+
+	/**
+	 * Reads {@code settings} to configure and return either an {@link H2Connector}
+	 * or a {@link MySqlConnector}. The {@code} driver field is used to determine
+	 * the output type (should be {@code h2} or {@code mysql}).
+	 */
+	@Nullable
+	public static DatabaseConnector createConnector(@NonNull Map<String, String> settings) {
 		String driver = settings.get("driver");
 
 		if (driver == null) {

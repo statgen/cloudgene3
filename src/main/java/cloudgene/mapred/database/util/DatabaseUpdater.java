@@ -1,15 +1,13 @@
 package cloudgene.mapred.database.util;
 
-import genepi.io.FileUtil;
-
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,6 +15,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.micronaut.core.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,21 +23,31 @@ public class DatabaseUpdater {
 
 	protected static final Logger log = LoggerFactory.getLogger(DatabaseUpdater.class);
 
-	private final DatabaseConnector connector;
-	private final Database database;
-	private final String oldVersion;
-	private final String currentVersion;
-	private final String filename;
-	private final InputStream updateFileAsStream;
-	private final boolean needUpdate;
-	private final Map<String, IUpdateListener> listeners;
+	private final @NonNull Database database;
+	private final @NonNull File versionFile;
+	private final @NonNull URL updatesFile;
+	private final @NonNull String currentVersion;
 
-	public DatabaseUpdater(Database database, String filename, InputStream updateFileAsStream, String currentVersion) {
-		this.filename = filename;
+	private final @NonNull DatabaseConnector connector;
+	private final @NonNull Map<String, IUpdateListener> listeners;
+
+	private final @NonNull String oldVersion;
+	private final boolean needUpdate;
+
+	public DatabaseUpdater(
+			@NonNull Database database,
+			@NonNull File versionFile,
+			@NonNull URL updatesFile,
+			@NonNull String currentVersion) {
+
 		this.database = database;
-		this.connector = database.getConnector();
-		this.updateFileAsStream = updateFileAsStream;
+		this.versionFile = versionFile;
+		this.updatesFile = updatesFile;
 		this.currentVersion = currentVersion;
+
+		// TODO(Marc): database.getConnector() is nullable, but here we assume connector
+		// is not null!
+		this.connector = database.getConnector();
 		this.listeners = new HashMap<>();
 
 		if (isVersionTableAvailable()) {
@@ -47,14 +56,14 @@ public class DatabaseUpdater {
 
 			// Should not happen, since an entry is created when metadata table exists.
 			if (oldVersion == null) {
-				oldVersion = readVersion(filename);
+				oldVersion = readVersion();
 				log.info("Read current version from DB was not successful, read it from file: {}", oldVersion);
 			}
 
 			this.oldVersion = oldVersion;
 		} else {
 			// check also file for backwards compatibility
-			this.oldVersion = readVersion(filename);
+			this.oldVersion = readVersion();
 			log.info("Read current version from file: {}", oldVersion);
 		}
 
@@ -62,15 +71,23 @@ public class DatabaseUpdater {
 		needUpdate = (compareVersion(currentVersion, oldVersion) > 0);
 	}
 
-	public void addUpdate(String version, IUpdateListener listener) {
+	/**
+	 * Assigns {@code listener} as the one and only update listener for
+	 * {@code version}.
+	 * Replaces any existing listeners for the same version.
+	 */
+	public void addListener(String version, IUpdateListener listener) {
 		listeners.put(version, listener);
 	}
 
+	/**
+	 * If the database needs updating, updates it. Otherwise, inserts the current
+	 * version to the version table.
+	 */
 	public boolean updateDB() {
-
 		if (needUpdate()) {
 			log.info("Database needs update...");
-			if (!update()) {
+			if (!update()) { // TODO: update() ALWAYS returns true...
 				log.error("Updating database failed.");
 				try {
 					database.disconnect();
@@ -98,12 +115,13 @@ public class DatabaseUpdater {
 		return true;
 	}
 
-	public boolean update() {
+	// TODO(Marc): Only called from updateDB(). Consider merging.
+	private boolean update() {
 		if (needUpdate) {
 			log.info("Updating database from {} to {}...", oldVersion, currentVersion);
 
 			try {
-				readAndPrepareSqlClasspath(updateFileAsStream, oldVersion, currentVersion);
+				readAndPrepareSqlClasspath(oldVersion, currentVersion);
 			} catch (IOException | URISyntaxException | SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -129,7 +147,14 @@ public class DatabaseUpdater {
 		return needUpdate;
 	}
 
-	public void writeVersion(String newVersion) {
+	/**
+	 * Creates the database version table if not already present, and inserts
+	 * {@code version} as the latest version. If a version file exists, it is
+	 * deleted. Exceptions are ignored.
+	 *
+	 * @param version Newest application version (semver format expected).
+	 */
+	private void writeVersion(String version) {
 		try {
 			if (!isVersionTableAvailable()) {
 				createVersionTable();
@@ -137,12 +162,12 @@ public class DatabaseUpdater {
 
 			Connection connection = connector.getDataSource().getConnection();
 			PreparedStatement ps = connection.prepareStatement("INSERT INTO database_versions (version) VALUES (?)");
-			ps.setString(1, newVersion);
+			ps.setString(1, version);
 			ps.executeUpdate();
-			log.info("Version in DB updated to: {}", newVersion);
+			log.info("Version in DB updated to: {}", version);
 
-			if (new File(filename).exists()) {
-				FileUtil.deleteFile(filename);
+			if (versionFile.exists()) {
+				versionFile.delete();
 				log.info("Deleted version.txt on file system.");
 			}
 
@@ -153,10 +178,13 @@ public class DatabaseUpdater {
 		}
 	}
 
-	public String readVersion(String versionFile) {
-		File file = new File(versionFile);
-
-		if (file.exists()) {
+	/**
+	 * If {@code versionFile} exists, returns its contents (expects semver version).
+	 * Defaults to {@code 0.0.0}.
+	 */
+	@NonNull
+	private String readVersion() {
+		if (versionFile.exists()) {
 			try {
 				return readFileAsString(versionFile);
 			} catch (Exception e) {
@@ -167,7 +195,7 @@ public class DatabaseUpdater {
 		}
 	}
 
-	public String readVersionDB() {
+	private String readVersionDB() {
 		String sql = "SELECT version FROM database_versions "
 				+ "WHERE updated_on = (SELECT MAX(updated_on) FROM database_versions) "
 				+ "ORDER BY updated_on, id DESC";
@@ -193,11 +221,12 @@ public class DatabaseUpdater {
 		return version;
 	}
 
-	public static String readFileAsString(String filename) throws java.io.IOException, URISyntaxException {
-		InputStream is = new FileInputStream(filename);
+	// TODO(Marc): Why is this here???
+	private static String readFileAsString(File file) throws IOException {
+		InputStream is = new FileInputStream(file);
+		InputStreamReader sr = new InputStreamReader(is);
+		BufferedReader br = new BufferedReader(sr);
 
-		DataInputStream in = new DataInputStream(is);
-		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String strLine;
 		StringBuilder builder = new StringBuilder();
 
@@ -205,15 +234,20 @@ public class DatabaseUpdater {
 			builder.append(strLine);
 		}
 
-		in.close();
+		br.close();
+		sr.close();
+		is.close();
+
 		return builder.toString();
 	}
 
-	public String readAndPrepareSqlClasspath(InputStream filestream, String minVersion, String maxVersion)
-			throws java.io.IOException, URISyntaxException, SQLException {
+	private String readAndPrepareSqlClasspath(String minVersion, String maxVersion)
+			throws IOException, URISyntaxException, SQLException {
 
-		DataInputStream in = new DataInputStream(filestream);
-		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		InputStream is = updatesFile.openStream();
+		InputStreamReader sr = new InputStreamReader(is);
+		BufferedReader br = new BufferedReader(sr);
+
 		String strLine;
 		StringBuilder builder = new StringBuilder();
 		boolean reading = false;
@@ -250,7 +284,10 @@ public class DatabaseUpdater {
 		// last block
 		executeSQLFile(builder.toString(), version);
 
-		in.close();
+		br.close();
+		sr.close();
+		is.close();
+
 		return builder.toString();
 	}
 
