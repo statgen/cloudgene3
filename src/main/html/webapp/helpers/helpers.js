@@ -31,7 +31,7 @@ function renderTreeItem(jobId, items, level) {
     if (items[i].folder) {
       html += '<i class="fas fa-angle-right folder-item text-muted fa-fw"></i>&nbsp;';
       html += '<span class="folder-item-text fa-fw"><i class="fas fa-folder text-muted"></i>&nbsp' + items[i].name + '</span>';
-      html += renderTreeItem(jobId, items[i].childs, level + 1);
+      html += renderTreeItem(jobId, items[i].children, level + 1);
     } else {
       html += '<i class="far fa-file-alt text-muted fa-fw file-item-icon""></i>&nbsp;';
       html += '<a class="file-item" href="' + items[i].path + '" target="_blank">' + items[i].name + '</a>';
@@ -59,7 +59,7 @@ stache.registerHelper('floor', function (value) {
   return Math.floor(value);
 });
 
-stache.registerHelper('formatNumber', number => number.toLocaleString());
+stache.registerHelper('formatNumber', number => Number.isFinite(number) ? number.toLocaleString() : 'NaN');
 
 stache.registerHelper('prettyTime', function (executionTime) {
   if (!executionTime || executionTime <= 0) {
