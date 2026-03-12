@@ -1,4 +1,4 @@
-package cloudgene.mapred.database.util;
+package cloudgene.mapred.database.updates;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,6 +13,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import cloudgene.mapred.database.util.Database;
+import cloudgene.mapred.database.util.DatabaseConnector;
 import io.micronaut.core.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

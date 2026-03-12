@@ -1,13 +1,11 @@
 package cloudgene.mapred.server;
 
-import java.io.File;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.*;
 
 import cloudgene.mapred.jobs.engine.handler.IJobErrorHandler;
 import cloudgene.mapred.jobs.engine.handler.JobErrorHandlerFactory;
-import cloudgene.mapred.util.config.Configuration;
 import io.micronaut.runtime.event.ApplicationShutdownEvent;
 import io.micronaut.runtime.event.annotation.EventListener;
 import org.slf4j.Logger;
@@ -19,7 +17,7 @@ import cloudgene.mapred.database.updates.BcryptHashUpdate;
 import cloudgene.mapred.database.util.Database;
 import cloudgene.mapred.database.util.DatabaseConnector;
 import cloudgene.mapred.database.util.DatabaseConnectorFactory;
-import cloudgene.mapred.database.util.DatabaseUpdater;
+import cloudgene.mapred.database.updates.DatabaseUpdater;
 import cloudgene.mapred.database.util.Fixtures;
 import cloudgene.mapred.jobs.PersistentWorkflowEngine;
 import cloudgene.mapred.jobs.WorkflowEngine;
