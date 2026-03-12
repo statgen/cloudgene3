@@ -13,6 +13,7 @@ import cloudgene.mapred.database.connector.DatabaseConnector;
 import cloudgene.mapred.database.connector.DatabaseConnectorFactory;
 import cloudgene.mapred.database.util.*;
 import io.micronaut.core.annotation.NonNull;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -75,8 +76,7 @@ public class DatabaseUpdaterTest {
 						new File("test-data/test-updates.sql").toURI().toURL(),
 						"1.0.0",
 						null,
-						true)
-		);
+						true));
 	}
 
 	@ParameterizedTest
@@ -114,10 +114,43 @@ public class DatabaseUpdaterTest {
 		assertFalse(updater.isVersionTableAvailable());
 		assertFalse(db.getConnector().tableExists("database_versions"));
 
-		updater.createVersionTable();
+		updater.writeVersion("0.0.0");
 
 		assertTrue(updater.isVersionTableAvailable());
 		assertTrue(db.getConnector().tableExists("database_versions"));
+	}
+
+	private static Stream<Arguments> provideForUpdateDB() throws SQLException, MalformedURLException {
+		return Stream.of(
+				arguments("0.0.0", false, false, true),
+				arguments("0.0.0", true, false, true),
+				arguments("1.0.0", false, true, true)
+
+		// TODO(Marc): More cases, more coverage.
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("provideForUpdateDB")
+	public void testUpdateDB(String version, boolean preloadTable, boolean needsUpdate, boolean result)
+			throws SQLException, MalformedURLException {
+		Database db = loadTestDb("DatabaseUpdaterTest_testUpdateDB_" + RandomStringUtils.secure().next(8));
+		URL updatesFile = new File("test-data/test-updates.sql").toURI().toURL();
+
+		if (preloadTable) {
+			DatabaseUpdater dummy = new DatabaseUpdater(db, updatesFile, "0.0.0");
+			dummy.writeVersion("0.0.0");
+		}
+
+		DatabaseUpdater updater = new DatabaseUpdater(db, updatesFile, version);
+
+		assertEquals(preloadTable, updater.isVersionTableAvailable());
+		assertEquals(needsUpdate, updater.needsUpdate());
+
+		boolean observed = updater.updateDB();
+
+		assertEquals(result, observed);
+		assertTrue(updater.isVersionTableAvailable()); // Always created.
 	}
 
 	@Test

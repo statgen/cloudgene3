@@ -62,7 +62,7 @@ public class DatabaseUpdater {
 
 		String oldVersion = "0.0.0";
 		if (isVersionTableAvailable()) {
-			String dbVersion = readVersionDB();
+			String dbVersion = readVersion();
 			if (dbVersion != null) {
 				oldVersion = dbVersion;
 				log.info("Read current DB version: {}", oldVersion);
@@ -128,7 +128,7 @@ public class DatabaseUpdater {
 			}
 		}
 
-		String dbVersion = readVersionDB();
+		String dbVersion = readVersion();
 		if (!dbVersion.equals(currentVersion)) {
 			log.error("App version (v{}) and DB version (v{}) does not match. Update Application to latest version.",
 					currentVersion, dbVersion);
@@ -152,7 +152,7 @@ public class DatabaseUpdater {
 		// contain any updates so it wasn't added by executeUpdates()).
 		try {
 			if (isVersionTableAvailable()) {
-				String currentDBVersion = readVersionDB();
+				String currentDBVersion = readVersion();
 				if ((compareVersion(currentVersion, currentDBVersion) > 0)) {
 					writeVersion(currentVersion);
 				}
@@ -174,7 +174,7 @@ public class DatabaseUpdater {
 	 *
 	 * @param version Newest application version (semver format expected).
 	 */
-	private void writeVersion(String version) throws SQLException {
+	public void writeVersion(String version) throws SQLException {
 		if (!isVersionTableAvailable()) {
 			createVersionTable();
 		}
@@ -192,7 +192,7 @@ public class DatabaseUpdater {
 	 * Attempts to read the latest version from the {@code database_versions} table
 	 * in the database. On failure, returns {@code null} (no exception is thrown).
 	 */
-	private String readVersionDB() {
+	private String readVersion() {
 		String sql = "SELECT version FROM database_versions "
 				+ "WHERE updated_on = (SELECT MAX(updated_on) FROM database_versions) "
 				+ "ORDER BY updated_on, id DESC";
@@ -319,7 +319,7 @@ public class DatabaseUpdater {
 	 * @throws SQLException If anything goes wrong (DB connectivity, {@code sql}
 	 *                      content issues...)
 	 */
-	public void executeSQL(String sql, String version) throws SQLException {
+	private void executeSQL(String sql, String version) throws SQLException {
 		String cleanedSQL = sql
 				.replaceAll("(?s)/\\*.*?\\*/", "") // remove block comments
 				.replaceAll("(?m)^\\s*--.*?$", "") // remove full line comments
@@ -384,7 +384,7 @@ public class DatabaseUpdater {
 	/**
 	 * Attempts to create the table {@code database_versions} in the database.
 	 */
-	public void createVersionTable() throws SQLException {
+	private void createVersionTable() throws SQLException {
 		String sql = "CREATE TABLE database_versions ("
 				+ "id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, "
 				+ "version VARCHAR(255) NOT NULL, "
