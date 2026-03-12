@@ -7,13 +7,12 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import cloudgene.mapred.database.dao.VersionDao;
 import cloudgene.mapred.database.util.Database;
-import cloudgene.mapred.database.connector.DatabaseConnector;
 import io.micronaut.core.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,7 @@ public class DatabaseUpdater {
 	private final @NonNull URL updatesFile;
 	private final @NonNull String currentVersion;
 
-	private final @NonNull DatabaseConnector connector;
+	private final @NonNull VersionDao dao;
 	private final @NonNull Map<String, IUpdateListener> listeners;
 
 	private final @NonNull String oldVersion;
@@ -41,6 +40,10 @@ public class DatabaseUpdater {
 			throw new IllegalArgumentException("database must be non-null");
 		}
 
+		if (database.getConnector() == null) {
+			throw new IllegalArgumentException("Database connector must be non-null.");
+		}
+
 		if (updatesFile == null) {
 			throw new IllegalArgumentException("updatesFile must be non-null");
 		}
@@ -53,16 +56,12 @@ public class DatabaseUpdater {
 		this.updatesFile = updatesFile;
 		this.currentVersion = currentVersion;
 
-		this.connector = database.getConnector();
-		if (connector == null) {
-			throw new IllegalArgumentException("Database connector must be non-null.");
-		}
-
-		this.listeners = new HashMap<>();
+		dao = new VersionDao(database);
+		listeners = new HashMap<>();
 
 		String oldVersion = "0.0.0";
-		if (isVersionTableAvailable()) {
-			String dbVersion = readVersion();
+		if (dao.isTableAvailable()) {
+			String dbVersion = dao.findLatest();
 			if (dbVersion != null) {
 				oldVersion = dbVersion;
 				log.info("Read current DB version: {}", oldVersion);
@@ -96,6 +95,7 @@ public class DatabaseUpdater {
 
 	// TODO(Marc): We should use the return value to indicate if updates were made,
 	//             and throw and Exception if something broke.
+
 	/**
 	 * If the database needs updating, updates it. Inserts the current version to
 	 * the version table.
@@ -118,17 +118,15 @@ public class DatabaseUpdater {
 			log.info("Update database done.");
 		} else {
 			log.info("Database is already up-to-date.");
-			if (!isVersionTableAvailable()) {
-				try {
-					writeVersion(currentVersion);
-				} catch (SQLException e) {
-					log.error("Failed to initialize version table", e);
+			if (!dao.isTableAvailable()) {
+				if (!writeVersion(currentVersion)) {
+					log.error("Failed to initialize version table");
 					return false;
 				}
 			}
 		}
 
-		String dbVersion = readVersion();
+		String dbVersion = dao.findLatest();
 		if (!dbVersion.equals(currentVersion)) {
 			log.error("App version (v{}) and DB version (v{}) does not match. Update Application to latest version.",
 					currentVersion, dbVersion);
@@ -150,17 +148,17 @@ public class DatabaseUpdater {
 
 		// Check if we need to write the current version to the DB (e.g., if it doesn't
 		// contain any updates so it wasn't added by executeUpdates()).
-		try {
-			if (isVersionTableAvailable()) {
-				String currentDBVersion = readVersion();
-				if ((compareVersion(currentVersion, currentDBVersion) > 0)) {
-					writeVersion(currentVersion);
+		if (dao.isTableAvailable()) {
+			String currentDBVersion = dao.findLatest();
+			if ((compareVersion(currentVersion, currentDBVersion) > 0)) {
+				if (!writeVersion(currentVersion)) {
+					return false;
 				}
-			} else {
-				writeVersion(currentVersion);
 			}
-		} catch (SQLException e) {
-			return false;
+		} else {
+			if (!writeVersion(currentVersion)) {
+				return false;
+			}
 		}
 
 		log.info("Database version successfully updated.");
@@ -169,48 +167,21 @@ public class DatabaseUpdater {
 
 	/**
 	 * Creates the database version table if not already present, and inserts
-	 * {@code version} as the latest version. If a version file exists, it is
-	 * deleted. Exceptions are ignored.
+	 * {@code version} as the latest version. Exceptions are ignored.
 	 *
-	 * @param version Newest application version (semver format expected).
+	 * @param version Newest application version. Must be semver-compliant. Expected
+	 *                to be greater than previously registered versions.
+	 * @return {@code true} if the version was inserted without issue (including
+	 *         table creation, if necessary).
 	 */
-	public void writeVersion(String version) throws SQLException {
-		if (!isVersionTableAvailable()) {
-			createVersionTable();
-		}
-
-		Connection connection = connector.getDataSource().getConnection();
-		PreparedStatement ps = connection.prepareStatement("INSERT INTO database_versions (version) VALUES (?)");
-		ps.setString(1, version);
-		ps.executeUpdate();
-		log.info("Version in DB updated to: {}", version);
-
-		connection.close();
-	}
-
-	/**
-	 * Attempts to read the latest version from the {@code database_versions} table
-	 * in the database. On failure, returns {@code null} (no exception is thrown).
-	 */
-	private String readVersion() {
-		String sql = "SELECT version FROM database_versions "
-				+ "WHERE updated_on = (SELECT MAX(updated_on) FROM database_versions) "
-				+ "ORDER BY updated_on, id DESC";
-
-		String version = null;
-
-		try (Connection connection = connector.getDataSource().getConnection()) {
-			PreparedStatement ps = connection.prepareStatement(sql);
-			ResultSet result = ps.executeQuery();
-
-			if (result.next()) {
-				version = result.getString(1);
+	public boolean writeVersion(String version) {
+		if (!dao.isTableAvailable()) {
+			if (!dao.createTable()) {
+				return false;
 			}
-		} catch (SQLException e) {
-			// pass
 		}
 
-		return version;
+		return dao.insert(version);
 	}
 
 	/**
@@ -327,7 +298,7 @@ public class DatabaseUpdater {
 				.trim();
 
 		if (!cleanedSQL.isEmpty()) {
-			Connection connection = connector.getDataSource().getConnection();
+			Connection connection = database.getConnector().getDataSource().getConnection();
 			PreparedStatement ps = connection.prepareStatement(cleanedSQL);
 			ps.executeUpdate();
 			connection.close();
@@ -366,35 +337,5 @@ public class DatabaseUpdater {
 		}
 
 		return 0;
-	}
-
-	/**
-	 * Returns {@code true} if the database can be reached and a table called
-	 * {@code database_versions} is confirmed to exist. Returns {@code false}
-	 * otherwise (doesn't throw).
-	 */
-	public boolean isVersionTableAvailable() {
-		try {
-			return database.getConnector().tableExists("database_versions");
-		} catch (SQLException e) {
-			return false;
-		}
-	}
-
-	/**
-	 * Attempts to create the table {@code database_versions} in the database.
-	 */
-	private void createVersionTable() throws SQLException {
-		String sql = "CREATE TABLE database_versions ("
-				+ "id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, "
-				+ "version VARCHAR(255) NOT NULL, "
-				+ "updated_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)";
-
-		Connection connection = connector.getDataSource().getConnection();
-		PreparedStatement statement = connection.prepareStatement(sql);
-		statement.executeUpdate();
-
-		connection.close();
-		log.info("Table database_versions created.");
 	}
 }

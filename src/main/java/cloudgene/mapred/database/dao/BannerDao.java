@@ -88,7 +88,7 @@ public class BannerDao extends JdbcDataAccessObject {
 			log.debug("find banner by id = {} successful.", id);
 			return result;
 		} catch (SQLException e) {
-			log.debug("find banner by id = {} failed.", id, e);
+			log.error("find banner by id = {} failed.", id, e);
 			return null;
 		}
 	}

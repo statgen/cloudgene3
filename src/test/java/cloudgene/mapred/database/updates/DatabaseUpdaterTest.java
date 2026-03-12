@@ -6,14 +6,11 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
-import cloudgene.mapred.database.connector.DatabaseConnector;
-import cloudgene.mapred.database.connector.DatabaseConnectorFactory;
+import cloudgene.mapred.database.dao.VersionDao;
 import cloudgene.mapred.database.util.*;
-import io.micronaut.core.annotation.NonNull;
-import org.apache.commons.lang3.RandomStringUtils;
+import cloudgene.mapred.test.TestDbUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -34,13 +31,13 @@ public class DatabaseUpdaterTest {
 						"database must be non-null",
 						false),
 				arguments(
-						loadTestDb("DatabaseUpdaterTest_testConstructor"),
+						TestDbUtil.getMemDb(),
 						null,
 						"1.0.0",
 						"updatesFile must be non-null",
 						false),
 				arguments(
-						loadTestDb("DatabaseUpdaterTest_testConstructor"),
+						TestDbUtil.getMemDb(),
 						new File("test-data/test-updates.sql").toURI().toURL(),
 						null,
 						"currentVersion must be non-null and non-blank",
@@ -48,7 +45,7 @@ public class DatabaseUpdaterTest {
 
 				// Version must not be blank.
 				arguments(
-						loadTestDb("DatabaseUpdaterTest_testConstructor"),
+						TestDbUtil.getMemDb(),
 						new File("test-data/test-updates.sql").toURI().toURL(),
 						"",
 						"currentVersion must be non-null and non-blank",
@@ -56,7 +53,7 @@ public class DatabaseUpdaterTest {
 
 				// Database must have a non-null connector.
 				arguments(
-						loadTestDb("DatabaseUpdaterTest_testConstructor", false),
+						new Database(), // By default, connector is set to null.
 						new File("test-data/test-updates.sql").toURI().toURL(),
 						"1.0.0",
 						"Database connector must be non-null.",
@@ -64,7 +61,7 @@ public class DatabaseUpdaterTest {
 
 				// Version == 0.0.0 (default) -> no update needed.
 				arguments(
-						loadTestDb("DatabaseUpdaterTest_testConstructor"),
+						TestDbUtil.getMemDb(),
 						new File("test-data/test-updates.sql").toURI().toURL(),
 						"0.0.0",
 						null,
@@ -72,7 +69,7 @@ public class DatabaseUpdaterTest {
 
 				// Version > 0.0.0 (default) -> needs update.
 				arguments(
-						loadTestDb("DatabaseUpdaterTest_testConstructor"),
+						TestDbUtil.getMemDb(),
 						new File("test-data/test-updates.sql").toURI().toURL(),
 						"1.0.0",
 						null,
@@ -101,25 +98,6 @@ public class DatabaseUpdaterTest {
 		}
 	}
 
-	@Test
-	public void testVersionTable() throws SQLException, MalformedURLException {
-		Database db = loadTestDb("DatabaseUpdaterTest_testVersionTable");
-		URL updatesFile = new File("test-data/test-updates.sql").toURI().toURL();
-
-		DatabaseUpdater updater = new DatabaseUpdater(
-				db,
-				updatesFile,
-				"1.0.0");
-
-		assertFalse(updater.isVersionTableAvailable());
-		assertFalse(db.getConnector().tableExists("database_versions"));
-
-		updater.writeVersion("0.0.0");
-
-		assertTrue(updater.isVersionTableAvailable());
-		assertTrue(db.getConnector().tableExists("database_versions"));
-	}
-
 	private static Stream<Arguments> provideForUpdateDB() throws SQLException, MalformedURLException {
 		return Stream.of(
 				arguments("0.0.0", false, false, true),
@@ -134,7 +112,8 @@ public class DatabaseUpdaterTest {
 	@MethodSource("provideForUpdateDB")
 	public void testUpdateDB(String version, boolean preloadTable, boolean needsUpdate, boolean result)
 			throws SQLException, MalformedURLException {
-		Database db = loadTestDb("DatabaseUpdaterTest_testUpdateDB_" + RandomStringUtils.secure().next(8));
+		Database db = TestDbUtil.getMemDb();
+		VersionDao dao = new VersionDao(db);
 		URL updatesFile = new File("test-data/test-updates.sql").toURI().toURL();
 
 		if (preloadTable) {
@@ -144,18 +123,18 @@ public class DatabaseUpdaterTest {
 
 		DatabaseUpdater updater = new DatabaseUpdater(db, updatesFile, version);
 
-		assertEquals(preloadTable, updater.isVersionTableAvailable());
+		assertEquals(preloadTable, dao.isTableAvailable());
 		assertEquals(needsUpdate, updater.needsUpdate());
 
 		boolean observed = updater.updateDB();
 
 		assertEquals(result, observed);
-		assertTrue(updater.isVersionTableAvailable()); // Always created.
+		assertTrue(dao.isTableAvailable()); // Always created.
 	}
 
 	@Test
 	public void testListeners() throws SQLException, MalformedURLException {
-		Database db = loadTestDb("DatabaseUpdaterTest_testListeners");
+		Database db = TestDbUtil.getMemDb();
 		URL updatesFile = new File("test-data/test-updates.sql").toURI().toURL();
 
 		DatabaseUpdater updater = new DatabaseUpdater(
@@ -192,7 +171,7 @@ public class DatabaseUpdaterTest {
 
 	@Test
 	public void testConstructorWithExistingDBData() throws SQLException, MalformedURLException {
-		Database db = loadTestDb("DatabaseUpdaterTest_testConstructorWithExistingDBData");
+		Database db = TestDbUtil.getMemDb();
 		URL updatesFile = new File("test-data/test-updates.sql").toURI().toURL();
 
 		DatabaseUpdater dummy = new DatabaseUpdater(
@@ -210,29 +189,6 @@ public class DatabaseUpdaterTest {
 		assertTrue(updater.needsUpdate());
 		assertEquals("0.1.0", updater.getOldVersion());
 		assertEquals("1.0.0", updater.getCurrentVersion());
-	}
-
-	private static Database loadTestDb(@NonNull String dbName) throws SQLException {
-		return loadTestDb(dbName, true);
-	}
-
-	private static Database loadTestDb(@NonNull String dbName, boolean connect) throws SQLException {
-		if (dbName == null || dbName.isBlank()) {
-			throw new IllegalArgumentException("dbName must be non-null and non-blank.");
-		}
-
-		Database db = new Database();
-
-		if (connect) {
-			DatabaseConnector connector = DatabaseConnectorFactory.createConnector(Map.of(
-					"driver", "h2",
-					"database", "mem:" + dbName));
-
-			assertNotNull(connector);
-			db.connect(connector);
-		}
-
-		return db;
 	}
 
 	private static class VersionRecorder implements IUpdateListener {
