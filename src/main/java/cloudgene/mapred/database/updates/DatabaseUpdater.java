@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cloudgene.mapred.database.util.Database;
-import cloudgene.mapred.database.util.DatabaseConnector;
+import cloudgene.mapred.database.connector.DatabaseConnector;
 import io.micronaut.core.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

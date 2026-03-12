@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import cloudgene.mapred.database.connector.DatabaseConnector;
+import cloudgene.mapred.database.connector.DatabaseConnectorFactory;
 import cloudgene.mapred.database.updates.DatabaseUpdater;
 import cloudgene.mapred.database.updates.IUpdateListener;
 import cloudgene.mapred.database.util.*;

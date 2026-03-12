@@ -1,25 +1,17 @@
-package cloudgene.mapred.database.util.h2;
+package cloudgene.mapred.database.connector.h2;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import io.micronaut.core.annotation.NonNull;
-import jakarta.validation.constraints.NotNull;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.dbutils.DbUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cloudgene.mapred.database.util.DatabaseConnector;
+import cloudgene.mapred.database.connector.DatabaseConnector;
 
 public class H2Connector implements DatabaseConnector {
 

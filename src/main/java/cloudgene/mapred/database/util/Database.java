@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cloudgene.mapred.database.connector.DatabaseConnector;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
 import org.apache.commons.dbcp.BasicDataSource;

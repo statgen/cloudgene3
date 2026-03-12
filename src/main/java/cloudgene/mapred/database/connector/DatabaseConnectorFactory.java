@@ -1,9 +1,9 @@
-package cloudgene.mapred.database.util;
+package cloudgene.mapred.database.connector;
 
 import java.util.Map;
 
-import cloudgene.mapred.database.util.h2.H2Connector;
-import cloudgene.mapred.database.util.mysql.MySqlConnector;
+import cloudgene.mapred.database.connector.h2.H2Connector;
+import cloudgene.mapred.database.connector.mysql.MySqlConnector;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
 

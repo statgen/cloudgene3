@@ -1,4 +1,4 @@
-package cloudgene.mapred.database.util;
+package cloudgene.mapred.database.connector;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.slf4j.Logger;
