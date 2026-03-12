@@ -1,7 +1,7 @@
 package cloudgene.mapred.server.services;
 
 import cloudgene.mapred.core.Banner;
-import cloudgene.mapred.database.BannerDao;
+import cloudgene.mapred.database.dao.BannerDao;
 import cloudgene.mapred.server.Application;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;

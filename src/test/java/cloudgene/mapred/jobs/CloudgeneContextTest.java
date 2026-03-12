@@ -2,7 +2,7 @@ package cloudgene.mapred.jobs;
 
 import cloudgene.mapred.TestApplication;
 import cloudgene.mapred.core.User;
-import cloudgene.mapred.database.UserDao;
+import cloudgene.mapred.database.dao.UserDao;
 import cloudgene.mapred.jobs.workspace.IWorkspace;
 import cloudgene.mapred.jobs.workspace.WorkspaceFactory;
 import cloudgene.mapred.util.config.Settings;

@@ -1,4 +1,4 @@
-package cloudgene.mapred.database;
+package cloudgene.mapred.database.dao;
 
 import cloudgene.mapred.core.Banner;
 import cloudgene.mapred.database.util.Database;

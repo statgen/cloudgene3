@@ -2,6 +2,7 @@ package cloudgene.mapred.database;
 
 import cloudgene.mapred.TestApplication;
 import cloudgene.mapred.core.Banner;
+import cloudgene.mapred.database.dao.BannerDao;
 import cloudgene.mapred.database.util.Database;
 import cloudgene.mapred.util.config.Settings;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;

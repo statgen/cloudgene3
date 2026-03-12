@@ -2,8 +2,8 @@ package cloudgene.mapred.database.util;
 
 import cloudgene.mapred.core.Template;
 import cloudgene.mapred.core.User;
-import cloudgene.mapred.database.TemplateDao;
-import cloudgene.mapred.database.UserDao;
+import cloudgene.mapred.database.dao.TemplateDao;
+import cloudgene.mapred.database.dao.UserDao;
 import cloudgene.mapred.util.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

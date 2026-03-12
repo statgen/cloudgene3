@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import cloudgene.mapred.core.User;
-import cloudgene.mapred.database.*;
+import cloudgene.mapred.database.dao.*;
 import cloudgene.mapred.jobs.engine.handler.IJobErrorHandler;
 import cloudgene.mapred.jobs.state.JobState;
 import io.micronaut.core.annotation.Nullable;

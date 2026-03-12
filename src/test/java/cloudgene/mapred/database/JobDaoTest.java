@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
+import cloudgene.mapred.database.dao.JobDao;
+import cloudgene.mapred.database.dao.UserDao;
 import cloudgene.mapred.jobs.state.JobState;
 import org.junit.jupiter.api.Test;
 

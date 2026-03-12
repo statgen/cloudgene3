@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cloudgene.mapred.BuildInfo;
-import cloudgene.mapred.database.TemplateDao;
+import cloudgene.mapred.database.dao.TemplateDao;
 import cloudgene.mapred.database.updates.BcryptHashUpdate;
 import cloudgene.mapred.database.util.Database;
 import cloudgene.mapred.database.connector.DatabaseConnector;

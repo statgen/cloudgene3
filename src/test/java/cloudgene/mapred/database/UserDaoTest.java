@@ -2,6 +2,7 @@ package cloudgene.mapred.database;
 
 import cloudgene.mapred.TestApplication;
 import cloudgene.mapred.core.User;
+import cloudgene.mapred.database.dao.UserDao;
 import cloudgene.mapred.database.util.Database;
 import cloudgene.mapred.util.HashUtil;
 import org.junit.jupiter.api.BeforeEach;
