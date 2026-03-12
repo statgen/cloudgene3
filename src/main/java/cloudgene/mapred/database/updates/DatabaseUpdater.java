@@ -37,6 +37,18 @@ public class DatabaseUpdater {
 			@NonNull URL updatesFile,
 			@NonNull String currentVersion) {
 
+		if (database == null) {
+			throw new IllegalArgumentException("database must be non-null");
+		}
+
+		if (updatesFile == null) {
+			throw new IllegalArgumentException("updatesFile must be non-null");
+		}
+
+		if (currentVersion == null || currentVersion.isBlank()) {
+			throw new IllegalArgumentException("currentVersion must be non-null and non-blank");
+		}
+
 		this.database = database;
 		this.updatesFile = updatesFile;
 		this.currentVersion = currentVersion;
@@ -62,6 +74,18 @@ public class DatabaseUpdater {
 		needsUpdate = (compareVersion(currentVersion, oldVersion) > 0);
 	}
 
+	public boolean needsUpdate() {
+		return needsUpdate;
+	}
+
+	public String getCurrentVersion() {
+		return currentVersion;
+	}
+
+	public String getOldVersion() {
+		return oldVersion;
+	}
+
 	/**
 	 * Assigns {@code listener} as the one and only update listener for
 	 * {@code version}. Replaces any existing listeners for the same version.
@@ -70,9 +94,14 @@ public class DatabaseUpdater {
 		listeners.put(version, listener);
 	}
 
+	// TODO(Marc): We should use the return value to indicate if updates were made,
+	//             and throw and Exception if something broke.
 	/**
 	 * If the database needs updating, updates it. Inserts the current version to
 	 * the version table.
+	 *
+	 * @return {@code true} if no errors were found (regardless of updates
+	 *         performed).
 	 */
 	public boolean updateDB() {
 		if (needsUpdate()) {
@@ -136,10 +165,6 @@ public class DatabaseUpdater {
 
 		log.info("Database version successfully updated.");
 		return true;
-	}
-
-	public boolean needsUpdate() {
-		return needsUpdate;
 	}
 
 	/**
@@ -227,8 +252,8 @@ public class DatabaseUpdater {
 		 */
 		public void execute() throws IOException, SQLException {
 			try (InputStream is = updatesFile.openStream();
-				 InputStreamReader sr = new InputStreamReader(is);
-				 BufferedReader br = new BufferedReader(sr)) {
+					InputStreamReader sr = new InputStreamReader(is);
+					BufferedReader br = new BufferedReader(sr)) {
 
 				while ((strLine = br.readLine()) != null) {
 					if (strLine.startsWith("--")) {
