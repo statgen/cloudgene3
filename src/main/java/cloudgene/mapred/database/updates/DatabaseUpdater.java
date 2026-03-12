@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -116,7 +115,7 @@ public class DatabaseUpdater {
 
 		try {
 			executeUpdates();
-		} catch (IOException | URISyntaxException | SQLException e) {
+		} catch (IOException | SQLException e) {
 			return false;
 		}
 
@@ -205,51 +204,82 @@ public class DatabaseUpdater {
 	 * statements). In particular, there don't need to be any SQL statements: as
 	 * long as the comment is present, the callbacks are triggered.
 	 */
-	private void executeUpdates() throws IOException, URISyntaxException, SQLException {
+	private void executeUpdates() throws IOException, SQLException {
+		UpdateFileExecutor executor = new UpdateFileExecutor();
+		executor.execute();
+	}
 
-		try (InputStream is = updatesFile.openStream();
-				InputStreamReader sr = new InputStreamReader(is);
-				BufferedReader br = new BufferedReader(sr)) {
+	/**
+	 * Utility class. Implements the behavior in {@link #executeUpdates()}
+	 */
+	private class UpdateFileExecutor {
+		private final StringBuilder builder = new StringBuilder();
 
-			String strLine;
-			StringBuilder builder = new StringBuilder();
-			boolean reading = false;
-			String version = null;
+		private String strLine = null;
+		private boolean reading = false;
+		private String version = null;
 
-			while ((strLine = br.readLine()) != null) {
-				if (strLine.startsWith("--")) { // New version block found
-					if (builder.length() > 0) { // Old version block had commands to run
-						executeSQL(builder.toString(), version);
-						builder.setLength(0);
-						IUpdateListener listener = listeners.get(version);
-						if (listener != null) {
-							listener.afterUpdate(database);
-						}
+		public UpdateFileExecutor() {
+		}
+
+		/**
+		 * Implements the behavior in {@link #executeUpdates()}
+		 */
+		public void execute() throws IOException, SQLException {
+			try (InputStream is = updatesFile.openStream();
+				 InputStreamReader sr = new InputStreamReader(is);
+				 BufferedReader br = new BufferedReader(sr)) {
+
+				while ((strLine = br.readLine()) != null) {
+					if (strLine.startsWith("--")) {
+						endBlock();
+						beginBlock();
 					}
 
-					// Initialize the new version block
-					version = strLine.replace("--", "").trim();
-					reading = (compareVersion(version, oldVersion) > 0 && compareVersion(version, currentVersion) <= 0);
+					// Only if we're in a version block and version is in range.
 					if (reading) {
-						log.info("Loading SQL update for version {}", version);
-						IUpdateListener listener = listeners.get(version);
-						if (listener != null) {
-							listener.beforeUpdate(database);
-						}
+						builder.append("\n");
+						builder.append(strLine);
 					}
 				}
 
-				// If we already found a version comment, and the version is within range,
-				// accumulate SQL statements into builder.
-				if (reading) {
-					builder.append("\n");
-					builder.append(strLine);
+				endBlock();
+			}
+		}
+
+		/**
+		 * Handles the start of a new version block. Parses the version, sets
+		 * {@code reading} if the block should be processed, and possibly invokes
+		 * {@link IUpdateListener#beforeUpdate(Database)}
+		 */
+		public void beginBlock() {
+			version = strLine.replace("--", "").trim();
+			reading = ((compareVersion(version, oldVersion) > 0)
+					&& (compareVersion(version, currentVersion) <= 0));
+
+			if (reading) {
+				log.info("Loading SQL update for version {}", version);
+				IUpdateListener listener = listeners.get(version);
+				if (listener != null) {
+					listener.beforeUpdate(database);
 				}
 			}
+		}
 
-			// TODO(Marc): This is wrong! It doesn't trigger the callback.
-			// last block
-			executeSQL(builder.toString(), version);
+		/**
+		 * Handles the end of a version block. Executes SQL commands if present, flushes
+		 * the {@code builder} contents, and possibly invokes
+		 * {@link IUpdateListener#afterUpdate(Database)}
+		 */
+		public void endBlock() throws SQLException {
+			if (!builder.isEmpty()) { // Old version block had commands to run
+				executeSQL(builder.toString(), version);
+				builder.setLength(0);
+				IUpdateListener listener = listeners.get(version);
+				if (listener != null) {
+					listener.afterUpdate(database);
+				}
+			}
 		}
 	}
 
