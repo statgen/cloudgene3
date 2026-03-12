@@ -1,4 +1,4 @@
-package cloudgene.mapred.database;
+package cloudgene.mapred.database.updates;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -10,8 +10,6 @@ import java.util.Map;
 
 import cloudgene.mapred.database.connector.DatabaseConnector;
 import cloudgene.mapred.database.connector.DatabaseConnectorFactory;
-import cloudgene.mapred.database.updates.DatabaseUpdater;
-import cloudgene.mapred.database.updates.IUpdateListener;
 import cloudgene.mapred.database.util.*;
 import io.micronaut.core.annotation.NonNull;
 import org.junit.jupiter.api.Test;
