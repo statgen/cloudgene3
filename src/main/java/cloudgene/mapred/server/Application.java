@@ -74,14 +74,10 @@ public class Application {
 		// update database schema if needed
 		log.info("Setup Database...");
 
-		String versionFilename = Configuration.getVersionFilename();
-		File versionFile = new File(versionFilename);
-
 		URL updatesFile = Application.class.getResource("/updates.sql");
 
 		DatabaseUpdater updater = new DatabaseUpdater(
 				database,
-				versionFile,
 				updatesFile,
 				BuildInfo.VERSION);
 

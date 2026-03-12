@@ -1,8 +1,6 @@
 package cloudgene.mapred.database.util;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -24,7 +22,6 @@ public class DatabaseUpdater {
 	protected static final Logger log = LoggerFactory.getLogger(DatabaseUpdater.class);
 
 	private final @NonNull Database database;
-	private final @NonNull File versionFile;
 	private final @NonNull URL updatesFile;
 	private final @NonNull String currentVersion;
 
@@ -32,68 +29,59 @@ public class DatabaseUpdater {
 	private final @NonNull Map<String, IUpdateListener> listeners;
 
 	private final @NonNull String oldVersion;
-	private final boolean needUpdate;
+	private final boolean needsUpdate;
 
 	public DatabaseUpdater(
 			@NonNull Database database,
-			@NonNull File versionFile,
 			@NonNull URL updatesFile,
 			@NonNull String currentVersion) {
 
 		this.database = database;
-		this.versionFile = versionFile;
 		this.updatesFile = updatesFile;
 		this.currentVersion = currentVersion;
 
-		// TODO(Marc): database.getConnector() is nullable, but here we assume connector
-		// is not null!
 		this.connector = database.getConnector();
-		this.listeners = new HashMap<>();
-
-		if (isVersionTableAvailable()) {
-			String oldVersion = readVersionDB();
-			log.info("Read current DB version: {}", oldVersion);
-
-			// Should not happen, since an entry is created when metadata table exists.
-			if (oldVersion == null) {
-				oldVersion = readVersion();
-				log.info("Read current version from DB was not successful, read it from file: {}", oldVersion);
-			}
-
-			this.oldVersion = oldVersion;
-		} else {
-			// check also file for backwards compatibility
-			this.oldVersion = readVersion();
-			log.info("Read current version from file: {}", oldVersion);
+		if (connector == null) {
+			throw new IllegalArgumentException("Database connector must be non-null.");
 		}
 
+		this.listeners = new HashMap<>();
+
+		String oldVersion = "0.0.0";
+		if (isVersionTableAvailable()) {
+			String dbVersion = readVersionDB();
+			if (dbVersion != null) {
+				oldVersion = dbVersion;
+				log.info("Read current DB version: {}", oldVersion);
+			}
+		}
+		this.oldVersion = oldVersion;
+
 		log.info("Current app version: {}", currentVersion);
-		needUpdate = (compareVersion(currentVersion, oldVersion) > 0);
+		needsUpdate = (compareVersion(currentVersion, oldVersion) > 0);
 	}
 
 	/**
 	 * Assigns {@code listener} as the one and only update listener for
-	 * {@code version}.
-	 * Replaces any existing listeners for the same version.
+	 * {@code version}. Replaces any existing listeners for the same version.
 	 */
 	public void addListener(String version, IUpdateListener listener) {
 		listeners.put(version, listener);
 	}
 
 	/**
-	 * If the database needs updating, updates it. Otherwise, inserts the current
-	 * version to the version table.
+	 * If the database needs updating, updates it. Inserts the current version to
+	 * the version table.
 	 */
 	public boolean updateDB() {
-		if (needUpdate()) {
+		if (needsUpdate()) {
 			log.info("Database needs update...");
-			if (!update()) { // TODO: update() ALWAYS returns true...
+			if (!update()) {
 				log.error("Updating database failed.");
 				try {
 					database.disconnect();
 				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.error("Error disconnecting database", e);
 				}
 				return false;
 			}
@@ -101,7 +89,12 @@ public class DatabaseUpdater {
 		} else {
 			log.info("Database is already up-to-date.");
 			if (!isVersionTableAvailable()) {
-				writeVersion(currentVersion);
+				try {
+					writeVersion(currentVersion);
+				} catch (SQLException e) {
+					log.error("Failed to initialize version table", e);
+					return false;
+				}
 			}
 		}
 
@@ -117,17 +110,17 @@ public class DatabaseUpdater {
 
 	// TODO(Marc): Only called from updateDB(). Consider merging.
 	private boolean update() {
-		if (needUpdate) {
-			log.info("Updating database from {} to {}...", oldVersion, currentVersion);
+		log.info("Updating database version from {} to {}...", oldVersion, currentVersion);
 
-			try {
-				readAndPrepareSqlClasspath(oldVersion, currentVersion);
-			} catch (IOException | URISyntaxException | SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			executeUpdates();
+		} catch (IOException | URISyntaxException | SQLException e) {
+			return false;
+		}
 
-			// check if DB version match with Main version
+		// Check if we need to write the current version to the DB (e.g., if it doesn't
+		// contain any updates so it wasn't added by executeUpdates()).
+		try {
 			if (isVersionTableAvailable()) {
 				String currentDBVersion = readVersionDB();
 				if ((compareVersion(currentVersion, currentDBVersion) > 0)) {
@@ -136,15 +129,16 @@ public class DatabaseUpdater {
 			} else {
 				writeVersion(currentVersion);
 			}
-
-			log.info("Updating database was successful.");
+		} catch (SQLException e) {
+			return false;
 		}
 
+		log.info("Database version successfully updated.");
 		return true;
 	}
 
-	public boolean needUpdate() {
-		return needUpdate;
+	public boolean needsUpdate() {
+		return needsUpdate;
 	}
 
 	/**
@@ -154,47 +148,24 @@ public class DatabaseUpdater {
 	 *
 	 * @param version Newest application version (semver format expected).
 	 */
-	private void writeVersion(String version) {
-		try {
-			if (!isVersionTableAvailable()) {
-				createVersionTable();
-			}
-
-			Connection connection = connector.getDataSource().getConnection();
-			PreparedStatement ps = connection.prepareStatement("INSERT INTO database_versions (version) VALUES (?)");
-			ps.setString(1, version);
-			ps.executeUpdate();
-			log.info("Version in DB updated to: {}", version);
-
-			if (versionFile.exists()) {
-				versionFile.delete();
-				log.info("Deleted version.txt on file system.");
-			}
-
-			connection.close();
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+	private void writeVersion(String version) throws SQLException {
+		if (!isVersionTableAvailable()) {
+			createVersionTable();
 		}
+
+		Connection connection = connector.getDataSource().getConnection();
+		PreparedStatement ps = connection.prepareStatement("INSERT INTO database_versions (version) VALUES (?)");
+		ps.setString(1, version);
+		ps.executeUpdate();
+		log.info("Version in DB updated to: {}", version);
+
+		connection.close();
 	}
 
 	/**
-	 * If {@code versionFile} exists, returns its contents (expects semver version).
-	 * Defaults to {@code 0.0.0}.
+	 * Attempts to read the latest version from the {@code database_versions} table
+	 * in the database. On failure, returns {@code null} (no exception is thrown).
 	 */
-	@NonNull
-	private String readVersion() {
-		if (versionFile.exists()) {
-			try {
-				return readFileAsString(versionFile);
-			} catch (Exception e) {
-				return "0.0.0";
-			}
-		} else {
-			return "0.0.0";
-		}
-	}
-
 	private String readVersionDB() {
 		String sql = "SELECT version FROM database_versions "
 				+ "WHERE updated_on = (SELECT MAX(updated_on) FROM database_versions) "
@@ -202,44 +173,37 @@ public class DatabaseUpdater {
 
 		String version = null;
 
-		try {
-			Connection connection = connector.getDataSource().getConnection();
+		try (Connection connection = connector.getDataSource().getConnection()) {
 			PreparedStatement ps = connection.prepareStatement(sql);
 			ResultSet result = ps.executeQuery();
 
 			if (result.next()) {
 				version = result.getString(1);
 			}
-
-			connection.close();
-
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (SQLException e) {
+			// pass
 		}
 
 		return version;
 	}
 
-	// TODO(Marc): Why is this here???
-	private static String readFileAsString(File file) throws IOException {
-		try (InputStream is = new FileInputStream(file);
-				InputStreamReader sr = new InputStreamReader(is);
-				BufferedReader br = new BufferedReader(sr)) {
-
-			String strLine;
-			StringBuilder builder = new StringBuilder();
-
-			while ((strLine = br.readLine()) != null) {
-				builder.append(strLine);
-			}
-
-			return builder.toString();
-		}
-	}
-
-	private String readAndPrepareSqlClasspath(String minVersion, String maxVersion)
-			throws IOException, URISyntaxException, SQLException {
+	/**
+	 * Parses {@code updatesFile}, and executes all relevant SQL commands.
+	 * <p>
+	 * Expects the file contents to be a series of SQL statements separated by
+	 * comments, with each comment being the semver version that applies to the
+	 * following SQL statements. Only versions between {@code oldVersion}
+	 * (exclusive) and {@code currentVersion} (inclusive) are processed.
+	 * <p>
+	 * If a version is in range and is present as a comment in the file, also checks
+	 * if a listener is registered in {@code listeners} for that version, and
+	 * triggers the callbacks {@link IUpdateListener#beforeUpdate(Database)} (before
+	 * executing any associated SQL statements) and
+	 * {@link IUpdateListener#afterUpdate(Database)} (after all associated SQL
+	 * statements). In particular, there don't need to be any SQL statements: as
+	 * long as the comment is present, the callbacks are triggered.
+	 */
+	private void executeUpdates() throws IOException, URISyntaxException, SQLException {
 
 		try (InputStream is = updatesFile.openStream();
 				InputStreamReader sr = new InputStreamReader(is);
@@ -251,9 +215,9 @@ public class DatabaseUpdater {
 			String version = null;
 
 			while ((strLine = br.readLine()) != null) {
-				if (strLine.startsWith("--")) {
-					if (builder.length() > 0) {
-						executeSQLFile(builder.toString(), version);
+				if (strLine.startsWith("--")) { // New version block found
+					if (builder.length() > 0) { // Old version block had commands to run
+						executeSQL(builder.toString(), version);
 						builder.setLength(0);
 						IUpdateListener listener = listeners.get(version);
 						if (listener != null) {
@@ -261,8 +225,9 @@ public class DatabaseUpdater {
 						}
 					}
 
+					// Initialize the new version block
 					version = strLine.replace("--", "").trim();
-					reading = (compareVersion(version, minVersion) > 0 && compareVersion(version, maxVersion) <= 0);
+					reading = (compareVersion(version, oldVersion) > 0 && compareVersion(version, currentVersion) <= 0);
 					if (reading) {
 						log.info("Loading SQL update for version {}", version);
 						IUpdateListener listener = listeners.get(version);
@@ -272,32 +237,44 @@ public class DatabaseUpdater {
 					}
 				}
 
+				// If we already found a version comment, and the version is within range,
+				// accumulate SQL statements into builder.
 				if (reading) {
 					builder.append("\n");
 					builder.append(strLine);
 				}
 			}
 
+			// TODO(Marc): This is wrong! It doesn't trigger the callback.
 			// last block
-			executeSQLFile(builder.toString(), version);s
-
-			return builder.toString();
+			executeSQL(builder.toString(), version);
 		}
 	}
 
-	public void executeSQLFile(String sqlContent, String version) throws SQLException {
-		String cleanedSQL = sqlContent
+	/**
+	 * If {@code sql} contains SQL commands to run, runs them and writes
+	 * {@code version} to the database.
+	 *
+	 * @param sql     Update commands to run. Comments and surrounding whitespace
+	 *                are removed.
+	 * @param version Version that this update belongs to. Written to DB iif
+	 *                {@code sql} is non-empty and runs without issue.
+	 * @throws SQLException If anything goes wrong (DB connectivity, {@code sql}
+	 *                      content issues...)
+	 */
+	public void executeSQL(String sql, String version) throws SQLException {
+		String cleanedSQL = sql
 				.replaceAll("(?s)/\\*.*?\\*/", "") // remove block comments
 				.replaceAll("(?m)^\\s*--.*?$", "") // remove full line comments
 				.replaceAll("(?m)(?<=\\s)--.*?$", "") // remove inline comments after SQL
 				.trim();
 
 		if (!cleanedSQL.isEmpty()) {
-			Connection connection;
-			connection = connector.getDataSource().getConnection();
-			PreparedStatement ps = connection.prepareStatement(sqlContent);
+			Connection connection = connector.getDataSource().getConnection();
+			PreparedStatement ps = connection.prepareStatement(cleanedSQL);
 			ps.executeUpdate();
 			connection.close();
+
 			log.info("DB SQL Update {} finished", version);
 			writeVersion(version);
 		}
@@ -334,31 +311,33 @@ public class DatabaseUpdater {
 		return 0;
 	}
 
+	/**
+	 * Returns {@code true} if the database can be reached and a table called
+	 * {@code database_versions} is confirmed to exist. Returns {@code false}
+	 * otherwise (doesn't throw).
+	 */
 	public boolean isVersionTableAvailable() {
 		try {
 			return database.getConnector().tableExists("database_versions");
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			return false;
 		}
 	}
 
-	public void createVersionTable() {
+	/**
+	 * Attempts to create the table {@code database_versions} in the database.
+	 */
+	public void createVersionTable() throws SQLException {
 		String sql = "CREATE TABLE database_versions ("
 				+ "id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, "
 				+ "version VARCHAR(255) NOT NULL, "
 				+ "updated_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)";
 
-		try {
-			Connection connection = connector.getDataSource().getConnection();
-			PreparedStatement statement = connection.prepareStatement(sql);
-			statement.executeUpdate();
-			connection.close();
-			log.info("Table database_versions created.");
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Connection connection = connector.getDataSource().getConnection();
+		PreparedStatement statement = connection.prepareStatement(sql);
+		statement.executeUpdate();
+
+		connection.close();
+		log.info("Table database_versions created.");
 	}
 }

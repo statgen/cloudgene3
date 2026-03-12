@@ -23,7 +23,6 @@ public class DatabaseUpdaterTest {
 
 		DatabaseUpdater updater = new DatabaseUpdater(
 				db,
-				new File("fake.fake"),
 				updatesFile,
 				"1.0.0");
 
@@ -46,8 +45,8 @@ public class DatabaseUpdaterTest {
 						"Before update: 0.0.2",
 						"After update: 0.0.2"
 
-						// 0.0.3 is not present in test-updates.sql, so it's skipped.
-						// 0.1.0 exists in test-updates.sql, but has no attached listener.
+				// 0.0.3 is not present in test-updates.sql, so it's skipped.
+				// 0.1.0 exists in test-updates.sql, but has no attached listener.
 				),
 				records);
 
