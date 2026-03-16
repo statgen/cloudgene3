@@ -47,8 +47,8 @@ public class AppController {
 	@Secured(SecurityRule.IS_ANONYMOUS)
 	public WdlAppResponse getApp(@Nullable Authentication authentication, String appId) {
 
-		log.info("GET /api/v2/server/apps/{} called", appId);
-		log.info("Loading app '{}' for authenticated user", appId);
+
+		log.info("Getting info for app '{}' for authenticated user", appId);
 
 		User user = authenticationService.getUserByAuthentication(authentication, AuthenticationType.ALL_TOKENS);
 		Application app = applicationService.getByIdAndUser(user, appId);
@@ -60,7 +60,7 @@ public class AppController {
 		WdlAppResponse response = WdlAppResponse.build(app.getWdlApp(), apps);
 
 		response.setS3Workspace(application.getSettings().getExternalWorkspaceType().equalsIgnoreCase("S3")
-				&& application.getSettings().getExternalWorkspaceLocation().isEmpty());
+			&& application.getSettings().getExternalWorkspaceLocation().isEmpty());
 
 		String footer = this.application.getTemplate(Template.FOOTER_SUBMIT_JOB);
 		if (footer != null && !footer.trim().isEmpty()) {
@@ -82,7 +82,7 @@ public class AppController {
 	@Put("/api/v2/server/apps/{appId}")
 	@Secured(User.ROLE_ADMIN)
 	public ApplicationResponse updateApp(String appId, @Nullable Boolean enabled, @Nullable String permission,
-										 @Nullable Boolean reinstall, @Nullable Map<String, String> config) {
+		@Nullable Boolean reinstall, @Nullable Map<String, String> config) {
 
 		Application app = applicationService.getById(appId);
 
@@ -111,7 +111,7 @@ public class AppController {
 	@Put("/api/v2/server/apps/{appId}/settings")
 	@Secured(User.ROLE_ADMIN)
 	public ApplicationResponse updateAppSettings(String appId, @Nullable Boolean enabled, @Nullable String permission,
-												 @Nullable Boolean reinstall, @Nullable Map<String, String> config) throws IOException {
+		@Nullable Boolean reinstall, @Nullable Map<String, String> config) throws IOException {
 
 		Application app = applicationService.getById(appId);
 		applicationService.updateConfig(app, config);
