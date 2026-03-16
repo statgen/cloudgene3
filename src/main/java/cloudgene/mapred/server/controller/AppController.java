@@ -26,8 +26,13 @@ import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.rules.SecurityRule;
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Controller
 public class AppController {
+
+	private static final Logger log = LoggerFactory.getLogger(AppController.class);
 
 	@Inject
 	protected cloudgene.mapred.server.Application application;
@@ -41,6 +46,9 @@ public class AppController {
 	@Get("/api/v2/server/apps/{appId}")
 	@Secured(SecurityRule.IS_ANONYMOUS)
 	public WdlAppResponse getApp(@Nullable Authentication authentication, String appId) {
+
+		log.info("GET /api/v2/server/apps/{} called", appId);
+		log.info("Loading app '{}' for authenticated user", appId);
 
 		User user = authenticationService.getUserByAuthentication(authentication, AuthenticationType.ALL_TOKENS);
 		Application app = applicationService.getByIdAndUser(user, appId);
@@ -67,6 +75,7 @@ public class AppController {
 	@Secured(User.ROLE_ADMIN)
 	public ApplicationResponse removeApp(String appId) {
 		Application app = applicationService.removeApp(appId);
+		log.info("Application '{}' removed successfully", appId);
 		return ApplicationResponse.build(app);
 	}
 
@@ -84,6 +93,8 @@ public class AppController {
 		// update permissions
 		applicationService.updatePermissions(app, permission);
 
+		log.info("Application '{}' updated successfully permission '{}'", appId , permission);
+
 		return ApplicationResponse.build(app);
 	}
 
@@ -92,6 +103,7 @@ public class AppController {
 	public ApplicationResponse getAppSettings(String appId) {
 		Application app = applicationService.getById(appId);
 		ApplicationRepository repository = applicationService.getRepository();
+		log.info("Application settings loaded successfully for '{}'", appId);
 		return ApplicationResponse.buildWithDetails(app, this.application.getSettings(), repository);
 
 	}
@@ -105,6 +117,7 @@ public class AppController {
 		applicationService.updateConfig(app, config);
 
 		ApplicationRepository repository = applicationService.getRepository();
+		log.info("Updating settings for application '{}'. Config keys={}", appId, config != null ? config.keySet() : null);
 
 		return ApplicationResponse.buildWithDetails(app, this.application.getSettings(), repository);
 
@@ -114,6 +127,7 @@ public class AppController {
 	@Secured(User.ROLE_ADMIN)
 	public ApplicationResponse install(@Nullable String url) {
 		Application app = applicationService.installApp(url);
+		log.info("Application installed successfully from url='{}'", url);
 		return ApplicationResponse.build(app);
 	}
 
@@ -125,6 +139,7 @@ public class AppController {
 		}
 		List<Application> apps = applicationService.listApps(reload);
 		ApplicationRepository repository = applicationService.getRepository();
+		log.info("Returning {} applications Names: {} ", apps.size(),apps.stream().map(Application::getId).toList());
 		return ApplicationResponse.buildWithDetails(apps, application.getSettings(), repository);
 	}
 
