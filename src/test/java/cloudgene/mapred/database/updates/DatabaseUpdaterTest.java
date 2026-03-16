@@ -191,6 +191,45 @@ public class DatabaseUpdaterTest {
 		assertEquals("1.0.0", updater.getCurrentVersion());
 	}
 
+	@Test
+	public void testIncrementalUpdates() throws SQLException, MalformedURLException {
+		Database db = TestDbUtil.getMemDb();
+		URL updatesFile = new File("test-data/test-updates.sql").toURI().toURL();
+		VersionDao dao = new VersionDao(db);
+
+		DatabaseUpdater u000 = new DatabaseUpdater(db, updatesFile, "0.0.0");
+		assertFalse(u000.needsUpdate());
+
+		// v0.0.0: nothing to do
+
+		u000.updateDB();
+		assertFalse(db.getConnector().tableExists("user")); // v0.0.1
+		assertFalse(db.getConnector().tableExists("job")); // v0.1.0
+		assertEquals("0.0.0", dao.findLatest());
+
+		// v0.0.1: 'user' table created at v0.0.1
+
+		DatabaseUpdater u001 = new DatabaseUpdater(db, updatesFile, "0.0.1");
+		assertTrue(u001.needsUpdate());
+		assertEquals("0.0.0", dao.findLatest());
+
+		u001.updateDB();
+		assertTrue(db.getConnector().tableExists("user")); // v0.0.1
+		assertFalse(db.getConnector().tableExists("job")); // v0.1.0
+		assertEquals("0.0.1", dao.findLatest());
+
+		// v0.2.3: 'job' table created at v0.1.0
+
+		DatabaseUpdater u023 = new DatabaseUpdater(db, updatesFile, "0.2.3");
+		assertTrue(u023.needsUpdate());
+		assertEquals("0.0.1", dao.findLatest());
+
+		u023.updateDB();
+		assertTrue(db.getConnector().tableExists("user")); // v0.0.1
+		assertTrue(db.getConnector().tableExists("job")); // v0.1.0
+		assertEquals("0.2.3", dao.findLatest());
+	}
+
 	private static class VersionRecorder implements IUpdateListener {
 
 		private final String version;
