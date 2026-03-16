@@ -128,7 +128,7 @@ public class DatabaseUpdater {
 
 		String dbVersion = dao.findLatest();
 		if (!dbVersion.equals(currentVersion)) {
-			log.error("App version (v{}) and DB version (v{}) does not match. Update Application to latest version.",
+			log.error("Application version (v{}) and DB version (v{}) do not match. Please update Cloudgene to the latest version.",
 					currentVersion, dbVersion);
 			return false;
 		}

@@ -247,6 +247,13 @@ public class DatabaseUpdaterTest {
 		assertTrue(db.getConnector().tableExists("user")); // v0.0.1
 		assertTrue(db.getConnector().tableExists("job")); // v0.1.0
 		assertEquals("0.2.3", dao.findLatest());
+
+		// v0.1.1: regression from v0.2.3. Update fails, since we cannot roll back DB state.
+
+		DatabaseUpdater u011 = new DatabaseUpdater(db, updatesFile, "0.1.1");
+		assertFalse(u011.needsUpdate());
+		success = u011.updateDB();
+		assertFalse(success);
 	}
 
 	private static class VersionRecorder implements IUpdateListener {
