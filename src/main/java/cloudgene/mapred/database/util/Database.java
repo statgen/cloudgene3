@@ -1,28 +1,30 @@
 package cloudgene.mapred.database.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cloudgene.mapred.database.connector.DatabaseConnector;
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// TODO(Marc): This class is a wrapper around DatabaseConnector and the only thing it
+//             adds is listener support, but we don't use these listeners anywhere.
+//             Remove.
 public class Database {
 
 	private static final Logger log = LoggerFactory.getLogger(Database.class);
 
-	private DatabaseConnector connector;
-
+	private @Nullable DatabaseConnector connector;
 	private final List<DatabaseListener> listeners = new ArrayList<>();
 
 	public Database() {
 	}
 
-	public void connect(DatabaseConnector connector) throws SQLException {
+	public void connect(@NonNull DatabaseConnector connector) throws SQLException {
 		this.connector = connector;
 		try {
 			connector.connect();
@@ -62,6 +64,7 @@ public class Database {
 		}
 	}
 
+	// TODO(Marc): Connector is nullable, so this can throw a NullPointerException.
 	public BasicDataSource getDataSource() {
 		return connector.getDataSource();
 	}
@@ -82,10 +85,7 @@ public class Database {
 		}
 	}
 
-	public void executeSQL(InputStream is) throws SQLException, IOException, URISyntaxException {
-		connector.executeSQL(is);
-	}
-
+	@Nullable
 	public DatabaseConnector getConnector() {
 		return connector;
 	}

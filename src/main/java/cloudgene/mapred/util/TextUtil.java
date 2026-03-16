@@ -1,6 +1,6 @@
 package cloudgene.mapred.util;
 
-import jakarta.validation.constraints.NotNull;
+import io.micronaut.core.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +21,7 @@ public final class TextUtil {
 	 * @param lines Number of lines from {@code file} to print.
 	 * @return The {@code file} tail.
 	 */
-	public static String tail(@NotNull File file, int lines) {
+	public static String tail(@NonNull File file, int lines) {
 		// TODO(Marc): This implementation seems very slow (seems to be copying one byte
 		// at a time and then reversing a string). We should add tests and rewrite.
 		try (java.io.RandomAccessFile fileHandler = new java.io.RandomAccessFile(file, "r")) {

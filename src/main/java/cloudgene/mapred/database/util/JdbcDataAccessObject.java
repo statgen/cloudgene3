@@ -121,4 +121,11 @@ public abstract class JdbcDataAccessObject {
 			return rs.getInt(1);
 		}
 	}
+
+	public static class StringMapper implements IRowMapper<String> {
+		@Override
+		public String mapRow(ResultSet rs, int row) throws SQLException {
+			return rs.getString(1);
+		}
+	}
 }

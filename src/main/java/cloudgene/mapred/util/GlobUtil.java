@@ -1,6 +1,6 @@
 package cloudgene.mapred.util;
 
-import jakarta.validation.constraints.NotNull;
+import io.micronaut.core.annotation.NonNull;
 
 import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
@@ -29,9 +29,9 @@ public final class GlobUtil {
 	 *         {@code false} otherwise.
 	 */
 	public static boolean isFileIncluded(
-			@NotNull String filename,
-			@NotNull List<String> includes,
-			@NotNull List<String> excludes) {
+			@NonNull String filename,
+			@NonNull List<String> includes,
+			@NonNull List<String> excludes) {
 
 		// If includes is empty, consider all files as included
 		boolean isIncluded = includes.isEmpty()
@@ -51,7 +51,7 @@ public final class GlobUtil {
 		return !isExcluded;
 	}
 
-	private static boolean matchPattern(@NotNull String filename, @NotNull String pattern) {
+	private static boolean matchPattern(@NonNull String filename, @NonNull String pattern) {
 		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
 		return matcher.matches(Paths.get(filename));
 	}

@@ -4,13 +4,13 @@ import cloudgene.mapred.core.Banner;
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.server.services.BannerService;
 import io.micronaut.core.annotation.Introspected;
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.*;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.serde.annotation.Serdeable;
-import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotNull;
 
 @Controller("/api/v2/admin/banner")
 @Secured(User.ROLE_ADMIN)
@@ -18,7 +18,7 @@ public class AdminBannerController {
 
 	@Introspected
 	@Serdeable.Deserializable
-	public record CreateInput(@NotNull String type, @NotNull String message) {}
+	public record CreateInput(@NonNull String type, @NonNull String message) {}
 
 	@Introspected
 	@Serdeable.Deserializable
@@ -26,7 +26,7 @@ public class AdminBannerController {
 
 	@Introspected
 	@Serdeable.Deserializable
-	public record SwapInput(@NotNull Integer id1, @NotNull Integer id2) {}
+	public record SwapInput(@NonNull Integer id1, @NonNull Integer id2) {}
 
 	@Inject
 	protected BannerService bannerService;

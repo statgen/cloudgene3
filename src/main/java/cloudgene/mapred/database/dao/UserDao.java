@@ -1,12 +1,12 @@
-package cloudgene.mapred.database;
+package cloudgene.mapred.database.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +102,7 @@ public class UserDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public @Nullable User findByUsername(@NotNull String username) {
+	public @Nullable User findByUsername(@NonNull String username) {
 		String sql = "SELECT * FROM `user` WHERE username = ?";
 
 		try {
@@ -118,7 +118,7 @@ public class UserDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public @Nullable User findByMail(@NotNull String mail) {
+	public @Nullable User findByMail(@NonNull String mail) {
 		String sql = "SELECT * FROM `user` WHERE mail = ?";
 
 		try {

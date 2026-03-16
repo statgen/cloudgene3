@@ -1,24 +1,23 @@
 package cloudgene.mapred.server;
 
-import java.io.InputStream;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.*;
 
 import cloudgene.mapred.jobs.engine.handler.IJobErrorHandler;
 import cloudgene.mapred.jobs.engine.handler.JobErrorHandlerFactory;
-import cloudgene.mapred.util.config.Configuration;
 import io.micronaut.runtime.event.ApplicationShutdownEvent;
 import io.micronaut.runtime.event.annotation.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cloudgene.mapred.BuildInfo;
-import cloudgene.mapred.database.TemplateDao;
+import cloudgene.mapred.database.dao.TemplateDao;
 import cloudgene.mapred.database.updates.BcryptHashUpdate;
 import cloudgene.mapred.database.util.Database;
-import cloudgene.mapred.database.util.DatabaseConnector;
-import cloudgene.mapred.database.util.DatabaseConnectorFactory;
-import cloudgene.mapred.database.util.DatabaseUpdater;
+import cloudgene.mapred.database.connector.DatabaseConnector;
+import cloudgene.mapred.database.connector.DatabaseConnectorFactory;
+import cloudgene.mapred.database.updates.DatabaseUpdater;
 import cloudgene.mapred.database.util.Fixtures;
 import cloudgene.mapred.jobs.PersistentWorkflowEngine;
 import cloudgene.mapred.jobs.WorkflowEngine;
@@ -72,11 +71,15 @@ public class Application {
 
 		// update database schema if needed
 		log.info("Setup Database...");
-		InputStream is = Application.class.getResourceAsStream("/updates.sql");
 
-		DatabaseUpdater updater = new DatabaseUpdater(database, Configuration.getVersionFilename(), is,
+		URL updatesFile = Application.class.getResource("/updates.sql");
+
+		DatabaseUpdater updater = new DatabaseUpdater(
+				database,
+				updatesFile,
 				BuildInfo.VERSION);
-		updater.addUpdate("2.3.0", new BcryptHashUpdate());
+
+		updater.addListener("2.3.0", new BcryptHashUpdate());
 
 		if (!updater.updateDB()) {
 			System.exit(-1);
