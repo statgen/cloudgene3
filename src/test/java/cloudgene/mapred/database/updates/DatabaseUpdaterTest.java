@@ -98,38 +98,52 @@ public class DatabaseUpdaterTest {
 		}
 	}
 
-	private static Stream<Arguments> provideForUpdateDB() throws SQLException, MalformedURLException {
-		return Stream.of(
-				arguments("0.0.0", false, false, true),
-				arguments("0.0.0", true, false, true),
-				arguments("1.0.0", false, true, true)
+	public record UpdateDbTestCase(
+			String sqlPath,
+			String version,
+			boolean preloadTable,
+			boolean needsUpdate,
+			boolean success) {}
 
-		// TODO(Marc): More cases, more coverage.
+	private static Stream<UpdateDbTestCase> provideForUpdateDB() {
+		return Stream.of(
+				// All these cases are normal and should result in successful runs.
+				new UpdateDbTestCase("test-data/test-updates.sql", "0.0.0", false, false, true),
+				new UpdateDbTestCase("test-data/test-updates.sql", "0.0.0", true, false, true),
+				new UpdateDbTestCase("test-data/test-updates.sql", "1.0.0", false, true, true),
+
+				// Wrong path to updates file -> updateDB() fails.
+				new UpdateDbTestCase("fake-file.404", "1.0.0", false, true, false),
+				// Invalid SQL statements -> updateDB() fails.
+				new UpdateDbTestCase("test-data/test-updates-broken.sql", "1.0.0", false, true, false)
 		);
 	}
 
 	@ParameterizedTest
 	@MethodSource("provideForUpdateDB")
-	public void testUpdateDB(String version, boolean preloadTable, boolean needsUpdate, boolean result)
+	public void testUpdateDB(UpdateDbTestCase testCase)
 			throws SQLException, MalformedURLException {
 		Database db = TestDbUtil.getMemDb();
 		VersionDao dao = new VersionDao(db);
-		URL updatesFile = new File("test-data/test-updates.sql").toURI().toURL();
+		URL updatesFile = new File(testCase.sqlPath).toURI().toURL();
 
-		if (preloadTable) {
+		if (testCase.preloadTable) {
 			DatabaseUpdater dummy = new DatabaseUpdater(db, updatesFile, "0.0.0");
 			dummy.writeVersion("0.0.0");
 		}
 
-		DatabaseUpdater updater = new DatabaseUpdater(db, updatesFile, version);
+		DatabaseUpdater updater = new DatabaseUpdater(db, updatesFile, testCase.version);
 
-		assertEquals(preloadTable, dao.isTableAvailable());
-		assertEquals(needsUpdate, updater.needsUpdate());
+		assertEquals(testCase.preloadTable, dao.isTableAvailable());
+		assertEquals(testCase.needsUpdate, updater.needsUpdate());
 
 		boolean observed = updater.updateDB();
 
-		assertEquals(result, observed);
-		assertTrue(dao.isTableAvailable()); // Always created.
+		assertEquals(testCase.success, observed);
+
+		if (testCase.success) {
+			assertTrue(dao.isTableAvailable()); // Always created on success.
+		}
 	}
 
 	@Test
@@ -179,7 +193,8 @@ public class DatabaseUpdaterTest {
 				updatesFile,
 				"0.1.0");
 
-		dummy.updateDB();
+		boolean success = dummy.updateDB();
+		assertTrue(success);
 
 		DatabaseUpdater updater = new DatabaseUpdater(
 				db,
@@ -196,13 +211,15 @@ public class DatabaseUpdaterTest {
 		Database db = TestDbUtil.getMemDb();
 		URL updatesFile = new File("test-data/test-updates.sql").toURI().toURL();
 		VersionDao dao = new VersionDao(db);
+		boolean success;
+
+		// v0.0.0: nothing to do
 
 		DatabaseUpdater u000 = new DatabaseUpdater(db, updatesFile, "0.0.0");
 		assertFalse(u000.needsUpdate());
 
-		// v0.0.0: nothing to do
-
-		u000.updateDB();
+		success = u000.updateDB();
+		assertTrue(success);
 		assertFalse(db.getConnector().tableExists("user")); // v0.0.1
 		assertFalse(db.getConnector().tableExists("job")); // v0.1.0
 		assertEquals("0.0.0", dao.findLatest());
@@ -213,7 +230,8 @@ public class DatabaseUpdaterTest {
 		assertTrue(u001.needsUpdate());
 		assertEquals("0.0.0", dao.findLatest());
 
-		u001.updateDB();
+		success = u001.updateDB();
+		assertTrue(success);
 		assertTrue(db.getConnector().tableExists("user")); // v0.0.1
 		assertFalse(db.getConnector().tableExists("job")); // v0.1.0
 		assertEquals("0.0.1", dao.findLatest());
@@ -224,7 +242,8 @@ public class DatabaseUpdaterTest {
 		assertTrue(u023.needsUpdate());
 		assertEquals("0.0.1", dao.findLatest());
 
-		u023.updateDB();
+		success = u023.updateDB();
+		assertTrue(success);
 		assertTrue(db.getConnector().tableExists("user")); // v0.0.1
 		assertTrue(db.getConnector().tableExists("job")); // v0.1.0
 		assertEquals("0.2.3", dao.findLatest());

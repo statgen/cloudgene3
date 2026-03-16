@@ -143,6 +143,7 @@ public class DatabaseUpdater {
 		try {
 			executeUpdates();
 		} catch (IOException | SQLException e) {
+			log.error("Failed to execute updates", e);
 			return false;
 		}
 
