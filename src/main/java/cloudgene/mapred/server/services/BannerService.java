@@ -3,10 +3,10 @@ package cloudgene.mapred.server.services;
 import cloudgene.mapred.core.Banner;
 import cloudgene.mapred.database.dao.BannerDao;
 import cloudgene.mapred.server.Application;
-import jakarta.annotation.Nullable;
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class BannerService {
 	}
 
 	@Nullable
-	public Banner create(@NotNull String type, @NotNull String message) {
+	public Banner create(@NonNull String type, @NonNull String message) {
 		// Raises IllegalArgumentException if null or malformed.
 		Banner.Type bannerType = Banner.Type.of(type);
 

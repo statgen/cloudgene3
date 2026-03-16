@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cloudgene.mapred.core.User;
-import jakarta.validation.constraints.NotNull;
+import io.micronaut.core.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ public class CounterDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@NotNull
+	@NonNull
 	public Map<String, Long> getAll() {
 		String sql = "SELECT name, SUM(`value`) FROM counters GROUP BY name";
 
@@ -51,7 +51,7 @@ public class CounterDao extends JdbcDataAccessObject {
 		}
 	}
 
-	@NotNull
+	@NonNull
 	public Map<String, Long> getByUser(User user) {
 		String sql = "SELECT counters.name AS name, SUM(counters.`value`) AS `value` "
 				+ "FROM counters INNER JOIN job ON counters.job_id = job.id "

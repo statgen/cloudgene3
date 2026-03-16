@@ -14,8 +14,8 @@ import cloudgene.mapred.util.config.Configuration;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +65,7 @@ public class ApplicationRepository {
 		return apps;
 	}
 
-	public void setApps(@NotNull List<Application> apps) {
+	public void setApps(@NonNull List<Application> apps) {
 		this.apps = apps;
 		reload();
 	}
@@ -156,13 +156,13 @@ public class ApplicationRepository {
 		return listApps;
 	}
 
-	public void remove(@NotNull Application application) throws IOException {
+	public void remove(@NonNull Application application) throws IOException {
 		log.info("Remove application " + application.getId());
 		apps.remove(application);
 		reload();
 	}
 
-	public void updateConfig(@NotNull Application app, @Nullable Map<String, String> config) throws IOException {
+	public void updateConfig(@NonNull Application app, @Nullable Map<String, String> config) throws IOException {
 
 		WdlApp wdlApp = app.getWdlApp();
 
@@ -183,7 +183,7 @@ public class ApplicationRepository {
 
 	}
 
-	public List<Application> install(@NotNull String url) throws IOException, GitHubException, URISyntaxException {
+	public List<Application> install(@NonNull String url) throws IOException, GitHubException, URISyntaxException {
 
 		List<Application> applications = new ArrayList<>();
 		Application application = null;
@@ -231,13 +231,13 @@ public class ApplicationRepository {
 	 * @param key Used to uniquely identify the download, to avoid collisions.
 	 * @return Path to a (potential) archive file unique to the {@code key}'s hash.
 	 */
-	private File getArchiveFile(@NotNull String key) {
+	private File getArchiveFile(@NonNull String key) {
 		int hash = key.hashCode();
 		String path = FileUtil.path(appsFolder, "archive_" + hash + ".zip");
 		return new File(path);
 	}
 
-	public List<Application> installFromUrl(@NotNull String url)
+	public List<Application> installFromUrl(@NonNull String url)
 			throws IOException, GitHubException, URISyntaxException {
 
 		if (!url.endsWith(".zip")) {
@@ -259,7 +259,7 @@ public class ApplicationRepository {
 		return applications;
 	}
 
-	public List<Application> installFromUrlRepository(@NotNull String url)
+	public List<Application> installFromUrlRepository(@NonNull String url)
 			throws IOException, GitHubException, URISyntaxException {
 
 		Pattern pattern = Pattern.compile("@([^/\\?]*)");
@@ -279,7 +279,7 @@ public class ApplicationRepository {
 		return installFromRepository(filename, version);
 	}
 
-	public List<Application> installFromRepository(@NotNull String file, String version)
+	public List<Application> installFromRepository(@NonNull String file, String version)
 			throws IOException, GitHubException, URISyntaxException {
 
 		ObjectMapper mapper = new ObjectMapper();
@@ -398,7 +398,7 @@ public class ApplicationRepository {
 		}
 	}
 
-	public Application installFromGitHub(@NotNull Repository repository)
+	public Application installFromGitHub(@NonNull Repository repository)
 			throws IOException, URISyntaxException, GitHubException {
 
 		String url = GitHubUtil.buildUrlFromRepository(repository);
@@ -414,11 +414,11 @@ public class ApplicationRepository {
 		return application;
 	}
 
-	public Application installFromZipFile(@NotNull String zipFilename) throws IOException {
+	public Application installFromZipFile(@NonNull String zipFilename) throws IOException {
 		return installFromZipFile(zipFilename, null);
 	}
 
-	public Application installFromZipFile(@NotNull String zipFilename, @Nullable String yamlFilename)
+	public Application installFromZipFile(@NonNull String zipFilename, @Nullable String yamlFilename)
 			throws IOException {
 
 		// extract in apps folder
@@ -443,11 +443,11 @@ public class ApplicationRepository {
 		}
 	}
 
-	public Application installFromDirectory(@NotNull String path, boolean moveToApps) throws IOException {
+	public Application installFromDirectory(@NonNull String path, boolean moveToApps) throws IOException {
 		return installFromDirectory(path, moveToApps, null);
 	}
 
-	public Application installFromDirectory(@NotNull String path, boolean moveToApps, @Nullable String customYaml)
+	public Application installFromDirectory(@NonNull String path, boolean moveToApps, @Nullable String customYaml)
 			throws IOException {
 
 		String name = "cloudgene.yaml";
@@ -532,7 +532,7 @@ public class ApplicationRepository {
 		return application;
 	}
 
-	private String[] getDirectories(@NotNull String path) {
+	private String[] getDirectories(@NonNull String path) {
 		File dir = new File(path);
 		File[] files = dir.listFiles();
 
@@ -579,7 +579,7 @@ public class ApplicationRepository {
 		return application.isEnabled() && application.isLoaded() && !application.hasSyntaxError();
 	}
 
-	public static JsonNode getVersion(@NotNull JsonNode releases, @Nullable String version) {
+	public static JsonNode getVersion(@NonNull JsonNode releases, @Nullable String version) {
 		if ("latest".equalsIgnoreCase(version)) {
 			return releases.get(0);
 		}

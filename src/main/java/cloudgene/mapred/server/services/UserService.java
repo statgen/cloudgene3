@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import cloudgene.mapred.database.dao.CounterDao;
-import jakarta.validation.constraints.NotNull;
+import io.micronaut.core.annotation.NonNull;
+import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +20,6 @@ import cloudgene.mapred.util.HashUtil;
 import cloudgene.mapred.util.MailUtil;
 import cloudgene.mapred.util.Page;
 import io.micronaut.http.HttpStatus;
-import jakarta.inject.Singleton;
 
 @Singleton
 public class UserService {
@@ -426,8 +426,8 @@ public class UserService {
 		}
 	}
 
-	@NotNull
-	public MessageResponse activateUser(@NotNull String username, @NotNull String code) {
+	@NonNull
+	public MessageResponse activateUser(@NonNull String username, @NonNull String code) {
 		UserDao dao = new UserDao(application.getDatabase());
 		User user = dao.findByUsername(username);
 
@@ -459,8 +459,8 @@ public class UserService {
 	 * Since the database only stores counters for successfully completed jobs, this
 	 * method does not show data for ongoing or failed jobs.
 	 */
-	@NotNull
-	public Map<String, Long> getUserCounters(@NotNull User user) {
+	@NonNull
+	public Map<String, Long> getUserCounters(@NonNull User user) {
 		CounterDao counterDao = new CounterDao(application.getDatabase());
 		Map<String, Long> counters = counterDao.getByUser(user);
 		return counters;

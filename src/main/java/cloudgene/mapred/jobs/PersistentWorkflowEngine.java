@@ -9,8 +9,8 @@ import cloudgene.mapred.core.User;
 import cloudgene.mapred.database.dao.*;
 import cloudgene.mapred.jobs.engine.handler.IJobErrorHandler;
 import cloudgene.mapred.jobs.state.JobState;
+import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,13 +53,13 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 	}
 
 	@Override
-	protected void statusUpdated(@NotNull AbstractJob job) {
+	protected void statusUpdated(@NonNull AbstractJob job) {
 		super.statusUpdated(job);
 		jobDao.update(job);
 	}
 
 	@Override
-	protected void jobCompleted(@NotNull AbstractJob job) {
+	protected void jobCompleted(@NonNull AbstractJob job) {
 		super.jobCompleted(job);
 
 		DownloadDao downloadDao = new DownloadDao(database);
@@ -144,7 +144,7 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 	}
 
 	@Override
-	protected void jobSubmitted(@NotNull AbstractJob job) {
+	protected void jobSubmitted(@NonNull AbstractJob job) {
 		super.jobSubmitted(job);
 		jobDao.insert(job);
 
@@ -164,7 +164,7 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 	}
 
 	@Override
-	@NotNull
+	@NonNull
 	public Map<String, Long> getCounters(JobState state, @Nullable List<String> names) {
 		if (state == JobState.SUCCESS) {
 			List<String> keys = (names == null) ? counters.keySet().stream().toList() : names;

@@ -5,7 +5,7 @@ import java.util.*;
 
 import cloudgene.mapred.util.GlobUtil;
 import cloudgene.mapred.util.config.Settings;
-import jakarta.validation.constraints.NotNull;
+import io.micronaut.core.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +37,8 @@ public class CloudgeneJob extends AbstractJob {
 	public CloudgeneJob(
 			User user,
 			String id,
-			@NotNull WdlApp app,
-			@NotNull Map<String, String> params) {
+			@NonNull WdlApp app,
+			@NonNull Map<String, String> params) {
 
 		this.app = app;
 		setId(id);
@@ -70,7 +70,7 @@ public class CloudgeneJob extends AbstractJob {
 		initLogOutput();
 	}
 
-	public void loadApp(@NotNull WdlApp app) {
+	public void loadApp(@NonNull WdlApp app) {
 		this.app = app;
 		workingDirectory = app.getPath();
 
@@ -256,9 +256,9 @@ public class CloudgeneJob extends AbstractJob {
 	}
 
 	public void exportParameter(
-			@NotNull CloudgeneParameterOutput out,
-			@NotNull List<String> includes,
-			@NotNull List<String> excludes) throws IOException {
+			@NonNull CloudgeneParameterOutput out,
+			@NonNull List<String> includes,
+			@NonNull List<String> excludes) throws IOException {
 
 		writeLog("  Exporting parameter " + out.getName() + "...");
 		out.setJobId(getId());

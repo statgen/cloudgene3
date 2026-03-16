@@ -4,7 +4,7 @@ import cloudgene.mapred.core.Banner;
 import cloudgene.mapred.database.util.Database;
 import cloudgene.mapred.database.util.IRowMapper;
 import cloudgene.mapred.database.util.JdbcDataAccessObject;
-import jakarta.validation.constraints.NotNull;
+import io.micronaut.core.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +20,7 @@ public class BannerDao extends JdbcDataAccessObject {
 		super(database);
 	}
 
-	public Banner insert(@NotNull Banner.Type type, @NotNull String message) {
+	public Banner insert(@NonNull Banner.Type type, @NonNull String message) {
 		String insertSql = "INSERT INTO banners (type, message, position) "
 				+ "SELECT ?, ?, COALESCE(MAX(position), 0) + 1 FROM banners";
 
@@ -42,7 +42,7 @@ public class BannerDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public boolean update(@NotNull Banner banner) {
+	public boolean update(@NonNull Banner banner) {
 		if (banner.getId() < 0) {
 			throw new IllegalArgumentException("Banner does not have an assigned id yet.");
 		}
@@ -93,7 +93,7 @@ public class BannerDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public boolean delete(@NotNull Banner banner) {
+	public boolean delete(@NonNull Banner banner) {
 		try {
 			update(
 					"DELETE FROM banners WHERE id = ?",
@@ -113,7 +113,7 @@ public class BannerDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public boolean swap(@NotNull Banner first, @NotNull Banner second) {
+	public boolean swap(@NonNull Banner first, @NonNull Banner second) {
 		int delta = first.getPosition() - second.getPosition();
 		if (delta != -1 && delta != +1) {
 			// Elements are not consecutive and cannot be swapped.
@@ -146,7 +146,7 @@ public class BannerDao extends JdbcDataAccessObject {
 
 	private static class BannerMapper implements IRowMapper<Banner> {
 		@Override
-		public Banner mapRow(@NotNull ResultSet rs, int row) throws SQLException {
+		public Banner mapRow(@NonNull ResultSet rs, int row) throws SQLException {
 			return new Banner(
 					Banner.Type.of(rs.getString("type")),
 					rs.getString("message"),

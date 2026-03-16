@@ -89,7 +89,7 @@ public class DatabaseUpdater {
 	 * Assigns {@code listener} as the one and only update listener for
 	 * {@code version}. Replaces any existing listeners for the same version.
 	 */
-	public void addListener(String version, IUpdateListener listener) {
+	public void addListener(@NonNull String version, @NonNull IUpdateListener listener) {
 		listeners.put(version, listener);
 	}
 
@@ -174,7 +174,7 @@ public class DatabaseUpdater {
 	 * @return {@code true} if the version was inserted without issue (including
 	 *         table creation, if necessary).
 	 */
-	public boolean writeVersion(String version) {
+	public boolean writeVersion(@NonNull String version) {
 		if (!dao.isTableAvailable()) {
 			if (!dao.createTable()) {
 				return false;
@@ -290,7 +290,7 @@ public class DatabaseUpdater {
 	 * @throws SQLException If anything goes wrong (DB connectivity, {@code sql}
 	 *                      content issues...)
 	 */
-	private void executeSQL(String sql, String version) throws SQLException {
+	private void executeSQL(@NonNull String sql, @NonNull String version) throws SQLException {
 		String cleanedSQL = sql
 				.replaceAll("(?s)/\\*.*?\\*/", "") // remove block comments
 				.replaceAll("(?m)^\\s*--.*?$", "") // remove full line comments
