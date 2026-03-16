@@ -32,115 +32,115 @@ import org.slf4j.LoggerFactory;
 @Controller
 public class AppController {
 
-    private static final Logger log = LoggerFactory.getLogger(AppController.class);
+	private static final Logger log = LoggerFactory.getLogger(AppController.class);
 
-    @Inject
-    protected cloudgene.mapred.server.Application application;
+	@Inject
+	protected cloudgene.mapred.server.Application application;
 
-    @Inject
-    protected AuthenticationService authenticationService;
+	@Inject
+	protected AuthenticationService authenticationService;
 
-    @Inject
-    protected ApplicationService applicationService;
+	@Inject
+	protected ApplicationService applicationService;
 
-    @Get("/api/v2/server/apps/{appId}")
-    @Secured(SecurityRule.IS_ANONYMOUS)
-    public WdlAppResponse getApp(@Nullable Authentication authentication, String appId) {
+	@Get("/api/v2/server/apps/{appId}")
+	@Secured(SecurityRule.IS_ANONYMOUS)
+	public WdlAppResponse getApp(@Nullable Authentication authentication, String appId) {
 
-        log.info("GET /api/v2/server/apps/{} called", appId);
-        log.info("Loading app '{}' for authenticated user", appId);
+		log.info("GET /api/v2/server/apps/{} called", appId);
+		log.info("Loading app '{}' for authenticated user", appId);
 
-        User user = authenticationService.getUserByAuthentication(authentication, AuthenticationType.ALL_TOKENS);
-        Application app = applicationService.getByIdAndUser(user, appId);
+		User user = authenticationService.getUserByAuthentication(authentication, AuthenticationType.ALL_TOKENS);
+		Application app = applicationService.getByIdAndUser(user, appId);
 
-        applicationService.checkRequirements(app);
-        ApplicationRepository repository = applicationService.getRepository();
-        List<Application> apps = repository.getAllByUser(user, ApplicationRepository.APPS_AND_DATASETS);
+		applicationService.checkRequirements(app);
+		ApplicationRepository repository = applicationService.getRepository();
+		List<Application> apps = repository.getAllByUser(user, ApplicationRepository.APPS_AND_DATASETS);
 
-        WdlAppResponse response = WdlAppResponse.build(app.getWdlApp(), apps);
+		WdlAppResponse response = WdlAppResponse.build(app.getWdlApp(), apps);
 
-        response.setS3Workspace(application.getSettings().getExternalWorkspaceType().equalsIgnoreCase("S3")
-                && application.getSettings().getExternalWorkspaceLocation().isEmpty());
+		response.setS3Workspace(application.getSettings().getExternalWorkspaceType().equalsIgnoreCase("S3")
+				&& application.getSettings().getExternalWorkspaceLocation().isEmpty());
 
-        String footer = this.application.getTemplate(Template.FOOTER_SUBMIT_JOB);
-        if (footer != null && !footer.trim().isEmpty()) {
-            response.setFooter(footer);
-        }
+		String footer = this.application.getTemplate(Template.FOOTER_SUBMIT_JOB);
+		if (footer != null && !footer.trim().isEmpty()) {
+			response.setFooter(footer);
+		}
 
-        return response;
+		return response;
 
-    }
+	}
 
-    @Delete("/api/v2/server/apps/{appId}")
-    @Secured(User.ROLE_ADMIN)
-    public ApplicationResponse removeApp(String appId) {
-        Application app = applicationService.removeApp(appId);
-        log.info("Application '{}' removed successfully", appId);
-        return ApplicationResponse.build(app);
-    }
+	@Delete("/api/v2/server/apps/{appId}")
+	@Secured(User.ROLE_ADMIN)
+	public ApplicationResponse removeApp(String appId) {
+		Application app = applicationService.removeApp(appId);
+		log.info("Application '{}' removed successfully", appId);
+		return ApplicationResponse.build(app);
+	}
 
-    @Put("/api/v2/server/apps/{appId}")
-    @Secured(User.ROLE_ADMIN)
-    public ApplicationResponse updateApp(String appId, @Nullable Boolean enabled, @Nullable String permission,
-                                         @Nullable Boolean reinstall, @Nullable Map<String, String> config) {
+	@Put("/api/v2/server/apps/{appId}")
+	@Secured(User.ROLE_ADMIN)
+	public ApplicationResponse updateApp(String appId, @Nullable Boolean enabled, @Nullable String permission,
+										 @Nullable Boolean reinstall, @Nullable Map<String, String> config) {
 
-        Application app = applicationService.getById(appId);
+		Application app = applicationService.getById(appId);
 
-        // enable or disable
-        if (enabled != null) {
-            applicationService.enableApp(app, enabled);
-        }
-        // update permissions
-        applicationService.updatePermissions(app, permission);
+		// enable or disable
+		if (enabled != null) {
+			applicationService.enableApp(app, enabled);
+		}
+		// update permissions
+		applicationService.updatePermissions(app, permission);
 
-        log.info("Application '{}' updated successfully permission '{}'", appId, permission);
+		log.info("Application '{}' updated successfully permission '{}'", appId, permission);
 
-        return ApplicationResponse.build(app);
-    }
+		return ApplicationResponse.build(app);
+	}
 
-    @Get("/api/v2/server/apps/{appId}/settings")
-    @Secured(User.ROLE_ADMIN)
-    public ApplicationResponse getAppSettings(String appId) {
-        Application app = applicationService.getById(appId);
-        ApplicationRepository repository = applicationService.getRepository();
-        log.info("Application settings loaded successfully for '{}'", appId);
-        return ApplicationResponse.buildWithDetails(app, this.application.getSettings(), repository);
+	@Get("/api/v2/server/apps/{appId}/settings")
+	@Secured(User.ROLE_ADMIN)
+	public ApplicationResponse getAppSettings(String appId) {
+		Application app = applicationService.getById(appId);
+		ApplicationRepository repository = applicationService.getRepository();
+		log.info("Application settings loaded successfully for '{}'", appId);
+		return ApplicationResponse.buildWithDetails(app, this.application.getSettings(), repository);
 
-    }
+	}
 
-    @Put("/api/v2/server/apps/{appId}/settings")
-    @Secured(User.ROLE_ADMIN)
-    public ApplicationResponse updateAppSettings(String appId, @Nullable Boolean enabled, @Nullable String permission,
-                                                 @Nullable Boolean reinstall, @Nullable Map<String, String> config) throws IOException {
+	@Put("/api/v2/server/apps/{appId}/settings")
+	@Secured(User.ROLE_ADMIN)
+	public ApplicationResponse updateAppSettings(String appId, @Nullable Boolean enabled, @Nullable String permission,
+												 @Nullable Boolean reinstall, @Nullable Map<String, String> config) throws IOException {
 
-        Application app = applicationService.getById(appId);
-        applicationService.updateConfig(app, config);
+		Application app = applicationService.getById(appId);
+		applicationService.updateConfig(app, config);
 
-        ApplicationRepository repository = applicationService.getRepository();
-        log.info("Updating settings for application '{}'. Config keys={}", appId, config != null ? config.keySet() : null);
+		ApplicationRepository repository = applicationService.getRepository();
+		log.info("Updating settings for application '{}'. Config keys={}", appId, config != null ? config.keySet() : null);
 
-        return ApplicationResponse.buildWithDetails(app, this.application.getSettings(), repository);
+		return ApplicationResponse.buildWithDetails(app, this.application.getSettings(), repository);
 
-    }
+	}
 
-    @Post("/api/v2/server/apps")
-    @Secured(User.ROLE_ADMIN)
-    public ApplicationResponse install(@Nullable String url) {
-        Application app = applicationService.installApp(url);
-        log.info("Application installed successfully from url='{}'", url);
-        return ApplicationResponse.build(app);
-    }
+	@Post("/api/v2/server/apps")
+	@Secured(User.ROLE_ADMIN)
+	public ApplicationResponse install(@Nullable String url) {
+		Application app = applicationService.installApp(url);
+		log.info("Application installed successfully from url='{}'", url);
+		return ApplicationResponse.build(app);
+	}
 
-    @Get("/api/v2/server/apps")
-    @Secured(User.ROLE_ADMIN)
-    public List<ApplicationResponse> list(@Nullable @QueryValue("reload") Boolean reload) {
-        if (reload == null) {
-            reload = false;
-        }
-        List<Application> apps = applicationService.listApps(reload);
-        ApplicationRepository repository = applicationService.getRepository();
-        log.info("Returning {} applications Names: {} ", apps.size(), apps.stream().map(Application::getId).toList());
-        return ApplicationResponse.buildWithDetails(apps, application.getSettings(), repository);
-    }
+	@Get("/api/v2/server/apps")
+	@Secured(User.ROLE_ADMIN)
+	public List<ApplicationResponse> list(@Nullable @QueryValue("reload") Boolean reload) {
+		if (reload == null) {
+			reload = false;
+		}
+		List<Application> apps = applicationService.listApps(reload);
+		ApplicationRepository repository = applicationService.getRepository();
+		log.info("Returning {} applications Names: {} ", apps.size(), apps.stream().map(Application::getId).toList());
+		return ApplicationResponse.buildWithDetails(apps, application.getSettings(), repository);
+	}
 
 }
