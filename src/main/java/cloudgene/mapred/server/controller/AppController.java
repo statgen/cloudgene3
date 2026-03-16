@@ -13,7 +13,6 @@ import cloudgene.mapred.server.auth.AuthenticationType;
 import cloudgene.mapred.server.responses.ApplicationResponse;
 import cloudgene.mapred.server.responses.WdlAppResponse;
 import cloudgene.mapred.server.services.ApplicationService;
-import cloudgene.mapred.wdl.WdlApp;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Delete;
@@ -47,9 +46,6 @@ public class AppController {
 	@Secured(SecurityRule.IS_ANONYMOUS)
 	public WdlAppResponse getApp(@Nullable Authentication authentication, String appId) {
 
-
-		log.info("Getting info for app '{}' for authenticated user", appId);
-
 		User user = authenticationService.getUserByAuthentication(authentication, AuthenticationType.ALL_TOKENS);
 		Application app = applicationService.getByIdAndUser(user, appId);
 
@@ -60,41 +56,40 @@ public class AppController {
 		WdlAppResponse response = WdlAppResponse.build(app.getWdlApp(), apps);
 
 		response.setS3Workspace(application.getSettings().getExternalWorkspaceType().equalsIgnoreCase("S3")
-			&& application.getSettings().getExternalWorkspaceLocation().isEmpty());
+				&& application.getSettings().getExternalWorkspaceLocation().isEmpty());
 
 		String footer = this.application.getTemplate(Template.FOOTER_SUBMIT_JOB);
 		if (footer != null && !footer.trim().isEmpty()) {
 			response.setFooter(footer);
 		}
 
+		log.info("Returning info for app '{}' for authenticated user.", appId);
 		return response;
-
 	}
 
 	@Delete("/api/v2/server/apps/{appId}")
 	@Secured(User.ROLE_ADMIN)
 	public ApplicationResponse removeApp(String appId) {
 		Application app = applicationService.removeApp(appId);
-		log.info("Application '{}' removed successfully", appId);
+
+		log.info("Application '{}' removed successfully.", appId);
 		return ApplicationResponse.build(app);
 	}
 
 	@Put("/api/v2/server/apps/{appId}")
 	@Secured(User.ROLE_ADMIN)
 	public ApplicationResponse updateApp(String appId, @Nullable Boolean enabled, @Nullable String permission,
-		@Nullable Boolean reinstall, @Nullable Map<String, String> config) {
+			@Nullable Boolean reinstall, @Nullable Map<String, String> config) {
 
 		Application app = applicationService.getById(appId);
 
-		// enable or disable
 		if (enabled != null) {
 			applicationService.enableApp(app, enabled);
 		}
-		// update permissions
+
 		applicationService.updatePermissions(app, permission);
 
-		log.info("Application '{}' updated successfully permission '{}'", appId, permission);
-
+		log.info("Application '{}' updated successfully. Permission: '{}'", appId, permission);
 		return ApplicationResponse.build(app);
 	}
 
@@ -103,6 +98,7 @@ public class AppController {
 	public ApplicationResponse getAppSettings(String appId) {
 		Application app = applicationService.getById(appId);
 		ApplicationRepository repository = applicationService.getRepository();
+
 		log.info("Application settings loaded successfully for '{}'", appId);
 		return ApplicationResponse.buildWithDetails(app, this.application.getSettings(), repository);
 
@@ -111,14 +107,15 @@ public class AppController {
 	@Put("/api/v2/server/apps/{appId}/settings")
 	@Secured(User.ROLE_ADMIN)
 	public ApplicationResponse updateAppSettings(String appId, @Nullable Boolean enabled, @Nullable String permission,
-		@Nullable Boolean reinstall, @Nullable Map<String, String> config) throws IOException {
+			@Nullable Boolean reinstall, @Nullable Map<String, String> config) throws IOException {
 
 		Application app = applicationService.getById(appId);
 		applicationService.updateConfig(app, config);
 
-		ApplicationRepository repository = applicationService.getRepository();
-		log.info("Updating settings for application '{}'. Config keys={}", appId, config != null ? config.keySet() : null);
+		log.info("Updated settings for application '{}'. Config keys: {}",
+				appId, config != null ? config.keySet() : null);
 
+		ApplicationRepository repository = applicationService.getRepository();
 		return ApplicationResponse.buildWithDetails(app, this.application.getSettings(), repository);
 
 	}
@@ -127,7 +124,8 @@ public class AppController {
 	@Secured(User.ROLE_ADMIN)
 	public ApplicationResponse install(@Nullable String url) {
 		Application app = applicationService.installApp(url);
-		log.info("Application installed successfully from url='{}'", url);
+
+		log.info("Application '{}' installed successfully from url='{}'", app.getId(), url);
 		return ApplicationResponse.build(app);
 	}
 
@@ -137,10 +135,11 @@ public class AppController {
 		if (reload == null) {
 			reload = false;
 		}
+
 		List<Application> apps = applicationService.listApps(reload);
 		ApplicationRepository repository = applicationService.getRepository();
-		log.info("Returning {} applications Names: {} ", apps.size(), apps.stream().map(Application::getId).toList());
+
+		log.info("Returning {} applications. IDs: {}", apps.size(), apps.stream().map(Application::getId).toList());
 		return ApplicationResponse.buildWithDetails(apps, application.getSettings(), repository);
 	}
-
 }
