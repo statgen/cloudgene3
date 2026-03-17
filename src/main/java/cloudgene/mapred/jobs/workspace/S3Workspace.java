@@ -8,6 +8,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,20 +22,15 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 
 public class S3Workspace implements IWorkspace {
 
-	private static final String OUTPUT_DIRECTORY = "outputs";
-
-	private static final String INPUT_DIRECTORY = "input";
-
-	private static final String LOGS_DIRECTORY = "logs";
-
-	private static final String TEMP_DIRECTORY = "temp";
-
-	public static long EXPIRATION_MS = 1_000L * 60L * 60L;
-
 	private static final Logger log = LoggerFactory.getLogger(S3Workspace.class);
 
-	private final String location;
+	private static final long EXPIRATION_MS = 1_000L * 60L * 60L;
+	private static final String OUTPUT_DIRECTORY = "outputs";
+	private static final String INPUT_DIRECTORY = "input";
+	private static final String LOGS_DIRECTORY = "logs";
+	private static final String TEMP_DIRECTORY = "temp";
 
+	private final String location;
 	private String job;
 
 	public S3Workspace(String location) {
@@ -52,7 +49,6 @@ public class S3Workspace implements IWorkspace {
 
 	@Override
 	public void setup() throws IOException {
-
 		if (job == null) {
 			throw new IOException("No job id provided.");
 		}
@@ -76,7 +72,7 @@ public class S3Workspace implements IWorkspace {
 	@Override
 	public String upload(String id, File file) throws IOException {
 		String target = location + "/" + job + "/" + id + "/" + file.getName();
-		log.info("Copy file " + file.getAbsolutePath() + " to " + target);
+		log.info("Copy file {} to {}", file.getAbsolutePath(), target);
 		S3Util.copyToS3(file, target);
 		return target;
 	}
@@ -124,7 +120,6 @@ public class S3Workspace implements IWorkspace {
 		String url = location + "/" + job;
 
 		try {
-
 			log.info("Deleting {} on S3 workspace: '{}'...", job, url);
 
 			S3Util.deleteFolder(url);
@@ -153,9 +148,9 @@ public class S3Workspace implements IWorkspace {
 
 		String input = location + "/" + job + "/" + INPUT_DIRECTORY;
 		try {
-			log.info("Deleting input directory for " + input + " on S3 workspace: '" + input + "'...");
+			log.info("Deleting input directory for {} on S3 workspace: '{}'...", input, input);
 			S3Util.deleteFolder(input);
-			log.info("Deleted all files on S3 for job " + job + ".");
+			log.info("Deleted all files on S3 for job {}.", job);
 		} catch (Exception e) {
 			throw new IOException("Folder '" + input + "' could not be deleted.", e);
 		}
@@ -166,7 +161,7 @@ public class S3Workspace implements IWorkspace {
 	 * at the provided S3 URI. Expires in {@link S3Workspace#EXPIRATION_MS}.
 	 */
 	@Override
-	public String createPublicLink(String uri) {
+	public String createPublicLink(@NonNull String uri) {
 		log.debug("Generating pre-signed URL for {}...", uri);
 		S3Util.UriParts uriParts = S3Util.getParts(uri);
 		URL publicUrl = S3Util.generatePresignedLink(uriParts, Duration.ofMillis(EXPIRATION_MS));
@@ -174,17 +169,19 @@ public class S3Workspace implements IWorkspace {
 		return publicUrl.toString();
 	}
 
+	/**
+	 * Get the "parent folder" of the current S3 URI.
+	 */
 	@Override
-	public String getParent(String uri) {
+	@Nullable
+	public String getParent(@NonNull String uri) {
 		if (uri.startsWith("s3://")) {
 			int index = uri.lastIndexOf('/');
-			if (index > 0) {
+			if (index >= 5) {
 				return uri.substring(0, index);
 			}
-			return null;
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	// TODO(Marc): Rename! No file is created (only a path string).
@@ -212,7 +209,8 @@ public class S3Workspace implements IWorkspace {
 	}
 
 	@Override
-	public List<Download> getDownloads(String uri) {
+	@NonNull
+	public List<Download> getDownloads(@NonNull String uri) {
 		List<Download> downloads = new ArrayList<>();
 
 		S3Util.UriParts uriParts = S3Util.getParts(uri);
@@ -245,6 +243,7 @@ public class S3Workspace implements IWorkspace {
 	}
 
 	@Override
+	@NonNull
 	public List<Download> getLogs() {
 		String uri = location + "/" + job + "/" + LOGS_DIRECTORY;
 		return getDownloads(uri);

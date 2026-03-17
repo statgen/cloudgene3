@@ -20,148 +20,135 @@ import java.util.Map;
 
 public class JobParameterParser {
 
-    private static final Logger log = LoggerFactory.getLogger(JobParameterParser.class);
+	private static final Logger log = LoggerFactory.getLogger(JobParameterParser.class);
 
-    private static final String PARAM_JOB_NAME = "job-name";
+	private static final String PARAM_JOB_NAME = "job-name";
 
-    @Inject
-    protected Application application;
+	@Inject
+	protected Application application;
 
-    public static Map<String, String> parse(List<FormUtil.Parameter> form, WdlApp app, IWorkspace workspace)
-            throws Exception {
+	public static Map<String, String> parse(List<FormUtil.Parameter> form, WdlApp app, IWorkspace workspace)
+			throws Exception {
 
-        Map<String, String> props = new HashMap<String, String>();
-        Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> props = new HashMap<>();
+		Map<String, String> params = new HashMap<>();
 
-        // uploaded files
+		// uploaded files
+		for (FormUtil.Parameter formParam : form) {
+			String name = formParam.getName();
+			Object value = formParam.getValue();
 
-        for (FormUtil.Parameter formParam : form) {
+			// remove upload identification!
+			String key = StringEscapeUtils.escapeHtml(name);
+			if (key.startsWith("input-")) {
+				key = key.replace("input-", "");
+			}
 
-            String name = formParam.getName();
-            Object value = formParam.getValue();
+			log.debug("Process parameter {}...", key);
 
-            // remove upload indentification!
-            String key = StringEscapeUtils.escapeHtml(name);
-            if (key.startsWith("input-")) {
-                key = key.replace("input-", "");
-            }
+			if (key.equals(PARAM_JOB_NAME) || key.endsWith("-pattern")) {
+				String cleanedValue = StringEscapeUtils.escapeHtml(value.toString());
+				props.put(key, cleanedValue);
+				log.debug("Parameter {} ignored.", key);
+				continue;
+			}
 
-            log.debug("Process parameter " + key + "...");
+			WdlParameterInput input = getInputParamByName(app, key);
+			if (input == null) {
+				log.error("Parameter {} not found in wdl application.", key);
+				throw new Exception("Parameter '" + key + "' not found.");
+			}
 
+			if (value instanceof File inputFile) {
+				log.debug("Parameter {} is a file.", key);
 
-            if (key.equals(PARAM_JOB_NAME) || key.endsWith("-pattern")) {
-                String cleanedValue = StringEscapeUtils.escapeHtml(value.toString());
-                props.put(key, cleanedValue);
-                log.debug("Parameter " + key + " ignored.");
-                continue;
-            }
+				try {
+					// copy to workspace in input directory
+					long start = System.currentTimeMillis();
+					log.debug("Upload file {} to workspace...", inputFile.getAbsolutePath());
+					String target = workspace.uploadInput(key, inputFile);
+					log.debug("File {} uploaded in {} ms", inputFile.getAbsolutePath(),
+							System.currentTimeMillis() - start);
 
-            WdlParameterInput input = getInputParamByName(app, key);
-            if (input == null) {
-                log.error("Parameter " + key + " not found in wdl application.");
-                throw new Exception("Parameter '" + key + "' not found.");
-            }
+					if (input.isFolder()) {
+						props.put(key, workspace.getParent(target));
+					} else {
+						// file
+						props.put(key, target);
+					}
+				} finally {
+					FileUtil.deleteFile(inputFile.getAbsolutePath());
+				}
 
-            if (value instanceof File inputFile) {
+				log.debug("Parameter {} processed.", key);
+			} else {
+				log.debug("Parameter {} is a value parameter.", key);
 
-                log.debug("Parameter " + key + " is a file.");
+				String cleanedValue = StringEscapeUtils.escapeHtml(value.toString());
 
-                try {
+				if (input.getWriteFile() != null && !input.getWriteFile().trim().isEmpty()) {
+					File file = Files.createTempFile("upload_", input.getWriteFile()).toFile();
+					file.deleteOnExit();
 
-                    // copy to workspace in input directory
-                    long start = System.currentTimeMillis();
-                    log.debug("Upload file " + inputFile.getAbsolutePath() + " to workspace...");
-                    String target = workspace.uploadInput(key, inputFile);
-                    log.debug("File " + inputFile.getAbsolutePath() + " uploaded in " + (System.currentTimeMillis() - start) + " ms");
+					try {
+						FileUtil.writeStringBufferToFile(file.getAbsolutePath(), new StringBuffer(cleanedValue));
+						String target = workspace.uploadInput(key, file);
+						cleanedValue = target;
+						log.debug("Parameter {} value written to file '{}\"", key, target);
+					} finally {
+						file.delete();
+					}
+				}
 
-                    if (input.isFolder()) {
-                        props.put(key, workspace.getParent(target));
-                    } else {
-                        // file
-                        props.put(key, target);
-                    }
+				if (!props.containsKey(key)) {
+					// don't override uploaded files
+					props.put(key, cleanedValue);
+				}
+			}
+		}
 
-                } finally {
-                    FileUtil.deleteFile(inputFile.getAbsolutePath());
-                }
+		for (WdlParameterInput input : app.getWorkflow().getInputs()) {
+			if (!params.containsKey(input.getId())) {
+				if (props.containsKey(input.getId())) {
+					if (input.isFolder() && input.getPattern() != null && !input.getPattern().isEmpty()) {
+						String pattern = props.get(input.getId() + "-pattern");
+						if (pattern == null) {
+							pattern = input.getPattern();
+						}
+						String value = props.get(input.getId());
+						if (!value.endsWith("/")) {
+							value = value + "/";
+						}
+						params.put(input.getId(), value + pattern);
+					} else {
 
-                log.debug("Parameter " + key + " processed." );
+						if (input.getTypeAsEnum() == WdlParameterInputType.CHECKBOX) {
+							params.put(input.getId(), input.getValues().get("true"));
+						} else {
+							params.put(input.getId(), props.get(input.getId()));
+						}
+					}
+				} else {
+					// ignore invisible input parameters
+					if (input.getTypeAsEnum() == WdlParameterInputType.CHECKBOX && input.isVisible()) {
+						params.put(input.getId(), input.getValues().get("false"));
+					}
+				}
+			}
+		}
 
-            } else {
+		params.put(PARAM_JOB_NAME, props.get(PARAM_JOB_NAME));
 
-                log.debug("Parameter " + key + " is a value parameter.");
+		return params;
+	}
 
-                String cleanedValue = StringEscapeUtils.escapeHtml(value.toString());
+	private static WdlParameterInput getInputParamByName(WdlApp app, String name) {
+		for (WdlParameterInput input : app.getWorkflow().getInputs()) {
+			if (input.getId().equals(name)) {
+				return input;
+			}
+		}
 
-                if (input.getWriteFile() != null && !input.getWriteFile().trim().isEmpty()) {
-
-                    File file = Files.createTempFile("upload_", input.getWriteFile()).toFile();
-                    file.deleteOnExit();
-
-                    try {
-                        FileUtil.writeStringBufferToFile(file.getAbsolutePath(), new StringBuffer(cleanedValue));
-                        String target = workspace.uploadInput(key, file);
-                        cleanedValue = target;
-                        log.debug("Parameter " + key + " value written to file '" + target + '"');
-                    }finally {
-                        file.delete();
-                    }
-
-                }
-
-                if (!props.containsKey(key)) {
-                    // don't override uploaded files
-                    props.put(key, cleanedValue);
-                }
-
-            }
-
-        }
-
-        for (WdlParameterInput input : app.getWorkflow().getInputs()) {
-            if (!params.containsKey(input.getId())) {
-                if (props.containsKey(input.getId())) {
-
-                    if (input.isFolder() && input.getPattern() != null && !input.getPattern().isEmpty()) {
-                        String pattern = props.get(input.getId() + "-pattern");
-                        if (pattern == null) {
-                            pattern = input.getPattern();
-                        }
-                        String value = props.get(input.getId());
-                        if (!value.endsWith("/")) {
-                            value = value + "/";
-                        }
-                        params.put(input.getId(), value + pattern);
-                    } else {
-
-                        if (input.getTypeAsEnum() == WdlParameterInputType.CHECKBOX) {
-                            params.put(input.getId(), input.getValues().get("true"));
-                        } else {
-                            params.put(input.getId(), props.get(input.getId()));
-                        }
-                    }
-                } else {
-                    // ignore invisible input parameters
-                    if (input.getTypeAsEnum() == WdlParameterInputType.CHECKBOX && input.isVisible()) {
-                        params.put(input.getId(), input.getValues().get("false"));
-                    }
-                }
-            }
-        }
-
-        params.put(PARAM_JOB_NAME, props.get(PARAM_JOB_NAME));
-
-        return params;
-    }
-
-    private static WdlParameterInput getInputParamByName(WdlApp app, String name) {
-
-        for (WdlParameterInput input : app.getWorkflow().getInputs()) {
-            if (input.getId().equals(name)) {
-                return input;
-            }
-        }
-        return null;
-    }
-
+		return null;
+	}
 }
