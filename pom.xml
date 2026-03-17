@@ -40,6 +40,12 @@
 			<email>marcfra@umich.edu</email>
 			<organization>University of Michigan</organization>
 		</developer>
+		<developer>
+			<id>snehal</id>
+			<name>Snehal Patil</name>
+			<email>snehal@umich.edu</email>
+			<organization>University of Michigan</organization>
+		</developer>
 	</developers>
 
 	<properties>
