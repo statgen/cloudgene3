@@ -2,16 +2,24 @@ package cloudgene.mapred.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.ListObjectsRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.amazonaws.services.s3.transfer.Download;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
-import com.amazonaws.services.s3.transfer.Upload;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.async.AsyncRequestBody;
+import software.amazon.awssdk.core.async.AsyncResponseTransformer;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
+import software.amazon.awssdk.transfer.s3.S3TransferManager;
+import software.amazon.awssdk.transfer.s3.model.*;
 
 public final class S3Util {
 
@@ -20,35 +28,39 @@ public final class S3Util {
 
 	// TODO(Marc): This nomenclature is incorrect. S3 paths starting with s3:// are
 	//             URIs, not URLs.
+
 	/**
 	 * Separates an S3 URI into its bucket and key parts.
 	 *
 	 * @param bucket The S3 bucket this URI points at.
 	 * @param key    The key / path inside the bucket pointing at this item.
 	 */
-	public record UrlParts(String bucket, String key) {
-	};
+	public record UrlParts(String bucket, String key) {}
 
-	private static AmazonS3 s3;
+	private static S3AsyncClient s3;
+	private static S3TransferManager tm;
+	private static S3Presigner presigner;
 
-	private static TransferManager tm;
-
-	/**
-	 * Returns a singleton {@link AmazonS3} client.
-	 */
-	public static AmazonS3 getAmazonS3() {
+	private static S3AsyncClient getS3Client() {
 		if (s3 == null) {
-			s3 = AmazonS3ClientBuilder.defaultClient();
+			s3 = S3AsyncClient.create();
 		}
 		return s3;
 	}
 
-	private static TransferManager getTransferManager() {
+	private static S3TransferManager getTransferManager() {
 		if (tm == null) {
-			s3 = getAmazonS3();
-			tm = TransferManagerBuilder.standard().withS3Client(s3).build();
+			s3 = getS3Client();
+			tm = S3TransferManager.builder().s3Client(s3).build();
 		}
 		return tm;
+	}
+
+	private static S3Presigner getPresigner() {
+		if (presigner == null) {
+			presigner = S3Presigner.create();
+		}
+		return presigner;
 	}
 
 	/**
@@ -73,6 +85,121 @@ public final class S3Util {
 		}
 
 		return new UrlParts(rawParts[0], rawParts[1]);
+	}
+
+	/**
+	 * Fetches an object from S3 as an input stream.
+	 * <p>
+	 * Returns a blocking {@link InputStream} that produces the object contents.
+	 *
+	 * @param urlParts Bucket and key indicating the S3 path to the desired object.
+	 * @return A data stream producing the object contents.
+	 */
+	public static InputStream getObject(UrlParts urlParts) throws IOException {
+		return getObject(urlParts.bucket(), urlParts.key());
+	}
+
+	/**
+	 * Fetches an object from S3 as an input stream.
+	 * <p>
+	 * Returns a blocking {@link InputStream} that produces the object contents.
+	 *
+	 * @param bucket S3 bucket the object will be downloaded from.
+	 * @param key    Path within the S3 bucket the object will be downloaded from.
+	 * @return A data stream producing the object contents.
+	 */
+	public static InputStream getObject(String bucket, String key) throws IOException {
+		GetObjectRequest request = GetObjectRequest.builder()
+				.bucket(bucket)
+				.key(key)
+				.build();
+
+		S3AsyncClient s3 = getS3Client();
+		CompletableFuture<ResponseInputStream<GetObjectResponse>> response = s3.getObject(
+				request,
+				AsyncResponseTransformer.toBlockingInputStream());
+
+		try {
+			return response.join();
+		} catch (CancellationException | CompletionException e) {
+			throw new IOException("Failed to get object: " + bucket + "/" + key, e);
+		}
+	}
+
+	/**
+	 * Returns the requested S3 object's metadata without downloading the object.
+	 *
+	 * @param urlParts Bucket and key indicating the S3 path to the desired object.
+	 * @return The queried object's metadata.
+	 */
+	public static HeadObjectResponse getObjectHead(UrlParts urlParts) throws IOException {
+		return getObjectHead(urlParts.bucket(), urlParts.key());
+	}
+
+	/**
+	 * Returns the requested S3 object's metadata without downloading the object.
+	 *
+	 * @param bucket S3 bucket containing the queried object.
+	 * @param key    Path within the S3 bucket identifying the queried object.
+	 * @return The queried object's metadata.
+	 */
+	public static HeadObjectResponse getObjectHead(String bucket, String key) throws IOException {
+		HeadObjectRequest request = HeadObjectRequest.builder()
+				.bucket(bucket)
+				.key(key)
+				.build();
+
+		try {
+			S3AsyncClient s3 = getS3Client();
+			CompletableFuture<HeadObjectResponse> future = s3.headObject(request);
+			return future.join();
+		} catch (CancellationException | CompletionException e) {
+			throw new IOException("Failed to get object head: " + bucket + "/" + key, e);
+		}
+	}
+
+	/**
+	 * Returns whether an object exists or not at the given S3 location.
+	 *
+	 * @param urlParts Bucket and key indicating the S3 path to the queried object.
+	 * @return {@code true} if an object is found at the given S3 location;
+	 *         {@code false} otherwise.
+	 */
+	public static boolean doesObjectExist(UrlParts urlParts) throws IOException {
+		return doesObjectExist(urlParts.bucket(), urlParts.key());
+	}
+
+	/**
+	 * Returns whether an object exists or not at the given S3 location.
+	 *
+	 * @param bucket S3 bucket containing the queried object.
+	 * @param key    Path within the S3 bucket identifying the queried object.
+	 * @return {@code true} if an object is found at the given S3 location;
+	 *         {@code false} otherwise.
+	 */
+	public static boolean doesObjectExist(String bucket, String key) throws IOException {
+		return getObjectHead(bucket, key) != null;
+	}
+
+	public static URL generatePresignedLink(UrlParts urlParts, Duration duration) {
+		return generatePresignedLink(urlParts.bucket(), urlParts.key(), duration);
+	}
+
+	public static URL generatePresignedLink(String bucket, String key, Duration duration) {
+		GetObjectRequest getRequest = GetObjectRequest.builder()
+				.bucket(bucket)
+				.key(key)
+				.build();
+
+		GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+				.getObjectRequest(getRequest)
+				.signatureDuration(duration)
+				.build();
+
+		S3Presigner presigner = getPresigner();
+		PresignedGetObjectRequest presigned = presigner.presignGetObject(presignRequest);
+
+		return presigned.url();
 	}
 
 	/**
@@ -112,13 +239,23 @@ public final class S3Util {
 	 * @throws IOException If the download fails.
 	 */
 	public static void copyToFile(String bucket, String key, File file) throws IOException {
-		TransferManager tm = getTransferManager();
-		Download download = tm.download(bucket, key, file);
+		S3TransferManager tm = getTransferManager();
+
+		GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+				.bucket(bucket)
+				.key(key)
+				.build();
+
+		DownloadFileRequest downloadFileRequest = DownloadFileRequest.builder()
+				.getObjectRequest(getObjectRequest)
+				.destination(file)
+				.build();
 
 		try {
-			download.waitForCompletion();
-		} catch (InterruptedException e) {
-			throw new IOException(e);
+			FileDownload download = tm.downloadFile(downloadFileRequest);
+			download.completionFuture().join();
+		} catch (CancellationException | CompletionException e) {
+			throw new IOException("Failed to download file from S3: " + bucket + "/" + key, e);
 		}
 	}
 
@@ -137,7 +274,7 @@ public final class S3Util {
 	}
 
 	/**
-	 * Uploads the provided {@code contents} to a file in the S3 bucket and key
+	 * Uploads the provided {@code content} to a file in the S3 bucket and key
 	 * specified by the provided {@code uri}, of form {@code s3://<bucket>/<key>}.
 	 * Blocking operation.
 	 *
@@ -161,47 +298,109 @@ public final class S3Util {
 	 * @throws IOException If the upload fails.
 	 */
 	public static void copyToS3(File file, String bucket, String key) throws IOException {
-		TransferManager tm = getTransferManager();
-		Upload upload = tm.upload(bucket, key, file);
+		S3TransferManager tm = getTransferManager();
+
+		PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+				.bucket(bucket)
+				.key(key)
+				.build();
+
+		UploadFileRequest uploadFileRequest = UploadFileRequest.builder()
+				.source(file)
+				.putObjectRequest(putObjectRequest)
+				.build();
 
 		try {
-			upload.waitForCompletion();
-		} catch (InterruptedException e) {
-			throw new IOException(e);
+			FileUpload upload = tm.uploadFile(uploadFileRequest);
+			upload.completionFuture().join();
+		} catch (CancellationException | CompletionException e) {
+			throw new IOException("Failed to upload file '" + file.getPath() + "' to " + bucket + "/" + key, e);
 		}
 	}
 
+	/**
+	 * Uploads the provided {@code contents} to the provided S3
+	 * {@code bucket}, at the path specified by the given {@code key}.
+	 * Blocking operation.
+	 *
+	 * @param content Data to upload into S3.
+	 * @param bucket  S3 bucket the file will be uploaded to.
+	 * @param key     Path within the S3 bucket the file will be uploaded to.
+	 * @throws IOException If the upload fails.
+	 */
 	public static void copyToS3(String content, String bucket, String key) throws IOException {
-		AmazonS3 s3 = getAmazonS3();
-		s3.putObject(bucket, key, content);
+		S3AsyncClient s3 = getS3Client();
+
+		PutObjectRequest request = PutObjectRequest.builder()
+				.bucket(bucket)
+				.key(key)
+				.build();
+
+		AsyncRequestBody body = AsyncRequestBody.fromString(content);
+
+		try {
+			CompletableFuture<PutObjectResponse> future = s3.putObject(request, body);
+			future.join();
+		} catch (CancellationException | CompletionException e) {
+			throw new IOException("Failed to upload content to " + bucket + "/" + key, e);
+		}
 	}
 
-	public static ObjectListing listObjects(String url) throws IOException {
-		UrlParts urlParts = getParts(url);
-		AmazonS3 s3 = getAmazonS3();
-		ObjectListing objects = s3.listObjects(urlParts.bucket(), urlParts.key());
-		return objects;
+	public static List<S3Object> listObjects(UrlParts urlParts) {
+		return listObjects(urlParts.bucket(), urlParts.key());
 	}
 
-	public static void deleteFolder(String url) {
+	public static List<S3Object> listObjects(String bucket, String prefix) {
+		S3AsyncClient s3 = getS3Client();
+
+		ListObjectsRequest request = ListObjectsRequest.builder()
+				.bucket(bucket)
+				.prefix(prefix)
+				.build();
+
+		CompletableFuture<ListObjectsResponse> future = s3.listObjects(request);
+		ListObjectsResponse response = future.join();
+
+		if (response.hasContents()) {
+			return response.contents();
+		} else {
+			return List.of();
+		}
+	}
+
+	public static void deleteFolder(String url) throws IOException {
 		UrlParts urlParts = getParts(url);
-		AmazonS3 s3 = S3Util.getAmazonS3();
+		S3AsyncClient s3 = S3Util.getS3Client();
+		String continuationToken = null;
 
-		ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
-				.withBucketName(urlParts.bucket())
-				.withPrefix(urlParts.key());
+		try { // There's some kind of pagination going on with the listObjects response.
+			do {
+				ListObjectsV2Request listRequest = ListObjectsV2Request.builder()
+						.bucket(urlParts.bucket())
+						.prefix(urlParts.key())
+						.continuationToken(continuationToken)
+						.build();
 
-		ObjectListing objectListing = s3.listObjects(listObjectsRequest);
+				CompletableFuture<ListObjectsV2Response> future = s3.listObjectsV2(listRequest);
+				ListObjectsV2Response response = future.join();
 
-		while (true) {
-			for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
-				s3.deleteObject(urlParts.bucket(), objectSummary.getKey());
-			}
-			if (objectListing.isTruncated()) {
-				objectListing = s3.listNextBatchOfObjects(objectListing);
-			} else {
-				break;
-			}
+				// TODO(Marc): It would be more efficient to use DeleteObjects* (note the
+				//             plural) to batch delte, but it has a max of 1,000 deletes
+				//             per call, so we'd have to control for that.
+				for (S3Object head : response.contents()) {
+					DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+							.bucket(urlParts.bucket())
+							.key(head.key())
+							.build();
+
+					CompletableFuture<DeleteObjectResponse> deleteFuture = s3.deleteObject(deleteRequest);
+					DeleteObjectResponse deleteResponse = deleteFuture.join();
+				}
+
+				continuationToken = response.nextContinuationToken();
+			} while (continuationToken != null);
+		} catch (CancellationException | CompletionException e) {
+			throw new IOException("Failed to delete S3 dir: " + urlParts.bucket() + "/" + urlParts.key(), e);
 		}
 	}
 }

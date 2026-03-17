@@ -11,14 +11,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @MicronautTest
 public class IpFetcherTest {
 
-    @Test
-    public void testFetchServerIpReturnsIpV4() {
-        Pattern regex = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
+	@Test
+	public void testFetchServerIpReturnsIpV4() {
+		Pattern regex = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
 
-        String serverIp = IpFetcher.fetchServerIp();
-        Matcher matcher = regex.matcher(serverIp);
+		String serverIp = IpFetcher.fetchServerIp();
+		Matcher matcher = regex.matcher(serverIp);
 
-        assertTrue(matcher.find());
-
-    }
+		assertTrue(matcher.find());
+	}
 }

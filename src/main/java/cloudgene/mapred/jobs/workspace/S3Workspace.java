@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,18 +12,11 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.HttpMethod;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
-
 import cloudgene.mapred.jobs.Download;
 import cloudgene.mapred.util.HashUtil;
 import cloudgene.mapred.util.S3Util;
 import genepi.io.FileUtil;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 public class S3Workspace implements IWorkspace {
 
@@ -34,7 +28,7 @@ public class S3Workspace implements IWorkspace {
 
 	private static final String TEMP_DIRECTORY = "temp";
 
-	public static long EXPIRATION_MS = 1000 * 60 * 60;
+	public static long EXPIRATION_MS = 1_000L * 60L * 60L;
 
 	private static final Logger log = LoggerFactory.getLogger(S3Workspace.class);
 
@@ -100,12 +94,7 @@ public class S3Workspace implements IWorkspace {
 	@Override
 	public InputStream download(String url) throws IOException {
 		S3Util.UrlParts urlParts = S3Util.getParts(url);
-
-		AmazonS3 s3 = S3Util.getAmazonS3();
-		S3Object o = s3.getObject(urlParts.bucket(), urlParts.key());
-		S3ObjectInputStream s3is = o.getObjectContent();
-
-		return s3is;
+		return S3Util.getObject(urlParts);
 	}
 
 	@Override
@@ -115,10 +104,9 @@ public class S3Workspace implements IWorkspace {
 		return log;
 	}
 
-	public boolean exists(String url) {
+	public boolean exists(String url) throws IOException {
 		S3Util.UrlParts urlParts = S3Util.getParts(url);
-		AmazonS3 s3 = S3Util.getAmazonS3();
-		return s3.doesObjectExist(urlParts.bucket(), urlParts.key());
+		return S3Util.doesObjectExist(urlParts);
 	}
 
 	@Override
@@ -132,11 +120,11 @@ public class S3Workspace implements IWorkspace {
 
 		try {
 
-			log.info("Deleting " + job + " on S3 workspace: '" + url + "'...");
+			log.info("Deleting {} on S3 workspace: '{}'...", job, url);
 
 			S3Util.deleteFolder(url);
 
-			log.info("Deleted all files on S3 for job " + job + ".");
+			log.info("Deleted all files on S3 for job {}.", job);
 
 		} catch (Exception e) {
 			throw new IOException("Folder '" + url + "' could not be deleted.", e);
@@ -151,9 +139,9 @@ public class S3Workspace implements IWorkspace {
 
 		String temp = location + "/" + job + "/" + TEMP_DIRECTORY;
 		try {
-			log.info("Deleting temp directory for " + job + " on S3 workspace: '" + temp + "'...");
+			log.info("Deleting temp directory for {} on S3 workspace: '{}'...", job, temp);
 			S3Util.deleteFolder(temp);
-			log.info("Deleted all files on S3 for job " + job + ".");
+			log.info("Deleted all files on S3 for job {}.", job);
 		} catch (Exception e) {
 			throw new IOException("Folder '" + temp + "' could not be deleted.", e);
 		}
@@ -170,21 +158,10 @@ public class S3Workspace implements IWorkspace {
 
 	@Override
 	public String createPublicLink(String url) {
+		log.debug("Generating pre-signed URL for {}...", url);
 		S3Util.UrlParts urlParts = S3Util.getParts(url);
-		AmazonS3 s3 = S3Util.getAmazonS3();
-
-		java.util.Date expiration = new java.util.Date();
-		long expTimeMillis = expiration.getTime();
-		expTimeMillis += EXPIRATION_MS;
-		expiration.setTime(expTimeMillis);
-
-		// Generate the presigned URL.
-		log.debug("Generating pre-signed URL for " + url + "...");
-		GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(urlParts.bucket(),
-				urlParts.key())
-				.withMethod(HttpMethod.GET).withExpiration(expiration);
-		URL publicUrl = s3.generatePresignedUrl(generatePresignedUrlRequest);
-		log.debug("Pre-signed URL for " + url + " generated. Link: " + publicUrl.toString());
+		URL publicUrl = S3Util.generatePresignedLink(urlParts, Duration.ofMillis(EXPIRATION_MS));
+		log.debug("Pre-signed URL for {} generated. Link: {}", url, publicUrl.toString());
 		return publicUrl.toString();
 	}
 
@@ -201,21 +178,25 @@ public class S3Workspace implements IWorkspace {
 		}
 	}
 
+	// TODO(Marc): Rename! No file is created (only a path string).
 	@Override
 	public String createFolder(String id) {
 		return location + "/" + job + "/" + OUTPUT_DIRECTORY + "/" + id;
 	}
 
+	// TODO(Marc): Rename! No file is created (only a path string).
 	@Override
 	public String createFile(String folder, String id) {
 		return location + "/" + job + "/" + OUTPUT_DIRECTORY + "/" + folder + "/" + id;
 	}
 
+	// TODO(Marc): Rename! No file is created (only a path string).
 	@Override
 	public String createLogFile(String id) {
 		return location + "/" + job + "/" + LOGS_DIRECTORY + "/" + id;
 	}
 
+	// TODO(Marc): Rename! No file is created (only a path string).
 	@Override
 	public String createTempFolder(String id) {
 		return location + "/" + job + "/" + TEMP_DIRECTORY + "/" + id;
@@ -224,19 +205,20 @@ public class S3Workspace implements IWorkspace {
 	@Override
 	public List<Download> getDownloads(String url) throws IOException {
 		List<Download> downloads = new ArrayList<>();
-		ObjectListing listing = S3Util.listObjects(url);
 
 		S3Util.UrlParts urlParts = S3Util.getParts(url);
+		List<S3Object> listing = S3Util.listObjects(urlParts);
 
-		for (S3ObjectSummary summary : listing.getObjectSummaries()) {
+		for (S3Object summary : listing) {
+			String key = summary.key();
 
-			if (summary.getKey().endsWith("/")) {
+			if (key.endsWith("/")) {
 				continue;
 			}
 
-			String filename = summary.getKey().replaceAll(urlParts.key() + "/", "");
-			String size = FileUtils.byteCountToDisplaySize(summary.getSize());
-			String hash = HashUtil.getSha256(filename + size + (Math.random() * 100000));
+			String filename = key.replaceAll(urlParts.key() + "/", "");
+			String size = FileUtils.byteCountToDisplaySize(summary.size());
+			String hash = HashUtil.getSha256(filename + size + (Math.random() * 100_000));
 
 			if (filename.equals("cloudgene.out")) {
 				continue;
@@ -244,11 +226,10 @@ public class S3Workspace implements IWorkspace {
 
 			Download download = new Download();
 			download.setName(filename);
-			download.setPath("s3://" + summary.getBucketName() + "/" + summary.getKey());
+			download.setPath("s3://" + urlParts.bucket() + "/" + key);
 			download.setSize(size);
 			download.setHash(hash);
 			downloads.add(download);
-
 		}
 
 		return downloads;

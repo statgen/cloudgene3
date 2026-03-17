@@ -20,9 +20,6 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
-
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.database.updates.DatabaseUpdater;
 import cloudgene.mapred.util.GitHubException;
@@ -33,6 +30,7 @@ import cloudgene.mapred.wdl.WdlApp;
 import genepi.io.FileUtil;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 public class ApplicationRepository {
 
@@ -347,37 +345,38 @@ public class ApplicationRepository {
 		FileUtil.createDirectory(appPath);
 
 		S3Util.UrlParts urlParts = S3Util.getParts(url);
-		String baseKey = urlParts.key();
+		String bucket = urlParts.bucket();
+		String prefix = urlParts.key();
 
-		ObjectListing listing = S3Util.listObjects(url);
+		List<S3Object> listing = S3Util.listObjects(bucket, prefix);
 
-		// create folders
-		for (S3ObjectSummary summary : listing.getObjectSummaries()) {
-			String bucket = summary.getBucketName();
-			String key = summary.getKey();
+		// First pass: create folders.
+		for (S3Object summary : listing) {
+			String key = summary.key();
 
-			if (!summary.getKey().endsWith("/")) {
+			// Only process dirs.
+			if (!key.endsWith("/")) {
 				continue;
 			}
 
-			System.out.println("Found folder" + bucket + "/" + key);
-			String relativeKey = summary.getKey().replaceAll(baseKey, "");
+			System.out.println("Found folder: " + bucket + "/" + key);
+			String relativeKey = key.replaceAll(prefix, "");
 			String target = FileUtil.path(appPath, relativeKey);
 			FileUtil.createDirectory(target);
 		}
 
-		// copy files
-		for (S3ObjectSummary summary : listing.getObjectSummaries()) {
-			String bucket = summary.getBucketName();
-			String key = summary.getKey();
+		// Second pass: copy files.
+		for (S3Object summary : listing) {
+			String key = summary.key();
 
-			if (summary.getKey().endsWith("/")) {
+			// Only process leaf objects.
+			if (key.endsWith("/")) {
 				continue;
 			}
 
-			System.out.println("Found file" + bucket + "/" + key);
+			System.out.println("Found file: " + bucket + "/" + key);
 
-			String relativeKey = summary.getKey().replaceAll(baseKey, "");
+			String relativeKey = key.replaceAll(prefix, "");
 			String target = FileUtil.path(appPath, relativeKey);
 			File file = new File(target);
 
