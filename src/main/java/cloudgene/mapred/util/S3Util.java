@@ -26,16 +26,13 @@ public final class S3Util {
 	private S3Util() {
 	}
 
-	// TODO(Marc): This nomenclature is incorrect. S3 paths starting with s3:// are
-	//             URIs, not URLs.
-
 	/**
 	 * Separates an S3 URI into its bucket and key parts.
 	 *
 	 * @param bucket The S3 bucket this URI points at.
 	 * @param key    The key / path inside the bucket pointing at this item.
 	 */
-	public record UrlParts(String bucket, String key) {}
+	public record UriParts(String bucket, String key) {}
 
 	private static S3AsyncClient s3;
 	private static S3TransferManager tm;
@@ -65,12 +62,12 @@ public final class S3Util {
 
 	/**
 	 * Separates the given S3 URI of form {@code s3://<bucket>/<key>} into the
-	 * bucket and key, returned as a {@link UrlParts} instance.
+	 * bucket and key, returned as a {@link UriParts} instance.
 	 *
 	 * @param uri S3 URI of form {@code s3://<bucket>/<key>}.
-	 * @return The bucket and key as fields in a {@link UrlParts} instance.
+	 * @return The bucket and key as fields in a {@link UriParts} instance.
 	 */
-	public static UrlParts getParts(String uri) {
+	public static UriParts getParts(String uri) {
 		if (!uri.startsWith("s3://")) {
 			throw new IllegalArgumentException("S3 URLs must start with 's3://'; found: '" + uri + "'");
 		}
@@ -84,7 +81,7 @@ public final class S3Util {
 							+ uri + "'");
 		}
 
-		return new UrlParts(rawParts[0], rawParts[1]);
+		return new UriParts(rawParts[0], rawParts[1]);
 	}
 
 	/**
@@ -92,11 +89,11 @@ public final class S3Util {
 	 * <p>
 	 * Returns a blocking {@link InputStream} that produces the object contents.
 	 *
-	 * @param urlParts Bucket and key indicating the S3 path to the desired object.
+	 * @param uriParts Bucket and key indicating the S3 path to the desired object.
 	 * @return A data stream producing the object contents.
 	 */
-	public static InputStream getObject(UrlParts urlParts) throws IOException {
-		return getObject(urlParts.bucket(), urlParts.key());
+	public static InputStream getObject(UriParts uriParts) throws IOException {
+		return getObject(uriParts.bucket(), uriParts.key());
 	}
 
 	/**
@@ -129,11 +126,11 @@ public final class S3Util {
 	/**
 	 * Returns the requested S3 object's metadata without downloading the object.
 	 *
-	 * @param urlParts Bucket and key indicating the S3 path to the desired object.
+	 * @param uriParts Bucket and key indicating the S3 path to the desired object.
 	 * @return The queried object's metadata.
 	 */
-	public static HeadObjectResponse getObjectHead(UrlParts urlParts) throws IOException {
-		return getObjectHead(urlParts.bucket(), urlParts.key());
+	public static HeadObjectResponse getObjectHead(UriParts uriParts) throws IOException {
+		return getObjectHead(uriParts.bucket(), uriParts.key());
 	}
 
 	/**
@@ -161,12 +158,12 @@ public final class S3Util {
 	/**
 	 * Returns whether an object exists or not at the given S3 location.
 	 *
-	 * @param urlParts Bucket and key indicating the S3 path to the queried object.
+	 * @param uriParts Bucket and key indicating the S3 path to the queried object.
 	 * @return {@code true} if an object is found at the given S3 location;
 	 *         {@code false} otherwise.
 	 */
-	public static boolean doesObjectExist(UrlParts urlParts) throws IOException {
-		return doesObjectExist(urlParts.bucket(), urlParts.key());
+	public static boolean doesObjectExist(UriParts uriParts) throws IOException {
+		return doesObjectExist(uriParts.bucket(), uriParts.key());
 	}
 
 	/**
@@ -181,8 +178,8 @@ public final class S3Util {
 		return getObjectHead(bucket, key) != null;
 	}
 
-	public static URL generatePresignedLink(UrlParts urlParts, Duration duration) {
-		return generatePresignedLink(urlParts.bucket(), urlParts.key(), duration);
+	public static URL generatePresignedLink(UriParts uriParts, Duration duration) {
+		return generatePresignedLink(uriParts.bucket(), uriParts.key(), duration);
 	}
 
 	public static URL generatePresignedLink(String bucket, String key, Duration duration) {
@@ -207,7 +204,7 @@ public final class S3Util {
 	 * {@code s3://<bucket>/<key>};
 	 * returns {@code false} otherwise.
 	 */
-	public static boolean isValidS3Url(String uri) {
+	public static boolean isValidS3Uri(String uri) {
 		try {
 			getParts(uri);
 		} catch (IllegalArgumentException e) {
@@ -225,8 +222,8 @@ public final class S3Util {
 	 * @throws IOException If the download fails.ss
 	 */
 	public static void copyToFile(String uri, File file) throws IOException {
-		UrlParts urlParts = getParts(uri);
-		copyToFile(urlParts.bucket(), urlParts.key(), file);
+		UriParts uriParts = getParts(uri);
+		copyToFile(uriParts.bucket(), uriParts.key(), file);
 	}
 
 	/**
@@ -269,8 +266,8 @@ public final class S3Util {
 	 * @throws IOException If the upload fails.
 	 */
 	public static void copyToS3(File file, String uri) throws IOException {
-		UrlParts urlParts = getParts(uri);
-		copyToS3(file, urlParts.bucket(), urlParts.key());
+		UriParts uriParts = getParts(uri);
+		copyToS3(file, uriParts.bucket(), uriParts.key());
 	}
 
 	/**
@@ -283,8 +280,8 @@ public final class S3Util {
 	 * @throws IOException If the upload fails.
 	 */
 	public static void copyToS3(String content, String uri) throws IOException {
-		UrlParts urlParts = getParts(uri);
-		copyToS3(content, urlParts.bucket(), urlParts.key());
+		UriParts uriParts = getParts(uri);
+		copyToS3(content, uriParts.bucket(), uriParts.key());
 	}
 
 	/**
@@ -346,8 +343,8 @@ public final class S3Util {
 		}
 	}
 
-	public static List<S3Object> listObjects(UrlParts urlParts) {
-		return listObjects(urlParts.bucket(), urlParts.key());
+	public static List<S3Object> listObjects(UriParts uriParts) {
+		return listObjects(uriParts.bucket(), uriParts.key());
 	}
 
 	public static List<S3Object> listObjects(String bucket, String prefix) {
@@ -368,16 +365,16 @@ public final class S3Util {
 		}
 	}
 
-	public static void deleteFolder(String url) throws IOException {
-		UrlParts urlParts = getParts(url);
+	public static void deleteFolder(String uri) throws IOException {
+		UriParts uriParts = getParts(uri);
 		S3AsyncClient s3 = S3Util.getS3Client();
 		String continuationToken = null;
 
 		try { // There's some kind of pagination going on with the listObjects response.
 			do {
 				ListObjectsV2Request listRequest = ListObjectsV2Request.builder()
-						.bucket(urlParts.bucket())
-						.prefix(urlParts.key())
+						.bucket(uriParts.bucket())
+						.prefix(uriParts.key())
 						.continuationToken(continuationToken)
 						.build();
 
@@ -389,7 +386,7 @@ public final class S3Util {
 				//             per call, so we'd have to control for that.
 				for (S3Object head : response.contents()) {
 					DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
-							.bucket(urlParts.bucket())
+							.bucket(uriParts.bucket())
 							.key(head.key())
 							.build();
 
@@ -400,7 +397,7 @@ public final class S3Util {
 				continuationToken = response.nextContinuationToken();
 			} while (continuationToken != null);
 		} catch (CancellationException | CompletionException e) {
-			throw new IOException("Failed to delete S3 dir: " + urlParts.bucket() + "/" + urlParts.key(), e);
+			throw new IOException("Failed to delete S3 dir: " + uriParts.bucket() + "/" + uriParts.key(), e);
 		}
 	}
 }

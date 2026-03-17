@@ -328,11 +328,11 @@ public class ApplicationRepository {
 		}
 	}
 
-	public Application installFromS3(String url) throws IOException {
+	public Application installFromS3(String uri) throws IOException {
 		// download file from s3 bucket
-		if (url.endsWith(".zip")) {
-			File zipFile = getArchiveFile(url);
-			S3Util.copyToFile(url, zipFile);
+		if (uri.endsWith(".zip")) {
+			File zipFile = getArchiveFile(uri);
+			S3Util.copyToFile(uri, zipFile);
 
 			Application application = installFromZipFile(zipFile.getAbsolutePath());
 
@@ -344,9 +344,9 @@ public class ApplicationRepository {
 		FileUtil.deleteDirectory(appPath);
 		FileUtil.createDirectory(appPath);
 
-		S3Util.UrlParts urlParts = S3Util.getParts(url);
-		String bucket = urlParts.bucket();
-		String prefix = urlParts.key();
+		S3Util.UriParts uriParts = S3Util.getParts(uri);
+		String bucket = uriParts.bucket();
+		String prefix = uriParts.key();
 
 		List<S3Object> listing = S3Util.listObjects(bucket, prefix);
 

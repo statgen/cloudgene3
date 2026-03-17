@@ -58,18 +58,18 @@ public class S3Workspace implements IWorkspace {
 		}
 
 		if (location == null) {
-			throw new IOException("No S3 Output Bucket specified.");
+			throw new IOException("No S3 Output URI specified.");
 		}
 
-		if (!S3Util.isValidS3Url(location)) {
-			throw new IOException("Output Url '" + location + "' is not a valid S3 bucket.");
+		if (!S3Util.isValidS3Uri(location)) {
+			throw new IOException("Output URI '" + location + "' is not a valid S3 URI (s3://<bucket>/<key>).");
 		}
 
 		try {
 			S3Util.copyToS3(job, location + "/" + job + "/version.txt");
 		} catch (Exception e) {
-			log.error("Copy file to '" + location + "/" + job + "/version.txt' failed.", e);
-			throw new IOException("Output Url '" + location + "' is not writable.", e);
+			log.error("Copy file to '{}/{}/version.txt' failed.", location, job, e);
+			throw new IOException("Output URI '" + location + "' is not writable.", e);
 		}
 	}
 
@@ -91,10 +91,13 @@ public class S3Workspace implements IWorkspace {
 		return upload(LOGS_DIRECTORY, file);
 	}
 
+	/**
+	 * Downloads the object at the given S3 URI location.
+	 */
 	@Override
-	public InputStream download(String url) throws IOException {
-		S3Util.UrlParts urlParts = S3Util.getParts(url);
-		return S3Util.getObject(urlParts);
+	public InputStream download(String uri) throws IOException {
+		S3Util.UriParts uriParts = S3Util.getParts(uri);
+		return S3Util.getObject(uriParts);
 	}
 
 	@Override
@@ -104,15 +107,17 @@ public class S3Workspace implements IWorkspace {
 		return log;
 	}
 
-	public boolean exists(String url) throws IOException {
-		S3Util.UrlParts urlParts = S3Util.getParts(url);
-		return S3Util.doesObjectExist(urlParts);
+	/**
+	 * Checks if {@code uri} is a valid S3 URI for an existing object.
+	 */
+	public boolean exists(String uri) throws IOException {
+		S3Util.UriParts uriParts = S3Util.getParts(uri);
+		return S3Util.doesObjectExist(uriParts);
 	}
 
 	@Override
 	public void delete(String job) throws IOException {
-
-		if (!S3Util.isValidS3Url(location)) {
+		if (!S3Util.isValidS3Uri(location)) {
 			throw new IOException("Output Url '" + location + "' is not a valid S3 bucket.");
 		}
 
@@ -133,7 +138,7 @@ public class S3Workspace implements IWorkspace {
 
 	@Override
 	public void cleanup(String job) throws IOException {
-		if (!S3Util.isValidS3Url(location)) {
+		if (!S3Util.isValidS3Uri(location)) {
 			throw new IOException("Output Url '" + location + "' is not a valid S3 bucket.");
 		}
 
@@ -156,21 +161,25 @@ public class S3Workspace implements IWorkspace {
 		}
 	}
 
+	/**
+	 * Creates a pre-signed S3 URL allowing time-limited public access to the object
+	 * at the provided S3 URI. Expires in {@link S3Workspace#EXPIRATION_MS}.
+	 */
 	@Override
-	public String createPublicLink(String url) {
-		log.debug("Generating pre-signed URL for {}...", url);
-		S3Util.UrlParts urlParts = S3Util.getParts(url);
-		URL publicUrl = S3Util.generatePresignedLink(urlParts, Duration.ofMillis(EXPIRATION_MS));
-		log.debug("Pre-signed URL for {} generated. Link: {}", url, publicUrl.toString());
+	public String createPublicLink(String uri) {
+		log.debug("Generating pre-signed URL for {}...", uri);
+		S3Util.UriParts uriParts = S3Util.getParts(uri);
+		URL publicUrl = S3Util.generatePresignedLink(uriParts, Duration.ofMillis(EXPIRATION_MS));
+		log.debug("Pre-signed URL for {} generated. Link: {}", uri, publicUrl.toString());
 		return publicUrl.toString();
 	}
 
 	@Override
-	public String getParent(String url) {
-		if (url.startsWith("s3://")) {
-			int index = url.lastIndexOf('/');
+	public String getParent(String uri) {
+		if (uri.startsWith("s3://")) {
+			int index = uri.lastIndexOf('/');
 			if (index > 0) {
-				return url.substring(0, index);
+				return uri.substring(0, index);
 			}
 			return null;
 		} else {
@@ -203,11 +212,11 @@ public class S3Workspace implements IWorkspace {
 	}
 
 	@Override
-	public List<Download> getDownloads(String url) throws IOException {
+	public List<Download> getDownloads(String uri) {
 		List<Download> downloads = new ArrayList<>();
 
-		S3Util.UrlParts urlParts = S3Util.getParts(url);
-		List<S3Object> listing = S3Util.listObjects(urlParts);
+		S3Util.UriParts uriParts = S3Util.getParts(uri);
+		List<S3Object> listing = S3Util.listObjects(uriParts);
 
 		for (S3Object summary : listing) {
 			String key = summary.key();
@@ -216,7 +225,7 @@ public class S3Workspace implements IWorkspace {
 				continue;
 			}
 
-			String filename = key.replaceAll(urlParts.key() + "/", "");
+			String filename = key.replaceAll(uriParts.key() + "/", "");
 			String size = FileUtils.byteCountToDisplaySize(summary.size());
 			String hash = HashUtil.getSha256(filename + size + (Math.random() * 100_000));
 
@@ -226,7 +235,7 @@ public class S3Workspace implements IWorkspace {
 
 			Download download = new Download();
 			download.setName(filename);
-			download.setPath("s3://" + urlParts.bucket() + "/" + key);
+			download.setPath("s3://" + uriParts.bucket() + "/" + key);
 			download.setSize(size);
 			download.setHash(hash);
 			downloads.add(download);
@@ -236,8 +245,8 @@ public class S3Workspace implements IWorkspace {
 	}
 
 	@Override
-	public List<Download> getLogs() throws IOException {
-		String url = location + "/" + job + "/" + LOGS_DIRECTORY;
-		return getDownloads(url);
+	public List<Download> getLogs() {
+		String uri = location + "/" + job + "/" + LOGS_DIRECTORY;
+		return getDownloads(uri);
 	}
 }
