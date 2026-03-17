@@ -27,15 +27,56 @@ public interface IWorkspace {
 
 	String createPublicLink(String url);
 
-	String getParent(String url);
+	/**
+	 * Returns the "parent folder" of the given {@code id}. May return {@code null}
+	 * if a distinct parent cannot be computed.
+	 *
+	 * @param id Hierarchical file identifier (file path, S3 URI...)
+	 * @return The parent ID, in the same style as the input {@code id} (file path,
+	 *         S3 URI...)
+	 */
+	String getParent(String id);
 
+	/**
+	 * Returns an identifier (filepath, S3 URI...) for a persistent folder within
+	 * the workspace, unique to the provided {@code id}. Guarantees that data can be
+	 * inserted into the folder, but may not create anything.
+	 *
+	 * @param id Unique identifier for the created folder (essentially the
+	 *           basename).
+	 */
 	String createFolder(String id);
 
-	String createFile(String name, String name2);
+	/**
+	 * Returns an identifier (filepath, S3 URI...) for a persistent file within the
+	 * workspace and {@code folder}, unique to the provided {@code id}. Guarantees
+	 * that such a file can be created without additional steps, but may not create
+	 * anything.
+	 *
+	 * @param folder Unique identifier for the parent folder.
+	 * @param id     Unique identifier for the created file (essentially the
+	 *               basename).
+	 */
+	String createFile(String folder, String id);
 
+	/**
+	 * Returns an identifier (filepath, S3 URI...) for a log file within the
+	 * workspace, unique to the provided {@code name}. Guarantees that such a file
+	 * can be created without additional steps, but may not create anything.
+	 *
+	 * @param name Unique identifier for the created log file.
+	 */
 	String createLogFile(String name);
 
-	String createTempFolder(String string);
+	/**
+	 * Returns an identifier (filepath, S3 URI...) for a temp folder within the
+	 * workspace, unique to the provided {@code id}. Guarantees that data can be
+	 * inserted into the folder, but may not create anything.
+	 *
+	 * @param id Unique identifier for the created temp folder (essentially the
+	 *           basename).
+	 */
+	String createTempFolder(String id);
 
 	List<Download> getDownloads(String url) throws IOException;
 

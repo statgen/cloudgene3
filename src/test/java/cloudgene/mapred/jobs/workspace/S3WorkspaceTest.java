@@ -12,15 +12,16 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 public class S3WorkspaceTest {
 	private static Stream<Arguments> provideForGetParent() {
 		return Stream.of(
+				// Error cases
 				arguments("http://example.com", null), // Not an S3 URI.
 				arguments("s3://", null), // Only protocol present.
+				arguments("s3://foo/bar", null), // We don't allow empty keys even as the parent.
+				arguments("s3:///", null), // Invalid URI
 
-				// Normal cases
-				arguments("s3://foo/bar", "s3://foo"), // Unclear, is it OK to reduce to bucket only?
-				arguments("s3://foo/bar/baz", "s3://foo/bar"), // Simple good example.
+				// Success cases
+				arguments("s3://foo/bar/baz", "s3://foo/bar"), // Simple example.
 				arguments("s3://a/b/c/d/e/f", "s3://a/b/c/d/e"), // Deeply nested.
-				arguments("s3://a/b", "s3://a"), // Shortest example that makes sense.
-				arguments("s3:///", "s3://") // Pathological! probably not OK.
+				arguments("s3://a/b/c", "s3://a/b") // Shortest example that makes sense.
 		);
 	}
 

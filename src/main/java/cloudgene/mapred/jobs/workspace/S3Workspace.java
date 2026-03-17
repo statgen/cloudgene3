@@ -169,40 +169,44 @@ public class S3Workspace implements IWorkspace {
 		return publicUrl.toString();
 	}
 
-	/**
-	 * Get the "parent folder" of the current S3 URI.
-	 */
 	@Override
 	@Nullable
 	public String getParent(@NonNull String uri) {
-		if (uri.startsWith("s3://")) {
-			int index = uri.lastIndexOf('/');
-			if (index >= 5) {
-				return uri.substring(0, index);
-			}
+		S3Util.UriParts parts;
+		try {
+			parts = S3Util.getParts(uri);
+		} catch (IllegalArgumentException e) {
+			return null; // Not a valid S3 URI with non-empty bucket and key.
 		}
-		return null;
+
+		String key = parts.key();
+
+		int index = key.lastIndexOf('/');
+		if (index < 1) {
+			return null; // We don't allow empty keys.
+		}
+
+		String parentKey = key.substring(0, index);
+		String parentUri = "s3://" + parts.bucket() + "/" + parentKey;
+
+		return parentUri;
 	}
 
-	// TODO(Marc): Rename! No file is created (only a path string).
 	@Override
 	public String createFolder(String id) {
 		return location + "/" + job + "/" + OUTPUT_DIRECTORY + "/" + id;
 	}
 
-	// TODO(Marc): Rename! No file is created (only a path string).
 	@Override
 	public String createFile(String folder, String id) {
 		return location + "/" + job + "/" + OUTPUT_DIRECTORY + "/" + folder + "/" + id;
 	}
 
-	// TODO(Marc): Rename! No file is created (only a path string).
 	@Override
 	public String createLogFile(String id) {
 		return location + "/" + job + "/" + LOGS_DIRECTORY + "/" + id;
 	}
 
-	// TODO(Marc): Rename! No file is created (only a path string).
 	@Override
 	public String createTempFolder(String id) {
 		return location + "/" + job + "/" + TEMP_DIRECTORY + "/" + id;

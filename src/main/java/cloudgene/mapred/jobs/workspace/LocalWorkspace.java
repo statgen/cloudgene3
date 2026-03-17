@@ -145,8 +145,8 @@ public class LocalWorkspace implements IWorkspace {
 	}
 
 	@Override
-	public String getParent(String url) {
-		return new File(url).getParent();
+	public String getParent(String filepath) {
+		return new File(filepath).getParent();
 	}
 
 	@Override
