@@ -13,7 +13,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class SemVerTest {
 
-	private static Stream<Arguments> provideForOf() {
+	private static Stream<Arguments> provideForOfStr() {
 		return Stream.of(
 				// Null or empty ->
 				arguments(null, null, "version must be non-null"),
@@ -81,13 +81,37 @@ public class SemVerTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("provideForOf")
-	public void testOf(String version, SemVer parsed, String errMsg) {
+	@MethodSource("provideForOfStr")
+	public void testOfStr(String version, SemVer parsed, String errMsg) {
 		try {
 			SemVer observed = SemVer.of(version);
 
 			assertNull(errMsg);
 			assertEquals(parsed, observed);
+		} catch (IllegalArgumentException e) {
+			assertNotNull(errMsg);
+			assertTrue(e.getMessage().startsWith(errMsg));
+		}
+	}
+
+	private static Stream<Arguments> provideForOfInt() {
+		return Stream.of(
+				arguments(-1, 0, 0, null, "Major version must be >= 0"),
+				arguments(0, -2, 0, null, "Minor version must be >= 0"),
+				arguments(0, 0, -3, null, "Patch version must be >= 0"),
+
+				arguments(0, 0, 0, new SemVer(0, 0, 0, identifiers(), identifiers()), null),
+				arguments(497, 20, 3, new SemVer(497, 20, 3, identifiers(), identifiers()), null));
+	}
+
+	@ParameterizedTest
+	@MethodSource("provideForOfInt")
+	public void testOfInt(int major, int minor, int patch, SemVer expected, String errMsg) {
+		try {
+			SemVer observed = SemVer.of(major, minor, patch);
+
+			assertNull(errMsg);
+			assertEquals(expected, observed);
 		} catch (IllegalArgumentException e) {
 			assertNotNull(errMsg);
 			assertTrue(e.getMessage().startsWith(errMsg));
@@ -149,6 +173,38 @@ public class SemVerTest {
 	public void testCompareTo(SemVer first, SemVer second, int sign) {
 		int observed = first.compareTo(second);
 		assertEquals(sign, Integer.signum(observed));
+	}
+
+	private static Stream<Arguments> provideForToString() {
+		return Stream.of(
+				arguments(
+						new SemVer(0, 0, 0, List.of(), List.of()),
+						"0.0.0"),
+				arguments(
+						new SemVer(32, 1, 789, identifiers(), identifiers()),
+						"32.1.789"),
+				arguments(
+						new SemVer(6, 45, 0, identifiers(978), identifiers()),
+						"6.45.0-978"),
+				arguments(
+						new SemVer(6, 45, 0, identifiers(978, "Aethelred"), identifiers()),
+						"6.45.0-978.Aethelred"),
+				arguments(
+						new SemVer(0, 11, 222, identifiers(), identifiers("kafka")),
+						"0.11.222+kafka"),
+				arguments(
+						new SemVer(0, 11, 222, identifiers(), identifiers("kafka", 1915)),
+						"0.11.222+kafka.1915"),
+				arguments(
+						new SemVer(0, 11, 222, identifiers("hitch-hiker", 42, "dolphins"),
+								identifiers(1, 2, 3, "done")),
+						"0.11.222-hitch-hiker.42.dolphins+1.2.3.done"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("provideForToString")
+	public void testToString(SemVer version, String expected) {
+		assertEquals(expected, version.toString());
 	}
 
 	private static List<SemVer.Identifier> identifiers(Object... ids) {

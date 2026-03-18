@@ -93,6 +93,16 @@ public record SemVer(
 				}
 			}
 		}
+
+		@Override
+		@NonNull
+		public String toString() {
+			if (isAlpha()) {
+				return alpha;
+			} else {
+				return Integer.toString(num);
+			}
+		}
 	}
 
 	/**
@@ -322,6 +332,49 @@ public record SemVer(
 		}
 	}
 
+	@Override
+	@NonNull
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(major);
+		builder.append('.');
+		builder.append(minor);
+		builder.append('.');
+		builder.append(patch);
+
+		if (!preRelease.isEmpty()) {
+			builder.append('-');
+			builder.append(preRelease.get(0).toString());
+
+			for (int i = 1; i < preRelease.size(); i++) {
+				builder.append('.');
+				builder.append(preRelease.get(i).toString());
+			}
+		}
+
+		if (!metadata.isEmpty()) {
+			builder.append('+');
+			builder.append(metadata.get(0).toString());
+
+			for (int i = 1; i < metadata.size(); i++) {
+				builder.append('.');
+				builder.append(metadata.get(i).toString());
+			}
+		}
+
+		return builder.toString();
+	}
+
+	/**
+	 * Attempts to parse {@code version} into a valid {@link SemVer} object. On
+	 * failure, throws {@link IllegalArgumentException}.
+	 * <p>
+	 * Full format: {@code <major>.<minor>.<patch>[-<pre-release>][+<metadata>]},
+	 * where {@code <major>.<minor>.<patch>} are three mandatory non-negative
+	 * integers, and both {@code <pre-release>} and {@code <metadata>} are optional
+	 * dot-separated sequences of either positive integers or alphanumeric
+	 * identifiers (dashes allowed).
+	 */
 	public static SemVer of(@NonNull String version) {
 		if (version == null || version.isBlank()) {
 			throw new IllegalArgumentException("version must be non-null and non-blank");
@@ -329,5 +382,26 @@ public record SemVer(
 
 		version = version.trim();
 		return new Parser(version).parse();
+	}
+
+	/**
+	 * Returns a simple {@link SemVer} object with the given
+	 * {@code <major>.<minor>.<patch>} version. Throws an
+	 * {@link IllegalArgumentException} if any of the version numbers is negative.
+	 * <p>
+	 * For more complex versions, see {@link #of(String)}.
+	 */
+	public static SemVer of(int major, int minor, int patch) {
+		if (major < 0) {
+			throw new IllegalArgumentException("Major version must be >= 0; found: " + major);
+		}
+		if (minor < 0) {
+			throw new IllegalArgumentException("Minor version must be >= 0; found: " + minor);
+		}
+		if (patch < 0) {
+			throw new IllegalArgumentException("Patch version must be >= 0; found: " + patch);
+		}
+
+		return new SemVer(major, minor, patch, List.of(), List.of());
 	}
 }
