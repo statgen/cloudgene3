@@ -13,7 +13,6 @@ import cloudgene.mapred.server.auth.AuthenticationType;
 import cloudgene.mapred.server.responses.ApplicationResponse;
 import cloudgene.mapred.server.responses.WdlAppResponse;
 import cloudgene.mapred.server.services.ApplicationService;
-import cloudgene.mapred.wdl.WdlApp;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Delete;
@@ -26,8 +25,13 @@ import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.rules.SecurityRule;
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Controller
 public class AppController {
+
+	private static final Logger log = LoggerFactory.getLogger(AppController.class);
 
 	@Inject
 	protected cloudgene.mapred.server.Application application;
@@ -59,14 +63,16 @@ public class AppController {
 			response.setFooter(footer);
 		}
 
+		log.info("Returning info for app '{}' for authenticated user.", appId);
 		return response;
-
 	}
 
 	@Delete("/api/v2/server/apps/{appId}")
 	@Secured(User.ROLE_ADMIN)
 	public ApplicationResponse removeApp(String appId) {
 		Application app = applicationService.removeApp(appId);
+
+		log.info("Application '{}' removed successfully.", appId);
 		return ApplicationResponse.build(app);
 	}
 
@@ -77,13 +83,13 @@ public class AppController {
 
 		Application app = applicationService.getById(appId);
 
-		// enable or disable
 		if (enabled != null) {
 			applicationService.enableApp(app, enabled);
 		}
-		// update permissions
+
 		applicationService.updatePermissions(app, permission);
 
+		log.info("Application '{}' updated successfully. Permission: '{}'", appId, permission);
 		return ApplicationResponse.build(app);
 	}
 
@@ -92,6 +98,8 @@ public class AppController {
 	public ApplicationResponse getAppSettings(String appId) {
 		Application app = applicationService.getById(appId);
 		ApplicationRepository repository = applicationService.getRepository();
+
+		log.info("Application settings loaded successfully for '{}'", appId);
 		return ApplicationResponse.buildWithDetails(app, this.application.getSettings(), repository);
 
 	}
@@ -104,8 +112,10 @@ public class AppController {
 		Application app = applicationService.getById(appId);
 		applicationService.updateConfig(app, config);
 
-		ApplicationRepository repository = applicationService.getRepository();
+		log.info("Updated settings for application '{}'. Config keys: {}",
+				appId, config != null ? config.keySet() : null);
 
+		ApplicationRepository repository = applicationService.getRepository();
 		return ApplicationResponse.buildWithDetails(app, this.application.getSettings(), repository);
 
 	}
@@ -114,6 +124,8 @@ public class AppController {
 	@Secured(User.ROLE_ADMIN)
 	public ApplicationResponse install(@Nullable String url) {
 		Application app = applicationService.installApp(url);
+
+		log.info("Application '{}' installed successfully from url='{}'", app.getId(), url);
 		return ApplicationResponse.build(app);
 	}
 
@@ -123,9 +135,11 @@ public class AppController {
 		if (reload == null) {
 			reload = false;
 		}
+
 		List<Application> apps = applicationService.listApps(reload);
 		ApplicationRepository repository = applicationService.getRepository();
+
+		log.info("Returning {} applications. IDs: {}", apps.size(), apps.stream().map(Application::getId).toList());
 		return ApplicationResponse.buildWithDetails(apps, application.getSettings(), repository);
 	}
-
 }

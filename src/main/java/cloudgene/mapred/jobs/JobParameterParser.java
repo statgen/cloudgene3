@@ -37,13 +37,11 @@ public class JobParameterParser {
 		Map<String, String> params = new HashMap<>();
 
 		// uploaded files
-
 		for (FormUtil.Parameter formParam : form) {
-
 			String name = formParam.getName();
 			Object value = formParam.getValue();
 
-			// remove upload indentification!
+			// remove upload identification!
 			String key = StringEscapeUtils.escapeHtml4(name);
 			if (key.startsWith("input-")) {
 				key = key.replace("input-", "");
@@ -54,7 +52,7 @@ public class JobParameterParser {
 			if (key.equals(PARAM_JOB_NAME) || key.endsWith("-pattern")) {
 				String cleanedValue = StringEscapeUtils.escapeHtml4(value.toString());
 				props.put(key, cleanedValue);
-				log.debug("Parameter " + key + " ignored.");
+				log.debug("Parameter {} ignored.", key);
 				continue;
 			}
 
@@ -65,11 +63,9 @@ public class JobParameterParser {
 			}
 
 			if (value instanceof File inputFile) {
-
 				log.debug("Parameter {} is a file.", key);
 
 				try {
-
 					// copy to workspace in input directory
 					long start = System.currentTimeMillis();
 					log.debug("Upload file {} to workspace...", inputFile.getAbsolutePath());
@@ -83,21 +79,17 @@ public class JobParameterParser {
 						// file
 						props.put(key, target);
 					}
-
 				} finally {
 					FileUtil.deleteFile(inputFile.getAbsolutePath());
 				}
 
 				log.debug("Parameter {} processed.", key);
-
 			} else {
-
 				log.debug("Parameter {} is a value parameter.", key);
 
 				String cleanedValue = StringEscapeUtils.escapeHtml4(value.toString());
 
 				if (input.getWriteFile() != null && !input.getWriteFile().trim().isEmpty()) {
-
 					File file = Files.createTempFile("upload_", input.getWriteFile()).toFile();
 					file.deleteOnExit();
 
@@ -105,7 +97,7 @@ public class JobParameterParser {
 						FileUtil.writeStringBufferToFile(file.getAbsolutePath(), new StringBuffer(cleanedValue));
 						String target = workspace.uploadInput(key, file);
 						cleanedValue = target;
-						log.debug("Parameter {} value written to file '{}'", key, target);
+						log.debug("Parameter {} value written to file '{}\"", key, target);
 					} finally {
 						file.delete();
 					}
@@ -132,7 +124,6 @@ public class JobParameterParser {
 						}
 						params.put(input.getId(), value + pattern);
 					} else {
-
 						if (input.getTypeAsEnum() == WdlParameterInputType.CHECKBOX) {
 							params.put(input.getId(), input.getValues().get("true"));
 						} else {
@@ -159,6 +150,7 @@ public class JobParameterParser {
 				return input;
 			}
 		}
+
 		return null;
 	}
 }

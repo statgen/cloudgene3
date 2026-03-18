@@ -1,4 +1,4 @@
-package cloudgene.mapred.database;
+package cloudgene.mapred.database.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cloudgene.mapred.core.User;
-import cloudgene.mapred.database.UserDao.UserMapper;
+import cloudgene.mapred.database.dao.UserDao.UserMapper;
 import cloudgene.mapred.database.util.Database;
 import cloudgene.mapred.database.util.IRowMapper;
 import cloudgene.mapred.database.util.JdbcDataAccessObject;
@@ -33,6 +33,10 @@ public class JobDao extends JdbcDataAccessObject {
 				+ "completion_state, success_state, notification_state, user_agent) "
 				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
+		CompletionState completion = job.getCompletionState();
+		SuccessState success = job.getSuccessState();
+		NotificationState notification = job.getNotificationState();
+
 		try {
 			Object[] params = new Object[18];
 			params[0] = job.getId();
@@ -49,9 +53,9 @@ public class JobDao extends JdbcDataAccessObject {
 			params[11] = job.getEndTime();
 			params[12] = -1;
 			params[13] = -1;
-			params[14] = job.getCompletionState().getValue();
-			params[15] = job.getSuccessState().getValue();
-			params[16] = job.getNotificationState().getValue();
+			params[14] = (completion == null) ? null : completion.getValue();
+			params[15] = (success == null) ? null : success.getValue();
+			params[16] = (notification == null) ? null : notification.getValue();
 			params[17] = trimToLength(job.getUserAgent(), 350);
 
 			update(sql, params);
@@ -69,8 +73,12 @@ public class JobDao extends JdbcDataAccessObject {
 				+ "name = ?, state = ?, start_time = ?, end_time = ?, user_id = ?, s3_url = ?, "
 				+ "type = ?, deleted_on = ?, application = ?, application_id = ?, submitted_on = ?, "
 				+ "finished_on = ?, setup_start_time = ?, setup_end_time = ?, completion_state = ?, "
-				+ "success_state = ?, notification_state = ?"
+				+ "success_state = ?, notification_state = ? "
 				+ "WHERE id = ? ";
+
+		CompletionState completion = job.getCompletionState();
+		SuccessState success = job.getSuccessState();
+		NotificationState notification = job.getNotificationState();
 
 		try {
 			Object[] params = new Object[18];
@@ -88,9 +96,9 @@ public class JobDao extends JdbcDataAccessObject {
 			params[11] = job.getEndTime();
 			params[12] = -1;
 			params[13] = -1;
-			params[14] = job.getCompletionState().getValue();
-			params[15] = job.getSuccessState().getValue();
-			params[16] = job.getNotificationState().getValue();
+			params[14] = (completion == null) ? null : completion.getValue();
+			params[15] = (success == null) ? null : success.getValue();
+			params[16] = (notification == null) ? null : notification.getValue();
 			params[17] = job.getId();
 
 			update(sql, params);

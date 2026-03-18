@@ -10,8 +10,8 @@ import cloudgene.mapred.core.User;
 import cloudgene.mapred.jobs.queue.PriorityRunnable;
 import cloudgene.mapred.jobs.queue.Queue;
 import cloudgene.mapred.jobs.state.JobState;
+import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
 
 public class WorkflowEngine implements Runnable {
 
@@ -119,7 +119,7 @@ public class WorkflowEngine implements Runnable {
 		return longTimeQueue.getJobById(id);
 	}
 
-	@NotNull
+	@NonNull
 	public Map<String, Long> getCounters(JobState state, @Nullable List<String> names) {
 		Map<String, Long> result = new HashMap<>();
 		List<AbstractJob> jobs = longTimeQueue.getAllJobs();

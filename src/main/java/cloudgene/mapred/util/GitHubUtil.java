@@ -7,10 +7,10 @@ import java.net.URI;
 import java.util.Map;
 
 import cloudgene.mapred.BuildInfo;
+import io.micronaut.core.annotation.NonNull;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.netty.DefaultHttpClient;
-import jakarta.validation.constraints.NotNull;
 import reactor.core.publisher.Mono;
 
 public class GitHubUtil {
@@ -65,7 +65,7 @@ public class GitHubUtil {
 	 *                  and the path to the YAML config).
 	 * @return The parsed repo details.
 	 */
-	public static Repository parseShorthand(@NotNull String shorthand) throws IllegalArgumentException {
+	public static Repository parseShorthand(@NonNull String shorthand) throws IllegalArgumentException {
 		Repository repo = new Repository();
 
 		// username/repo[/subdir][@ref]
@@ -103,8 +103,8 @@ public class GitHubUtil {
 	 * @param repo The repository to download.
 	 * @return The URL to the repo's {@code zipball}.
 	 */
-	@NotNull
-	public static String buildUrlFromRepository(@NotNull Repository repo) throws GitHubException {
+	@NonNull
+	public static String buildUrlFromRepository(@NonNull Repository repo) throws GitHubException {
 		String tag = repo.getTag();
 
 		if (tag != null && tag.equalsIgnoreCase("latest")) {
@@ -127,7 +127,7 @@ public class GitHubUtil {
 	 * @param repo GitHub repository queried for its latest version.
 	 * @return The latest version {@code tag}.
 	 */
-	public static String getLatestReleaseFromRepository(@NotNull Repository repo) throws GitHubException {
+	public static String getLatestReleaseFromRepository(@NonNull Repository repo) throws GitHubException {
 		String urlString = "https://api.github.com/repos/" + repo.getUser() + "/" + repo.getRepo() + "/releases/latest";
 
 		HttpClient httpClient = new DefaultHttpClient();

@@ -8,10 +8,6 @@ public class Configuration {
 		return FileUtil.path(getConfigDirectory(), "settings.yaml");
 	}
 
-	public static String getVersionFilename() {
-		return get("CG_VERSION_FILENAME", "version.txt");
-	}
-
 	public static String getConfigDirectory() {
 		return get("CG_CONFIG_DIRECTORY", "config");
 	}

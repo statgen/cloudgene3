@@ -14,17 +14,14 @@ import cloudgene.mapred.util.config.Configuration;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotNull;
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
-
 import cloudgene.mapred.core.User;
-import cloudgene.mapred.database.util.DatabaseUpdater;
+import cloudgene.mapred.database.updates.DatabaseUpdater;
 import cloudgene.mapred.util.GitHubException;
 import cloudgene.mapred.util.GitHubUtil;
 import cloudgene.mapred.util.GitHubUtil.Repository;
@@ -33,6 +30,7 @@ import cloudgene.mapred.wdl.WdlApp;
 import genepi.io.FileUtil;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 public class ApplicationRepository {
 
@@ -65,7 +63,7 @@ public class ApplicationRepository {
 		return apps;
 	}
 
-	public void setApps(@NotNull List<Application> apps) {
+	public void setApps(@NonNull List<Application> apps) {
 		this.apps = apps;
 		reload();
 	}
@@ -156,13 +154,13 @@ public class ApplicationRepository {
 		return listApps;
 	}
 
-	public void remove(@NotNull Application application) throws IOException {
+	public void remove(@NonNull Application application) throws IOException {
 		log.info("Remove application " + application.getId());
 		apps.remove(application);
 		reload();
 	}
 
-	public void updateConfig(@NotNull Application app, @Nullable Map<String, String> config) throws IOException {
+	public void updateConfig(@NonNull Application app, @Nullable Map<String, String> config) throws IOException {
 
 		WdlApp wdlApp = app.getWdlApp();
 
@@ -183,7 +181,7 @@ public class ApplicationRepository {
 
 	}
 
-	public List<Application> install(@NotNull String url) throws IOException, GitHubException, URISyntaxException {
+	public List<Application> install(@NonNull String url) throws IOException, GitHubException, URISyntaxException {
 
 		List<Application> applications = new ArrayList<>();
 		Application application = null;
@@ -231,13 +229,13 @@ public class ApplicationRepository {
 	 * @param key Used to uniquely identify the download, to avoid collisions.
 	 * @return Path to a (potential) archive file unique to the {@code key}'s hash.
 	 */
-	private File getArchiveFile(@NotNull String key) {
+	private File getArchiveFile(@NonNull String key) {
 		int hash = key.hashCode();
 		String path = FileUtil.path(appsFolder, "archive_" + hash + ".zip");
 		return new File(path);
 	}
 
-	public List<Application> installFromUrl(@NotNull String url)
+	public List<Application> installFromUrl(@NonNull String url)
 			throws IOException, GitHubException, URISyntaxException {
 
 		if (!url.endsWith(".zip")) {
@@ -259,7 +257,7 @@ public class ApplicationRepository {
 		return applications;
 	}
 
-	public List<Application> installFromUrlRepository(@NotNull String url)
+	public List<Application> installFromUrlRepository(@NonNull String url)
 			throws IOException, GitHubException, URISyntaxException {
 
 		Pattern pattern = Pattern.compile("@([^/\\?]*)");
@@ -279,7 +277,7 @@ public class ApplicationRepository {
 		return installFromRepository(filename, version);
 	}
 
-	public List<Application> installFromRepository(@NotNull String file, String version)
+	public List<Application> installFromRepository(@NonNull String file, String version)
 			throws IOException, GitHubException, URISyntaxException {
 
 		ObjectMapper mapper = new ObjectMapper();
@@ -330,11 +328,11 @@ public class ApplicationRepository {
 		}
 	}
 
-	public Application installFromS3(String url) throws IOException {
+	public Application installFromS3(String uri) throws IOException {
 		// download file from s3 bucket
-		if (url.endsWith(".zip")) {
-			File zipFile = getArchiveFile(url);
-			S3Util.copyToFile(url, zipFile);
+		if (uri.endsWith(".zip")) {
+			File zipFile = getArchiveFile(uri);
+			S3Util.copyToFile(uri, zipFile);
 
 			Application application = installFromZipFile(zipFile.getAbsolutePath());
 
@@ -346,38 +344,39 @@ public class ApplicationRepository {
 		FileUtil.deleteDirectory(appPath);
 		FileUtil.createDirectory(appPath);
 
-		S3Util.UrlParts urlParts = S3Util.getParts(url);
-		String baseKey = urlParts.key();
+		S3Util.UriParts uriParts = S3Util.getParts(uri);
+		String bucket = uriParts.bucket();
+		String prefix = uriParts.key();
 
-		ObjectListing listing = S3Util.listObjects(url);
+		List<S3Object> listing = S3Util.listObjects(bucket, prefix);
 
-		// create folders
-		for (S3ObjectSummary summary : listing.getObjectSummaries()) {
-			String bucket = summary.getBucketName();
-			String key = summary.getKey();
+		// First pass: create folders.
+		for (S3Object summary : listing) {
+			String key = summary.key();
 
-			if (!summary.getKey().endsWith("/")) {
+			// Only process dirs.
+			if (!key.endsWith("/")) {
 				continue;
 			}
 
-			System.out.println("Found folder" + bucket + "/" + key);
-			String relativeKey = summary.getKey().replaceAll(baseKey, "");
+			System.out.println("Found folder: " + bucket + "/" + key);
+			String relativeKey = key.replaceAll(prefix, "");
 			String target = FileUtil.path(appPath, relativeKey);
 			FileUtil.createDirectory(target);
 		}
 
-		// copy files
-		for (S3ObjectSummary summary : listing.getObjectSummaries()) {
-			String bucket = summary.getBucketName();
-			String key = summary.getKey();
+		// Second pass: copy files.
+		for (S3Object summary : listing) {
+			String key = summary.key();
 
-			if (summary.getKey().endsWith("/")) {
+			// Only process leaf objects.
+			if (key.endsWith("/")) {
 				continue;
 			}
 
-			System.out.println("Found file" + bucket + "/" + key);
+			System.out.println("Found file: " + bucket + "/" + key);
 
-			String relativeKey = summary.getKey().replaceAll(baseKey, "");
+			String relativeKey = key.replaceAll(prefix, "");
 			String target = FileUtil.path(appPath, relativeKey);
 			File file = new File(target);
 
@@ -398,7 +397,7 @@ public class ApplicationRepository {
 		}
 	}
 
-	public Application installFromGitHub(@NotNull Repository repository)
+	public Application installFromGitHub(@NonNull Repository repository)
 			throws IOException, URISyntaxException, GitHubException {
 
 		String url = GitHubUtil.buildUrlFromRepository(repository);
@@ -414,11 +413,11 @@ public class ApplicationRepository {
 		return application;
 	}
 
-	public Application installFromZipFile(@NotNull String zipFilename) throws IOException {
+	public Application installFromZipFile(@NonNull String zipFilename) throws IOException {
 		return installFromZipFile(zipFilename, null);
 	}
 
-	public Application installFromZipFile(@NotNull String zipFilename, @Nullable String yamlFilename)
+	public Application installFromZipFile(@NonNull String zipFilename, @Nullable String yamlFilename)
 			throws IOException {
 
 		// extract in apps folder
@@ -443,11 +442,11 @@ public class ApplicationRepository {
 		}
 	}
 
-	public Application installFromDirectory(@NotNull String path, boolean moveToApps) throws IOException {
+	public Application installFromDirectory(@NonNull String path, boolean moveToApps) throws IOException {
 		return installFromDirectory(path, moveToApps, null);
 	}
 
-	public Application installFromDirectory(@NotNull String path, boolean moveToApps, @Nullable String customYaml)
+	public Application installFromDirectory(@NonNull String path, boolean moveToApps, @Nullable String customYaml)
 			throws IOException {
 
 		String name = "cloudgene.yaml";
@@ -532,7 +531,7 @@ public class ApplicationRepository {
 		return application;
 	}
 
-	private String[] getDirectories(@NotNull String path) {
+	private String[] getDirectories(@NonNull String path) {
 		File dir = new File(path);
 		File[] files = dir.listFiles();
 
@@ -579,7 +578,7 @@ public class ApplicationRepository {
 		return application.isEnabled() && application.isLoaded() && !application.hasSyntaxError();
 	}
 
-	public static JsonNode getVersion(@NotNull JsonNode releases, @Nullable String version) {
+	public static JsonNode getVersion(@NonNull JsonNode releases, @Nullable String version) {
 		if ("latest".equalsIgnoreCase(version)) {
 			return releases.get(0);
 		}

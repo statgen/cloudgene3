@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cloudgene</groupId>
 	<artifactId>cloudgene</artifactId>
-	<version>3.1.4-statgen.15</version>
+	<version>3.1.4-statgen.18</version>
 	<packaging>${packaging}</packaging>
 
 	<parent>
@@ -40,6 +40,12 @@
 			<email>marcfra@umich.edu</email>
 			<organization>University of Michigan</organization>
 		</developer>
+		<developer>
+			<id>snehal</id>
+			<name>Snehal Patil</name>
+			<email>snehal@umich.edu</email>
+			<organization>University of Michigan</organization>
+		</developer>
 	</developers>
 
 	<properties>
@@ -62,9 +68,9 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>com.amazonaws</groupId>
-				<artifactId>aws-java-sdk-bom</artifactId>
-				<version>1.12.788</version>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>bom</artifactId>
+				<version>2.42.4</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -126,7 +132,7 @@
 		<dependency>
 			<groupId>org.apache.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
-			<version>4.0.28</version>
+			<version>4.0.30</version>
 			<type>pom</type>
 			<exclusions>
 				<exclusion>
@@ -161,18 +167,23 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-s3</artifactId>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-ec2</artifactId>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3-transfer-manager</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-sts</artifactId>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>ec2</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>sts</artifactId>
 		</dependency>
 
 		<dependency>

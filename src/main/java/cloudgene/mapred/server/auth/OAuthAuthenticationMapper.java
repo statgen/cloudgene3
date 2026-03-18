@@ -7,7 +7,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.reactivestreams.Publisher;
 
 import cloudgene.mapred.core.User;
-import cloudgene.mapred.database.UserDao;
+import cloudgene.mapred.database.dao.UserDao;
 import cloudgene.mapred.server.Application;
 import cloudgene.mapred.server.services.UserService;
 import cloudgene.mapred.util.HashUtil;

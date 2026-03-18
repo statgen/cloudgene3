@@ -1,13 +1,12 @@
 package cloudgene.mapred.util;
 
-import com.amazonaws.util.EC2MetadataUtils;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.regions.internal.util.EC2MetadataUtils;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Provides the static method {@link #fetchServerIp()}, which returns this
@@ -22,7 +21,7 @@ public final class IpFetcher {
 	/**
 	 * Loops through the system's reported IP addresses and returns the first IPv4
 	 * external address. If anything goes wrong, returns null.
-	 *
+	 * <p>
 	 * Note that the returned IP is only guaranteed to be visible in the local
 	 * network link. E.g., a router in the way could map this IP to a different one.
 	 */
@@ -52,11 +51,24 @@ public final class IpFetcher {
 	}
 
 	/**
+	 * Wrapper for {@link EC2MetadataUtils#getPrivateIpAddress()}. Attempts to use
+	 * the EC2 service (AWS) to retrieve this device's IPv4, as visible from the
+	 * local VPC subnet. If anything goes wrong, returns {@code null} instead of
+	 * throwing.
+	 */
+	private static String fetchEC2IpV4() {
+		try {
+			return EC2MetadataUtils.getPrivateIpAddress();
+		} catch (SdkClientException e) {
+			return null;
+		}
+	}
+
+	/**
 	 * Does the actual IP fetching work behind fetchServerIp(), see comments there.
 	 */
 	private static String actuallyFetchTheIp() {
-		Logger.getLogger("com.amazonaws").setLevel(Level.SEVERE); // Avoid warning dumps if we're not in AWS
-		String ec2Ip = EC2MetadataUtils.getPrivateIpAddress();
+		String ec2Ip = fetchEC2IpV4();
 		if (ec2Ip != null) {
 			return ec2Ip;
 		}
@@ -74,7 +86,7 @@ public final class IpFetcher {
 	 * environment, it uses the EC2 metadata service to get the "private IP" that is
 	 * valid in the local VPC. Otherwise, attempts to get the address from the
 	 * system. Raises an IllegalStateException if no valid IPv4 can be obtained.
-	 *
+	 * <p>
 	 * Results are cached for the lifetime of the application.
 	 */
 	public static String fetchServerIp() {

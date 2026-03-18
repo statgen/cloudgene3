@@ -19,16 +19,13 @@ import genepi.io.FileUtil;
 
 public class LocalWorkspace implements IWorkspace {
 
-	private static final String INPUT_DIRECTORY = "input";
-
-	private static final String TEMP_DIRECTORY = "temp";
-
-	private static final String LOGS_DIRECTORY = "logs";
-
 	private static final Logger log = LoggerFactory.getLogger(LocalWorkspace.class);
 
-	private final String location;
+	private static final String INPUT_DIRECTORY = "input";
+	private static final String TEMP_DIRECTORY = "temp";
+	private static final String LOGS_DIRECTORY = "logs";
 
+	private final String location;
 	private String workspace;
 
 	public LocalWorkspace(String location) {
@@ -47,12 +44,11 @@ public class LocalWorkspace implements IWorkspace {
 
 	@Override
 	public void setup() throws IOException {
-
 		if (workspace == null) {
 			throw new IOException("No job id provided.");
 		}
 
-		log.info("Init workspace " + workspace);
+		log.info("Init workspace {}", workspace);
 		FileUtil.createDirectory(workspace);
 	}
 
@@ -61,7 +57,7 @@ public class LocalWorkspace implements IWorkspace {
 		String folder = FileUtil.path(workspace, id);
 		FileUtil.createDirectory(folder);
 		String target = FileUtil.path(folder, file.getName());
-		log.info("Copy file " + file.getAbsolutePath() + " to " + target);
+		log.info("Copy file {} to {}", file.getAbsolutePath(), target);
 		FileUtil.copy(file.getAbsolutePath(), target);
 		return target;
 	}
@@ -112,14 +108,13 @@ public class LocalWorkspace implements IWorkspace {
 	@Override
 	public void delete(String job) throws IOException {
 		try {
-			log.debug("Deleting " + job + " on local workspace...");
+			log.debug("Deleting {} on local workspace...", job);
 			String workspace = FileUtil.path(location, job);
 			FileUtil.deleteDirectory(workspace);
 
-			log.debug("Deleted all files on local workspace for job " + job + ".");
-
+			log.debug("Deleted all files on local workspace for job {}.", job);
 		} catch (Exception e) {
-			log.error("Deleting " + job + " failed.", e);
+			log.error("Deleting {} failed.", job, e);
 			throw new IOException("Deleting " + job + " failed.", e);
 		}
 	}
@@ -130,17 +125,16 @@ public class LocalWorkspace implements IWorkspace {
 		// TODO: add flag to disable cleanup (e.g. debugging)
 
 		try {
-			log.debug("Cleanup " + job + " on local workspace...");
+			log.debug("Cleanup {} on local workspace...", job);
 			String temp = FileUtil.path(location, job, TEMP_DIRECTORY);
 			FileUtil.deleteDirectory(temp);
 
 			String inputs = FileUtil.path(location, job, INPUT_DIRECTORY);
 			FileUtil.deleteDirectory(inputs);
 
-			log.debug("Deleted all files on local workspace for job " + job + ".");
-
+			log.debug("Deleted all files on local workspace for job {}.", job);
 		} catch (Exception e) {
-			log.error("Deleting " + job + " failed.", e);
+			log.error("Deleting {} failed.", job, e);
 			throw new IOException("Deleting " + job + " failed.", e);
 		}
 	}
@@ -151,8 +145,8 @@ public class LocalWorkspace implements IWorkspace {
 	}
 
 	@Override
-	public String getParent(String url) {
-		return new File(url).getParent();
+	public String getParent(String filepath) {
+		return new File(filepath).getParent();
 	}
 
 	@Override
@@ -192,7 +186,6 @@ public class LocalWorkspace implements IWorkspace {
 	}
 
 	private void exportFolder(String prefix, File folder, List<Download> downloads) {
-
 		if (!folder.exists()) {
 			return;
 		}
@@ -204,6 +197,9 @@ public class LocalWorkspace implements IWorkspace {
 		}
 
 		File[] files = folder.listFiles();
+		if (files == null) {
+			return;
+		}
 
 		for (File file : files) {
 			if (file.isFile()) {
@@ -248,5 +244,4 @@ public class LocalWorkspace implements IWorkspace {
 		String location = FileUtil.path(workspace, LOGS_DIRECTORY);
 		return getDownloads(location);
 	}
-
 }
