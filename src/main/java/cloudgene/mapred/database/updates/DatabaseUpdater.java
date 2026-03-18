@@ -24,12 +24,12 @@ public class DatabaseUpdater {
 
 	private final @NonNull Database database;
 	private final @NonNull URL updatesFile;
-	private final @NonNull String currentVersion;
+	private final @NonNull SemVer currentVersion;
 
 	private final @NonNull VersionDao dao;
-	private final @NonNull Map<String, IUpdateListener> listeners;
+	private final @NonNull Map<SemVer, IUpdateListener> listeners;
 
-	private final @NonNull String oldVersion;
+	private final @NonNull SemVer oldVersion;
 	private final boolean needsUpdate;
 
 	public DatabaseUpdater(
@@ -40,29 +40,26 @@ public class DatabaseUpdater {
 		if (database == null) {
 			throw new IllegalArgumentException("database must be non-null");
 		}
-
 		if (database.getConnector() == null) {
 			throw new IllegalArgumentException("Database connector must be non-null.");
 		}
+		this.database = database;
 
 		if (updatesFile == null) {
 			throw new IllegalArgumentException("updatesFile must be non-null");
 		}
-
-		if (currentVersion == null || currentVersion.isBlank()) {
-			throw new IllegalArgumentException("currentVersion must be non-null and non-blank");
-		}
-
-		this.database = database;
 		this.updatesFile = updatesFile;
-		this.currentVersion = currentVersion;
+
+		// SemVer.of() already throws IllegalArgumentException if the string is not a
+		// valid semver version.
+		this.currentVersion = SemVer.of(currentVersion);
 
 		dao = new VersionDao(database);
 		listeners = new HashMap<>();
 
-		String oldVersion = "0.0.0";
+		SemVer oldVersion = SemVer.of(0, 0, 0);
 		if (dao.isTableAvailable()) {
-			String dbVersion = dao.findLatest();
+			SemVer dbVersion = dao.findLatest();
 			if (dbVersion != null) {
 				oldVersion = dbVersion;
 				log.info("Read current DB version: {}", oldVersion);
@@ -71,18 +68,18 @@ public class DatabaseUpdater {
 		this.oldVersion = oldVersion;
 
 		log.info("Current app version: {}", currentVersion);
-		needsUpdate = (compareVersion(currentVersion, oldVersion) > 0);
+		needsUpdate = (this.currentVersion.compareTo(this.oldVersion) > 0);
 	}
 
 	public boolean needsUpdate() {
 		return needsUpdate;
 	}
 
-	public String getCurrentVersion() {
+	public SemVer getCurrentVersion() {
 		return currentVersion;
 	}
 
-	public String getOldVersion() {
+	public SemVer getOldVersion() {
 		return oldVersion;
 	}
 
@@ -91,7 +88,8 @@ public class DatabaseUpdater {
 	 * {@code version}. Replaces any existing listeners for the same version.
 	 */
 	public void addListener(@NonNull String version, @NonNull IUpdateListener listener) {
-		listeners.put(version, listener);
+		SemVer parsed = SemVer.of(version);
+		listeners.put(parsed, listener);
 	}
 
 	// TODO(Marc): We should use the return value to indicate if updates were made,
@@ -127,9 +125,10 @@ public class DatabaseUpdater {
 			}
 		}
 
-		String dbVersion = dao.findLatest();
+		SemVer dbVersion = dao.findLatest();
 		if (!dbVersion.equals(currentVersion)) {
-			log.error("Application version (v{}) and DB version (v{}) do not match. Please update Cloudgene to the latest version.",
+			log.error(
+					"Application version (v{}) and DB version (v{}) do not match. Please update Cloudgene to the latest version.",
 					currentVersion, dbVersion);
 			return false;
 		}
@@ -151,8 +150,8 @@ public class DatabaseUpdater {
 		// Check if we need to write the current version to the DB (e.g., if it doesn't
 		// contain any updates so it wasn't added by executeUpdates()).
 		if (dao.isTableAvailable()) {
-			String currentDBVersion = dao.findLatest();
-			if ((compareVersion(currentVersion, currentDBVersion) > 0)) {
+			SemVer currentDBVersion = dao.findLatest();
+			if (currentVersion.compareTo(currentDBVersion) > 0) {
 				if (!writeVersion(currentVersion)) {
 					return false;
 				}
@@ -176,7 +175,7 @@ public class DatabaseUpdater {
 	 * @return {@code true} if the version was inserted without issue (including
 	 *         table creation, if necessary).
 	 */
-	public boolean writeVersion(@NonNull String version) {
+	public boolean writeVersion(@NonNull SemVer version) {
 		if (!dao.isTableAvailable()) {
 			if (!dao.createTable()) {
 				return false;
@@ -213,9 +212,10 @@ public class DatabaseUpdater {
 	private class UpdateFileExecutor {
 		private final StringBuilder builder = new StringBuilder();
 
+		private int line = 0;
 		private String strLine = null;
 		private boolean reading = false;
-		private String version = null;
+		private SemVer version = null;
 
 		public UpdateFileExecutor() {}
 
@@ -228,6 +228,8 @@ public class DatabaseUpdater {
 					BufferedReader br = new BufferedReader(sr)) {
 
 				while ((strLine = br.readLine()) != null) {
+					line++;
+
 					if (strLine.startsWith("--")) {
 						endBlock();
 						beginBlock();
@@ -249,10 +251,17 @@ public class DatabaseUpdater {
 		 * {@code reading} if the block should be processed, and possibly invokes
 		 * {@link IUpdateListener#beforeUpdate(Database)}
 		 */
-		public void beginBlock() {
-			version = strLine.replace("--", "").trim();
-			reading = ((compareVersion(version, oldVersion) > 0)
-					&& (compareVersion(version, currentVersion) <= 0));
+		private void beginBlock() throws IOException {
+			String comment = strLine.replace("--", "").trim();
+			try {
+				version = SemVer.of(comment);
+			} catch (IllegalArgumentException e) {
+				throw new IOException(
+						"(Line " + line + ") Found comment that is not a valid semver version: " + comment);
+			}
+
+			reading = (version.compareTo(oldVersion) > 0)
+					&& (version.compareTo(currentVersion) <= 0);
 
 			if (reading) {
 				log.info("Loading SQL update for version {}", version);
@@ -268,7 +277,7 @@ public class DatabaseUpdater {
 		 * the {@code builder} contents, and possibly invokes
 		 * {@link IUpdateListener#afterUpdate(Database)}
 		 */
-		public void endBlock() throws SQLException {
+		private void endBlock() throws SQLException {
 			if (!builder.isEmpty()) { // Old version block had commands to run
 				executeSQL(builder.toString(), version);
 				builder.setLength(0);
@@ -291,7 +300,7 @@ public class DatabaseUpdater {
 	 * @throws SQLException If anything goes wrong (DB connectivity, {@code sql}
 	 *                      content issues...)
 	 */
-	private void executeSQL(@NonNull String sql, @NonNull String version) throws SQLException {
+	private void executeSQL(@NonNull String sql, @NonNull SemVer version) throws SQLException {
 		String cleanedSQL = sql
 				.replaceAll("(?s)/\\*.*?\\*/", "") // remove block comments
 				.replaceAll("(?m)^\\s*--.*?$", "") // remove full line comments
@@ -307,12 +316,5 @@ public class DatabaseUpdater {
 			log.info("DB SQL Update {} finished", version);
 			writeVersion(version);
 		}
-	}
-
-	public static int compareVersion(@NonNull String first, @NonNull String second) {
-		SemVer v1 = SemVer.of(first);
-		SemVer v2 = SemVer.of(second);
-
-		return v1.compareTo(v2);
 	}
 }

@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import cloudgene.mapred.plugins.IPlugin;
 import cloudgene.mapred.plugins.PluginManager;
+import cloudgene.mapred.util.SemVer;
 import cloudgene.mapred.util.config.Configuration;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -21,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cloudgene.mapred.core.User;
-import cloudgene.mapred.database.updates.DatabaseUpdater;
 import cloudgene.mapred.util.GitHubException;
 import cloudgene.mapred.util.GitHubUtil;
 import cloudgene.mapred.util.GitHubUtil.Repository;
@@ -118,10 +118,14 @@ public class ApplicationRepository {
 		// find latest
 		Application latest = versions.get(0);
 		for (int i = 1; i < versions.size(); i++) {
-			String latestVersion = latest.getWdlApp().getVersion();
-			String version = versions.get(i).getWdlApp().getVersion();
-			if (DatabaseUpdater.compareVersion(version, latestVersion) == 1) {
-				latest = versions.get(i);
+			try {
+				SemVer latestVersion = SemVer.of(latest.getWdlApp().getVersion());
+				SemVer version = SemVer.of(versions.get(i).getWdlApp().getVersion());
+				if (version.compareTo(latestVersion) > 0) {
+					latest = versions.get(i);
+				}
+			} catch (IllegalArgumentException e) {
+				log.warn("Non-semver compliant version found; ignoring.", e);
 			}
 		}
 
@@ -132,7 +136,6 @@ public class ApplicationRepository {
 		List<Application> listApps = new ArrayList<>();
 
 		for (Application application : getAll()) {
-
 			if (!hasAccess(user, application) || !isActivated(application)) {
 				continue;
 			}
@@ -143,11 +146,9 @@ public class ApplicationRepository {
 				listApps.add(application);
 			} else if (filter == APPS && wdlApp.getWorkflow() != null) {
 				listApps.add(application);
-
 			} else if (filter == DATASETS && wdlApp.getWorkflow() != null) {
 				listApps.add(application);
 			}
-
 		}
 
 		Collections.sort(listApps);
@@ -155,13 +156,12 @@ public class ApplicationRepository {
 	}
 
 	public void remove(@NonNull Application application) throws IOException {
-		log.info("Remove application " + application.getId());
+		log.info("Removing application: {}", application.getId());
 		apps.remove(application);
 		reload();
 	}
 
 	public void updateConfig(@NonNull Application app, @Nullable Map<String, String> config) throws IOException {
-
 		WdlApp wdlApp = app.getWdlApp();
 
 		if (config == null) {
@@ -178,27 +178,22 @@ public class ApplicationRepository {
 			}
 			plugin.updateConfig(wdlApp, updatedConfig);
 		}
-
 	}
 
 	public List<Application> install(@NonNull String url) throws IOException, GitHubException, URISyntaxException {
-
 		List<Application> applications = new ArrayList<>();
-		Application application = null;
+		Application application;
+
 		if (url.startsWith("http://") || url.startsWith("https://")) {
 			return installFromUrl(url);
 		} else if (url.startsWith("s3://")) {
 			application = installFromS3(url);
 		} else if (url.startsWith("github://")) {
-
 			String repo = url.replace("github://", "");
 			Repository repository = GitHubUtil.parseShorthand(repo);
 			application = installFromGitHub(repository);
-
 		} else {
-
 			if (new File(url).exists()) {
-
 				if (url.endsWith(".zip")) {
 					application = installFromZipFile(url);
 				} else if (url.endsWith(".yaml")) {
@@ -208,18 +203,18 @@ public class ApplicationRepository {
 				} else {
 					application = installFromDirectory(url, false);
 				}
-
 			} else {
 				String repo = url.replace("github://", "");
 				Repository repository = GitHubUtil.parseShorthand(repo);
 				application = installFromGitHub(repository);
 			}
 		}
+
 		if (application != null) {
 			applications.add(application);
 		}
-		return applications;
 
+		return applications;
 	}
 
 	/**
