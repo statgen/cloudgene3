@@ -58,7 +58,7 @@
       <div class="col">
         <div class="card h-100">
           <div class="card-body">
-            <p><img src="/static/images/up-cloud.png" width="105px" alt="Upload to cloud symbol"></p>
+            <p><img src="/static/img/up-cloud.png" width="105px" alt="Upload to cloud symbol"></p>
             <b>Upload your genotypes to our secured service.</b>
           </div>
         </div>
@@ -66,7 +66,7 @@
       <div class="col">
         <div class="card h-100">
           <div class="card-body">
-            <p><img src="/static/images/impute.png" width="105px" alt="Imputation Symbol"></p>
+            <p><img src="/static/img/impute.png" width="105px" alt="Imputation Symbol"></p>
             <b>Choose a reference panel</b>. We will take care of pre-phasing and imputation.
           </div>
         </div>
@@ -74,7 +74,7 @@
       <div class="col">
         <div class="card h-100">
           <div class="card-body">
-            <p><img src="/static/images/down-cloud.png" width="105px" alt="Download from cloud symbol"></p>
+            <p><img src="/static/img/down-cloud.png" width="105px" alt="Download from cloud symbol"></p>
             <b>Download the results</b>.<br>All results are encrypted with a one-time password. After 7 days, all
             results are deleted from our server.
           </div>

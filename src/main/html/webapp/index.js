@@ -5,13 +5,14 @@ import '@fortawesome/fontawesome-free/css/all.css';
 
 import RouterControl from 'helpers/router';
 import ErrorPage from 'helpers/error-page';
-import StaticPage from 'helpers/static-page';
 import { addBeforeSendHook } from 'helpers/before-send';
 
 import Server from 'models/server';
 
 import LayoutControl from 'components/core/layout/';
 import DashboardControl from 'components/core/dashboard/';
+import AboutControl from 'components/core/about/';
+import ContactControl from 'components/core/contact/';
 import UserLoginControl from 'components/core/user/login/';
 import UserLogoutControl from 'components/core/user/logout/';
 import UserSignupControl from 'components/core/user/signup/';
@@ -36,6 +37,12 @@ const routes = [{
   path: 'pages/home',
   control: DashboardControl,
   classes: 'fullsize-container',
+}, {
+  path: 'pages/about',
+  control: AboutControl,
+}, {
+  path: 'pages/contact',
+  control: ContactControl,
 }, {
   path: 'pages/login',
   control: UserLoginControl,
@@ -86,9 +93,6 @@ const routes = [{
   control: SubmitJobControl,
   classes: 'fullsize-container',
   guard: loggedInGuard,
-}, {
-  path: 'pages/{page}',
-  control: StaticPage,
 }];
 
 function loggedInGuard(appState) {

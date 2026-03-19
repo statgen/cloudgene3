@@ -66,6 +66,11 @@
       "jquery": {
         "format": "global"
       }
+    },
+    "envs": {
+      "window-production": {
+        "bundlesPath": "bundles"
+      }
     }
   }
 }
