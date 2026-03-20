@@ -13,6 +13,7 @@ import java.util.concurrent.CompletionException;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.core.async.AsyncResponseTransformer;
+import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -118,16 +119,19 @@ public final class S3Util {
 
 		try {
 			return response.join();
-		} catch (CancellationException | CompletionException e) {
+		} catch (CancellationException | CompletionException | SdkException e) {
 			throw new IOException("Failed to get object: " + bucket + "/" + key, e);
 		}
 	}
 
 	/**
 	 * Returns the requested S3 object's metadata without downloading the object.
+	 * <p>
+	 * If the {@code key} does not correspond to a present object, returns
+	 * {@code null}. Other errors raise an {@link IOException}.
 	 *
 	 * @param uriParts Bucket and key indicating the S3 path to the desired object.
-	 * @return The queried object's metadata.
+	 * @return The queried object's metadata, if present. Otherwise, {@code null}.
 	 */
 	public static HeadObjectResponse getObjectHead(UriParts uriParts) throws IOException {
 		return getObjectHead(uriParts.bucket(), uriParts.key());
@@ -135,10 +139,13 @@ public final class S3Util {
 
 	/**
 	 * Returns the requested S3 object's metadata without downloading the object.
+	 * <p>
+	 * If the {@code key} does not correspond to a present object, returns
+	 * {@code null}. Other errors raise an {@link IOException}.
 	 *
 	 * @param bucket S3 bucket containing the queried object.
 	 * @param key    Path within the S3 bucket identifying the queried object.
-	 * @return The queried object's metadata.
+	 * @return The queried object's metadata, if present. Otherwise, {@code null}.
 	 */
 	public static HeadObjectResponse getObjectHead(String bucket, String key) throws IOException {
 		HeadObjectRequest request = HeadObjectRequest.builder()
@@ -150,7 +157,9 @@ public final class S3Util {
 			S3AsyncClient s3 = getS3Client();
 			CompletableFuture<HeadObjectResponse> future = s3.headObject(request);
 			return future.join();
-		} catch (CancellationException | CompletionException e) {
+		} catch (NoSuchKeyException e) {
+			return null;
+		} catch (CancellationException | CompletionException | SdkException e) {
 			throw new IOException("Failed to get object head: " + bucket + "/" + key, e);
 		}
 	}
@@ -251,7 +260,7 @@ public final class S3Util {
 		try {
 			FileDownload download = tm.downloadFile(downloadFileRequest);
 			download.completionFuture().join();
-		} catch (CancellationException | CompletionException e) {
+		} catch (CancellationException | CompletionException | SdkException e) {
 			throw new IOException("Failed to download file from S3: " + bucket + "/" + key, e);
 		}
 	}
@@ -310,7 +319,7 @@ public final class S3Util {
 		try {
 			FileUpload upload = tm.uploadFile(uploadFileRequest);
 			upload.completionFuture().join();
-		} catch (CancellationException | CompletionException e) {
+		} catch (CancellationException | CompletionException | SdkException e) {
 			throw new IOException("Failed to upload file '" + file.getPath() + "' to " + bucket + "/" + key, e);
 		}
 	}
@@ -338,7 +347,7 @@ public final class S3Util {
 		try {
 			CompletableFuture<PutObjectResponse> future = s3.putObject(request, body);
 			future.join();
-		} catch (CancellationException | CompletionException e) {
+		} catch (CancellationException | CompletionException | SdkException e) {
 			throw new IOException("Failed to upload content to " + bucket + "/" + key, e);
 		}
 	}
@@ -396,7 +405,7 @@ public final class S3Util {
 
 				continuationToken = response.nextContinuationToken();
 			} while (continuationToken != null);
-		} catch (CancellationException | CompletionException e) {
+		} catch (CancellationException | CompletionException | SdkException e) {
 			throw new IOException("Failed to delete S3 dir: " + uriParts.bucket() + "/" + uriParts.key(), e);
 		}
 	}
