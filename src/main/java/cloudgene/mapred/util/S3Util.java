@@ -127,27 +127,27 @@ public final class S3Util {
 	/**
 	 * Returns the requested S3 object's metadata without downloading the object.
 	 * <p>
-	 * If the {@code key} does not correspond to a present object, returns
-	 * {@code null}. Other errors raise an {@link IOException}.
+	 * If any errors are raised, including a missing {@code key}, returns
+	 * {@code null}. Does not throw.
 	 *
 	 * @param uriParts Bucket and key indicating the S3 path to the desired object.
 	 * @return The queried object's metadata, if present. Otherwise, {@code null}.
 	 */
-	public static HeadObjectResponse getObjectHead(UriParts uriParts) throws IOException {
+	public static HeadObjectResponse getObjectHead(UriParts uriParts) {
 		return getObjectHead(uriParts.bucket(), uriParts.key());
 	}
 
 	/**
 	 * Returns the requested S3 object's metadata without downloading the object.
 	 * <p>
-	 * If the {@code key} does not correspond to a present object, returns
-	 * {@code null}. Other errors raise an {@link IOException}.
+	 * If any errors are raised, including a missing {@code key}, returns
+	 * {@code null}. Does not throw.
 	 *
 	 * @param bucket S3 bucket containing the queried object.
 	 * @param key    Path within the S3 bucket identifying the queried object.
 	 * @return The queried object's metadata, if present. Otherwise, {@code null}.
 	 */
-	public static HeadObjectResponse getObjectHead(String bucket, String key) throws IOException {
+	public static HeadObjectResponse getObjectHead(String bucket, String key) {
 		HeadObjectRequest request = HeadObjectRequest.builder()
 				.bucket(bucket)
 				.key(key)
@@ -157,10 +157,8 @@ public final class S3Util {
 			S3AsyncClient s3 = getS3Client();
 			CompletableFuture<HeadObjectResponse> future = s3.headObject(request);
 			return future.join();
-		} catch (NoSuchKeyException e) {
-			return null;
 		} catch (CancellationException | CompletionException | SdkException e) {
-			throw new IOException("Failed to get object head: " + bucket + "/" + key, e);
+			return null;
 		}
 	}
 
@@ -171,7 +169,7 @@ public final class S3Util {
 	 * @return {@code true} if an object is found at the given S3 location;
 	 *         {@code false} otherwise.
 	 */
-	public static boolean doesObjectExist(UriParts uriParts) throws IOException {
+	public static boolean doesObjectExist(UriParts uriParts) {
 		return doesObjectExist(uriParts.bucket(), uriParts.key());
 	}
 
@@ -183,7 +181,7 @@ public final class S3Util {
 	 * @return {@code true} if an object is found at the given S3 location;
 	 *         {@code false} otherwise.
 	 */
-	public static boolean doesObjectExist(String bucket, String key) throws IOException {
+	public static boolean doesObjectExist(String bucket, String key) {
 		return getObjectHead(bucket, key) != null;
 	}
 
