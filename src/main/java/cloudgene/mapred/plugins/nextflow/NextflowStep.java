@@ -26,19 +26,15 @@ import groovy.json.JsonOutput;
 
 public class NextflowStep extends CloudgeneStep {
 
-	private static final String PROPERTY_PROCESS_CONFIG = "processes";
+	private static final Logger log = LoggerFactory.getLogger(NextflowStep.class);
 
+	private static final String PROPERTY_PROCESS_CONFIG = "processes";
 	private static final String PROPERTY_GROUPS_CONFIG = "groups";
 
 	private CloudgeneContext context;
-
-	private Map<String, Message> messages = new HashMap<String, Message>();
-
-	private Map<String, NextflowProcessConfig> configs = new HashMap<String, NextflowProcessConfig>();
-
-	private NextflowCollector collector = NextflowCollector.getInstance();
-
-	private static final Logger log = LoggerFactory.getLogger(NextflowStep.class);
+	private final Map<String, Message> messages = new HashMap<>();
+	private final Map<String, NextflowProcessConfig> configs = new HashMap<>();
+	private final NextflowCollector collector = NextflowCollector.getInstance();
 
 	@Override
 	public boolean run(WdlStep step, CloudgeneContext context) {
@@ -141,7 +137,7 @@ public class NextflowStep extends CloudgeneStep {
 		}
 		nextflow.setParamsFile(paramsFile);
 
-		// register job in webcollector and set created url
+		// register job in web collector and set created url
 		String collectorUrl = collector.addContext(context, configs);
 		nextflow.setWeblog(collectorUrl);
 
@@ -233,11 +229,9 @@ public class NextflowStep extends CloudgeneStep {
 
 	@Override
 	public void updateProgress() {
-
 		List<NextflowProcess> processes = collector.getProcesses(context);
 
 		for (NextflowProcess process : processes) {
-
 			NextflowProcessConfig config = getNextflowProcessConfig(process);
 
 			Message message = messages.get(process.getName());
@@ -252,9 +246,7 @@ public class NextflowStep extends CloudgeneStep {
 			}
 
 			NextflowProcessRenderer.render(config, process, message);
-
 		}
-
 	}
 
 	private void loadProcessConfigs(Object map) {
@@ -278,7 +270,7 @@ public class NextflowStep extends CloudgeneStep {
 	}
 
 	private Map<String, Step> loadGroups(Object map) {
-		Map<String, Step> groups = new HashMap<String, Step>();
+		Map<String, Step> groups = new HashMap<>();
 		if (map != null) {
 			List<Map<String, Object>> groupConfigs = (List<Map<String, Object>>) map;
 			for (Map<String, Object> groupConfig : groupConfigs) {
@@ -302,7 +294,7 @@ public class NextflowStep extends CloudgeneStep {
 	}
 
 	private Map<String, Object> createParamsMap(WdlStep step) {
-		Map<String, Object> params = new HashMap<String, Object>();
+		Map<String, Object> params = new HashMap<>();
 
 		// used to defined hard coded params
 		if (step.get("params") != null) {

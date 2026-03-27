@@ -8,6 +8,7 @@ import java.util.Map;
 
 import cloudgene.mapred.jobs.Step;
 import cloudgene.mapred.util.IpFetcher;
+import io.micronaut.core.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,13 +93,19 @@ public class NextflowCollector {
 		processes.add(process);
 	}
 
-	public List<NextflowProcess> getProcesses(CloudgeneContext context) {
+	/**
+	 * Returns an immutable list containing the processes associated with the
+	 * provided context. If anything's missing, returns an empty list. The list
+	 * returned is always a copy (avoids concurrency issues).
+	 */
+	public @NonNull List<NextflowProcess> getProcesses(@NonNull CloudgeneContext context) {
 		List<NextflowProcess> processes = data.get(context.getPublicJobId());
-		if (processes == null) {
-			return new ArrayList<>();
-		}
-		return processes;
 
+		if (processes == null) {
+			return List.of();
+		}
+
+		return List.copyOf(processes);
 	}
 
 	public void cleanProcesses(CloudgeneContext context) {
