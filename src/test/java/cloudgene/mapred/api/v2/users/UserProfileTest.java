@@ -63,7 +63,7 @@ public class UserProfileTest {
 	}
 
 	@Test
-	public void testGetWithWrongCredentials() {
+	public void testGetWithoutAuth() {
 		RestAssured
 				.when()
 				.get("/api/v2/users/test1/profile")
@@ -72,10 +72,20 @@ public class UserProfileTest {
 	}
 
 	@Test
-	public void testGetWithCorrectCredentials() {
-		// login as user test1 and get profile. username is ignored, returns
-		// always auth user's profile. just for better urls
+	public void testGetWithWrongCredentials() {
+		Header accessToken = client.login("test1", "Test1Password!");
 
+		RestAssured
+				.given()
+				.header(accessToken)
+				.when()
+				.get("/api/v2/users/test2/profile")
+				.then()
+				.statusCode(403);
+	}
+
+	@Test
+	public void testGetWithCorrectCredentials() {
 		Header accessToken = client.login("test1", "Test1Password!");
 
 		RestAssured
@@ -88,20 +98,18 @@ public class UserProfileTest {
 				.body("username", equalTo("test1"))
 				.body("mail", equalTo("test1@test.com"))
 				.body("password", nullValue());
-
 	}
 
 	@Test
 	public void testUpdateWithCorrectCredentials() {
-
-		// login as user test1
+		// login as user test2
 		Header accessToken = client.login("test2", "Test2+Passw?rd");
 
 		// try to update password for test2
 		Map<String, String> form = new HashMap<>();
 		form.put("username", "test2");
 		form.put("full-name", "new full-name");
-		form.put("mail", "test1@test.com");
+		form.put("mail", "test2+new-email@test.com");
 		form.put("new-password", "new-Password27");
 		form.put("confirm-new-password", "new-Password27");
 
@@ -111,7 +119,7 @@ public class UserProfileTest {
 				.and()
 				.formParams(form)
 				.when()
-				.post("/api/v2/users/test1/profile")
+				.post("/api/v2/users/test2/profile")
 				.then()
 				.statusCode(200)
 				.body("success", equalTo(true))

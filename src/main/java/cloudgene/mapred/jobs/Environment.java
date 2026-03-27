@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonClassDescription;
 
 public class Environment {
 
-	public static String PREFIX = "CLOUDGENE_";
+	private static final String PREFIX = "CLOUDGENE_";
 
 	private final Map<String, String> env = new HashMap<>();
 
@@ -103,31 +103,6 @@ public class Environment {
 	}
 
 	@JsonClassDescription
-	public static class Variable {
-
-		private String name;
-
-		private String value;
-
-		public Variable(String name, String value) {
-			this.name = name;
-			this.value = value;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setValue(String value) {
-			this.value = value;
-		}
-
-		public String getValue() {
-			return value;
-		}
+	public record Variable(String name, String value) {
 	}
 }
