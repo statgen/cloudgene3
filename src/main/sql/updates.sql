@@ -215,3 +215,21 @@ ALTER TABLE job ADD COLUMN notification_state ENUM('pending', 'notified_retireme
 -- 3.1.4-statgen.17
 
 ALTER TABLE job MODIFY COLUMN notification_state ENUM('pending', 'sent_retirement_reminder') NULL DEFAULT NULL;
+
+-- 3.1.4-statgen.22
+
+ALTER TABLE `user` ADD CONSTRAINT user_id_unique       UNIQUE (id);
+ALTER TABLE `user` ADD CONSTRAINT user_username_unique UNIQUE (username);
+ALTER TABLE `user` ADD CONSTRAINT user_mail_unique     UNIQUE (mail);
+
+ALTER TABLE job              ADD CONSTRAINT job_id_unique              UNIQUE (id);
+ALTER TABLE parameter        ADD CONSTRAINT parameter_id_unique        UNIQUE (id);
+ALTER TABLE steps            ADD CONSTRAINT steps_id_unique            UNIQUE (id);
+ALTER TABLE log_messages     ADD CONSTRAINT log_messages_id_unique     UNIQUE (id);
+ALTER TABLE downloads        ADD CONSTRAINT downloads_id_unique        UNIQUE (id);
+ALTER TABLE cache_entries    ADD CONSTRAINT cache_entries_id_unique    UNIQUE (id);
+ALTER TABLE counters         ADD CONSTRAINT counters_id_unique         UNIQUE (id);
+ALTER TABLE counters_history ADD CONSTRAINT counters_history_id_unique UNIQUE (id);
+ALTER TABLE html_snippets    ADD CONSTRAINT html_snippets_id_unique    UNIQUE (id);
+ALTER TABLE job_values       ADD CONSTRAINT job_values_id_unique       UNIQUE (id);
+ALTER TABLE banners          ADD CONSTRAINT banners_id_unique          UNIQUE (id);

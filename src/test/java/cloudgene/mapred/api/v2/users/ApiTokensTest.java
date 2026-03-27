@@ -46,46 +46,46 @@ public class ApiTokensTest {
 		UserDao userDao = new UserDao(database);
 
 		User testUser1 = new User();
-		testUser1.setUsername("testusertoken");
-		testUser1.setFullName("test1");
-		testUser1.setMail("test1@test.com");
+		testUser1.setUsername("testusertoken1");
+		testUser1.setFullName("Token 1");
+		testUser1.setMail("test1@api.token.test");
 		testUser1.setRoles(new String[] { "private" });
 		testUser1.setActive(true);
 		testUser1.setActivationCode("");
-		testUser1.setPassword(HashUtil.hashPassword("Test1Password"));
+		testUser1.setPassword(HashUtil.hashPassword("Test1P4ssword!"));
 		userDao.insert(testUser1);
 
 		User testUser2 = new User();
 		testUser2.setUsername("testusertoken2");
-		testUser2.setFullName("test2");
-		testUser2.setMail("test1@test.com");
+		testUser2.setFullName("Token 2");
+		testUser2.setMail("test2@api.token.test");
 		testUser2.setRoles(new String[] { "private" });
 		testUser2.setActive(true);
 		testUser2.setActivationCode("");
-		testUser2.setPassword(HashUtil.hashPassword("Test2Password"));
+		testUser2.setPassword(HashUtil.hashPassword("Test2P4ssword@"));
 		userDao.insert(testUser2);
 	}
 
 	@Test
 	public void testValidateToken() {
-		Header accessToken = client.login("testusertoken", "Test1Password");
+		Header accessToken = client.login("testusertoken1", "Test1P4ssword!");
 
 		// check if token is empty
 		RestAssured
 				.given()
 				.header(accessToken)
 				.when()
-				.get("/api/v2/users/testusertoken/profile")
+				.get("/api/v2/users/testusertoken1/profile")
 				.then()
 				.statusCode(200)
-				.body("username", equalTo("testusertoken"))
+				.body("username", equalTo("testusertoken1"))
 				.body("hasApiToken", equalTo(false))
 				.body("password", nullValue());
 
 		// create token without authentification
 		RestAssured
 				.when()
-				.post("/api/v2/users/testusertoken/api-token")
+				.post("/api/v2/users/testusertoken1/api-token")
 				.then()
 				.statusCode(401);
 
@@ -94,7 +94,7 @@ public class ApiTokensTest {
 				.given()
 				.header(accessToken)
 				.when()
-				.post("/api/v2/users/testusertoken/api-token")
+				.post("/api/v2/users/testusertoken1/api-token")
 				.then()
 				.statusCode(200)
 				.body("success", equalTo(true))
@@ -122,24 +122,24 @@ public class ApiTokensTest {
 				.given()
 				.header(headerApiToken)
 				.when()
-				.delete("/api/v2/users/testusertoken/api-token")
+				.delete("/api/v2/users/testusertoken1/api-token")
 				.then()
 				.statusCode(403);
 
 		// try to update user profile (e.g. email) wit apiToken. should fail.
 		Map<String, String> formProfile = new HashMap<>();
-		formProfile.put("username", "testusertoken");
+		formProfile.put("username", "testusertoken1");
 		formProfile.put("full-name", "new full-name");
-		formProfile.put("mail", "new@email.com");
-		formProfile.put("new-password", "new-Password27");
-		formProfile.put("confirm-new-password", "new-Password27");
+		formProfile.put("mail", "new.mail@api.tokens.test");
+		formProfile.put("new-password", "new-Password27#");
+		formProfile.put("confirm-new-password", "new-Password27#");
 
 		RestAssured
 				.given()
 				.header(headerApiToken)
 				.formParams(formProfile)
 				.when()
-				.post("/api/v2/users/testusertoken/profile")
+				.post("/api/v2/users/testusertoken1/profile")
 				.then()
 				.statusCode(403);
 
@@ -148,7 +148,7 @@ public class ApiTokensTest {
 				.given()
 				.header(accessToken)
 				.when()
-				.delete("/api/v2/users/testusertoken/api-token")
+				.delete("/api/v2/users/testusertoken1/api-token")
 				.then()
 				.statusCode(200)
 				.body("success", equalTo(true));
@@ -166,17 +166,17 @@ public class ApiTokensTest {
 
 	@Test
 	public void testCreateTokenWithCorrectCredentials() {
-		Header accessToken = client.login("testusertoken", "Test1Password");
+		Header accessToken = client.login("testusertoken1", "Test1P4ssword!");
 
 		// check if token is empty
 		RestAssured
 				.given()
 				.header(accessToken)
 				.when()
-				.get("/api/v2/users/testusertoken/profile")
+				.get("/api/v2/users/testusertoken1/profile")
 				.then()
 				.statusCode(200)
-				.body("username", equalTo("testusertoken"))
+				.body("username", equalTo("testusertoken1"))
 				.body("hasApiToken", equalTo(false))
 				.body("password", nullValue());
 
@@ -185,7 +185,7 @@ public class ApiTokensTest {
 				.given()
 				.header(accessToken)
 				.when()
-				.post("/api/v2/users/testusertoken/api-token")
+				.post("/api/v2/users/testusertoken1/api-token")
 				.then()
 				.statusCode(200)
 				.body("success", equalTo(true))
@@ -226,7 +226,7 @@ public class ApiTokensTest {
 				.given()
 				.header(accessToken)
 				.when()
-				.delete("/api/v2/users/testusertoken/api-token")
+				.delete("/api/v2/users/testusertoken1/api-token")
 				.then()
 				.statusCode(200)
 				.body("success", equalTo(true));
@@ -247,7 +247,7 @@ public class ApiTokensTest {
 
 	@Test
 	public void testSubmitWithoutVersion() {
-		Header accessToken = client.login("testusertoken2", "Test2Password");
+		Header accessToken = client.login("testusertoken2", "Test2P4ssword@");
 
 		// check if token is empty
 		RestAssured
@@ -265,7 +265,7 @@ public class ApiTokensTest {
 				.given()
 				.header(accessToken)
 				.when()
-				.post("/api/v2/users/testusertoken/api-token")
+				.post("/api/v2/users/testusertoken2/api-token")
 				.then()
 				.statusCode(200)
 				.and()
@@ -306,7 +306,7 @@ public class ApiTokensTest {
 				.given()
 				.header(accessToken)
 				.when()
-				.delete("/api/v2/users/testusertoken/api-token")
+				.delete("/api/v2/users/testusertoken2/api-token")
 				.then()
 				.statusCode(200)
 				.body("success", equalTo(true));
@@ -335,14 +335,14 @@ public class ApiTokensTest {
 	@Test
 	public void testSubmitJobWithExpiredApiToken() {
 		int expiration = 0;
-		Header accessToken = client.login("testusertoken", "Test1Password");
+		Header accessToken = client.login("testusertoken1", "Test1P4ssword!");
 
 		// create token
 		String apiToken = RestAssured
 				.given()
 				.header(accessToken)
 				.when()
-				.post("/api/v2/users/testusertoken/api-token?expiration=" + expiration)
+				.post("/api/v2/users/testusertoken1/api-token?expiration=" + expiration)
 				.then()
 				.statusCode(200)
 				.body("success", equalTo(true))
@@ -357,7 +357,7 @@ public class ApiTokensTest {
 				.given()
 				.header(accessToken)
 				.when()
-				.delete("/api/v2/users/testusertoken/api-token")
+				.delete("/api/v2/users/testusertoken1/api-token")
 				.then()
 				.statusCode(200)
 				.body("success", equalTo(true));

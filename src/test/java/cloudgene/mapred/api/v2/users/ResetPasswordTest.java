@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -41,9 +40,9 @@ public class ResetPasswordTest {
 		UserDao userDao = new UserDao(database);
 
 		User testUser1 = new User();
-		testUser1.setUsername("testreset");
-		testUser1.setFullName("test1");
-		testUser1.setMail("testuser1@test.com");
+		testUser1.setUsername("testreset1");
+		testUser1.setFullName("Test Reset 1");
+		testUser1.setMail("testreset1@test.com");
 		testUser1.setRoles(new String[] { "User" });
 		testUser1.setActive(true);
 		testUser1.setActivationCode("");
@@ -52,27 +51,30 @@ public class ResetPasswordTest {
 
 		User testUse2 = new User();
 		testUse2.setUsername("testreset2");
-		testUse2.setFullName("test1");
-		testUse2.setMail("testuser1@test.com");
+		testUse2.setFullName("Test Reset 2");
+		testUse2.setMail("testreset2@test.com");
 		testUse2.setRoles(new String[] { "User" });
 		testUse2.setActive(false);
 		testUse2.setActivationCode("fdsfdsfsdfsdfsd");
 		testUse2.setPassword(HashUtil.hashPassword("oldpassword"));
 		userDao.insert(testUse2);
-
 	}
 
 	@Test
 	public void testWithWrongName() {
-
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
-		Map<String, String> form = new HashMap<String, String>();
-		form.put("username", "unknown-user-wrong");
+		Map<String, String> form = Map.of("username", "unknown-user-wrong");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/reset").then().statusCode(200).and()
-				.body("success", equalTo(false)).and()
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/reset")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
 				.body("message", equalTo("We couldn't find an account with that username or email."));
 
 		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
@@ -80,35 +82,42 @@ public class ResetPasswordTest {
 
 	@Test
 	public void testWithInActiveUser() {
-
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
-		Map<String, String> form = new HashMap<String, String>();
-		form.put("username", "testreset2");
+		Map<String, String> form = Map.of("username", "testreset2");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/reset").then().statusCode(200).and()
-				.body("success", equalTo(false)).and().body("message", equalTo("Account is not activated."));
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/reset")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", equalTo("Account is not activated."));
 
 		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
-
 	}
 
 	@Test
 	public void testWithWrongEMail() {
-
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
-		Map<String, String> form = new HashMap<String, String>();
-		form.put("username", "wrong@e-mail.com");
+		Map<String, String> form = Map.of("username", "wrong@e-mail.com");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/reset").then().statusCode(200).and()
-				.body("success", equalTo(false)).and()
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/reset")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
 				.body("message", equalTo("We couldn't find an account with that username or email."));
 
 		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
-
 	}
 
 	@Test
@@ -116,42 +125,58 @@ public class ResetPasswordTest {
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
-		Map<String, String> form = new HashMap<String, String>();
-		form.put("username", "%");
+		Map<String, String> form = Map.of("username", "%");
 
-		RestAssured.given().formParams(form).when().post("/api/v2/users/reset").then().statusCode(200).and()
-				.body("success", equalTo(false)).and()
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/reset")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
 				.body("message", equalTo("We couldn't find an account with that username or email."));
 
 		assertEquals(mailsBefore, mailServer.getReceivedEmailSize());
-
 	}
 
 	@Test
 	public void testResetPassword() {
-
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
-		Map<String, String> form = new HashMap<String, String>();
-		form.put("username", "testreset");
+		Map<String, String> form = Map.of("username", "testreset1");
 
 		// rest password and check if mail was sent
-		RestAssured.given().formParams(form).when().post("/api/v2/users/reset").then().statusCode(200).and()
-				.body("success", equalTo(true)).and().body("message", containsString("We sent you an email"));
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/reset")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(true))
+				.body("message", containsString("We sent you an email"));
 
 		assertEquals(mailsBefore + 1, mailServer.getReceivedEmailSize());
 
 		// try it a second time (nervous user)
-		RestAssured.given().formParams(form).when().post("/api/v2/users/reset").then().statusCode(200).and()
-				.body("success", equalTo(true)).and().body("message", containsString("We sent you an email"));
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/reset")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(true))
+				.body("message", containsString("We sent you an email"));
 
 		assertEquals(mailsBefore + 2, mailServer.getReceivedEmailSize());
 
 		// get activation key from database and check if key was reused in mail2
 		Database database = application.getDatabase();
 		UserDao userDao = new UserDao(database);
-		User user = userDao.findByUsername("testreset");
+		User user = userDao.findByUsername("testreset1");
 		assertNotNull(user);
 
 		// check if correct key is in mail1
@@ -161,7 +186,5 @@ public class ResetPasswordTest {
 		// check if correct key is in mail2
 		SmtpMessage message2 = mailServer.getReceivedEmailAsList().get(mailsBefore + 1);
 		assertTrue(message2.getBody().contains(user.getActivationCode()));
-
 	}
-
 }
