@@ -33,7 +33,7 @@ public class CloudgeneContextTest {
 	public void testConstructor() {
 		CloudgeneContext context = makeContext();
 
-		assertEquals("foo@bar.com", context.getData("cloudgene.user.mail"));
+		assertEquals("user@example.com", context.getData("cloudgene.user.mail"));
 		assertEquals("User User", context.getData("cloudgene.user.name"));
 		assertEquals("user", context.getUser().getUsername());
 		assertTrue(context.getLocalOutput().endsWith(context.getJob().getLocalWorkspace()));
@@ -149,10 +149,10 @@ public class CloudgeneContextTest {
 	@Test
 	public void testSubmitCounter() {
 		// NOTE(Marc): This doesn't seem to be correctly designed. There is no relation
-		// between what goes into counters
-		// and submitCounters, except getSubmittedCounters kind of assumes the
-		// submitCounters keys are a
-		// subset of the counters keys (as one would expect, but we don't enforce).
+		//             between what goes into counters and submitCounters, except
+		//             getSubmittedCounters kind of assumes the submitCounters keys are a
+		//             subset of the counters keys (as one would expect, but we don't
+		//             enforce).
 
 		CloudgeneContext context = makeContext();
 		Map<String, Long> counters;

@@ -170,7 +170,7 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 				"user",
 				"admin1978",
 				"User User",
-				"foo@bar.com",
+				"user@example.com",
 				false,
 				new String[] { "public" });
 
