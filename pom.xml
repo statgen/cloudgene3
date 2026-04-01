@@ -562,16 +562,32 @@
 				<version>2.4</version>
 				<executions>
 					<execution>
-						<id>create-assembly</id>
+						<id>assemble-backend</id>
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
 						</goals>
 						<configuration>
-							<appendAssemblyId>false</appendAssemblyId>
 							<descriptors>
-								<descriptor>src/main/assembly/assembly.xml</descriptor>
+								<descriptor>src/main/assembly/backend.xml</descriptor>
 							</descriptors>
+							<finalName>backend.${project.artifactId}-${project.version}</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+						</configuration>
+					</execution>
+					<execution>
+						<id>assemble-frontend</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>src/main/assembly/frontend.xml</descriptor>
+							</descriptors>
+							<finalName>frontend.${project.artifactId}-${project.version}</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							<attach>false</attach>
 						</configuration>
 					</execution>
 				</executions>
