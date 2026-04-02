@@ -7,8 +7,8 @@ import cloudgene.mapred.wdl.WdlApp;
 import cloudgene.mapred.wdl.WdlParameterInput;
 import cloudgene.mapred.wdl.WdlParameterInputType;
 import genepi.io.FileUtil;
+import io.micronaut.core.annotation.NonNull;
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotNull;
 import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +29,9 @@ public class JobParameterParser {
 	protected Application application;
 
 	public static Map<String, String> parse(
-			@NotNull List<FormUtil.Parameter> form,
-			@NotNull WdlApp app,
-			@NotNull IWorkspace workspace) throws Exception {
+			@NonNull List<FormUtil.Parameter> form,
+			@NonNull WdlApp app,
+			@NonNull IWorkspace workspace) throws Exception {
 
 		Map<String, String> props = new HashMap<>();
 		Map<String, String> params = new HashMap<>();
@@ -144,7 +144,7 @@ public class JobParameterParser {
 		return params;
 	}
 
-	private static WdlParameterInput getInputParamByName(@NotNull WdlApp app, String name) {
+	private static WdlParameterInput getInputParamByName(@NonNull WdlApp app, String name) {
 		for (WdlParameterInput input : app.getWorkflow().getInputs()) {
 			if (input.getId().equals(name)) {
 				return input;
