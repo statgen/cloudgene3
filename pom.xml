@@ -49,9 +49,6 @@
 	</developers>
 
 	<properties>
-		<node.version>v25.3.0</node.version>
-		<npm.version>11.6.2</npm.version>
-		<webapp>${basedir}/src/main/html/webapp</webapp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<packaging>jar</packaging>
@@ -341,17 +338,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>io.micronaut.micrometer</groupId>
-			<artifactId>micronaut-micrometer-core</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>io.micronaut.micrometer</groupId>
-			<artifactId>micronaut-micrometer-registry-prometheus</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.20.0</version>
@@ -509,51 +495,6 @@
 				</configuration>
 			</plugin>
 
-			<!-- Create webapp for production -->
-
-			<plugin>
-				<groupId>com.github.eirslett</groupId>
-				<artifactId>frontend-maven-plugin</artifactId>
-				<version>1.11.0</version>
-				<executions>
-					<execution>
-						<id>install node and npm</id>
-						<goals>
-							<goal>install-node-and-npm</goal>
-						</goals>
-						<configuration>
-							<nodeVersion>${node.version}</nodeVersion>
-							<npmVersion>${npm.version}</npmVersion>
-							<workingDirectory>${webapp}</workingDirectory>
-						</configuration>
-					</execution>
-					<execution>
-						<id>npm install</id>
-						<goals>
-							<goal>npm</goal>
-						</goals>
-						<configuration>
-							<arguments>install</arguments>
-							<workingDirectory>${webapp}</workingDirectory>
-
-						</configuration>
-					</execution>
-					<execution>
-						<id>npm build prod</id>
-						<goals>
-							<goal>npm</goal>
-						</goals>
-						<phase>generate-resources</phase>
-						<configuration>
-							<arguments>run build</arguments>
-							<npmInheritsProxyConfigFromMaven>false</npmInheritsProxyConfigFromMaven>
-							<workingDirectory>${webapp}</workingDirectory>
-
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
 			<!-- Build final directory structure and zip files -->
 
 			<plugin>
@@ -571,23 +512,8 @@
 							<descriptors>
 								<descriptor>src/main/assembly/backend.xml</descriptor>
 							</descriptors>
-							<finalName>backend.${project.artifactId}-${project.version}</finalName>
+							<finalName>${project.artifactId}-${project.version}</finalName>
 							<appendAssemblyId>false</appendAssemblyId>
-						</configuration>
-					</execution>
-					<execution>
-						<id>assemble-frontend</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<descriptors>
-								<descriptor>src/main/assembly/frontend.xml</descriptor>
-							</descriptors>
-							<finalName>frontend.${project.artifactId}-${project.version}</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
-							<attach>false</attach>
 						</configuration>
 					</execution>
 				</executions>

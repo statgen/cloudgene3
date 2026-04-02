@@ -44,19 +44,6 @@ micronaut:
         enabled: false
       logout:
         get-allowed: true
-  router:
-    static-resources:
-      webapp:
-        mapping: "${micronaut.server.context-path:}/**"
-        paths:
-          - file:webapp
-        enabled: true
-      pages:
-        enabled: true
-        mapping: "${micronaut.server.context-path:}/static/**"
-        paths:
-          - file:pages
-          - classpath:/pages
   serde:
     serialization:
       inclusion: ALWAYS
