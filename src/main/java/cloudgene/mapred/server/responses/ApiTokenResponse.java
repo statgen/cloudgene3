@@ -3,23 +3,18 @@ package cloudgene.mapred.server.responses;
 import cloudgene.mapred.core.ApiToken;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 
-
 @JsonClassDescription
 public class ApiTokenResponse {
 
 	private String token = "";
-
-	private boolean success = true;
-
-	private String message = "";
-
+	private boolean success;
+	private String message;
 	private int type;
-
 	private long time;
 
 	public ApiTokenResponse(ApiToken token) {
 		this("Creation successfull.", true);
-		this.token = token.getAccessToken();
+		this.token = token.accessToken();
 	}
 
 	public ApiTokenResponse(String message, boolean success) {
@@ -66,5 +61,4 @@ public class ApiTokenResponse {
 	public String getToken() {
 		return token;
 	}
-
 }

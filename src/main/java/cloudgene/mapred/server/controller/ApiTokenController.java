@@ -25,6 +25,8 @@ import io.micronaut.security.rules.SecurityRule;
 import jakarta.inject.Inject;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
+
 @Controller
 public class ApiTokenController {
 
@@ -32,6 +34,7 @@ public class ApiTokenController {
 
 	private static final String MESSAGE_API_TOKEN_CREATED = "Creation successful.";
 	private static final String MESSAGE_APT_TOKEN_ERROR = "Error during API token generation.";
+	private static final String MESSAGE_APT_TOKEN_BAD_INPUT = "Bad input on API token request.";
 	private static final int DEFAULT_TOKEN_LIFETIME_DAYS = 30;
 
 	@Inject
@@ -50,29 +53,33 @@ public class ApiTokenController {
 
 		User user = authenticationService.getUserByAuthentication(authentication);
 
-		// Query parameter expressed in days, service expects
 		if (expiration == null) {
 			expiration = DEFAULT_TOKEN_LIFETIME_DAYS;
 		}
 
-		ApiToken apiToken = authenticationService.createApiToken(user, expiration);
+		ApiToken apiToken;
+		try {
+			apiToken = authenticationService.createApiToken(user, expiration);
+		} catch (IllegalArgumentException e) {
+			log.warn(
+					"Bad inputs on API token request for user {} (ID {} - email {}). Reason: {}",
+					user.getUsername(), user.getId(), user.getMail(), e.getMessage());
 
-		// store random hash (not access token) in database to validate token
-		user.setApiToken(apiToken.getHash());
-		user.setApiTokenExpiresOn(apiToken.getExpiresOn());
+			return HttpResponse.badRequest(new ApiTokenResponse(MESSAGE_APT_TOKEN_BAD_INPUT, false));
+		} catch (IOException e) {
+			log.warn(
+					"Failed to create API token for user {} (ID {} - email {}). Reason: {}",
+					user.getUsername(), user.getId(), user.getMail(), e.getMessage());
 
-		UserDao userDao = new UserDao(application.getDatabase());
-		boolean successful = userDao.update(user);
-
-		if (successful) {
-			log.info(
-					"User: generated API token for user {} (ID {} - email {})",
-					user.getUsername(), user.getId(), user.getMail());
-
-			return HttpResponse.ok(new ApiTokenResponse(apiToken));
-		} else {
+			// NOTE(Marc): Keeping OK for backwards compatibility. Should probably be SERVER_ERROR.
 			return HttpResponse.ok(new ApiTokenResponse(MESSAGE_APT_TOKEN_ERROR, false));
 		}
+
+		log.info(
+				"User: generated API token for user {} (ID {} - email {})",
+				user.getUsername(), user.getId(), user.getMail());
+
+		return HttpResponse.ok(new ApiTokenResponse(apiToken));
 	}
 
 	@Delete("/api/v2/users/{username}/api-token")

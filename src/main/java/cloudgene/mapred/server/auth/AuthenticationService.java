@@ -1,5 +1,6 @@
 package cloudgene.mapred.server.auth;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,10 +88,25 @@ public class AuthenticationService {
 		throw new AuthorizationException(authentication);
 	}
 
-	public @NonNull ApiToken createApiToken(@NonNull User user, int lifetimeDays) {
-		if (lifetimeDays < 1 || lifetimeDays > 90) {
+	/**
+	 * Creates a new {@link ApiToken} (JWT + metadata) for the given user that will
+	 * expire in a set number of days.
+	 * <p>
+	 * The token hash (random salt) and expiration timestamp are saved in the
+	 * database. Only one hash per user is stored.
+	 *
+	 * @param user         The produced token allows the bearer to act on this
+	 *                     user's behalf (non-null).
+	 * @param lifetimeDays Number of days since creation until the token expires.
+	 *                     Range: 0..90 (inclusive).
+	 * @return The newly created token (non-null, throws on failure).
+	 */
+	public @NonNull ApiToken createApiToken(@NonNull User user, int lifetimeDays) throws IOException {
+		// NOTE(Marc): lifetimeDays = 0 will immediately expire. The test suite depends
+		//             on this to test expired tokens.
+		if (lifetimeDays < 0 || lifetimeDays > 90) {
 			throw new IllegalArgumentException(
-					"lifetimeDays should be in range 1..90 (inclusive); found: " + lifetimeDays);
+					"lifetimeDays should be in range 0..90 (inclusive); found: " + lifetimeDays);
 		}
 
 		int lifetimeSeconds = 24 * 60 * 60 * lifetimeDays;
@@ -109,10 +125,28 @@ public class AuthenticationService {
 		attributes.put("api", true);
 
 		Authentication authentication = Authentication.build(user.getUsername(), attributes);
-		Optional<String> token = generator.generateToken(authentication, lifetimeSeconds);
+		Optional<String> jwt = generator.generateToken(authentication, lifetimeSeconds);
+
+		if (jwt.isEmpty()) {
+			throw new IOException("Failed to generate JWT token.");
+		}
+
 		Date expiresOn = new Date(System.currentTimeMillis() + (lifetimeSeconds * 1_000L));
 
-		return new ApiToken(token.get(), hash, expiresOn);
+		ApiToken apiToken = new ApiToken(jwt.get(), hash, expiresOn);
+
+		// store random hash (not access token) in database to validate token
+		user.setApiToken(hash);
+		user.setApiTokenExpiresOn(expiresOn);
+
+		UserDao userDao = new UserDao(application.getDatabase());
+		boolean successful = userDao.update(user);
+
+		if (!successful) {
+			throw new IOException("Failed to update database.");
+		}
+
+		return apiToken;
 	}
 
 	public Mono<ValidatedApiTokenResponse> validateApiToken(String token) {
