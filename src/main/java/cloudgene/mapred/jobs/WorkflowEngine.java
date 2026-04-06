@@ -91,7 +91,6 @@ public class WorkflowEngine implements Runnable {
 		threadLongTimeQueue = new Thread(longTimeQueue);
 		threadLongTimeQueue.start();
 		running = true;
-
 	}
 
 	public void stop() {

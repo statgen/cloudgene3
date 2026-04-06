@@ -19,7 +19,6 @@ public class WdlAppResponse {
 	private String submitButton;
 	private List<WdlParameterInputResponse> params;
 	private boolean s3Workspace;
-	private String footer;
 
 	public String getId() {
 		return id;
@@ -83,14 +82,6 @@ public class WdlAppResponse {
 
 	public void setSubmitButton(String submitButton) {
 		this.submitButton = submitButton;
-	}
-
-	public String getFooter() {
-		return footer;
-	}
-
-	public void setFooter(String footer) {
-		this.footer = footer;
 	}
 
 	public boolean isS3Workspace() {

@@ -10,6 +10,7 @@ import cloudgene.mapred.server.auth.AuthenticationService;
 import cloudgene.mapred.server.auth.AuthenticationType;
 import cloudgene.mapred.server.responses.CounterResponse;
 import cloudgene.mapred.server.responses.JobValueResponse;
+import cloudgene.mapred.server.responses.ServerResponse;
 import cloudgene.mapred.server.services.ServerService;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.HttpResponse;
@@ -34,26 +35,27 @@ public class ServerController {
 
 	@Inject
 	protected List<OauthClientConfigurationProperties> clients;
-	
+
 	@Inject
 	protected ServerService serverService;
 
 	@Get("/")
 	@Secured(SecurityRule.IS_ANONYMOUS)
-	public String get(@Nullable Authentication authentication) {
+	public ServerResponse get(@Nullable Authentication authentication) {
 		User user = null;
 		if (authentication != null) {
 			user = authenticationService.getUserByAuthentication(authentication, AuthenticationType.ALL_TOKENS);
 		}
-		
-		return serverService.getRoot(user);
 
+		return serverService.getRoot(user);
 	}
 
 	@Get("/counters")
 	@Secured(SecurityRule.IS_ANONYMOUS)
 	public CounterResponse counters() {
-		CounterResponse response = CounterResponse.build(application.getWorkflowEngine(), application.getSettings().getCounters());
+		CounterResponse response = CounterResponse.build(
+				application.getWorkflowEngine(),
+				application.getSettings().getCounters());
 		UserDao dao = new UserDao(application.getDatabase());
 		response.setUsers(dao.countAll());
 		return response;
@@ -73,7 +75,7 @@ public class ServerController {
 		application.getWorkflowEngine().block();
 		return "Queue blocked.";
 	}
-	
+
 	@Get("/queue/open")
 	@Secured(User.ROLE_ADMIN)
 	@Produces(MediaType.TEXT_PLAIN)
@@ -90,7 +92,7 @@ public class ServerController {
 		application.getSettings().save();
 		return "Enter Maintenance mode.";
 	}
-	
+
 	@Get("/maintenance/exit")
 	@Secured(User.ROLE_ADMIN)
 	@Produces(MediaType.TEXT_PLAIN)
@@ -99,11 +101,10 @@ public class ServerController {
 		application.getSettings().save();
 		return "Exit Maintenance mode.";
 	}
-	
+
 	@Get("/version.svg")
 	public HttpResponse<String> getVersion() {
 		return HttpResponse.ok(ServerService.IMAGE_DATA);
 
 	}
-	
 }

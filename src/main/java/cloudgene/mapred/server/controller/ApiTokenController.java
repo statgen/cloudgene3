@@ -25,14 +25,17 @@ import io.micronaut.security.rules.SecurityRule;
 import jakarta.inject.Inject;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
+
 @Controller
 public class ApiTokenController {
 
-	private static Logger log = LoggerFactory.getLogger(ApiTokenController.class);
-	
-	private static final String MESSAGE_API_TOKEN_CREATED = "Creation successfull.";
+	private static final Logger log = LoggerFactory.getLogger(ApiTokenController.class);
 
+	private static final String MESSAGE_API_TOKEN_CREATED = "Creation successful.";
 	private static final String MESSAGE_APT_TOKEN_ERROR = "Error during API token generation.";
+	private static final String MESSAGE_APT_TOKEN_BAD_INPUT = "Bad input on API token request.";
+	private static final int DEFAULT_TOKEN_LIFETIME_DAYS = 30;
 
 	@Inject
 	protected Application application;
@@ -40,42 +43,43 @@ public class ApiTokenController {
 	@Inject
 	protected AuthenticationService authenticationService;
 
-	public static int DEFAULT_TOKEN_LIFETIME_API_SEC = 30 * 24 * 60 * 60;
-
 	@Post("/api/v2/users/{username}/api-token")
 	@Consumes(MediaType.ALL)
 	@Secured(SecurityRule.IS_AUTHENTICATED)
-	public HttpResponse<ApiTokenResponse> create(String username, Authentication authentication,
+	public HttpResponse<ApiTokenResponse> create(
+			String username,
+			Authentication authentication,
 			@QueryValue @Nullable Integer expiration) {
 
 		User user = authenticationService.getUserByAuthentication(authentication);
-		
+
 		if (expiration == null) {
-			expiration = DEFAULT_TOKEN_LIFETIME_API_SEC;
-		} else if (expiration == -1) {
-			expiration = Integer.MAX_VALUE;
-		} else {
-			expiration = expiration * 24 * 60 * 60;
+			expiration = DEFAULT_TOKEN_LIFETIME_DAYS;
 		}
-		ApiToken apiToken = authenticationService.createApiToken(user, expiration);
-		
-		// store random hash (not access token) in database to validate token
-		user.setApiToken(apiToken.getHash());
-		user.setApiTokenExpiresOn(apiToken.getExpiresOn());
-		
-		UserDao userDao = new UserDao(application.getDatabase());
-		boolean successful = userDao.update(user);
 
-		if (successful) {
-			log.info(String.format("User: generated API token for user %s (ID %s - email %s)", user.getUsername(), user.getId(), user.getMail()));
-			return HttpResponse.ok(new ApiTokenResponse(apiToken));
+		ApiToken apiToken;
+		try {
+			apiToken = authenticationService.createApiToken(user, expiration);
+		} catch (IllegalArgumentException e) {
+			log.warn(
+					"Bad inputs on API token request for user {} (ID {} - email {}). Reason: {}",
+					user.getUsername(), user.getId(), user.getMail(), e.getMessage());
 
-		} else {
+			return HttpResponse.badRequest(new ApiTokenResponse(MESSAGE_APT_TOKEN_BAD_INPUT, false));
+		} catch (IOException e) {
+			log.warn(
+					"Failed to create API token for user {} (ID {} - email {}). Reason: {}",
+					user.getUsername(), user.getId(), user.getMail(), e.getMessage());
 
+			// NOTE(Marc): Keeping OK for backwards compatibility. Should probably be SERVER_ERROR.
 			return HttpResponse.ok(new ApiTokenResponse(MESSAGE_APT_TOKEN_ERROR, false));
-
 		}
 
+		log.info(
+				"User: generated API token for user {} (ID {} - email {})",
+				user.getUsername(), user.getId(), user.getMail());
+
+		return HttpResponse.ok(new ApiTokenResponse(apiToken));
 	}
 
 	@Delete("/api/v2/users/{username}/api-token")
@@ -92,26 +96,20 @@ public class ApiTokenController {
 		boolean successful = userDao.update(user);
 
 		if (successful) {
+			log.info(
+					"User: revoked API token for user {} (ID {} - email {})",
+					user.getUsername(), user.getId(), user.getMail());
 
-			log.info(String.format("User: revoked API token for user %s (ID %s - email %s)", user.getUsername(), user.getId(), user.getMail()));
-			
 			return HttpResponse.ok(MessageResponse.success(MESSAGE_API_TOKEN_CREATED));
-
 		} else {
-
 			return HttpResponse.ok(MessageResponse.error(MESSAGE_APT_TOKEN_ERROR));
-
 		}
-
 	}
 
 	@Post("/api/v2/tokens/verify")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Secured(SecurityRule.IS_ANONYMOUS)
 	public HttpResponse<Mono<ValidatedApiTokenResponse>> verify(String token) {
-
 		return HttpResponse.ok(authenticationService.validateApiToken(token));
-
 	}
-
 }

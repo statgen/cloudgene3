@@ -9,7 +9,7 @@ import cloudgene.mapred.database.dao.CounterHistoryDao;
 import cloudgene.mapred.server.Application;
 import cloudgene.mapred.server.auth.AuthenticationService;
 import cloudgene.mapred.server.responses.NextflowConfigResponse;
-import cloudgene.mapred.server.responses.ServerResponse;
+import cloudgene.mapred.server.responses.ServerSettingsResponse;
 import cloudgene.mapred.server.responses.StatisticsResponse;
 import cloudgene.mapred.server.services.ServerService;
 import cloudgene.mapred.util.TextUtil;
@@ -88,19 +88,17 @@ public class ServerAdminController {
 	}
 
 	@Get("/settings")
-	public ServerResponse getSettings() {
-		return ServerResponse.build(application.getSettings());
+	public ServerSettingsResponse getSettings() {
+		return ServerSettingsResponse.build(application.getSettings());
 	}
 
 	@Post("/settings/update")
-	public ServerResponse updateSettings(
+	public ServerSettingsResponse updateSettings(
 			String name,
 			String adminName,
 			String adminMail,
 			String serverUrl,
 			String baseUrl,
-			String backgroundColor,
-			String foregroundColor,
 			@Nullable String googleAnalytics,
 			boolean mail,
 			String mailSmtp,
@@ -111,11 +109,10 @@ public class ServerAdminController {
 			String workspaceType,
 			String workspaceLocation) {
 
-		serverService.updateSettings(name, adminName, adminMail, serverUrl, baseUrl, backgroundColor, foregroundColor,
-				googleAnalytics, String.valueOf(mail), mailSmtp, mailPort, mailUser, mailPassword, mailName,
-				workspaceType, workspaceLocation);
+		serverService.updateSettings(name, adminName, adminMail, serverUrl, baseUrl, googleAnalytics, mail, mailSmtp,
+				mailPort, mailUser, mailPassword, mailName, workspaceType, workspaceLocation);
 
-		return ServerResponse.build(application.getSettings());
+		return ServerSettingsResponse.build(application.getSettings());
 	}
 
 	@Get("/nextflow/config")

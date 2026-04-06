@@ -2,6 +2,7 @@ package cloudgene.mapred.database.dao;
 
 import cloudgene.mapred.database.util.Database;
 import cloudgene.mapred.database.util.JdbcDataAccessObject;
+import cloudgene.mapred.util.SemVer;
 import io.micronaut.core.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,12 +66,12 @@ public class VersionDao extends JdbcDataAccessObject {
 	 *                updates.
 	 * @return {@code true} if the version was inserted without issue.
 	 */
-	public boolean insert(@NonNull String version) {
+	public boolean insert(@NonNull SemVer version) {
 		String sql = "INSERT INTO database_versions (version) VALUES (?)";
 
 		try {
 			Object[] params = new Object[1];
-			params[0] = version;
+			params[0] = version.toString();
 
 			insert(sql, params);
 
@@ -86,16 +87,18 @@ public class VersionDao extends JdbcDataAccessObject {
 	 * Returns the most recently inserted version in {@code database_versions}.
 	 * Returns {@code null} on failure.
 	 */
-	public String findLatest() {
+	public SemVer findLatest() {
 		String sql = "SELECT version FROM database_versions "
 				+ "WHERE updated_on = (SELECT MAX(updated_on) FROM database_versions) "
 				+ "ORDER BY updated_on, id DESC";
 
 		try {
 			String result = queryForObject(sql, new StringMapper());
+			SemVer parsed = SemVer.of(result);
+
 			log.debug("Find latest database version successful.");
-			return result;
-		} catch (SQLException e) {
+			return parsed;
+		} catch (SQLException | IllegalArgumentException e) {
 			log.error("Find latest database version failed.", e);
 			return null;
 		}

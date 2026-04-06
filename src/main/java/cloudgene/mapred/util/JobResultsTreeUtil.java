@@ -10,21 +10,28 @@ import cloudgene.mapred.jobs.JobResultsTreeItem;
 
 public final class JobResultsTreeUtil {
 
-	private JobResultsTreeUtil() {}
+	private JobResultsTreeUtil() {
+	}
 
 	public static List<JobResultsTreeItem> createTree(CloudgeneParameterOutput param) {
 		List<JobResultsTreeItem> items = new ArrayList<>();
 
+		// TODO(Marc): This iteration can sometimes fail due to a concurrent
+		//             modification of the `files` list. It looks like the only
+		//             place it can happen is `CloudgeneJob.exportParameter()`.
+		//             Should investigate further.
 		for (Download file : param.getFiles()) {
 			String[] tiles = file.getName().split("/");
 			JobResultsTreeItem root = null;
+
 			for (int i = 0; i < tiles.length - 1; i++) {
-				List<JobResultsTreeItem> _items = null;
+				List<JobResultsTreeItem> _items;
 				if (root == null) {
 					_items = items;
 				} else {
 					_items = root.getChildren();
 				}
+
 				root = get(_items, tiles[i]);
 				if (root == null) {
 					root = new JobResultsTreeItem();
@@ -32,18 +39,23 @@ public final class JobResultsTreeUtil {
 					root.setFolder(true);
 					_items.add(root);
 				}
+
 				_items.sort(new JobsResultsTreeItemComparator());
 			}
+
 			JobResultsTreeItem item = new JobResultsTreeItem();
 			item.setName(tiles[tiles.length - 1]);
+
 			if (param.getHash() != null) {
 				item.setPath("/browse/" + param.getHash() + "/" + file.getName());
 			} else {
 				item.setPath("/share/results/" + file.getHash() + "/" + file.getName());
 			}
+
 			item.setHash(file.getHash());
 			item.setSize(file.getSize());
 			item.setFolder(false);
+
 			if (root == null) {
 				items.add(item);
 				items.sort(new JobsResultsTreeItemComparator());
@@ -58,8 +70,9 @@ public final class JobResultsTreeUtil {
 
 	public static JobResultsTreeItem get(List<JobResultsTreeItem> items, String name) {
 		for (JobResultsTreeItem item : items) {
-			if (item.getName().equals(name))
+			if (item.getName().equals(name)) {
 				return item;
+			}
 		}
 
 		return null;

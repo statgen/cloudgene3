@@ -1,12 +1,8 @@
 package cloudgene.mapred.jobs.engine;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 
 import cloudgene.mapred.jobs.*;
 import org.slf4j.Logger;
@@ -18,19 +14,18 @@ import cloudgene.mapred.steps.ErrorStep;
 import cloudgene.mapred.steps.JavaInternalStep;
 import cloudgene.mapred.util.TimeUtil;
 import cloudgene.mapred.wdl.WdlStep;
-import genepi.io.FileUtil;
 
 public class ExecutableStep {
 
+	private static final Logger log = LoggerFactory.getLogger(ExecutableStep.class);
+
+	private final CloudgeneContext context;
+
+	private final CloudgeneJob job;
+
 	private WdlStep step;
 
-	private CloudgeneContext context;
-
-	private CloudgeneJob job;
-
 	private CloudgeneStep instance;
-
-	private static final Logger log = LoggerFactory.getLogger(CloudgeneJob.class);
 
 	private boolean killed = false;
 
@@ -53,24 +48,21 @@ public class ExecutableStep {
 	}
 
 	private void instance() {
-
 		// find step implementation
 		CloudgeneStepFactory factory = CloudgeneStepFactory.getInstance();
-		Class myClass = factory.getClassname(step);
+		Class<?> myClass = factory.getClassname(step);
 
 		// create instance
 		try {
-
-
-			Object object = myClass.newInstance();
+			Object object = myClass.getDeclaredConstructor().newInstance();
 
 			if (object instanceof CloudgeneStep) {
 				instance = (CloudgeneStep) object;
 			} else if (object instanceof WorkflowStep) {
 				instance = new JavaInternalStep((WorkflowStep) object);
 			} else {
-				instance = new ErrorStep("Error during initialization: class " + step.getClassname() + " ( "
-						+ object.getClass().getSuperclass().getCanonicalName() + ") "
+				instance = new ErrorStep("Error during initialization: class " + step.getClassname()
+						+ " ( " + object.getClass().getSuperclass().getCanonicalName() + ") "
 						+ " has to extend CloudgeneStep or WorkflowStep. ");
 
 			}
@@ -83,7 +75,6 @@ public class ExecutableStep {
 							"Requirements not fulfilled. This steps needs plugin '" + plugin + "'");
 				}
 			}
-
 
 		} catch (Exception e) {
 			Writer writer = new StringWriter();
@@ -98,7 +89,6 @@ public class ExecutableStep {
 	}
 
 	public ExecutionResult run() {
-
 		job.writeLog("------------------------------------------------------");
 		job.writeLog(step.getName());
 		job.writeLog("------------------------------------------------------");
@@ -106,7 +96,6 @@ public class ExecutableStep {
 		long start = System.currentTimeMillis();
 
 		try {
-
 			instance.setup(context);
 			boolean successful = instance.run(step, context);
 
@@ -120,7 +109,6 @@ public class ExecutableStep {
 
 				job.writeLog("  " + step.getName() + " [" + TimeUtil.format(time) + "]");
 				setTime(time);
-
 			}
 		} catch (Exception e) {
 			log.error("Running extern job failed!", e);
@@ -128,13 +116,12 @@ public class ExecutableStep {
 		}
 
 		return ExecutionResult.SUCCESS;
-
 	}
 
 	public void kill() {
 		killed = true;
 		if (instance != null) {
-			log.info("Get kill signal for job " + job.getId());
+			log.info("Get kill signal for job {}", job.getId());
 			instance.kill();
 		}
 	}
@@ -152,5 +139,4 @@ public class ExecutableStep {
 	public long getExecutionTime() {
 		return time;
 	}
-
 }

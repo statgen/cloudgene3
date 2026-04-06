@@ -12,7 +12,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import cloudgene.mapred.server.Application;
 import cloudgene.mapred.util.config.Settings;
 import genepi.base.Tool;
-import io.micronaut.context.env.Environment;
 import io.micronaut.runtime.Micronaut;
 
 public class StartServer extends Tool {
@@ -42,10 +41,8 @@ public class StartServer extends Tool {
 	public int run() {
 		if (isFlagSet("verbose")) {
 			System.setProperty(ClassicConstants.CONFIG_FILE_PROPERTY, "logback-verbose.xml");
-		} else if (new File("webapp").exists()) {
-			System.setProperty(ClassicConstants.CONFIG_FILE_PROPERTY, "logback.xml");
 		} else {
-			System.setProperty(ClassicConstants.CONFIG_FILE_PROPERTY, "logback-dev.xml");
+			System.setProperty(ClassicConstants.CONFIG_FILE_PROPERTY, "logback.xml");
 		}
 
 		try {
@@ -100,14 +97,7 @@ public class StartServer extends Tool {
 				properties.put("micronaut.server.context-path", baseUrl);
 			}
 
-			if (new File("webapp").exists()) {
-				Micronaut.build(args).mainClass(Application.class).properties(properties).start();
-			} else {
-				System.out.println("Start in DEVELOPMENT mode");
-
-				Micronaut.build(args).mainClass(Application.class).properties(properties)
-						.defaultEnvironments(Environment.DEVELOPMENT).start();
-			}
+			Micronaut.build(args).mainClass(Application.class).properties(properties).start();
 
 			System.out.println();
 			System.out.println("Server is running on port " + port);

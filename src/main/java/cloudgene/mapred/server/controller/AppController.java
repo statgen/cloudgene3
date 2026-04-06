@@ -6,7 +6,6 @@ import java.util.Map;
 
 import cloudgene.mapred.apps.Application;
 import cloudgene.mapred.apps.ApplicationRepository;
-import cloudgene.mapred.core.Template;
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.server.auth.AuthenticationService;
 import cloudgene.mapred.server.auth.AuthenticationType;
@@ -57,11 +56,6 @@ public class AppController {
 
 		response.setS3Workspace(application.getSettings().getExternalWorkspaceType().equalsIgnoreCase("S3")
 				&& application.getSettings().getExternalWorkspaceLocation().isEmpty());
-
-		String footer = this.application.getTemplate(Template.FOOTER_SUBMIT_JOB);
-		if (footer != null && !footer.trim().isEmpty()) {
-			response.setFooter(footer);
-		}
 
 		log.info("Returning info for app '{}' for authenticated user.", appId);
 		return response;

@@ -3,7 +3,7 @@ package cloudgene.mapred.server.auth;
 import java.util.Arrays;
 import java.util.Date;
 
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.reactivestreams.Publisher;
 
 import cloudgene.mapred.core.User;
@@ -84,7 +84,7 @@ public class OAuthAuthenticationMapper extends DefaultOpenIdAuthenticationMapper
 				user.setFullName(openIdClaims.getName());
 				user.setMail(email);
 				user.setRoles(new String[] { UserService.DEFAULT_ROLE });
-				user.setPassword(HashUtil.hashPassword(RandomStringUtils.randomAlphanumeric(30)));
+				user.setPassword(HashUtil.hashPassword(RandomStringUtils.secure().nextAlphanumeric(30)));
 				dao.insert(user);
 
 				emitter.success(AuthenticationResponse.success(user.getUsername(), Arrays.asList(user.getRoles())));

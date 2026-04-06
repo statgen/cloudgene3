@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import cloudgene.mapred.database.dao.VersionDao;
 import cloudgene.mapred.database.util.*;
 import cloudgene.mapred.test.TestDbUtil;
+import cloudgene.mapred.util.SemVer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -40,7 +41,7 @@ public class DatabaseUpdaterTest {
 						TestDbUtil.getMemDb(),
 						new File("test-data/test-updates.sql").toURI().toURL(),
 						null,
-						"currentVersion must be non-null and non-blank",
+						"version must be non-null and non-blank",
 						false),
 
 				// Version must not be blank.
@@ -48,7 +49,7 @@ public class DatabaseUpdaterTest {
 						TestDbUtil.getMemDb(),
 						new File("test-data/test-updates.sql").toURI().toURL(),
 						"",
-						"currentVersion must be non-null and non-blank",
+						"version must be non-null and non-blank",
 						false),
 
 				// Database must have a non-null connector.
@@ -89,8 +90,8 @@ public class DatabaseUpdaterTest {
 			DatabaseUpdater updater = new DatabaseUpdater(database, updatesFile, currentVersion);
 			assertNull(errMsg);
 
-			assertEquals("0.0.0", updater.getOldVersion());
-			assertEquals(currentVersion, updater.getCurrentVersion());
+			assertEquals(SemVer.of(0, 0, 0), updater.getOldVersion());
+			assertEquals(SemVer.of(currentVersion), updater.getCurrentVersion());
 			assertEquals(needsUpdate, updater.needsUpdate());
 		} catch (Exception e) {
 			assertNotNull(errMsg);
@@ -103,7 +104,8 @@ public class DatabaseUpdaterTest {
 			String version,
 			boolean preloadTable,
 			boolean needsUpdate,
-			boolean success) {}
+			boolean success) {
+	}
 
 	private static Stream<UpdateDbTestCase> provideForUpdateDB() {
 		return Stream.of(
@@ -115,8 +117,7 @@ public class DatabaseUpdaterTest {
 				// Wrong path to updates file -> updateDB() fails.
 				new UpdateDbTestCase("fake-file.404", "1.0.0", false, true, false),
 				// Invalid SQL statements -> updateDB() fails.
-				new UpdateDbTestCase("test-data/test-updates-broken.sql", "1.0.0", false, true, false)
-		);
+				new UpdateDbTestCase("test-data/test-updates-broken.sql", "1.0.0", false, true, false));
 	}
 
 	@ParameterizedTest
@@ -129,7 +130,7 @@ public class DatabaseUpdaterTest {
 
 		if (testCase.preloadTable) {
 			DatabaseUpdater dummy = new DatabaseUpdater(db, updatesFile, "0.0.0");
-			dummy.writeVersion("0.0.0");
+			dummy.writeVersion(SemVer.of(0, 0, 0));
 		}
 
 		DatabaseUpdater updater = new DatabaseUpdater(db, updatesFile, testCase.version);
@@ -202,8 +203,8 @@ public class DatabaseUpdaterTest {
 				"1.0.0");
 
 		assertTrue(updater.needsUpdate());
-		assertEquals("0.1.0", updater.getOldVersion());
-		assertEquals("1.0.0", updater.getCurrentVersion());
+		assertEquals(SemVer.of(0, 1, 0), updater.getOldVersion());
+		assertEquals(SemVer.of(1, 0, 0), updater.getCurrentVersion());
 	}
 
 	@Test
@@ -222,33 +223,34 @@ public class DatabaseUpdaterTest {
 		assertTrue(success);
 		assertFalse(db.getConnector().tableExists("user")); // v0.0.1
 		assertFalse(db.getConnector().tableExists("job")); // v0.1.0
-		assertEquals("0.0.0", dao.findLatest());
+		assertEquals(SemVer.of(0, 0, 0), dao.findLatest());
 
 		// v0.0.1: 'user' table created at v0.0.1
 
 		DatabaseUpdater u001 = new DatabaseUpdater(db, updatesFile, "0.0.1");
 		assertTrue(u001.needsUpdate());
-		assertEquals("0.0.0", dao.findLatest());
+		assertEquals(SemVer.of(0, 0, 0), dao.findLatest());
 
 		success = u001.updateDB();
 		assertTrue(success);
 		assertTrue(db.getConnector().tableExists("user")); // v0.0.1
 		assertFalse(db.getConnector().tableExists("job")); // v0.1.0
-		assertEquals("0.0.1", dao.findLatest());
+		assertEquals(SemVer.of(0, 0, 1), dao.findLatest());
 
 		// v0.2.3: 'job' table created at v0.1.0
 
 		DatabaseUpdater u023 = new DatabaseUpdater(db, updatesFile, "0.2.3");
 		assertTrue(u023.needsUpdate());
-		assertEquals("0.0.1", dao.findLatest());
+		assertEquals(SemVer.of(0, 0, 1), dao.findLatest());
 
 		success = u023.updateDB();
 		assertTrue(success);
 		assertTrue(db.getConnector().tableExists("user")); // v0.0.1
 		assertTrue(db.getConnector().tableExists("job")); // v0.1.0
-		assertEquals("0.2.3", dao.findLatest());
+		assertEquals(SemVer.of(0, 2, 3), dao.findLatest());
 
-		// v0.1.1: regression from v0.2.3. Update fails, since we cannot roll back DB state.
+		// v0.1.1: regression from v0.2.3. Update fails, since we cannot roll back DB
+		// state.
 
 		DatabaseUpdater u011 = new DatabaseUpdater(db, updatesFile, "0.1.1");
 		assertFalse(u011.needsUpdate());

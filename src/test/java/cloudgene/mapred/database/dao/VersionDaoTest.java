@@ -2,6 +2,7 @@ package cloudgene.mapred.database.dao;
 
 import cloudgene.mapred.database.util.Database;
 import cloudgene.mapred.test.TestDbUtil;
+import cloudgene.mapred.util.SemVer;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
@@ -38,7 +39,7 @@ public class VersionDaoTest {
 	@Test
 	public void testInsertAndFind() throws SQLException {
 		boolean result;
-		String observed;
+		SemVer observed;
 
 		Database db = TestDbUtil.getMemDb();
 		VersionDao dao = new VersionDao(db);
@@ -49,16 +50,16 @@ public class VersionDaoTest {
 		observed = dao.findLatest();
 		assertNull(observed); // Nothing placed in table yet -> null
 
-		result = dao.insert("1.2.3");
+		result = dao.insert(SemVer.of(1, 2, 3));
 		assertTrue(result);
 
 		observed = dao.findLatest();
-		assertEquals("1.2.3", observed);
+		assertEquals(SemVer.of(1, 2, 3), observed);
 
-		result = dao.insert("1.4.3");
+		result = dao.insert(SemVer.of(1, 4, 3));
 		assertTrue(result);
 
 		observed = dao.findLatest();
-		assertEquals("1.4.3", observed);
+		assertEquals(SemVer.of(1, 4, 3), observed);
 	}
 }

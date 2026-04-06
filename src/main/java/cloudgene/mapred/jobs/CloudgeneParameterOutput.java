@@ -1,37 +1,25 @@
 package cloudgene.mapred.jobs;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import cloudgene.mapred.wdl.WdlParameterOutput;
 import cloudgene.mapred.wdl.WdlParameterOutputType;
+import org.apache.commons.lang3.RandomStringUtils;
 
 public class CloudgeneParameterOutput {
 
 	private int id;
-
 	private String description;
-
 	private String value = "";
-
 	private WdlParameterOutputType type;
-
 	private boolean download = true;
-
 	private String name = "";
-
 	private List<Download> files;
-
 	private List<JobResultsTreeItem> tree;
-
 	private CloudgeneJob job;
-
 	private String jobId;
-
 	private boolean adminOnly = false;
-
 	private String hash = "";
 
 	public CloudgeneParameterOutput() {}
@@ -142,14 +130,6 @@ public class CloudgeneParameterOutput {
 	}
 
 	public void initHash() {
-		String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		hash = "";
-		Random random = new Random();
-		int length = 40;
-		for (int i = 0; i < length; i++) {
-			int index = random.nextInt(alphabet.length());
-			char randomChar = alphabet.charAt(index);
-			hash += randomChar;
-		}
+		hash = RandomStringUtils.secure().nextAlphanumeric(40);
 	}
 }

@@ -29,7 +29,8 @@ public class GroovyStep extends CloudgeneStep {
 		String filename = FileUtil.path(workingDirectory, script);
 
 		try {
-			Class<?> scriptClass = new GroovyScriptEngine(".", getClass().getClassLoader()).loadScriptByName(filename);
+			GroovyScriptEngine engine = new GroovyScriptEngine(".", getClass().getClassLoader());
+			Class<?> scriptClass = engine.loadScriptByName(filename);
 			Object scriptInstance = scriptClass.getDeclaredConstructor().newInstance();
 
 			Method method = scriptClass.getDeclaredMethod("run", WorkflowContext.class);
@@ -41,12 +42,16 @@ public class GroovyStep extends CloudgeneStep {
 			}
 		} catch (Exception e) {
 			if (e.getCause() != null) {
-				log.error("[Job {}] Step '{}': Error in script '{}'", context.getJobId(), step.getName(), script, e.getCause());
+				log.error(
+					"[Job {}] Step '{}': Error in script '{}'",
+					context.getJobId(), step.getName(), script, e.getCause());
+
 				context.error("Error in script " + script + ":\n" + getStackTraceAsString(e.getCause()));
 			} else {
 				log.error("[Job {}] Step '{}': Error in script '{}'", context.getJobId(), step.getName(), script, e);
 				context.error("Error in script " + script + ":\n" + getStackTraceAsString(e));
 			}
+
 			return false;
 		}
 	}

@@ -7,8 +7,9 @@ import cloudgene.mapred.wdl.WdlApp;
 import cloudgene.mapred.wdl.WdlParameterInput;
 import cloudgene.mapred.wdl.WdlParameterInputType;
 import genepi.io.FileUtil;
+import io.micronaut.core.annotation.NonNull;
 import jakarta.inject.Inject;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +28,10 @@ public class JobParameterParser {
 	@Inject
 	protected Application application;
 
-	public static Map<String, String> parse(List<FormUtil.Parameter> form, WdlApp app, IWorkspace workspace)
-			throws Exception {
+	public static Map<String, String> parse(
+			@NonNull List<FormUtil.Parameter> form,
+			@NonNull WdlApp app,
+			@NonNull IWorkspace workspace) throws Exception {
 
 		Map<String, String> props = new HashMap<>();
 		Map<String, String> params = new HashMap<>();
@@ -39,7 +42,7 @@ public class JobParameterParser {
 			Object value = formParam.getValue();
 
 			// remove upload identification!
-			String key = StringEscapeUtils.escapeHtml(name);
+			String key = StringEscapeUtils.escapeHtml4(name);
 			if (key.startsWith("input-")) {
 				key = key.replace("input-", "");
 			}
@@ -47,7 +50,7 @@ public class JobParameterParser {
 			log.debug("Process parameter {}...", key);
 
 			if (key.equals(PARAM_JOB_NAME) || key.endsWith("-pattern")) {
-				String cleanedValue = StringEscapeUtils.escapeHtml(value.toString());
+				String cleanedValue = StringEscapeUtils.escapeHtml4(value.toString());
 				props.put(key, cleanedValue);
 				log.debug("Parameter {} ignored.", key);
 				continue;
@@ -84,7 +87,7 @@ public class JobParameterParser {
 			} else {
 				log.debug("Parameter {} is a value parameter.", key);
 
-				String cleanedValue = StringEscapeUtils.escapeHtml(value.toString());
+				String cleanedValue = StringEscapeUtils.escapeHtml4(value.toString());
 
 				if (input.getWriteFile() != null && !input.getWriteFile().trim().isEmpty()) {
 					File file = Files.createTempFile("upload_", input.getWriteFile()).toFile();
@@ -121,7 +124,6 @@ public class JobParameterParser {
 						}
 						params.put(input.getId(), value + pattern);
 					} else {
-
 						if (input.getTypeAsEnum() == WdlParameterInputType.CHECKBOX) {
 							params.put(input.getId(), input.getValues().get("true"));
 						} else {
@@ -142,7 +144,7 @@ public class JobParameterParser {
 		return params;
 	}
 
-	private static WdlParameterInput getInputParamByName(WdlApp app, String name) {
+	private static WdlParameterInput getInputParamByName(@NonNull WdlApp app, String name) {
 		for (WdlParameterInput input : app.getWorkflow().getInputs()) {
 			if (input.getId().equals(name)) {
 				return input;

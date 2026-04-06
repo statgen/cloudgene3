@@ -1,11 +1,13 @@
 package cloudgene.mapred.server.auth;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.lang.RandomStringUtils;
+import io.micronaut.core.annotation.NonNull;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -19,7 +21,7 @@ import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.authentication.AuthenticationException;
 import io.micronaut.security.authentication.AuthorizationException;
 import io.micronaut.security.token.jwt.generator.JwtTokenGenerator;
-import io.micronaut.security.token.jwt.validator.JwtTokenValidator;
+import io.micronaut.security.token.jwt.validator.ReactiveJsonWebTokenValidator;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import reactor.core.publisher.Mono;
@@ -28,8 +30,10 @@ import reactor.core.publisher.Mono;
 public class AuthenticationService {
 
 	private static final String MESSAGE_VALID_API_TOKEN = "API Token was created by %s and is valid.";
-
 	private static final String MESSAGE_INVALID_API_TOKEN = "Invalid API Token.";
+
+	private static final String ATTRIBUTE_TOKEN_TYPE = "token_type";
+	private static final String ATTRIBUTE_API_HASH = "api_hash";
 
 	@Inject
 	protected Application application;
@@ -38,93 +42,118 @@ public class AuthenticationService {
 	protected JwtTokenGenerator generator;
 
 	@Inject
-	protected JwtTokenValidator validator;
-
-	public static String ATTRIBUTE_TOKEN_TYPE = "token_type";
-
-	public static String ATTRIBUTE_API_HASH = "api_hash";
+	protected ReactiveJsonWebTokenValidator<?, ?> validator;
 
 	public User getUserByAuthentication(Authentication authentication) {
 		return getUserByAuthentication(authentication, AuthenticationType.ACCESS_TOKEN);
 	}
 
-	public User getUserByAuthentication(Authentication authentication, AuthenticationType authenticationType) {
+	public User getUserByAuthentication(
+			Authentication authentication,
+			AuthenticationType authenticationType) {
 
-		User user = null;
-		if (authentication != null) {
-			UserDao userDao = new UserDao(application.getDatabase());
-			user = userDao.findByUsername(authentication.getName());
-			Map<String, Object> attributes = authentication.getAttributes();
+		if (authentication == null) {
+			throw new AuthenticationException();
+		}
 
-			if (attributes.containsKey(ATTRIBUTE_TOKEN_TYPE)) {
+		UserDao userDao = new UserDao(application.getDatabase());
+		User user = userDao.findByUsername(authentication.getName());
 
-				String tokenType = attributes.get(ATTRIBUTE_TOKEN_TYPE).toString();
+		Map<String, Object> attributes = authentication.getAttributes();
 
-				if (tokenType.equalsIgnoreCase(AuthenticationType.API_TOKEN.toString())) {
+		if (attributes.containsKey(ATTRIBUTE_TOKEN_TYPE)) {
+			String tokenType = attributes.get(ATTRIBUTE_TOKEN_TYPE).toString();
 
-					if (authenticationType == AuthenticationType.API_TOKEN
-							|| authenticationType == AuthenticationType.ALL_TOKENS) {
-						if (user.getApiToken().equals(attributes.get(ATTRIBUTE_API_HASH))) {
-							user.setAccessedByApi(true);
-							return user;
-						}
-					}
-
-				} else if (tokenType.equalsIgnoreCase(AuthenticationType.ACCESS_TOKEN.toString())) {
-
-					if (authenticationType == AuthenticationType.ACCESS_TOKEN
-							|| authenticationType == AuthenticationType.ALL_TOKENS) {
+			if (tokenType.equalsIgnoreCase(AuthenticationType.API_TOKEN.toString())) {
+				if (authenticationType == AuthenticationType.API_TOKEN
+						|| authenticationType == AuthenticationType.ALL_TOKENS) {
+					if (user.getApiToken().equals(attributes.get(ATTRIBUTE_API_HASH))) {
+						user.setAccessedByApi(true);
 						return user;
 					}
-
 				}
-
-			} else {
-
+			} else if (tokenType.equalsIgnoreCase(AuthenticationType.ACCESS_TOKEN.toString())) {
 				if (authenticationType == AuthenticationType.ACCESS_TOKEN
 						|| authenticationType == AuthenticationType.ALL_TOKENS) {
 					return user;
 				}
-
 			}
-
-			throw new AuthorizationException(authentication);
-
+		} else {
+			if (authenticationType == AuthenticationType.ACCESS_TOKEN
+					|| authenticationType == AuthenticationType.ALL_TOKENS) {
+				return user;
+			}
 		}
 
-		throw new AuthenticationException();
-
+		throw new AuthorizationException(authentication);
 	}
 
-	public ApiToken createApiToken(User user, int lifetime) {
+	/**
+	 * Creates a new {@link ApiToken} (JWT + metadata) for the given user that will
+	 * expire in a set number of days.
+	 * <p>
+	 * The token hash (random salt) and expiration timestamp are saved in the
+	 * database. Only one hash per user is stored.
+	 *
+	 * @param user         The produced token allows the bearer to act on this
+	 *                     user's behalf (non-null).
+	 * @param lifetimeDays Number of days since creation until the token expires.
+	 *                     Range: 0..90 (inclusive).
+	 * @return The newly created token (non-null, throws on failure).
+	 */
+	public @NonNull ApiToken createApiToken(@NonNull User user, int lifetimeDays) throws IOException {
+		// NOTE(Marc): lifetimeDays = 0 will immediately expire. The test suite depends
+		//             on this to test expired tokens.
+		if (lifetimeDays < 0 || lifetimeDays > 90) {
+			throw new IllegalArgumentException(
+					"lifetimeDays should be in range 0..90 (inclusive); found: " + lifetimeDays);
+		}
 
-		String hash = RandomStringUtils.randomAlphanumeric(30);
+		int lifetimeSeconds = 24 * 60 * 60 * lifetimeDays;
 
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		String hash = RandomStringUtils.secure().nextAlphabetic(30);
+
+		Map<String, Object> attributes = new HashMap<>();
+
 		attributes.put(ATTRIBUTE_TOKEN_TYPE, AuthenticationType.API_TOKEN.toString());
 		attributes.put(ATTRIBUTE_API_HASH, hash);
-		// addition attributes that are needed by imputationbot
+
+		// Additional attributes needed by imputationbot
 		attributes.put("username", user.getUsername());
 		attributes.put("name", user.getFullName());
 		attributes.put("mail", user.getMail());
 		attributes.put("api", true);
 
-		Authentication authentication2 = Authentication.build(user.getUsername(), attributes);
-		Optional<String> token = generator.generateToken(authentication2, lifetime);
+		Authentication authentication = Authentication.build(user.getUsername(), attributes);
+		Optional<String> jwt = generator.generateToken(authentication, lifetimeSeconds);
 
-		Date expiresOn = new Date(System.currentTimeMillis() + (lifetime * 1000L));
+		if (jwt.isEmpty()) {
+			throw new IOException("Failed to generate JWT token.");
+		}
 
-		return new ApiToken(token.get(), hash, expiresOn);
+		Date expiresOn = new Date(System.currentTimeMillis() + (lifetimeSeconds * 1_000L));
 
+		ApiToken apiToken = new ApiToken(jwt.get(), hash, expiresOn);
+
+		// store random hash (not access token) in database to validate token
+		user.setApiToken(hash);
+		user.setApiTokenExpiresOn(expiresOn);
+
+		UserDao userDao = new UserDao(application.getDatabase());
+		boolean successful = userDao.update(user);
+
+		if (!successful) {
+			throw new IOException("Failed to update database.");
+		}
+
+		return apiToken;
 	}
 
 	public Mono<ValidatedApiTokenResponse> validateApiToken(String token) {
-
 		Publisher<Authentication> authentication = validator.validateToken(token, null);
 
 		return Mono.<ValidatedApiTokenResponse>create(emitter -> {
-
-			authentication.subscribe(new Subscriber<Authentication>() {
+			authentication.subscribe(new Subscriber<>() {
 
 				private Subscription subscription;
 
@@ -162,10 +191,7 @@ public class AuthenticationService {
 					this.subscription = subscription;
 					subscription.request(1);
 				}
-
 			});
 		}).single();
-
 	}
-
 }

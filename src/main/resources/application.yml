@@ -36,7 +36,7 @@ micronaut:
         signatures:
           secret:
             generator:
-              secret: '"${JWT_GENERATOR_SIGNATURE_SECRET:pleaseChangeThisSecretForANewOne}"'
+              secret: ${JWT_GENERATOR_SIGNATURE_SECRET:pleaseChangeThisSecretForANewOne}
     redirect:
       enabled: false
     endpoints:
@@ -44,21 +44,6 @@ micronaut:
         enabled: false
       logout:
         get-allowed: true
-  router:
-    static-resources:
-      webapp:
-        mapping: "${micronaut.server.context-path:}/**"
-        paths:
-          - file:webapp
-        enabled: true
-      pages:
-        enabled: true
-        mapping: "${micronaut.server.context-path:}/static/**"
-        paths:
-          - file:pages
-          - classpath:/pages
-  views:
-    folder: webapp
   serde:
     serialization:
       inclusion: ALWAYS

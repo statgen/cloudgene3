@@ -8,6 +8,7 @@ import cloudgene.mapred.plugins.IPlugin;
 import cloudgene.mapred.plugins.PluginManager;
 import cloudgene.mapred.plugins.nextflow.NextflowPlugin;
 import cloudgene.mapred.server.Application;
+import cloudgene.mapred.server.responses.ServerResponse;
 import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.util.command.Command;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,76 +45,75 @@ public class ServerService {
 	@Inject
 	protected List<OauthClientConfigurationProperties> clients;
 
-	public String getRoot(User user) {
+	public ServerResponse getRoot(User user) {
+		String name = application.getSettings().getName();
+		boolean emailRequired = application.getSettings().isEmailRequired();
 
-		ObjectMapper mapper = new ObjectMapper();
+		String userEmailDescription = application.getTemplate(Template.USER_EMAIL_DESCRIPTION);
+		String userWithoutEmailDescription = application.getTemplate(Template.USER_WITHOUT_EMAIL_DESCRIPTION);
 
-		ObjectNode data = mapper.createObjectNode();
-		data.put("name", application.getSettings().getName());
-		data.put("background", application.getSettings().getColors().get("background"));
-		data.put("foreground", application.getSettings().getColors().get("foreground"));
-		data.put("footer", application.getTemplate(Template.FOOTER));
-		data.put("emailRequired", application.getSettings().isEmailRequired());
-		data.put("userEmailDescription", application.getTemplate(Template.USER_EMAIL_DESCRIPTION));
-		data.put("userWithoutEmailDescription", application.getTemplate(Template.USER_WITHOUT_EMAIL_DESCRIPTION));
+		List<String> oauth = clients.stream()
+				.map(OauthClientConfigurationProperties::getName)
+				.toList();
 
-		List<String> authClients = new ArrayList<>();
-		for (OauthClientConfigurationProperties client : clients) {
-			authClients.add(client.getName());
-		}
-		data.putPOJO("oauth", authClients);
+		ServerResponse.User responseUser = null;
+		List<ServerResponse.App> apps = new ArrayList<>();
+		List<ServerResponse.App> deprecatedApps = null;
+		List<ServerResponse.App> experimentalApps = null;
 
 		if (user != null) {
-			ObjectNode userJson = mapper.createObjectNode();
-			userJson.put("username", user.getUsername());
-			userJson.put("mail", user.getMail());
-			userJson.put("admin", user.isAdmin());
-			userJson.put("name", user.getFullName());
-			data.set("user", userJson);
+			responseUser = new ServerResponse.User(
+					user.getUsername(),
+					user.getFullName(),
+					user.getMail(),
+					user.isAdmin());
 
-			ApplicationRepository repository = application.getSettings().getApplicationRepository();
-			List<cloudgene.mapred.apps.Application> apps = repository.getAllByUser(user, ApplicationRepository.APPS);
-			data.putPOJO("apps", apps);
+			ApplicationRepository appRepo = application.getSettings().getApplicationRepository();
+			List<cloudgene.mapred.apps.Application> rawApps = appRepo.getAllByUser(user, ApplicationRepository.APPS);
 
-			List<ObjectNode> appsJson = new ArrayList<>();
-			List<ObjectNode> deprecatedAppsJson = new ArrayList<>();
-			List<ObjectNode> experimentalAppsJson = new ArrayList<>();
+			deprecatedApps = new ArrayList<>();
+			experimentalApps = new ArrayList<>();
 
-			for (cloudgene.mapred.apps.Application app : apps) {
-				ObjectNode appJson = mapper.createObjectNode();
-				appJson.put("id", app.getId());
-				appJson.put("name", app.getWdlApp().getName());
-				appJson.put("version", app.getWdlApp().getVersion());
-				if (app.getWdlApp().getRelease() == null) {
-					appsJson.add(appJson);
-				} else if (app.getWdlApp().getRelease().equals("deprecated")) {
-					deprecatedAppsJson.add(appJson);
-				} else if (app.getWdlApp().getRelease().equals("experimental")) {
-					experimentalAppsJson.add(appJson);
-				} else {
-					appsJson.add(appJson);
+			for (cloudgene.mapred.apps.Application app : rawApps) {
+				ServerResponse.App processed = new ServerResponse.App(
+						app.getId(),
+						app.getWdlApp().getName(),
+						app.getWdlApp().getVersion());
+
+				switch (app.getWdlApp().getRelease()) {
+					case "deprecated" -> deprecatedApps.add(processed);
+					case "experimental" -> experimentalApps.add(processed);
+					case null, default -> apps.add(processed);
 				}
 			}
-
-			data.putPOJO("apps", appsJson);
-			data.putPOJO("deprecatedApps", deprecatedAppsJson);
-			data.putPOJO("experimentalApps", experimentalAppsJson);
-			data.put("loggedIn", true);
-
-		} else {
-			data.putPOJO("apps", new ArrayList<>());
-			data.put("loggedIn", false);
 		}
 
-		data.putPOJO("navigation", application.getSettings().getNavigation());
+		boolean loggedIn = (user != null);
+
+		boolean maintenance;
+		String maintenanceMessage;
+
 		if (application.getSettings().isMaintenance()) {
-			data.put("maintenace", true);
-			data.put("maintenaceMessage", application.getTemplate(Template.MAINTENANCE_MESSAGE));
+			maintenance = true;
+			maintenanceMessage = application.getTemplate(Template.MAINTENANCE_MESSAGE);
 		} else {
-			data.put("maintenace", false);
+			maintenance = false;
+			maintenanceMessage = null;
 		}
 
-		return data.toString();
+		return new ServerResponse(
+				name,
+				emailRequired,
+				userEmailDescription,
+				userWithoutEmailDescription,
+				oauth,
+				responseUser,
+				apps,
+				deprecatedApps,
+				experimentalApps,
+				loggedIn,
+				maintenance,
+				maintenanceMessage);
 	}
 
 	public void updateSettings(
@@ -122,10 +122,8 @@ public class ServerService {
 			String adminMail,
 			String serverUrl,
 			String baseUrl,
-			String backgroundColor,
-			String foregroundColor,
 			String googleAnalytics,
-			String mail,
+			boolean mail,
 			String mailSmtp,
 			String mailPort,
 			String mailUser,
@@ -140,13 +138,11 @@ public class ServerService {
 		settings.setAdminMail(adminMail);
 		settings.setServerUrl(serverUrl);
 		settings.setBaseUrl(baseUrl);
-		settings.getColors().put("background", backgroundColor);
-		settings.getColors().put("foreground", foregroundColor);
 		settings.setGoogleAnalytics(googleAnalytics);
 		settings.getExternalWorkspace().put("type", workspaceType);
 		settings.getExternalWorkspace().put("location", workspaceLocation);
 
-		if (mail != null && mail.equals("true")) {
+		if (mail) {
 			Map<String, String> mailConfig = new HashMap<>();
 			mailConfig.put("smtp", mailSmtp);
 			mailConfig.put("port", mailPort);
@@ -159,13 +155,10 @@ public class ServerService {
 		}
 
 		application.getSettings().save();
-
 	}
 
 	public String getClusterDetails() {
-
 		ObjectMapper mapper = new ObjectMapper();
-
 		ObjectNode object = mapper.createObjectNode();
 
 		// general settings

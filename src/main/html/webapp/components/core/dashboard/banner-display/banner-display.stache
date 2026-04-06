@@ -1,5 +1,0 @@
-{{#each banners}}
-  <div {{data 'banner'}} class="{{alertClass}} m-0">
-    {{{message}}}
-  </div>
-{{/each}}
