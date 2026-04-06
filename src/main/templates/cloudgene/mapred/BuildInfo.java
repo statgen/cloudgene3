@@ -10,4 +10,5 @@ public final class BuildInfo {
 	public static final String URL = "${project.url}";
 	public static final String BUILD_TIME = "${maven.build.timestamp}";
 	public static final String BUILT_BY = "statgen";
+	public static final String COMMIT_ID_SHORT = "${git.commit.id.abbrev}";
 }
