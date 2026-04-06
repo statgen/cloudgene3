@@ -6,30 +6,17 @@ import com.fasterxml.jackson.annotation.JsonClassDescription;
 public class Template {
 
 	public static final String MAINTENANCE_MESSAGE = "MAINTENANCE_MESSAGE";
-
-	public static final String FOOTER = "FOOTER";
-
 	public static final String REGISTER_MAIL = "REGISTER_MAIL";
-
 	public static final String RECOVERY_MAIL = "RECOVERY_MAIL";
-
 	public static final String RETIRE_JOB_MAIL = "RETIRE_JOB_MAIL";
-
-	public static final String FOOTER_SUBMIT_JOB = "FOOTER_SUBMIT_JOB";
-
 	public static final String TERMS = "TERMS";
-
 	public static final String USER_EMAIL_DESCRIPTION = "USER_EMAIL_DESCRIPTION";
-
 	public static final String USER_WITHOUT_EMAIL_DESCRIPTION = "USER_WITHOUT_EMAIL_DESCRIPTION";
 
 	public static final Template[] SNIPPETS = new Template[] {
 
 			new Template(MAINTENANCE_MESSAGE,
 					"Sorry, our service is currently under maintenance. Imputation Server is expected to be down until <b>Tuesday 08:00 AM EDT</b>."),
-
-			new Template(FOOTER,
-					"<p>powered by <a href=\"https://www.cloudgene.io\">Cloudgene</a></p>"),
 
 			new Template(REGISTER_MAIL,
 			"""
@@ -51,8 +38,6 @@ public class Template {
 				This email has been sent automatically by the "%s" system.
 
 				To reset your password, please click on this link %s."""),
-
-			new Template(FOOTER_SUBMIT_JOB, ""),
 
 			new Template(TERMS, "I will not attempt to re-identify or contact research participants.<br>" +
 					"I will report any inadvertent data release, security breach or other data management incident of which I become aware."),
