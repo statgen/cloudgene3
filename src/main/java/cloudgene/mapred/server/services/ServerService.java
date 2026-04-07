@@ -17,6 +17,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.util.*;
 
 import org.apache.commons.dbcp.BasicDataSource;
@@ -154,6 +156,11 @@ public class ServerService {
 		application.getSettings().save();
 	}
 
+	private long getUptimeMs() {
+		RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+		return runtimeMxBean.getUptime();
+	}
+
 	public ClusterDetailsResponse getClusterDetails() {
 
 		// general settings
@@ -161,10 +168,12 @@ public class ServerService {
 		boolean blocked = !application.getWorkflowEngine().isRunning();
 		String version = BuildInfo.VERSION;
 		String hash = BuildInfo.COMMIT_ID_SHORT;
+		boolean dirty = BuildInfo.COMMIT_DIRTY;
 		int threads = application.getSettings().getThreadsQueue();
 		int maxJobsUser = application.getSettings().getMaxRunningJobsPerUser();
 		String builtBy = BuildInfo.BUILT_BY;
 		String builtTime = BuildInfo.BUILD_TIME;
+		long uptimeMs = getUptimeMs();
 
 		// workspace and hdd
 		File workspace = new File(application.getSettings().getLocalWorkspace());
@@ -196,7 +205,7 @@ public class ServerService {
 		int dbMaxOpenPrepStatements = dbSrc.getMaxOpenPreparedStatements();
 
 		return new ClusterDetailsResponse(
-				maintenance, blocked, version, hash, threads, maxJobsUser, builtBy, builtTime,
+				maintenance, blocked, version, hash, dirty, threads, maxJobsUser, builtBy, builtTime, uptimeMs,
 				workspacePath, freeDiskSpace, totalDiskSpace, usedDiskSpace,
 				plugins,
 				dbMaxActive, dbActive, dbMaxIdle, dbIdle, dbMaxOpenPrepStatements);

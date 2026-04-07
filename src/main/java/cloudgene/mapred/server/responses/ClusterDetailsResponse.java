@@ -15,10 +15,12 @@ public record ClusterDetailsResponse(
 		boolean blocked,
 		String version,
 		String hash,
+		boolean dirty,
 		int threads,
 		int maxJobsUser,
 		String builtBy,
 		String builtTime,
+		long uptimeMs,
 
 		String workspacePath,
 		long freeDiskSpace,
@@ -31,8 +33,7 @@ public record ClusterDetailsResponse(
 		int dbActive,
 		int dbMaxIdle,
 		int dbIdle,
-		int dbMaxOpenPrepStatements
-) {
+		int dbMaxOpenPrepStatements) {
 
 	@JsonClassDescription
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -41,8 +42,7 @@ public record ClusterDetailsResponse(
 			String name,
 			boolean enabled,
 			String details,
-			String error
-	) {
+			String error) {
 		public static Plugin ok(String name, String details) {
 			return new Plugin(name, true, details, null);
 		}

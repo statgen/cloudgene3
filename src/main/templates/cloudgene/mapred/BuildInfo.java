@@ -11,4 +11,5 @@ public final class BuildInfo {
 	public static final String BUILD_TIME = "${maven.build.timestamp}";
 	public static final String BUILT_BY = "statgen";
 	public static final String COMMIT_ID_SHORT = "${git.commit.id.abbrev}";
+	public static final boolean COMMIT_DIRTY = ${git.dirty};
 }
