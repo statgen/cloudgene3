@@ -3,14 +3,8 @@
 set -euxo pipefail
 set -m # Sets JOB CONTROL mode, needed for fg
 
-# Bust front-end cache
-rm -rf src/main/html/webapp/dist
-
-# Bust back-end cache
-rm -rf target
-
-# Rebuild bundle
-mvn install -DskipTests
+# Rebuild
+mvn clean install -DskipTests
 
 # Set Cloudgene up
 cd target/cloudgene-*-statgen.*/
