@@ -24,70 +24,41 @@ public class Settings {
 
 	private static final Logger log = LoggerFactory.getLogger(Settings.class);
 
-	private String serverUrl = "http://localhost:8082";
-
-	private String baseUrl = "";
-
-	private String tempPath = "tmp";
-
-	private String localWorkspace = "workspace";
-
-	private String name = "Cloudgene";
-
-	private String secretKey = "";
-
-	private Map<String, String> mail;
-
-	private Map<String, String> database;
-
-	private Map<String, Map<String, String>> plugins;
-
-	private List<Map<String, String>> errorHandlers = new ArrayList<>();
-
-	private int autoRetireInterval = 5;
-
-	private int retireAfter = 6;
-
-	private int notificationAfter = 4;
-
-	private int threadsQueue = 5;
-
-	private int maxRunningJobsPerUser = 2;
-
-	private boolean autoRetire = false;
-
-	private boolean writeStatistics = true;
-
-	private boolean maintenance = false;
-
-	private boolean emailRequired = true;
-
-	private String adminMail = null;
-
-	private String adminName = null;
-
-	private boolean showLogs = false;
-
-	private Map<String, String> externalWorkspace = null;
-
-	private int uploadLimit = 5000;
-
-	private String googleAnalytics = "";
-
-	private int maxDownloads = 10;
-
-	private String port = "8082";
-
-	private boolean workspaceCleanup = true;
-
-	private List<String> counters = new ArrayList<>();
-
 	public static final String DEFAULT_SECURITY_KEY = "default-key-change-me-immediately";
+
+	private String serverUrl = "http://localhost:8082";
+	private String baseUrl = "";
+	private String tempPath = "tmp";
+	private String localWorkspace = "workspace";
+	private String name = "Cloudgene";
+	private String secretKey = "";
+	private Map<String, String> mail;
+	private Map<String, String> database;
+	private Map<String, Map<String, String>> plugins;
+	private List<Map<String, String>> errorHandlers = new ArrayList<>();
+	private int autoRetireInterval = 5;
+	private int retireAfter = 6;
+	private int notificationAfter = 4;
+	private int threadsQueue = 5;
+	private int maxRunningJobsPerUser = 2;
+	private boolean autoRetire = false;
+	private boolean writeStatistics = true;
+	private boolean maintenance = false;
+	private boolean emailRequired = true;
+	private String adminMail = null;
+	private String adminName = null;
+	private boolean showLogs = false;
+	private Map<String, String> externalWorkspace = null;
+	private int uploadLimit = 5000;
+	private String googleAnalytics = "";
+	private int maxDownloads = 10;
+	private String port = "8082";
+	private boolean workspaceCleanup = true;
+	private List<String> counters = new ArrayList<>();
+	private ApplicationRepository repository;
 
 	// fake!
 	private List<Application> apps = new ArrayList<>();
-
-	private ApplicationRepository repository;
 
 	public Settings() {
 		repository = new ApplicationRepository();
