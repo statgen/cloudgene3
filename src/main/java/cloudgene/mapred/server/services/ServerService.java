@@ -8,12 +8,9 @@ import cloudgene.mapred.plugins.IPlugin;
 import cloudgene.mapred.plugins.PluginManager;
 import cloudgene.mapred.plugins.nextflow.NextflowPlugin;
 import cloudgene.mapred.server.Application;
+import cloudgene.mapred.server.responses.ClusterDetailsResponse;
 import cloudgene.mapred.server.responses.ServerResponse;
 import cloudgene.mapred.util.config.Settings;
-import cloudgene.mapred.util.command.Command;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import genepi.io.FileUtil;
 import io.micronaut.security.oauth2.configuration.OauthClientConfigurationProperties;
 import jakarta.inject.Inject;
@@ -157,20 +154,17 @@ public class ServerService {
 		application.getSettings().save();
 	}
 
-	public String getClusterDetails() {
-		ObjectMapper mapper = new ObjectMapper();
-		ObjectNode object = mapper.createObjectNode();
+	public ClusterDetailsResponse getClusterDetails() {
 
 		// general settings
-		object.put("maintenance", application.getSettings().isMaintenance());
-		object.put("blocked", !application.getWorkflowEngine().isRunning());
-		object.put("version", BuildInfo.VERSION);
-		object.put("maintenance", application.getSettings().isMaintenance());
-		object.put("blocked", !application.getWorkflowEngine().isRunning());
-		object.put("threads", application.getSettings().getThreadsQueue());
-		object.put("max_jobs_user", application.getSettings().getMaxRunningJobsPerUser());
-		object.put("built_by", BuildInfo.BUILT_BY);
-		object.put("built_time", BuildInfo.BUILD_TIME);
+		boolean maintenance = application.getSettings().isMaintenance();
+		boolean blocked = !application.getWorkflowEngine().isRunning();
+		String version = BuildInfo.VERSION;
+		String hash = BuildInfo.COMMIT_ID_SHORT;
+		int threads = application.getSettings().getThreadsQueue();
+		int maxJobsUser = application.getSettings().getMaxRunningJobsPerUser();
+		String builtBy = BuildInfo.BUILT_BY;
+		String builtTime = BuildInfo.BUILD_TIME;
 
 		// workspace and hdd
 		File workspace = new File(application.getSettings().getLocalWorkspace());
@@ -180,67 +174,32 @@ public class ServerService {
 		long totalDiskSpace = workspace.getTotalSpace() / (1024L * 1024L * 1024L);
 		long usedDiskSpace = totalDiskSpace - freeDiskSpace;
 
-		object.put("workspace_path", workspacePath);
-		object.put("free_disc_space", freeDiskSpace);
-		object.put("total_disc_space", totalDiskSpace);
-		object.put("used_disc_space", usedDiskSpace);
-
 		// plugins
 		PluginManager manager = PluginManager.getInstance();
-
-		ArrayNode plugins = object.putArray("plugins");
-
+		List<ClusterDetailsResponse.Plugin> plugins = new ArrayList<>();
 		for (IPlugin plugin : manager.getPlugins()) {
-			ObjectNode pluginObject = mapper.createObjectNode();
-			pluginObject.put("name", plugin.getName());
-
+			ClusterDetailsResponse.Plugin details;
 			if (plugin.isInstalled()) {
-				pluginObject.put("enabled", true);
-				pluginObject.put("details", plugin.getDetails());
+				details = ClusterDetailsResponse.Plugin.ok(plugin.getName(), plugin.getDetails());
 			} else {
-				pluginObject.put("enabled", false);
-				pluginObject.put("error", plugin.getStatus());
+				details = ClusterDetailsResponse.Plugin.err(plugin.getName(), plugin.getStatus());
 			}
-			plugins.add(pluginObject);
-		}
-
-		// check user defined resources
-		for (Map<String, String> resource : application.getSettings().getResources()) {
-			String name = resource.get("name");
-			ObjectNode pluginObject = mapper.createObjectNode();
-			pluginObject.put("name", name);
-			if (!resource.containsKey("command")) {
-				pluginObject.put("error", "Command defined in resource '" + name + "'");
-			}
-			String cmd = resource.get("command");
-			String[] tiles = cmd.split(" ");
-			String[] params = Arrays.copyOfRange(tiles, 1, tiles.length);
-			Command command = new Command(tiles[0], params);
-			command.setSilent(true);
-			StringBuffer output = new StringBuffer();
-			StringBuffer error = new StringBuffer();
-			command.writeStdout(output);
-			command.writeStderr(error);
-			int exitCode = command.execute();
-			if (exitCode == 0) {
-				pluginObject.put("enabled", true);
-				pluginObject.put("details", output.toString());
-			} else {
-				pluginObject.put("enabled", false);
-				pluginObject.put("error", output + "\n" + error);
-			}
-			plugins.add(pluginObject);
+			plugins.add(details);
 		}
 
 		// database
 		BasicDataSource dbSrc = application.getDatabase().getDataSource();
-		object.put("db_max_active", dbSrc.getMaxActive());
-		object.put("db_active", dbSrc.getNumActive());
-		object.put("db_max_idle", dbSrc.getMaxIdle());
-		object.put("db_idle", dbSrc.getNumIdle());
-		object.put("db_max_open_prep_statements", dbSrc.getMaxOpenPreparedStatements());
+		int dbMaxActive = dbSrc.getMaxActive();
+		int dbActive = dbSrc.getNumActive();
+		int dbMaxIdle = dbSrc.getMaxIdle();
+		int dbIdle = dbSrc.getNumIdle();
+		int dbMaxOpenPrepStatements = dbSrc.getMaxOpenPreparedStatements();
 
-		return object.toString();
+		return new ClusterDetailsResponse(
+				maintenance, blocked, version, hash, threads, maxJobsUser, builtBy, builtTime,
+				workspacePath, freeDiskSpace, totalDiskSpace, usedDiskSpace,
+				plugins,
+				dbMaxActive, dbActive, dbMaxIdle, dbIdle, dbMaxOpenPrepStatements);
 	}
 
 	public void updateNextflowConfig(String content) {

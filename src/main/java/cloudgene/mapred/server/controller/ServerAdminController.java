@@ -8,6 +8,7 @@ import cloudgene.mapred.core.User;
 import cloudgene.mapred.database.dao.CounterHistoryDao;
 import cloudgene.mapred.server.Application;
 import cloudgene.mapred.server.auth.AuthenticationService;
+import cloudgene.mapred.server.responses.ClusterDetailsResponse;
 import cloudgene.mapred.server.responses.NextflowConfigResponse;
 import cloudgene.mapred.server.responses.ServerSettingsResponse;
 import cloudgene.mapred.server.responses.StatisticsResponse;
@@ -21,7 +22,6 @@ import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.Produces;
 import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.security.annotation.Secured;
-import io.micronaut.security.oauth2.configuration.OauthClientConfigurationProperties;
 import jakarta.inject.Inject;
 
 @Controller("/api/v2/admin/server")
@@ -35,9 +35,6 @@ public class ServerAdminController {
 
 	@Inject
 	protected AuthenticationService authenticationService;
-
-	@Inject
-	protected List<OauthClientConfigurationProperties> clients;
 
 	@Inject
 	protected ServerService serverService;
@@ -73,7 +70,7 @@ public class ServerAdminController {
 	}
 
 	@Get("/cluster")
-	public String getDetails() {
+	public ClusterDetailsResponse getDetails() {
 		return serverService.getClusterDetails();
 	}
 

@@ -24,8 +24,6 @@ public class Settings {
 
 	private static final Logger log = LoggerFactory.getLogger(Settings.class);
 
-	private final ArrayList<Map<String, String>> maps = new ArrayList<>();
-
 	private String serverUrl = "http://localhost:8082";
 
 	private String baseUrl = "";
@@ -45,8 +43,6 @@ public class Settings {
 	private Map<String, Map<String, String>> plugins;
 
 	private List<Map<String, String>> errorHandlers = new ArrayList<>();
-
-	private List<Map<String, String>> resources = maps;
 
 	private int autoRetireInterval = 5;
 
@@ -344,14 +340,6 @@ public class Settings {
 
 	public List<Map<String, String>> getErrorHandlers() {
 		return errorHandlers;
-	}
-
-	public void setResources(List<Map<String, String>> resources) {
-		this.resources = resources;
-	}
-
-	public List<Map<String, String>> getResources() {
-		return resources;
 	}
 
 	public void setRepository(ApplicationRepository repository) {

@@ -20,7 +20,6 @@ import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Produces;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.authentication.Authentication;
-import io.micronaut.security.oauth2.configuration.OauthClientConfigurationProperties;
 import io.micronaut.security.rules.SecurityRule;
 import jakarta.inject.Inject;
 
@@ -32,9 +31,6 @@ public class ServerController {
 
 	@Inject
 	protected AuthenticationService authenticationService;
-
-	@Inject
-	protected List<OauthClientConfigurationProperties> clients;
 
 	@Inject
 	protected ServerService serverService;
