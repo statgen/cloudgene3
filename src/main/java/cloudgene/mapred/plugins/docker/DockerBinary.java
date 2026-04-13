@@ -30,7 +30,6 @@ public class DockerBinary {
 
 	public boolean isInstalled() {
 		if (binary != null) {
-			String binary = getBinary();
 			return (new File(binary)).exists();
 		} else {
 			return false;

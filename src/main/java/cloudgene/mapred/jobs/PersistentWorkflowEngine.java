@@ -21,13 +21,9 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 	private static final Logger log = LoggerFactory.getLogger(PersistentWorkflowEngine.class);
 
 	private final Database database;
-
 	private final JobDao jobDao;
-
 	private final CounterDao counterDao;
-
 	private final Map<String, Long> counters;
-
 	private final List<IJobErrorHandler> handlers = new ArrayList<>();
 
 	public PersistentWorkflowEngine(Database database, int ltqThreads) {
@@ -168,13 +164,13 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 	public Map<String, Long> getCounters(JobState state, @Nullable List<String> names) {
 		if (state == JobState.SUCCESS) {
 			List<String> keys = (names == null) ? counters.keySet().stream().toList() : names;
-			Map<String, Long> counters = new HashMap<>();
+			Map<String, Long> filtered = new HashMap<>();
 
 			for (String name : keys) {
-				counters.put(name, this.counters.get(name));
+				filtered.put(name, this.counters.get(name));
 			}
 
-			return counters;
+			return filtered;
 		} else {
 			return super.getCounters(state, null);
 		}

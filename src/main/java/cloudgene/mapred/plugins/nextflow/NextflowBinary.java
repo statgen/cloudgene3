@@ -10,32 +10,20 @@ import cloudgene.mapred.util.command.Command;
 
 public class NextflowBinary {
 
-	private String binary = "";
-
+	private String binary;
 	private String script;
-
 	private String revision;
-
 	private String profile;
-
-	private final List<File> configFiles = new ArrayList<>();
-
 	private String work;
-
 	private File paramsFile;
-
 	private String weblog;
-
 	private String trace;
-
 	private String report;
-
 	private String timeline;
-
 	private String log;
-
 	private String name;
 
+	private final List<File> configFiles = new ArrayList<>();
 	private final List<File> envScripts = new ArrayList<>();
 
 	public static NextflowBinary build(Settings settings) {
@@ -59,7 +47,6 @@ public class NextflowBinary {
 
 	public boolean isInstalled() {
 		if (binary != null) {
-			String binary = getBinary();
 			return (new File(binary)).exists();
 		} else {
 			return false;
