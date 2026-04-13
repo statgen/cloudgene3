@@ -79,9 +79,7 @@ public abstract class JdbcDataAccessObject {
 			ResultSet rs = statement.getGeneratedKeys();
 			rs.beforeFirst();
 			rs.next();
-			int id = rs.getInt(1);
-			connection.close();
-			return id;
+			return rs.getInt(1);
 		}
 	}
 

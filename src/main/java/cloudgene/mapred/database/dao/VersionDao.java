@@ -45,11 +45,11 @@ public class VersionDao extends JdbcDataAccessObject {
 					+ "version VARCHAR(255) NOT NULL, "
 					+ "updated_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)";
 
-			Connection connection = database.getConnector().getDataSource().getConnection();
-			PreparedStatement statement = connection.prepareStatement(sql);
-			statement.executeUpdate();
+			try(Connection connection = database.getConnector().getDataSource().getConnection()) {
+				PreparedStatement statement = connection.prepareStatement(sql);
+				statement.executeUpdate();
+			}
 
-			connection.close();
 			log.debug("Table database_versions created.");
 			return true;
 		} catch (SQLException e) {

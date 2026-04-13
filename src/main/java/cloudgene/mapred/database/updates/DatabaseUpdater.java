@@ -308,10 +308,10 @@ public class DatabaseUpdater {
 				.trim();
 
 		if (!cleanedSQL.isEmpty()) {
-			Connection connection = database.getConnector().getDataSource().getConnection();
-			PreparedStatement ps = connection.prepareStatement(cleanedSQL);
-			ps.executeUpdate();
-			connection.close();
+			try(Connection connection = database.getConnector().getDataSource().getConnection()) {
+				PreparedStatement ps = connection.prepareStatement(cleanedSQL);
+				ps.executeUpdate();
+			}
 
 			log.info("DB SQL Update {} finished", version);
 			writeVersion(version);
