@@ -77,6 +77,7 @@ public class H2Connector implements DatabaseConnector {
 		dataSource.close();
 	}
 
+	@Override
 	public BasicDataSource getDataSource() {
 		return dataSource;
 	}
