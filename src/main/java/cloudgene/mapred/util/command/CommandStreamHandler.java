@@ -4,17 +4,13 @@ import java.io.*;
 
 public class CommandStreamHandler implements Runnable {
 
-	private BufferedReader is;
+	private final BufferedReader is;
 
 	private boolean silent = false;
 
-	private String filename = null;
+	private String filename;
 
 	private StringBuffer memory;
-
-	public CommandStreamHandler(InputStream is) {
-		this.is = new BufferedReader(new InputStreamReader(is));
-	}
 
 	public CommandStreamHandler(InputStream is, String filename) {
 		this.is = new BufferedReader(new InputStreamReader(is));
@@ -35,19 +31,15 @@ public class CommandStreamHandler implements Runnable {
 
 	@Override
 	public void run() {
-
 		try {
-
 			boolean save = (filename != null && !filename.isEmpty());
 			BufferedWriter writer = null;
-
-			byte[] buffer = new byte[200];
 
 			if (save) {
 				writer = new BufferedWriter(new FileWriter(filename));
 			}
 
-			String line = null;
+			String line;
 			while ((line = is.readLine()) != null) {
 				if (memory != null) {
 					memory.append(line).append("\n");
@@ -66,11 +58,8 @@ public class CommandStreamHandler implements Runnable {
 			}
 
 			is.close();
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
-
 }

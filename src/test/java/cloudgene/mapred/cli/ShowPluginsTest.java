@@ -2,15 +2,15 @@ package cloudgene.mapred.cli;
 
 import org.junit.jupiter.api.Test;
 
-public class ShowPluginsTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-	public static String TEST_SETTINGS = null;
+public class ShowPluginsTest {
 
 	@Test
 	public void testShowPlugins() {
 		String[] args = {};
 		ShowPlugins cmd = new ShowPlugins(args);
 		int result = cmd.start();
+		assertEquals(0, result);
 	}
-
 }

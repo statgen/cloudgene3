@@ -15,7 +15,6 @@ public class ShowPlugins extends BaseTool {
 
 	@Override
 	public int run() {
-
 		PluginManager plugins = PluginManager.getInstance();
 		for (IPlugin plugin: plugins.getPlugins()) {
 			if (plugin.isInstalled()) {
@@ -26,6 +25,5 @@ public class ShowPlugins extends BaseTool {
 		}
 		
 		return 0;
-
 	}
 }
