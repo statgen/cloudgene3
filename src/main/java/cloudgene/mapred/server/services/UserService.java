@@ -298,7 +298,7 @@ public class UserService {
 				key = user.getActivationCode();
 			} else {
 				// create activation token
-				key = HashUtil.getActivationHash(user);
+				key = HashUtil.getSecureHash();
 				user.setActivationCode(key);
 				dao.update(user);
 			}
@@ -399,7 +399,7 @@ public class UserService {
 			// activate user immediately.
 
 			if (application.getSettings().getMail() != null && mailProvided) {
-				String activationKey = HashUtil.getActivationHash(newUser);
+				String activationKey = HashUtil.getSecureHash();
 				newUser.setActive(false);
 				newUser.setActivationCode(activationKey);
 
