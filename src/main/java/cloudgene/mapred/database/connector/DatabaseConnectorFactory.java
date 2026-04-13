@@ -35,7 +35,6 @@ public final class DatabaseConnectorFactory {
 			String password = settings.get("password");
 
 			return new H2Connector(database, user, password, false);
-
 		} else if (driver.equals("mysql")) {
 			String host = settings.get("host");
 			String port = settings.get("port");
@@ -46,13 +45,21 @@ public final class DatabaseConnectorFactory {
 			MySqlConnector connector = new MySqlConnector(host, port, database, user, password);
 
 			if (settings.containsKey("maxActive")) {
-				int maxActive = Integer.parseInt(settings.get("maxActive"));
-				connector.setMaxActive(maxActive);
+				try {
+					int maxActive = Integer.parseInt(settings.get("maxActive"));
+					connector.setMaxActive(maxActive);
+				} catch (NumberFormatException e) {
+					throw new IllegalArgumentException("Field 'maxActive' must be an integer (if present).", e);
+				}
 			}
 
 			if (settings.containsKey("maxWait")) {
-				int maxWait = Integer.parseInt(settings.get("maxWait"));
-				connector.setMaxWait(maxWait);
+				try {
+					int maxWait = Integer.parseInt(settings.get("maxWait"));
+					connector.setMaxWait(maxWait);
+				} catch (NumberFormatException e) {
+					throw new IllegalArgumentException("Field 'maxWait' must be an integer (if present).", e);
+				}
 			}
 
 			return connector;

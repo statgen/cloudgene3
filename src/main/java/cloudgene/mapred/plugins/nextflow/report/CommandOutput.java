@@ -61,9 +61,13 @@ public class CommandOutput {
 					break;
 				case "set-counter":
 				case "inc-counter":
-					context.incCounter(
-							command.parameters().get("name"),
-							Long.parseLong(command.parameters().get("value")));
+					try {
+						context.incCounter(
+								command.parameters().get("name"),
+								Long.parseLong(command.parameters().get("value")));
+					} catch (NumberFormatException e) {
+						throw new IOException("inc-counter must have an integer value.", e);
+					}
 					break;
 				case "submit-counter":
 					context.submitCounter(command.parameters().get("name"));
