@@ -9,12 +9,12 @@ import cloudgene.mapred.jobs.CloudgeneContext;
 import cloudgene.mapred.jobs.CloudgeneStep;
 import cloudgene.mapred.jobs.Message;
 import cloudgene.mapred.wdl.WdlStep;
+import io.micronaut.core.annotation.NonNull;
 
 public class BashCommandStep extends CloudgeneStep {
 
 	@Override
-	public boolean run(WdlStep step, CloudgeneContext context) {
-
+	public boolean run(@NonNull WdlStep step, @NonNull CloudgeneContext context) {
 		context.createStep(step.getName());
 
 		String originalCommand = step.getString("exec");
