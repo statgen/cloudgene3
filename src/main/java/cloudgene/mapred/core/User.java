@@ -3,6 +3,7 @@ package cloudgene.mapred.core;
 import jakarta.annotation.Nullable;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class User {
@@ -313,13 +314,15 @@ public class User {
 
 		return null;
 	}
+	
+	@Override
+	public boolean equals(Object object) {
+		if (!(object instanceof User user)) return false;
+		return Objects.equals(username, user.username);
+	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-
-		return ((User) obj).getUsername().equals(username);
+	public int hashCode() {
+		return Objects.hashCode(username);
 	}
 }

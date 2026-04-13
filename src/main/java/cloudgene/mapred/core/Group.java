@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonClassDescription;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @JsonClassDescription
 public class Group {
@@ -37,12 +38,13 @@ public class Group {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
+	public boolean equals(Object object) {
+		if (!(object instanceof Group group)) return false;
+		return Objects.equals(name, group.name);
+	}
 
-		Group g = (Group) obj;
-		return g.getName().equalsIgnoreCase(getName());
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(name);
 	}
 }
