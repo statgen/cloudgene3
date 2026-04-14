@@ -78,10 +78,10 @@ public class MySqlConnector extends AbstractDatabaseConnector {
 	public boolean tableExists(String table) throws SQLException {
 		boolean exists = false;
 
-		try(Connection connection = dataSource.getConnection()) {
+		try (Connection connection = dataSource.getConnection()) {
 			DatabaseMetaData meta = connection.getMetaData();
 
-			try(ResultSet res = meta.getTables(null, null, table, new String[]{"TABLE"})) {
+			try (ResultSet res = meta.getTables(null, null, table, new String[]{"TABLE"})) {
 				exists = res.next();
 			}
 		}

@@ -52,11 +52,12 @@ public class CounterHistoryDao extends JdbcDataAccessObject {
 			Map<String, String> counters = new HashMap<>();
 			String old = "";
 
-			try(Connection connection = database.getDataSource().getConnection()) {
-				PreparedStatement statement = connection.prepareStatement(sql);
+			try (Connection connection = database.getDataSource().getConnection();
+					PreparedStatement statement = connection.prepareStatement(sql)) {
+
 				statement.setInt(1, limit);
 
-				try(ResultSet rs = statement.executeQuery()) {
+				try (ResultSet rs = statement.executeQuery()) {
 
 					// NOTE(Marc): This whole thing is convoluted, so I'm leaving some notes behind.
 					//
@@ -109,13 +110,13 @@ public class CounterHistoryDao extends JdbcDataAccessObject {
 			Map<String, String> counters = new HashMap<>();
 			String old = "";
 
-			try(Connection connection = database.getDataSource().getConnection()) {
+			try (Connection connection = database.getDataSource().getConnection();
+					PreparedStatement statement = connection.prepareStatement(sql)) {
 
-				PreparedStatement statement = connection.prepareStatement(sql);
 				statement.setLong(1, start);
 				statement.setLong(2, end);
 
-				try(ResultSet rs = statement.executeQuery()) {
+				try (ResultSet rs = statement.executeQuery()) {
 					while (rs.next()) {
 						// NOTE(Marc): See explainer in the other method.
 

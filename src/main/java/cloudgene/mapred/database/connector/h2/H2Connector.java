@@ -91,7 +91,7 @@ public class H2Connector implements DatabaseConnector {
 	public boolean tableExists(String table) throws SQLException {
 		boolean exists = false;
 
-		try(Connection connection = dataSource.getConnection()) {
+		try (Connection connection = dataSource.getConnection()) {
 			DatabaseMetaData meta = connection.getMetaData();
 
 			try (ResultSet res = meta.getTables(null, null, table.toUpperCase(), new String[]{"TABLE"})) {
