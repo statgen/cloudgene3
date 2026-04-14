@@ -1,63 +1,50 @@
 package cloudgene.mapred.util;
 
 import io.micronaut.core.annotation.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.io.input.ReversedLinesFileReader;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
 
 public final class TextUtil {
 
 	private TextUtil() {}
 
-	private static final Logger log = LoggerFactory.getLogger(TextUtil.class);
-
 	/**
-	 * Reads the last {@code lines} lines from the provided {@code file} (just like
-	 * the {@code tail} command).
+	 * Reads the last {@code lines} lines from the provided {@code file} (just like the {@code tail} command).
+	 * <p>
+	 * Converts newlines to UNIX-style (only line feed: {@code \n}). Ignores trailing newlines. UTF-8 is assumed.
+	 * <p>
+	 * If {@code lines} is greater than the actual line count in {@code file}, the whole file is returned.
 	 *
-	 * @param file  File whose tail we want to read.
-	 * @param lines Number of lines from {@code file} to print.
+	 * @param file  File whose tail we want to read. Must be non-null and correspond to an actual file in the filesystem.
+	 * @param lines Number of lines from {@code file} to print. Must be strictly positive.
 	 * @return The {@code file} tail.
+	 * @throws IllegalArgumentException if {@code file} is null or not present in the filesystem; or if {@code lines} is less than 1.
+	 * @throws IOException              if any issues are encountered reading from the filesystem.
 	 */
-	public static String tail(@NonNull File file, int lines) {
-		// TODO(Marc): This implementation seems very slow (seems to be copying one byte
-		// at a time and then reversing a string). We should add tests and rewrite.
-		try (java.io.RandomAccessFile fileHandler = new java.io.RandomAccessFile(file, "r")) {
-			long fileLength = fileHandler.length() - 1;
-			StringBuilder sb = new StringBuilder();
-			int line = 0;
+	public static String tail(@NonNull File file, int lines) throws IOException {
+		if (!file.isFile()) {
+			throw new IllegalArgumentException("'file' is not a file in the filesystem: " + file);
+		}
 
-			for (long filePointer = fileLength; filePointer != -1; filePointer--) {
-				fileHandler.seek(filePointer);
-				int readByte = fileHandler.readByte();
+		if (lines <= 0) {
+			throw new IllegalArgumentException("'lines' must be > 0; found: " + lines);
+		}
 
-				if (readByte == 0xA) {
-					line = line + 1;
-					if (line == lines) {
-						if (filePointer == fileLength) {
-							continue;
-						}
-						break;
-					}
-				} else if (readByte == 0xD) {
-					line = line + 1;
-					if (line == lines) {
-						if (filePointer == fileLength - 1) {
-							continue;
-						}
-						break;
-					}
-				}
-				sb.append((char) readByte);
-			}
+		try (ReversedLinesFileReader reader = ReversedLinesFileReader.builder()
+				.setBufferSize(4096)
+				.setCharset(StandardCharsets.UTF_8)
+				.setFile(file)
+				.get()) {
 
-			String lastLine = sb.reverse().toString();
-			return lastLine;
-		} catch (IOException e) {
-			log.error("Parsing log file failed.", e);
-			return null;
+			List<String> lineList = reader.readLines(lines);
+			Collections.reverse(lineList);
+
+			return String.join("\n", lineList);
 		}
 	}
 }

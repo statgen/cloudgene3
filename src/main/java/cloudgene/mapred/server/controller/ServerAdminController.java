@@ -1,6 +1,7 @@
 package cloudgene.mapred.server.controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -23,10 +24,14 @@ import io.micronaut.http.annotation.Produces;
 import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.security.annotation.Secured;
 import jakarta.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller("/api/v2/admin/server")
 @Secured(User.ROLE_ADMIN)
 public class ServerAdminController {
+
+	private static final Logger log = LoggerFactory.getLogger(ServerAdminController.class);
 
 	private static final String LOG_FILENAME = "logs/cloudgene.log";
 
@@ -77,9 +82,10 @@ public class ServerAdminController {
 	@Get("/logs/cloudgene.log")
 	public String getLogs() {
 		File file = new File(LOG_FILENAME);
-		if (file.exists()) {
-			return TextUtil.tail(file, 1000);
-		} else {
+		try {
+			return TextUtil.tail(file, 1_000);
+		} catch (IOException e) {
+			log.error("Failed to load log file: " + LOG_FILENAME, e);
 			return "No log file available.";
 		}
 	}
