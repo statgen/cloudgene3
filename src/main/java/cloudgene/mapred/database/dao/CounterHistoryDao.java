@@ -101,7 +101,7 @@ public class CounterHistoryDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public List<Map<String, String>> getAllBeetween(long start, long end) {
+	public List<Map<String, String>> getAllBetween(long start, long end) {
 		String sql = "SELECT time_stamp, name, `value` FROM counters_history "
 				+ "WHERE time_stamp > ? AND time_stamp < ? ORDER BY time_stamp DESC, name";
 

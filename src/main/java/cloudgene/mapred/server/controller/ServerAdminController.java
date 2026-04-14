@@ -140,7 +140,7 @@ public class ServerAdminController {
 
 		CounterHistoryDao dao = new CounterHistoryDao(application.getDatabase());
 
-		List<Map<String, String>> stats = dao.getAllBeetween(
+		List<Map<String, String>> stats = dao.getAllBetween(
 				System.currentTimeMillis() - (1000L * 60L * 60L * 24L * days), System.currentTimeMillis());
 
 		return StatisticsResponse.build(stats);
