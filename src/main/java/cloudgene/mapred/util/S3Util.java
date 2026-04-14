@@ -226,7 +226,7 @@ public final class S3Util {
 	 *
 	 * @param uri  S3 URI pointing to a downloadable object.
 	 * @param file Local path that the file should be downloaded into.
-	 * @throws IOException If the download fails.ss
+	 * @throws IOException If the download fails.
 	 */
 	public static void copyToFile(String uri, File file) throws IOException {
 		UriParts uriParts = getParts(uri);
@@ -389,7 +389,7 @@ public final class S3Util {
 				ListObjectsV2Response response = future.join();
 
 				// TODO(Marc): It would be more efficient to use DeleteObjects* (note the
-				//             plural) to batch delte, but it has a max of 1,000 deletes
+				//             plural) to batch delete, but it has a max of 1,000 deletes
 				//             per call, so we'd have to control for that.
 				for (S3Object head : response.contents()) {
 					DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()

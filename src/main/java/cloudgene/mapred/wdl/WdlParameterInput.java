@@ -202,7 +202,7 @@ public class WdlParameterInput implements WdlParameter {
 		return writeFile;
 	}
 
-	public boolean hasDataBindung() {
+	public boolean hasDataBinding() {
 		if (value != null) {
 			return values.containsKey("bind");
 		} else {
