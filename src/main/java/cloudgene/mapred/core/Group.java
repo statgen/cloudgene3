@@ -1,6 +1,7 @@
 package cloudgene.mapred.core;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
+import io.micronaut.core.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,27 +10,27 @@ import java.util.Objects;
 @JsonClassDescription
 public class Group {
 
-	private String name;
+	private @NonNull String name;
 
-	private List<String> apps = new ArrayList<>();
+	private @NonNull List<String> apps = new ArrayList<>();
 
-	public Group(String name) {
+	public Group(@NonNull String name) {
 		this.name = name;
 	}
 
-	public void setName(String name) {
+	public void setName(@NonNull String name) {
 		this.name = name;
 	}
 
-	public String getName() {
+	public @NonNull String getName() {
 		return name;
 	}
 
-	public void setApps(List<String> apps) {
+	public void setApps(@NonNull List<String> apps) {
 		this.apps = apps;
 	}
 
-	public List<String> getApps() {
+	public @NonNull List<String> getApps() {
 		return apps;
 	}
 
@@ -40,11 +41,11 @@ public class Group {
 	@Override
 	public boolean equals(Object object) {
 		if (!(object instanceof Group group)) return false;
-		return Objects.equals(name, group.name);
+		return name.equalsIgnoreCase(group.name);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(name);
+		return Objects.hashCode(name.toLowerCase());
 	}
 }
