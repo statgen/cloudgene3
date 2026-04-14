@@ -1,38 +1,19 @@
 package cloudgene.mapred.util;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.crypto.bcrypt.BCrypt;
-
-import cloudgene.mapred.core.User;
-
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 public final class HashUtil {
 
 	private HashUtil() {}
 
-    // NOTE(Marc): Used in UserService.resetPassword() to create a one-time activation code (used for a randomized activation URL).
-    // NOTE(Marc): Used in UserService.registerUser() to create a one-time activation code (used for a randomized activation URL).
-    // TODO(Marc): Should be substituted with a fixed-length cryptographically secure random hash.
-    /**
-     * Calculates a time-based hash.
-     * @param user Ignored.
-     */
-	public static String getActivationHash(User user) {
-		return HashUtil.getSha256(System.currentTimeMillis() + "_" + Math.round(2000));
+	/**
+	 * Returns a secure random alphanumeric string with 64 characters.
+	 */
+	public static String getSecureHash() {
+		return RandomStringUtils.secure().nextAlphanumeric(64);
 	}
-
-//    // TODO(Marc): Unused!
-//    // TODO(Marc): Should be substituted with a fixed-length cryptographically secure random hash.
-//    /**
-//     * Calculates a time-based hash.
-//     * @param user Ignored.
-//     */
-//	public static String getCsrfToken(User user) {
-//		return HashUtil.getSha256(System.currentTimeMillis() + "_" + Math.round(2000));
-//	}
 
     /**
      * Calculates the SHA-256 digest and returns the value as a hex string.

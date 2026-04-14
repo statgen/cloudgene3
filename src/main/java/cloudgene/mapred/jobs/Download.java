@@ -1,6 +1,8 @@
 package cloudgene.mapred.jobs;
 
 
+import java.util.Objects;
+
 public class Download implements Comparable<Download> {
 
 	private String name = "";
@@ -67,11 +69,15 @@ public class Download implements Comparable<Download> {
 		return name.compareTo(o.getName());
 
 	}
-	
+
 	@Override
 	public boolean equals(Object object) {
-		Download download = (Download) object;
-		return name.equals(download.getName());
+		if (!(object instanceof Download download)) return false;
+		return Objects.equals(name, download.name);
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(name);
+	}
 }

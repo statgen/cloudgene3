@@ -1,5 +1,8 @@
 package cloudgene.mapred.util;
 
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
+
 import java.util.*;
 
 public final class MapValueParser {
@@ -11,7 +14,7 @@ public final class MapValueParser {
 	 * leaves into a typed map. Parses compatible leaves into {@code int},
 	 * {@code float}, and {@code bool}.
 	 */
-	public static Map<String, Object> parseMap(Map<String, Object> map) {
+	public static @NonNull Map<String, Object> parseMap(@NonNull Map<String, Object> map) {
 		Map<String, Object> parsedMap = new HashMap<>();
 
 		for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -30,37 +33,28 @@ public final class MapValueParser {
 		return parsedMap;
 	}
 
-	public static Object guessType(String value) {
+	public static @Nullable Object guessType(@Nullable String value) {
 		if (value == null) {
 			return null;
 		}
-		if (isInteger(value)) {
+
+		try {
 			return Integer.parseInt(value);
-		} else if (isDouble(value)) {
+		} catch (NumberFormatException e) {
+			// pass
+		}
+
+		try {
 			return Double.parseDouble(value);
-		} else if (isBoolean(value)) {
+		} catch (NumberFormatException e) {
+			// pass
+		}
+
+		if (isBoolean(value)) {
 			return Boolean.parseBoolean(value);
-		} else {
-			return value;
 		}
-	}
 
-	private static boolean isInteger(String value) {
-		try {
-			Integer.parseInt(value);
-			return true;
-		} catch (NumberFormatException e) {
-			return false;
-		}
-	}
-
-	private static boolean isDouble(String value) {
-		try {
-			Double.parseDouble(value);
-			return true;
-		} catch (NumberFormatException e) {
-			return false;
-		}
+		return value;
 	}
 
 	private static boolean isBoolean(String value) {

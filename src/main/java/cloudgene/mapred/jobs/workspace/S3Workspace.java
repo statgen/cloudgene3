@@ -106,6 +106,7 @@ public class S3Workspace implements IWorkspace {
 	/**
 	 * Checks if {@code uri} is a valid S3 URI for an existing object.
 	 */
+	@Override
 	public boolean exists(String uri) throws IOException {
 		S3Util.UriParts uriParts = S3Util.getParts(uri);
 		return S3Util.doesObjectExist(uriParts);

@@ -57,11 +57,11 @@ public class UserService {
 		this.application = application;
 	}
 
-	public Page<User> getAll(String query, String page, int pageSize) {
+	public Page<User> getAll(String query, Integer page, int pageSize) {
 		int offset = 0;
 
 		if (page != null) {
-			offset = Integer.parseInt(page);
+			offset = page;
 			if (offset < 1) {
 				offset = 1;
 			}
@@ -75,7 +75,7 @@ public class UserService {
 
 		if (query != null && !query.isEmpty()) {
 			users = dao.findByQuery(query);
-			page = "1";
+			page = 1;
 			count = users.size();
 			pageSize = count;
 		} else {
@@ -84,7 +84,7 @@ public class UserService {
 				count = dao.findAll().size();
 			} else {
 				users = dao.findAll();
-				page = "1";
+				page = 1;
 				count = users.size();
 				pageSize = count;
 			}
@@ -93,7 +93,7 @@ public class UserService {
 		Page<User> result = new Page<>();
 
 		result.setCount(count);
-		result.setPage(Integer.parseInt(page));
+		result.setPage(page);
 		result.setPageSize(pageSize);
 		result.setData(users);
 
@@ -298,7 +298,7 @@ public class UserService {
 				key = user.getActivationCode();
 			} else {
 				// create activation token
-				key = HashUtil.getActivationHash(user);
+				key = HashUtil.getSecureHash();
 				user.setActivationCode(key);
 				dao.update(user);
 			}
@@ -399,7 +399,7 @@ public class UserService {
 			// activate user immediately.
 
 			if (application.getSettings().getMail() != null && mailProvided) {
-				String activationKey = HashUtil.getActivationHash(newUser);
+				String activationKey = HashUtil.getSecureHash();
 				newUser.setActive(false);
 				newUser.setActivationCode(activationKey);
 

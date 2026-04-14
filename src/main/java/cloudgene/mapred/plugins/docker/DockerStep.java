@@ -8,6 +8,7 @@ import cloudgene.mapred.jobs.CloudgeneContext;
 import cloudgene.mapred.jobs.CloudgeneStep;
 import cloudgene.mapred.jobs.Message;
 import cloudgene.mapred.wdl.WdlStep;
+import io.micronaut.core.annotation.NonNull;
 
 public class DockerStep extends CloudgeneStep {
 
@@ -16,16 +17,17 @@ public class DockerStep extends CloudgeneStep {
 	public static final String DOCKER_WORKING = "/mnt/working";
 
 	@Override
-	public boolean run(WdlStep step, CloudgeneContext context) {
-
+	public boolean run(@NonNull WdlStep step, @NonNull CloudgeneContext context) {
 		String cmd = step.getString("cmd");
 
 		if (cmd == null) {
 			context.error("No 'exec' or 'cmd' parameter found.");
+			return false;
 		}
 
 		if (cmd.isEmpty()) {
 			context.error("'exec' or 'cmd' parameter cannot be an empty string.");
+			return false;
 		}
 
 		String stdout = step.getString("stdout", "false");
@@ -37,26 +39,26 @@ public class DockerStep extends CloudgeneStep {
 
 		if (image == null) {
 			context.error("No 'image' parameter found.");
+			return false;
 		}
 
 		if (image.isEmpty()) {
 			context.error("'image' parameter cannot be an empty string.");
+			return false;
 		}
 
 		return runInDockerContainer(context, image, params, streamStdout);
-
 	}
 
-	protected boolean runInDockerContainer(CloudgeneContext context, String image, String[] cmd) {
-		return runInDockerContainer(context, image, cmd, false);
-	}
-
-	protected boolean runInDockerContainer(CloudgeneContext context, String image, String[] cmd, boolean streamStdout) {
+	private boolean runInDockerContainer(
+			@NonNull CloudgeneContext context,
+			@NonNull String image,
+			@NonNull String[] cmd,
+			boolean streamStdout) {
 
 		String localWorkspace = new File(context.getJob().getLocalWorkspace()).getAbsolutePath();
 
 		try {
-
 			// replace all paths with paths in docker workspace
 			String[] newParams = new String[cmd.length];
 			for (int i = 0; i < newParams.length; i++) {
@@ -69,8 +71,10 @@ public class DockerStep extends CloudgeneStep {
 			}
 
 			// mount workspace from host to container
-			String[] volumes = { localWorkspace + ":" + DOCKER_WORKSPACE,
+			String[] volumes = {
+					localWorkspace + ":" + DOCKER_WORKSPACE,
 					context.getWorkingDirectory() + ":" + DOCKER_WORKING };
+
 			context.log("Command: " + Arrays.toString(newParams));
 
 			DockerBinary binary = DockerBinary.build(context.getSettings());
@@ -96,7 +100,8 @@ public class DockerStep extends CloudgeneStep {
 					if (streamStdout) {
 						context.endTask(output.toString(), Message.ERROR);
 					} else {
-						context.endTask("Execution failed. Please contact the server administrators for help if you believe this job should have completed successfully.",
+						context.endTask(
+								"Execution failed. Please contact the server administrators for help if you believe this job should have completed successfully.",
 								Message.ERROR);
 					}
 					return false;
@@ -117,5 +122,4 @@ public class DockerStep extends CloudgeneStep {
 	public String[] getRequirements() {
 		return new String[] { DockerPlugin.ID };
 	}
-
 }

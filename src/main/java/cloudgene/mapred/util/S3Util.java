@@ -398,7 +398,7 @@ public final class S3Util {
 							.build();
 
 					CompletableFuture<DeleteObjectResponse> deleteFuture = s3.deleteObject(deleteRequest);
-					DeleteObjectResponse deleteResponse = deleteFuture.join();
+					deleteFuture.join();
 				}
 
 				continuationToken = response.nextContinuationToken();

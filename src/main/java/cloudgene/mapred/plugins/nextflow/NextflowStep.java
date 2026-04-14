@@ -15,6 +15,8 @@ import cloudgene.mapred.util.MapValueParser;
 import cloudgene.mapred.wdl.WdlParameterInput;
 import cloudgene.mapred.wdl.WdlParameterInputType;
 import cloudgene.mapred.wdl.WdlParameterOutput;
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +39,7 @@ public class NextflowStep extends CloudgeneStep {
 	private final NextflowCollector collector = NextflowCollector.getInstance();
 
 	@Override
-	public boolean run(WdlStep step, CloudgeneContext context) {
+	public boolean run(@NonNull WdlStep step, @NonNull CloudgeneContext context) {
 
 		this.context = context;
 
@@ -55,8 +57,8 @@ public class NextflowStep extends CloudgeneStep {
 			scriptPath = FileUtil.path(context.getWorkingDirectory(), script);
 		}
 		if (!new File(scriptPath).exists()) {
-			context.log(
-					"Warning: Nextflow script '" + scriptPath + "' not found. Try to resolve it on github as '" + script + "'");
+			context.log("Warning: Nextflow script '" + scriptPath + "' not found. "
+					+ "Try to resolve it on github as '" + script + "'");
 			scriptPath = script;
 		}
 
@@ -68,7 +70,7 @@ public class NextflowStep extends CloudgeneStep {
 		if (groups.isEmpty()) {
 			context.createStep(step.getName());
 		}
-		for (NextflowProcessConfig config: configs.values()) {
+		for (NextflowProcessConfig config : configs.values()) {
 			if (config.getGroup() != null) {
 				config.setStep(groups.get(config.getGroup()));
 			}
@@ -83,12 +85,14 @@ public class NextflowStep extends CloudgeneStep {
 
 		NextflowPlugin plugin = (NextflowPlugin) PluginManager.getInstance().getPlugin(NextflowPlugin.ID);
 
-		Map<String, String> nextflowSettings = null;
+		Map<String, String> nextflowSettings;
 		try {
 			nextflowSettings = plugin.getConfig(context.getJob().getApp());
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Failed to load Nextflow settings.", e);
+			return false;
 		}
+
 		// set profile
 		String profile = nextflowSettings.get("nextflow.profile");
 		nextflow.setProfile(profile);
@@ -107,7 +111,6 @@ public class NextflowStep extends CloudgeneStep {
 		String appEnv = FileUtil.path(appFolder, "nextflow.env");
 		nextflow.addEnvScript(new File(appEnv));
 
-
 		// set work directory
 		IWorkspace workspace = job.getWorkspace();
 
@@ -120,11 +123,10 @@ public class NextflowStep extends CloudgeneStep {
 			nextflow.setWork(workDir);
 		}
 
-
 		String prefix = "step" + context.getStepCounter() + "-";
 
 		// params json file
-		String paramsJsonFilename = FileUtil.path(context.getLocalOutput(),prefix + "params.json");
+		String paramsJsonFilename = FileUtil.path(context.getLocalOutput(), prefix + "params.json");
 		File paramsFile = new File(paramsJsonFilename);
 		try {
 			Map<String, Object> params = createParamsMap(step);
@@ -151,14 +153,12 @@ public class NextflowStep extends CloudgeneStep {
 		nextflow.setLog(logPath);
 
 		try {
-
 			File executionDir = new File(context.getLocalOutput());
 
 			StringBuilder output = new StringBuilder();
 			boolean successful = executeCommand(nextflow.buildCommand(), context, output, executionDir);
 
 			if (!successful) {
-
 				// set all running processes to failed
 				List<NextflowProcess> processes = collector.getProcesses(context);
 				for (NextflowProcess process : processes) {
@@ -181,7 +181,6 @@ public class NextflowStep extends CloudgeneStep {
 						context.error(output.toString());
 					}
 				}
-
 			}
 
 			updateProgress();
@@ -214,15 +213,14 @@ public class NextflowStep extends CloudgeneStep {
 				log.error("[Job {}] Uploading Nextflow logs failed.", context.getJobId(), e);
 			}
 		}
-
 	}
 
-	private void parseOutput(File file) throws IOException {
+	private void parseOutput(@NonNull File file) throws IOException {
 		CommandOutput output = new CommandOutput(file.getAbsolutePath());
 		output.execute(context, context.getCurrentStep());
 	}
 
-	private void parseOutput(StringBuilder content) throws IOException {
+	private void parseOutput(@NonNull StringBuilder content) throws IOException {
 		CommandOutput output = new CommandOutput(content);
 		output.execute(context, context.getCurrentStep());
 	}
@@ -249,7 +247,7 @@ public class NextflowStep extends CloudgeneStep {
 		}
 	}
 
-	private void loadProcessConfigs(Object map) {
+	private void loadProcessConfigs(@Nullable Object map) {
 		if (map != null) {
 			List<Map<String, Object>> processConfigs = (List<Map<String, Object>>) map;
 			for (Map<String, Object> processConfig : processConfigs) {
@@ -269,7 +267,7 @@ public class NextflowStep extends CloudgeneStep {
 		}
 	}
 
-	private Map<String, Step> loadGroups(Object map) {
+	private Map<String, Step> loadGroups(@Nullable Object map) {
 		Map<String, Step> groups = new HashMap<>();
 		if (map != null) {
 			List<Map<String, Object>> groupConfigs = (List<Map<String, Object>>) map;
@@ -283,7 +281,7 @@ public class NextflowStep extends CloudgeneStep {
 		return groups;
 	}
 
-	private NextflowProcessConfig getNextflowProcessConfig(NextflowProcess process) {
+	private NextflowProcessConfig getNextflowProcessConfig(@NonNull NextflowProcess process) {
 		NextflowProcessConfig config = configs.get(process.getName());
 		return config != null ? config : new NextflowProcessConfig();
 	}
@@ -293,7 +291,8 @@ public class NextflowStep extends CloudgeneStep {
 		return new String[] { NextflowPlugin.ID };
 	}
 
-	private Map<String, Object> createParamsMap(WdlStep step) {
+	@NonNull
+	private Map<String, Object> createParamsMap(@NonNull WdlStep step) {
 		Map<String, Object> params = new HashMap<>();
 
 		// used to defined hard coded params
@@ -303,7 +302,7 @@ public class NextflowStep extends CloudgeneStep {
 		}
 
 		// add all inputs
-		for (WdlParameterInput param: context.getJob().getApp().getWorkflow().getInputs()) {
+		for (WdlParameterInput param : context.getJob().getApp().getWorkflow().getInputs()) {
 			String name = param.getId();
 			String value = context.getInput(name);
 			if (!param.isSerialize()) {
@@ -318,11 +317,10 @@ public class NextflowStep extends CloudgeneStep {
 			} else {
 				params.put(name, MapValueParser.guessType(value));
 			}
-
 		}
 
 		// add all outputs
-		for (WdlParameterOutput param: context.getJob().getApp().getWorkflow().getOutputs()) {
+		for (WdlParameterOutput param : context.getJob().getApp().getWorkflow().getOutputs()) {
 			String name = param.getId();
 			String value = context.getOutput(name);
 			if (!param.isSerialize()) {
@@ -332,13 +330,11 @@ public class NextflowStep extends CloudgeneStep {
 		}
 
 		return params;
-
 	}
 
-	protected void writeParamsJson(Map<String, Object> params, File paramsFile) throws IOException {
+	protected void writeParamsJson(Map<String, Object> params, @NonNull File paramsFile) throws IOException {
 		BufferedWriter writer = new BufferedWriter(new FileWriter(paramsFile));
 		writer.write(JsonOutput.prettyPrint(JsonOutput.toJson(params)));
 		writer.close();
 	}
-
 }

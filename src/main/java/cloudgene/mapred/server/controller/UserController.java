@@ -51,7 +51,7 @@ public class UserController {
 
 	@Get("/api/v2/admin/users")
 	@Secured(User.ROLE_ADMIN)
-	public PageResponse get(@Nullable @QueryValue("page") String page, @Nullable @QueryValue("query") String query) {
+	public PageResponse get(@Nullable @QueryValue("page") Integer page, @Nullable @QueryValue("query") String query) {
 
 		Page<User> users = userService.getAll(query, page, DEFAULT_PAGE_SIZE);
 		List<UserResponse> userResponses = UserResponse.build(users.getData());

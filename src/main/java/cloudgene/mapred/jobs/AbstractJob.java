@@ -429,12 +429,14 @@ abstract public class AbstractJob extends PriorityRunnable {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof AbstractJob)) {
-			return false;
-		}
+	public boolean equals(Object object) {
+		if (!(object instanceof AbstractJob that)) return false;
+		return Objects.equals(id, that.id);
+	}
 
-		return ((AbstractJob) obj).getId().equals(id);
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id);
 	}
 
 	public Settings getSettings() {

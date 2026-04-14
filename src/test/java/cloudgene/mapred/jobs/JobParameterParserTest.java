@@ -43,7 +43,7 @@ public class JobParameterParserTest {
      */
     private static Map<String, Object> map(Object... parts) {
         Map<String, Object> out = new HashMap<>();
-        for (int i = 0; i < parts.length; i += 2) {
+        for (int i = 0; i < parts.length-1; i += 2) {
             String key = (String)parts[i];
             Object value = parts[i+1];
             out.put(key, value);

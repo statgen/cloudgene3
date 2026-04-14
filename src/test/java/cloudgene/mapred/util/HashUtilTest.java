@@ -1,7 +1,5 @@
 package cloudgene.mapred.util;
 
-import cloudgene.mapred.core.User;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -13,9 +11,8 @@ public class HashUtilTest {
 
 	@Test
 	public void testActivationHash() {
-		User user = new User();
-		String hash = HashUtil.getActivationHash(user);
-		assert64CharHex(hash);
+		String hash = HashUtil.getSecureHash();
+		assert64CharAlnum(hash);
 	}
 
 	@Test
@@ -76,6 +73,15 @@ public class HashUtilTest {
 		// Hash is a 64-digit hex number.
 		Pattern format = Pattern.compile("[a-f0-9]{64}");
 		assertTrue(format.matcher(test).matches());
+	}
 
+	private void assert64CharAlnum(String test) {
+		// Basic sanity checks.
+		assertNotNull(test);
+		assertFalse(test.isBlank());
+
+		// Hash is a 64-digit hex number.
+		Pattern format = Pattern.compile("[a-zA-Z0-9]{64}");
+		assertTrue(format.matcher(test).matches());
 	}
 }

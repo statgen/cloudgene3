@@ -57,6 +57,7 @@ public final class MailUtil {
 			props.put("mail.smtp.auth", "true");
 			props.put("mail.smtp.starttls.enable", "true");
 			session = Session.getInstance(props, new jakarta.mail.Authenticator() {
+				@Override
 				protected PasswordAuthentication getPasswordAuthentication() {
 					return new PasswordAuthentication(username, password);
 				}

@@ -52,52 +52,51 @@ public class CounterHistoryDao extends JdbcDataAccessObject {
 			Map<String, String> counters = new HashMap<>();
 			String old = "";
 
-			Connection connection = database.getDataSource().getConnection();
+			try (Connection connection = database.getDataSource().getConnection();
+					PreparedStatement statement = connection.prepareStatement(sql)) {
 
-			PreparedStatement statement = connection.prepareStatement(sql);
-			statement.setInt(1, limit);
+				statement.setInt(1, limit);
 
-			ResultSet rs = statement.executeQuery();
+				try (ResultSet rs = statement.executeQuery()) {
 
-			// NOTE(Marc): This whole thing is convoluted, so I'm leaving some notes behind.
-			//
-			// This method grabs the last `limit` entries in `counters_history`, which has
-			// time series of the total value of each tracked counter (counters sum up values
-			// from all jobs).
-			//
-			// It then iterates over the list, and merges data with the same timestamp
-			// (allegedly different counters at the same sample point) into a single `counters`
-			// object.
-			//
-			// So basically we're going from long form to wide form.
-			//
-			// On failure it returns an empty collection, which is different behavior from
-			// other DAOs (they return `null` even if we're querying a collection).
+					// NOTE(Marc): This whole thing is convoluted, so I'm leaving some notes behind.
+					//
+					// This method grabs the last `limit` entries in `counters_history`, which has
+					// time series of the total value of each tracked counter (counters sum up values
+					// from all jobs).
+					//
+					// It then iterates over the list, and merges data with the same timestamp
+					// (allegedly different counters at the same sample point) into a single `counters`
+					// object.
+					//
+					// So basically we're going from long form to wide form.
+					//
+					// On failure it returns an empty collection, which is different behavior from
+					// other DAOs (they return `null` even if we're querying a collection).
 
-			while (rs.next()) {
-				String timestamp = rs.getString(1);
-				if (!old.equals(timestamp)) {
-					counters = new HashMap<>();
-					result.add(counters);
+					while (rs.next()) {
+						String timestamp = rs.getString(1);
+						if (!old.equals(timestamp)) {
+							counters = new HashMap<>();
+							result.add(counters);
 
-					Date date = new Date(rs.getLong(1));
-					counters.put("timestamp", DATE_FORMAT.format(date));
+							Date date = new Date(rs.getLong(1));
+							counters.put("timestamp", DATE_FORMAT.format(date));
 
-					old = rs.getString(1);
+							old = rs.getString(1);
+						}
+
+						String name = rs.getString(2);
+						String value = rs.getString(3);
+						counters.put(name, value);
+					}
 				}
-
-				String name = rs.getString(2);
-				String value = rs.getString(3);
-				counters.put(name, value);
 			}
 
-			rs.close();
-			connection.close();
-
-			log.debug("find counter history successful. results: " + result.size());
+			log.debug("find full counter history successful. Results: {}", result.size());
 			return result;
 		} catch (SQLException e) {
-			log.error("find all counter history failed", e);
+			log.error("find full counter history failed", e);
 			return new ArrayList<>();
 		}
 	}
@@ -111,34 +110,32 @@ public class CounterHistoryDao extends JdbcDataAccessObject {
 			Map<String, String> counters = new HashMap<>();
 			String old = "";
 
-			Connection connection = database.getDataSource().getConnection();
+			try (Connection connection = database.getDataSource().getConnection();
+					PreparedStatement statement = connection.prepareStatement(sql)) {
 
-			PreparedStatement statement = connection.prepareStatement(sql);
-			statement.setLong(1, start);
-			statement.setLong(2, end);
+				statement.setLong(1, start);
+				statement.setLong(2, end);
 
-			ResultSet rs = statement.executeQuery();
+				try (ResultSet rs = statement.executeQuery()) {
+					while (rs.next()) {
+						// NOTE(Marc): See explainer in the other method.
 
-			while (rs.next()) {
-				// NOTE(Marc): See explainer in the other method.
-
-				if (!old.equals(rs.getString(1))) {
-					counters = new HashMap<>();
-					result.add(counters);
-					counters.put("timestamp",
-							DATE_FORMAT.format(new Date(rs.getLong(1))));
-					old = rs.getString(1);
+						if (!old.equals(rs.getString(1))) {
+							counters = new HashMap<>();
+							result.add(counters);
+							counters.put("timestamp",
+									DATE_FORMAT.format(new Date(rs.getLong(1))));
+							old = rs.getString(1);
+						}
+						counters.put(rs.getString(2), rs.getString(3));
+					}
 				}
-				counters.put(rs.getString(2), rs.getString(3));
 			}
 
-			rs.close();
-			connection.close();
-
-			log.debug("find counter history successful. results: " + result.size());
+			log.debug("find counter history between times successful. Results: {}", result.size());
 			return result;
 		} catch (SQLException e) {
-			log.error("find all counter history failed", e);
+			log.error("find counter history between times failed", e);
 			return new ArrayList<>();
 		}
 	}
