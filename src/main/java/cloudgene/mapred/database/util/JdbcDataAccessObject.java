@@ -69,8 +69,8 @@ public abstract class JdbcDataAccessObject {
 	}
 
 	public int insert(String sql, Object[] params) throws SQLException {
-		try (Connection connection = database.getDataSource().getConnection()) {
-			PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+		try (Connection connection = database.getDataSource().getConnection();
+			PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
 			runner.fillStatement(statement, params);
 
@@ -79,6 +79,7 @@ public abstract class JdbcDataAccessObject {
 			ResultSet rs = statement.getGeneratedKeys();
 			rs.beforeFirst();
 			rs.next();
+
 			return rs.getInt(1);
 		}
 	}
