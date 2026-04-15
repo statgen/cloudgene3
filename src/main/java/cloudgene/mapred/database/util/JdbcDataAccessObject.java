@@ -104,12 +104,12 @@ public abstract class JdbcDataAccessObject {
 	}
 
 	public boolean callProcedure(String sql, Object[] params) throws SQLException {
-		try (Connection connection = database.getDataSource().getConnection()) {
-			CallableStatement statement = connection.prepareCall(sql);
+		try (Connection connection = database.getDataSource().getConnection();
+				CallableStatement statement = connection.prepareCall(sql)) {
+
 			runner.fillStatement(statement, params);
 			boolean state = statement.execute();
-			statement.close();
-			connection.close();
+
 			return state;
 		}
 	}
