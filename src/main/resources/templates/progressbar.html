@@ -1,6 +1,39 @@
-<b>${label} (${completed}/${total})</b><br>
-<div class="progress" style="width: 100%; margin-top: 15px;">
-	<div class="progress-bar bg-success" style="width: ${(completed/(double)total)*100}%;"></div>
-	<div class="progress-bar bg-primary" style="width: ${(failed/(double)total)*100}%;"></div>
-	<div class="progress-bar bg-light" style="width: ${(running/(double)total)*100}%;"></div>
+<label for="${id}-progress" class="d-block fw-bold">
+	${label} (${completed}/${total})
+</label>
+<p id="${id}-desc">
+	Completed: ${completed}. Failed: ${failed}. Running: ${running}.
+</p>
+
+<div id="${id}-progress" aria-describedby="${id}-desc" class="progress w-100 mt-3">
+	<div
+			role="progressbar"
+			class="progress-bar bg-success"
+			aria-label="completed job percentage"
+			aria-valuemin="0"
+			aria-valuemax="100"
+			aria-valuenow="${(int)((completed/(double)total)*100)"
+			style="width: ${(completed/(double)total)*100}%;"
+			title="completed jobs: ${(completed/(double)total)*100}%"
+	></div>
+	<div
+			role="progressbar"
+			class="progress-bar progress-bar-striped bg-danger"
+			aria-label="failed job percentage"
+			aria-valuemin="0"
+			aria-valuemax="100"
+			aria-valuenow="${(int)((failed/(double)total)*100)"
+			style="width: ${(failed/(double)total)*100}%;"
+			title="failed jobs: ${(failed/(double)total)*100}%"
+	></div>
+	<div
+			role="progressbar"
+			class="progress-bar bg-light"
+			aria-label="running job percentage"
+			aria-valuemin="0"
+			aria-valuemax="100"
+			aria-valuenow="${(int)((running/(double)total)*100)"
+			style="width: ${(running/(double)total)*100}%;"
+			title="running jobs: ${(running/(double)total)*100}%"
+	></div>
 </div>
