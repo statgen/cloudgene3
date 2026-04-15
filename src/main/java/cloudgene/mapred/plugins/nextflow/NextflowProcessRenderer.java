@@ -8,6 +8,7 @@ import org.codehaus.groovy.control.CompilationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -134,6 +135,9 @@ public class NextflowProcessRenderer {
 		}
 
 		URL resourceUrl = NextflowProcessRenderer.class.getResource(path);
+		if (resourceUrl == null) {
+			throw new FileNotFoundException("Resource not found in the classpath: " + path);
+		}
 		Path resourcePath = Paths.get(resourceUrl.toURI());
 		String content = Files.readString(resourcePath);
 
