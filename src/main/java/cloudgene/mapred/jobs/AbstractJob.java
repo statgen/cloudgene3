@@ -357,7 +357,7 @@ abstract public class AbstractJob extends PriorityRunnable {
 
 	public void cancel() {
 		writeLog("Canceled by user.");
-		log.info("[Job {}]: canceld by user.", getId());
+		log.info("[Job {}]: canceled by user.", getId());
 
 		canceled = true;
 		setEndTime(System.currentTimeMillis());

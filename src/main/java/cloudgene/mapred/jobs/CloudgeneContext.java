@@ -14,6 +14,7 @@ import cloudgene.mapred.util.MailUtil;
 import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.wdl.WdlParameterInputType;
 import genepi.io.FileUtil;
+import io.micronaut.core.annotation.NonNull;
 
 public class CloudgeneContext extends WorkflowContext {
 
@@ -39,7 +40,7 @@ public class CloudgeneContext extends WorkflowContext {
 
 	private final Map<String, Boolean> submitValues = new HashMap<>();
 
-	private final CloudgeneJob job;
+	private final @NonNull CloudgeneJob job;
 
 	private final Map<String, Object> data = new HashMap<>();
 
@@ -47,7 +48,7 @@ public class CloudgeneContext extends WorkflowContext {
 
 	private int stepCounter = 0;
 
-	public CloudgeneContext(CloudgeneJob job) {
+	public CloudgeneContext(@NonNull CloudgeneJob job) {
 
 		this.workingDirectory = job.getWorkingDirectory();
 		this.job = job;
@@ -86,7 +87,7 @@ public class CloudgeneContext extends WorkflowContext {
 			String value = input.getValue();
 			String linkedAppId = value;
 			if (value.startsWith("apps@")) {
-				linkedAppId = value.replaceAll("apps@", "");
+				linkedAppId = value.replace("apps@", "");
 			}
 
 			if (value.isEmpty()) {
@@ -189,7 +190,7 @@ public class CloudgeneContext extends WorkflowContext {
 		job.writeLog(line);
 	}
 
-	public CloudgeneJob getJob() {
+	public @NonNull CloudgeneJob getJob() {
 		return job;
 	}
 
@@ -249,7 +250,7 @@ public class CloudgeneContext extends WorkflowContext {
 		if (oldCount == null) {
 			oldCount = 0L;
 		}
-		Long newCount = oldCount + value;
+		long newCount = oldCount + value;
 
 		log(String.format("Increment counter '%s': %,d + %,d = %,d", name, oldCount, value, newCount));
 		counters.put(name, newCount);
@@ -342,14 +343,7 @@ public class CloudgeneContext extends WorkflowContext {
 	}
 
 	public void beginTask(Step step, String name) {
-		Message status = new Message(step, Message.RUNNING, name);
-
-		List<Message> logs = step.getLogMessages();
-		if (logs == null) {
-			logs = new ArrayList<>();
-			step.setLogMessages(logs);
-		}
-		logs.add(status);
+		createTask(step, name);
 	}
 
 	@Override

@@ -28,7 +28,9 @@ public class CommandOutput {
 	}
 
 	public void loadFromFile(String filename) throws IOException {
-		loadFromInputStream(new FileInputStream(filename));
+		try (InputStream in = new FileInputStream(filename)) {
+			loadFromInputStream(in);
+		}
 	}
 
 	public void loadFromInputStream(InputStream in) throws IOException {

@@ -204,7 +204,7 @@ public class WdlParameterInputResponse {
 			response.setEmptySelection(input.getEmptySelection());
 		}
 
-		if (input.getTypeAsEnum() == WdlParameterInputType.LIST && input.hasDataBindung()) {
+		if (input.getTypeAsEnum() == WdlParameterInputType.LIST && input.hasDataBinding()) {
 			String category = input.getValues().get("category");
 			String property = input.getValues().get("property");
 			String bind = input.getValues().get("bind");

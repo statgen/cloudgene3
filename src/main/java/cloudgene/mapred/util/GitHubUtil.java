@@ -130,9 +130,7 @@ public class GitHubUtil {
 	public static String getLatestReleaseFromRepository(@NonNull Repository repo) throws GitHubException {
 		String urlString = "https://api.github.com/repos/" + repo.getUser() + "/" + repo.getRepo() + "/releases/latest";
 
-		HttpClient httpClient = new DefaultHttpClient();
-
-		try {
+		try (HttpClient httpClient = DefaultHttpClient.builder().build()) {
 			URI uri = new URI(urlString);
 
 			HttpRequest<?> req = HttpRequest.GET(uri)
@@ -151,8 +149,6 @@ public class GitHubUtil {
 			return tag;
 		} catch (Exception e) {
 			throw new GitHubException("Failed to retrieve latest tag from repository", e);
-		} finally {
-			httpClient.close();
 		}
 	}
 }

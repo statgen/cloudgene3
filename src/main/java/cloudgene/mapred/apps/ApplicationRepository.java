@@ -29,7 +29,6 @@ import cloudgene.mapred.util.S3Util;
 import cloudgene.mapred.wdl.WdlApp;
 import genepi.io.FileUtil;
 import net.lingala.zip4j.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 public class ApplicationRepository {
@@ -40,7 +39,7 @@ public class ApplicationRepository {
 
 	public static final String CONFIG_PATH = Configuration.getConfigDirectory();
 
-	private String appsFolder = Configuration.getAppsDirectory();;
+	private String appsFolder = Configuration.getAppsDirectory();
 
 	private static final Logger log = LoggerFactory.getLogger(ApplicationRepository.class);
 
@@ -306,7 +305,7 @@ public class ApplicationRepository {
 						if (item.has("config") && item.hasNonNull("config")) {
 							Map<String, String> config = mapper.convertValue(
 									item.get("config"),
-									new TypeReference<Map<String, String>>() {});
+									new TypeReference<>() {});
 							for (Application application : installedApplications) {
 								System.out.println("Configure application " + application.getId());
 								updateConfig(application, config);
@@ -422,12 +421,8 @@ public class ApplicationRepository {
 		FileUtil.deleteDirectory(appPath);
 		FileUtil.createDirectory(appPath);
 
-		try {
-			ZipFile file = new ZipFile(zipFilename);
+		try (ZipFile file = new ZipFile(zipFilename)) {
 			file.extractAll(appPath);
-			file.close();
-		} catch (ZipException e) {
-			throw new IOException(e);
 		}
 
 		try {

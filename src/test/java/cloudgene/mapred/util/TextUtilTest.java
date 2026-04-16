@@ -36,9 +36,9 @@ public class TextUtilTest {
 		assertEquals(expected, observed);
 
 		// Asking for 1 line gives us the last line (ignoring the trailing newline).
-        expected = "      temp: false";
-        observed = TextUtil.tail(file, 1);
-        assertEquals(expected, observed);
+		expected = "      temp: false";
+		observed = TextUtil.tail(file, 1);
+		assertEquals(expected, observed);
 
 		// Asking for <= 0 lines throws an IllegalArgumentException.
 		assertThrows(IllegalArgumentException.class, () -> TextUtil.tail(file, 0));
