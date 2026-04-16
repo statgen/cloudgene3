@@ -1,6 +1,5 @@
 <configuration>
 
-
     <appender
             name="httpAccessLogAppender"
             class="ch.qos.logback.core.rolling.RollingFileAppender">

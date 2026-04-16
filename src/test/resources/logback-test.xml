@@ -9,12 +9,12 @@
         </encoder>
     </appender>
 
-    <root level="INFO">
+    <root level="info">
         <appender-ref ref="STDOUT" />
     </root>
-    
+
     <logger name="org.apache.hadoop" level="OFF"/>
     <logger name="org.mortbay.log" level="OFF"/>
     <logger name="BlockStateChange" level="OFF"/>
-    
+
 </configuration>
