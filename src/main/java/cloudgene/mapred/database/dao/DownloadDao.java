@@ -86,7 +86,8 @@ public class DownloadDao extends JdbcDataAccessObject {
 
 		try {
 			Download result = queryForObject(sql, params, new DownloadMapper());
-			log.debug("find download by hash {} successful. name: {}", hash, result.getName());
+			log.debug("find download by hash {} successful. result: {}",
+					hash, (result == null) ? null : result.getName());
 			return result;
 		} catch (SQLException e) {
 			log.error("find download by hash {} failed.", hash, e);
@@ -102,7 +103,8 @@ public class DownloadDao extends JdbcDataAccessObject {
 
 		try {
 			Download result = queryForObject(sql, params, new DownloadMapper());
-			log.debug("find download by job {} and path {} successful. name: {}", job, path, result.getName());
+			log.debug("find download by job {} and path {} successful. result: {}",
+					job, path, (result == null) ? null : result.getName());
 			return result;
 		} catch (SQLException e) {
 			log.error("find download by job {} and path {} failed.", job, path, e);
@@ -119,8 +121,8 @@ public class DownloadDao extends JdbcDataAccessObject {
 
 		try {
 			Download result = queryForObject(sql, params, new DownloadMapper());
-			log.debug("find download by param {} and filename {} successful. name: {}",
-					param.getId(), filename, result.getName());
+			log.debug("find download by param {} and filename {} successful. result: {}",
+					param.getId(), filename, (result == null) ? null : result.getName());
 			return result;
 		} catch (SQLException e) {
 			log.error("find download by param {} and filename {} failed.", param.getId(), filename, e);

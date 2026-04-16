@@ -24,7 +24,7 @@ public class DownloadResultsTest {
 	CloudgeneClientRestAssured client;
 
 	@Test
-	public void testDownloadSingleFile() throws InterruptedException {
+	public void testDownloadSingleFile() {
 		Header accessToken = client.loginAsPublicUser();
 
 		// submit job
@@ -87,7 +87,7 @@ public class DownloadResultsTest {
 	}
 
 	@Test
-	public void testDownloadSingleFolder() throws InterruptedException {
+	public void testDownloadSingleFolder() {
 		Header accessToken = client.loginAsPublicUser();
 
 		// submit job
@@ -138,7 +138,7 @@ public class DownloadResultsTest {
 	}
 
 	@Test
-	public void testDownloadCounter() throws InterruptedException {
+	public void testDownloadCounter() {
 		Header accessToken = client.loginAsPublicUser();
 
 		// submit job
