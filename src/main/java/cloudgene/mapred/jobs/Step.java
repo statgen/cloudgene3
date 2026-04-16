@@ -6,11 +6,8 @@ import java.util.List;
 public class Step {
 
 	private int id;
-
 	private String name;
-
 	private CloudgeneJob job;
-
 	private List<Message> logMessages = new ArrayList<>();
 
 	public Step() {}

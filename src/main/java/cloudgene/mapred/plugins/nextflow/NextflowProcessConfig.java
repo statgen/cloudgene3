@@ -7,11 +7,8 @@ public class NextflowProcessConfig {
 	private static final String DEFAULT_VIEW = "list";
 
 	private String view = DEFAULT_VIEW;
-
 	private String label = null;
-
 	private String group = null;
-
 	private Step step = null;
 
 	public String getView() {

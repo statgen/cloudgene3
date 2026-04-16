@@ -3,24 +3,16 @@ package cloudgene.mapred.jobs;
 public class Message {
 
 	public static final int OK = 0;
-
 	public static final int ERROR = 1;
-
 	public static final int WARNING = 2;
-
 	public static final int RUNNING = 3;
 
 	private String message;
-
 	private int type;
-
 	private Step step;
-
 	private long time;
 
-	public Message() {
-
-	}
+	public Message() {}
 
 	public Message(Step step, int type, String message) {
 		this.type = type;
@@ -63,5 +55,4 @@ public class Message {
 	public void setTime(long time) {
 		this.time = time;
 	}
-
 }

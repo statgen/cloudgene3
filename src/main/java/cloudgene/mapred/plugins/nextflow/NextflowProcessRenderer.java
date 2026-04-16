@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NextflowProcessRenderer {
+public final class NextflowProcessRenderer {
 
 	private static final Logger log = LoggerFactory.getLogger(NextflowProcessRenderer.class);
 
@@ -39,6 +39,8 @@ public class NextflowProcessRenderer {
 	private static final String VIEW_STATUS = "status";
 	private static final String VIEW_PROGRESSBAR = "progressbar";
 	private static final String TRACE_STATUS = "status";
+
+	private NextflowProcessRenderer() {}
 
 	public static void render(
 			@NonNull NextflowProcessConfig config,
