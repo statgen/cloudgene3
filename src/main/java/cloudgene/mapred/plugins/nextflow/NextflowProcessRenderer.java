@@ -4,17 +4,15 @@ import cloudgene.mapred.jobs.Message;
 import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
 import io.micronaut.core.annotation.NonNull;
+import org.apache.commons.io.IOUtils;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -120,7 +118,7 @@ public final class NextflowProcessRenderer {
 	}
 
 	private static @NonNull String renderTemplate(@NonNull String path, @NonNull Map<String, Object> bindings)
-			throws CompilationFailedException, ClassNotFoundException, IOException, URISyntaxException {
+			throws CompilationFailedException, ClassNotFoundException, IOException {
 
 		Template template = getTemplate(path);
 		String rendered = template.make(bindings).toString();
@@ -128,20 +126,20 @@ public final class NextflowProcessRenderer {
 	}
 
 	private static synchronized @NonNull Template getTemplate(@NonNull String path)
-			throws IOException, CompilationFailedException, ClassNotFoundException, URISyntaxException {
+			throws IOException, CompilationFailedException, ClassNotFoundException {
 
 		Template template = CACHE.get(path);
-
 		if (template != null) {
 			return template;
 		}
 
-		URL resourceUrl = NextflowProcessRenderer.class.getResource(path);
-		if (resourceUrl == null) {
-			throw new FileNotFoundException("Resource not found in the classpath: " + path);
+		String content;
+		try (InputStream in = NextflowProcessRenderer.class.getResourceAsStream(path)) {
+			if (in == null) {
+				throw new FileNotFoundException("Template file not found: " + path);
+			}
+			content = IOUtils.toString(in, StandardCharsets.UTF_8);
 		}
-		Path resourcePath = Paths.get(resourceUrl.toURI());
-		String content = Files.readString(resourcePath);
 
 		SimpleTemplateEngine engine = new SimpleTemplateEngine();
 		template = engine.createTemplate(content);
