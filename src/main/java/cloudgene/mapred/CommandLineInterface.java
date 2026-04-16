@@ -20,7 +20,8 @@ public class CommandLineInterface extends Toolbox {
 
 	private void printHeader() {
 		System.out.println();
-		System.out.println(BuildInfo.APP_NAME + " " + BuildInfo.VERSION + " (" + BuildInfo.COMMIT_ID_SHORT + ")");
+		System.out.println(BuildInfo.APP_NAME + " " + BuildInfo.VERSION + " (" + BuildInfo.COMMIT_ID_SHORT
+				+ (BuildInfo.COMMIT_DIRTY ? "*" : "") + ")");
 		System.out.println(BuildInfo.URL);
 		System.out.println("(c) 2009-2026 " + BuildInfo.ORG_NAME);
 		System.out.println();
