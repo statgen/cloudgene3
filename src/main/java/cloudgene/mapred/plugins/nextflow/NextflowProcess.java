@@ -11,11 +11,8 @@ import cloudgene.mapred.jobs.Step;
 public class NextflowProcess {
 
 	private final String name;
-
 	private final Step step;
-
 	private final CloudgeneContext context;
-
 	private final List<NextflowTask> tasks = new ArrayList<>();
 
 	public NextflowProcess(CloudgeneContext context, Map<String, Object> trace, Step step) throws IOException {
@@ -35,12 +32,14 @@ public class NextflowProcess {
 
 	public void addTrace(Map<String, Object> trace) throws IOException {
 		int taskId = (Integer) trace.get("task_id");
+
 		for (NextflowTask task : tasks) {
 			if (task.getId() == taskId) {
 				task.update(trace);
 				return;
 			}
 		}
+
 		NextflowTask task = new NextflowTask(context, trace, step);
 		tasks.add(task);
 	}
