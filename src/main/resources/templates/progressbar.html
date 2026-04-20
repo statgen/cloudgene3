@@ -1,9 +1,9 @@
 <label for="${id}-progress" class="d-block fw-bold">
 	${label} (${completed}/${total})
 </label>
-<p id="${id}-desc">
+<small class="d-block text-muted" id="${id}-desc">
 	Completed: ${completed}. Failed: ${failed}. Running: ${running}.
-</p>
+</small>
 
 <div id="${id}-progress" aria-describedby="${id}-desc" class="progress w-100 mt-3">
 	<div
