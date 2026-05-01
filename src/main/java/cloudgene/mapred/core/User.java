@@ -1,12 +1,18 @@
 package cloudgene.mapred.core;
 
+import cloudgene.mapred.util.HashUtil;
 import jakarta.annotation.Nullable;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class User {
+
+	public static final String ROLE_SEPARATOR = ",";
+	public static final String ROLE_ADMIN = "admin";
+	public static final String ROLE_USER = "user";
 
 	private static final Pattern DIGIT = Pattern.compile("[0-9]");
 	private static final Pattern LOWERCASE = Pattern.compile("[a-z]");
@@ -16,39 +22,21 @@ public class User {
 			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$");
 	private static final Pattern USERNAME = Pattern.compile("^[a-z][a-z0-9_]+[a-z0-9]$");
 
-	private String username;
-
-	private String password;
-
 	private int id;
-
+	private String username;
+	private String password;
 	private String fullName = "";
-
 	private String mail;
-
 	private String[] roles = new String[0];
-
 	private boolean active = true;
-
-	private String activationKey = null;
-
-	private String apiToken = "";
-
+	private String activationCode = null;
+	private Instant activationCodeCreated = null;
 	private Date lastLogin;
-
 	private Date lockedUntil;
-
 	private int loginAttempts;
-
+	private String apiToken = "";
 	private Date apiTokenExpiresOn = null;
-
 	private boolean accessedByApi = false;
-
-	public static final String ROLE_SEPARATOR = ",";
-
-	public static final String ROLE_ADMIN = "admin";
-
-	public static final String ROLE_USER = "user";
 
 	public void setUsername(String username) {
 		this.username = username;
@@ -152,11 +140,33 @@ public class User {
 	}
 
 	public String getActivationCode() {
-		return activationKey;
+		return activationCode;
 	}
 
-	public void setActivationCode(String activationKey) {
-		this.activationKey = activationKey;
+	/**
+	 * <b>DON'T USE DIRECTLY</b> (unless you're populating this from a DB or other
+	 * serialization).
+	 * <p>
+	 * Raw setter for {@link #activationCode}. Use {@link #createActivationCode()}
+	 * or {@link #clearActivationCode()} instead.
+	 */
+	public void setActivationCode(String activationCode) {
+		this.activationCode = activationCode;
+	}
+
+	public Instant getActivationCodeCreated() {
+		return activationCodeCreated;
+	}
+
+	/**
+	 * <b>DON'T USE DIRECTLY</b> (unless you're populating this from a DB or other
+	 * serialization).
+	 * <p>
+	 * Raw setter for {@link #activationCodeCreated}. Use
+	 * {@link #createActivationCode()} or {@link #clearActivationCode()} instead.
+	 */
+	public void setActivationCodeCreated(Instant activationCodeCreated) {
+		this.activationCodeCreated = activationCodeCreated;
 	}
 
 	public void setApiToken(String apiToken) {
@@ -205,6 +215,38 @@ public class User {
 
 	public boolean isAccessedByApi() {
 		return accessedByApi;
+	}
+
+	/**
+	 * Generates a secure random activation code, sets {@link #activationCode} to a
+	 * hash of the code, sets {@link #activationCodeCreated} to now, and returns the
+	 * activation code.
+	 * <p>
+	 * The returned code is not stored.
+	 * <p>
+	 * <b>NOTE:</b> This method does not call the DB. Updating is up to the caller.
+	 *
+	 * @return The secure activation code used for password creation and recovery
+	 *         (as part of the URL mailed to the end user).
+	 */
+	public String createActivationCode() {
+		String code = HashUtil.getSecureHash();
+		String hash = HashUtil.hashPassword(code);
+
+		this.setActivationCode(hash);
+		this.setActivationCodeCreated(Instant.now());
+
+		return code;
+	}
+
+	/**
+	 * Clears {@link #activationCode} and {@link #activationCodeCreated}.
+	 * <p>
+	 * <b>NOTE:</b> This method does not call the DB. Updating is up to the caller.
+	 */
+	public void clearActivationCode() {
+		this.setActivationCode(null);
+		this.setActivationCodeCreated(null);
 	}
 
 	/**
@@ -314,7 +356,7 @@ public class User {
 
 		return null;
 	}
-	
+
 	@Override
 	public boolean equals(Object object) {
 		if (!(object instanceof User user)) return false;

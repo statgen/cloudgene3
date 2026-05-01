@@ -1,11 +1,13 @@
 package cloudgene.mapred.server.services;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import cloudgene.mapred.database.dao.CounterDao;
 import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +32,11 @@ public class UserService {
 	public static final String DEFAULT_ROLE = "User";
 	public static final String DEFAULT_ANONYMOUS_ROLE = "Anonymous_User";
 
+	/** Minimum time between consecutive password recovery requests, in seconds. */
+	private static final int RECOVERY_REQUEST_COOLDOWN_S = 60;
+	/** Time before the password recovery token expires, in seconds. */
+	private static final int RECOVERY_REQUEST_EXPIRES_IN_S = 60 * 60;
+
 	private static final String MESSAGE_USER_PROFILE_DELETE = "User profile successfully delete.";
 	private static final String MESSAGE_DELETE_ERROR = "Error during deleting your user profile.";
 	private static final String MESSAGE_WRONG_PASSWORD = "Wrong password.";
@@ -37,6 +44,8 @@ public class UserService {
 	private static final String MESSAGE_NOT_ALLOWED = "You are not allowed to change this user profile.";
 	private static final String MESSAGE_NO_USERNAME_SET = "No username set.";
 	private static final String MESSAGE_PASSWORD_UPDATED = "Password successfully updated.";
+	private static final String MESSAGE_RECOVERY_REQUEST_COOLDOWN = "You must wait " + RECOVERY_REQUEST_COOLDOWN_S
+			+ " seconds between consecutive recovery requests.";
 	private static final String MESSAGE_INVALID_RECOVERY_REQUEST = "Your recovery request is invalid or expired.";
 	private static final String MESSAGE_ACCOUNT_IS_INACTIVE = "Account is not activated.";
 	private static final String MESSAGE_ACCOUNT_NOT_FOUND = "We couldn't find an account with that username or email.";
@@ -236,10 +245,10 @@ public class UserService {
 	}
 
 	public MessageResponse updatePassword(
-			String username,
+			@Nullable String username,
 			String token,
-			String newPassword,
-			String confirmNewPassword) {
+			@Nullable String newPassword,
+			@Nullable String confirmNewPassword) {
 
 		if (username == null || username.isEmpty()) {
 			return MessageResponse.error(MESSAGE_NO_USERNAME_SET);
@@ -256,7 +265,27 @@ public class UserService {
 			return MessageResponse.error(MESSAGE_ACCOUNT_IS_INACTIVE);
 		}
 
-		if (user.getActivationCode() == null || !user.getActivationCode().equals(token)) {
+		Instant codeCreated = user.getActivationCodeCreated();
+		if (codeCreated == null) {
+			user.clearActivationCode();
+			dao.update(user);
+			return MessageResponse.error(MESSAGE_INVALID_RECOVERY_REQUEST);
+		}
+		Instant codeExpires = codeCreated.plusSeconds(RECOVERY_REQUEST_EXPIRES_IN_S);
+		if (Instant.now().isAfter(codeExpires)) {
+			user.clearActivationCode();
+			dao.update(user);
+			return MessageResponse.error(MESSAGE_INVALID_RECOVERY_REQUEST);
+		}
+
+		String dbHash = user.getActivationCode();
+		if (dbHash == null || dbHash.isEmpty()) {
+			user.clearActivationCode();
+			dao.update(user);
+			return MessageResponse.error(MESSAGE_INVALID_RECOVERY_REQUEST);
+		}
+
+		if (!HashUtil.checkPassword(token, dbHash)) {
 			return MessageResponse.error(MESSAGE_INVALID_RECOVERY_REQUEST);
 		}
 
@@ -266,7 +295,7 @@ public class UserService {
 		}
 
 		user.setPassword(HashUtil.hashPassword(newPassword));
-		user.setActivationCode("");
+		user.clearActivationCode();
 		dao.update(user);
 
 		log.info("User: changed password via account recovery mechanism for user {} (ID {} - email {})",
@@ -287,48 +316,45 @@ public class UserService {
 			user = dao.findByMail(username);
 		}
 
-		if (user != null) {
-			if (!user.isActive()) {
-				return MessageResponse.error(MESSAGE_ACCOUNT_IS_INACTIVE);
-			}
-
-			String key;
-			if (user.getActivationCode() != null && !user.getActivationCode().isEmpty()) {
-				// resend the same activation token
-				key = user.getActivationCode();
-			} else {
-				// create activation token
-				key = HashUtil.getSecureHash();
-				user.setActivationCode(key);
-				dao.update(user);
-			}
-
-			String hostname = application.getSettings().getServerUrl();
-			hostname += application.getSettings().getBaseUrl();
-
-			String link = hostname + "/#!recovery/" + user.getUsername() + "/" + key;
-
-			// send email with activation code
-			String app = application.getSettings().getName();
-			String subject = "[" + app + "] Password Recovery";
-			String body = application.getTemplate(Template.RECOVERY_MAIL, user.getFullName(), app, link);
-
-			try {
-				if (user.getMail() != null && !user.getMail().isEmpty()) {
-
-					log.info("Password reset link requested for user '{}'", username);
-
-					MailUtil.send(application.getSettings(), user.getMail(), subject, body);
-
-					return MessageResponse.success(MESSAGE_EMAIL_SENT);
-				} else {
-					return MessageResponse.error(MESSAGE_EMAIL_NOT_AVAILABLE);
-				}
-			} catch (Exception e) {
-				return MessageResponse.error(MESSAGE_SENDING_EMAIL_FAILED + e.getMessage());
-			}
-		} else {
+		if (user == null) {
 			return MessageResponse.error(MESSAGE_ACCOUNT_NOT_FOUND);
+		}
+
+		if (!user.isActive()) {
+			return MessageResponse.error(MESSAGE_ACCOUNT_IS_INACTIVE);
+		}
+
+		Instant codeCreated = user.getActivationCodeCreated();
+		if (codeCreated != null) {
+			Instant resubmitCutoff = codeCreated.plusSeconds(RECOVERY_REQUEST_COOLDOWN_S);
+			if (resubmitCutoff.isAfter(Instant.now())) {
+				return MessageResponse.error(MESSAGE_RECOVERY_REQUEST_COOLDOWN);
+			}
+		}
+
+		String key = user.createActivationCode();
+		dao.update(user);
+
+		String hostname = application.getSettings().getServerUrl();
+		hostname += application.getSettings().getBaseUrl();
+
+		String link = hostname + "/#!recovery/" + user.getUsername() + "/" + key;
+
+		// send email with activation code
+		String app = application.getSettings().getName();
+		String subject = "[" + app + "] Password Recovery";
+		String body = application.getTemplate(Template.RECOVERY_MAIL, user.getFullName(), app, link);
+
+		try {
+			if (user.getMail() != null && !user.getMail().isEmpty()) {
+				log.info("Password reset link requested for user '{}'", username);
+				MailUtil.send(application.getSettings(), user.getMail(), subject, body);
+				return MessageResponse.success(MESSAGE_EMAIL_SENT);
+			} else {
+				return MessageResponse.error(MESSAGE_EMAIL_NOT_AVAILABLE);
+			}
+		} catch (Exception e) {
+			return MessageResponse.error(MESSAGE_SENDING_EMAIL_FAILED + e.getMessage());
 		}
 	}
 
@@ -399,9 +425,8 @@ public class UserService {
 			// activate user immediately.
 
 			if (application.getSettings().getMail() != null && mailProvided) {
-				String activationKey = HashUtil.getSecureHash();
+				String activationKey = newUser.createActivationCode();
 				newUser.setActive(false);
-				newUser.setActivationCode(activationKey);
 
 				// send email with activation code
 				String appName = application.getSettings().getName();
@@ -412,7 +437,7 @@ public class UserService {
 				MailUtil.send(application.getSettings(), mail, subject, body);
 			} else {
 				newUser.setActive(true);
-				newUser.setActivationCode("");
+				newUser.clearActivationCode();
 			}
 
 			log.info("Registration: New user {} (ID {} - email {} - roles {})", newUser.getUsername(), newUser.getId(),
@@ -429,27 +454,36 @@ public class UserService {
 	@NonNull
 	public MessageResponse activateUser(@NonNull String username, @NonNull String code) {
 		UserDao dao = new UserDao(application.getDatabase());
+
 		User user = dao.findByUsername(username);
-
-		if (user != null) {
-			if (user.getActivationCode() != null && user.getActivationCode().equals(code)) {
-				user.setActive(true);
-				user.setActivationCode("");
-				dao.update(user);
-
-				log.info("User: activated user {} (ID {} - email {})",
-						user.getUsername(), user.getId(), user.getMail());
-
-				return MessageResponse.success(MESSAGE_USER_ACTIVATED);
-			} else {
-				log.warn("User: code is either incorrect or has already been used for user {} (ID {} - email {})",
-						user.getUsername(), user.getId(), user.getMail());
-
-				return MessageResponse.error(MESSAGE_WRONG_ACTIVATION_CODE);
-			}
-		} else {
-			log.warn("User: used activation code for missing or unknown username '{}'", username);
+		if (user == null) {
+			log.warn("User: attempted activation for unknown username '{}'", username);
 			return MessageResponse.error(MESSAGE_WRONG_USERNAME);
+		}
+
+		String activationCode = user.getActivationCode();
+		if (activationCode == null || activationCode.isEmpty()) {
+			log.warn(
+					"User: attempted activation, but no code present in DB (already activated?). "
+							+ "Username: '{}' (ID {} - email {})",
+					user.getUsername(), user.getId(), user.getMail());
+			return MessageResponse.error(MESSAGE_WRONG_ACTIVATION_CODE);
+		}
+
+		if (HashUtil.checkPassword(code, activationCode)) {
+			user.setActive(true);
+			user.clearActivationCode();
+			dao.update(user);
+
+			log.info("User: activated user '{}' (ID {} - email {})",
+					user.getUsername(), user.getId(), user.getMail());
+
+			return MessageResponse.success(MESSAGE_USER_ACTIVATED);
+		} else {
+			log.warn("User: code is either incorrect or has already been used for user '{}' (ID {} - email {})",
+					user.getUsername(), user.getId(), user.getMail());
+
+			return MessageResponse.error(MESSAGE_WRONG_ACTIVATION_CODE);
 		}
 	}
 

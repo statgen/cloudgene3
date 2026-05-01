@@ -8,7 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import cloudgene.mapred.util.HashUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -71,7 +74,9 @@ public class ActivateUserTest {
 
 		// check if correct key is in mail
 		SmtpMessage message = mailServer.getReceivedEmailAsList().get(mailsBefore);
-		assertTrue(message.getBody().contains(user.getActivationCode()));
+
+		String activationCode = extractActivationCode(message.getBody());
+		assertTrue(HashUtil.checkPassword(activationCode, user.getActivationCode()));
 
 		// login should not be possible
 		form = new HashMap<>();
@@ -90,7 +95,7 @@ public class ActivateUserTest {
 		// activate user with wrong activation code
 		RestAssured
 				.when()
-				.get("/users/activate/" + user.getUsername() + "/RANDOMACTIVATIONCODE")
+				.get("/users/activate/unique_name_5/RANDOMACTIVATIONCODE")
 				.then()
 				.statusCode(200)
 				.body("success", equalTo(false))
@@ -99,7 +104,7 @@ public class ActivateUserTest {
 		// activate user with wrong username
 		RestAssured
 				.when()
-				.get("/users/activate/randomusername/" + user.getActivationCode())
+				.get("/users/activate/randomusername/" + activationCode)
 				.then()
 				.statusCode(200)
 				.body("success", equalTo(false))
@@ -122,7 +127,7 @@ public class ActivateUserTest {
 		// activate user with correct data
 		RestAssured
 				.when()
-				.get("/users/activate/" + user.getUsername() + "/" + user.getActivationCode())
+				.get("/users/activate/unique_name_5/" + activationCode)
 				.then()
 				.statusCode(200)
 				.body("success", equalTo(true))
@@ -142,5 +147,14 @@ public class ActivateUserTest {
 				.statusCode(200)
 				.body("username", equalTo("unique_name_5"))
 				.body("access_token", notNullValue());
+	}
+
+	private static final Pattern URL_PATTERN = Pattern
+			.compile("https?://[^/]+/#!activate/unique_name_5/([a-zA-Z0-9]+)");
+
+	private static String extractActivationCode(String mailBody) {
+		Matcher matcher = URL_PATTERN.matcher(mailBody);
+		assertTrue(matcher.find());
+		return matcher.group(1);
 	}
 }

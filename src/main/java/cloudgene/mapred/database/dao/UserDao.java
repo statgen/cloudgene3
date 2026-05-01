@@ -2,6 +2,7 @@ package cloudgene.mapred.database.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,12 +28,12 @@ public class UserDao extends JdbcDataAccessObject {
 	public boolean insert(User user) {
 		String sql = "INSERT INTO `user` "
 				+ "(username, password, full_name, aws_key, aws_secret_key, save_keys, export_to_s3, s3_bucket, mail, "
-				+ "role, export_input_to_s3, activation_code, active, api_token, last_login, locked_until, "
-				+ "login_attempts, api_token_expires_on) "
-				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				+ "role, export_input_to_s3, activation_code, activation_code_created, active, api_token, last_login, "
+				+ "locked_until, login_attempts, api_token_expires_on) "
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		try {
-			Object[] params = new Object[18];
+			Object[] params = new Object[19];
 			params[0] = user.getUsername().toLowerCase();
 			params[1] = user.getPassword();
 			params[2] = user.getFullName();
@@ -45,12 +46,13 @@ public class UserDao extends JdbcDataAccessObject {
 			params[9] = String.join(User.ROLE_SEPARATOR, user.getRoles());
 			params[10] = false;
 			params[11] = user.getActivationCode();
-			params[12] = user.isActive();
-			params[13] = user.getApiToken();
-			params[14] = user.getLastLogin();
-			params[15] = user.getLockedUntil();
-			params[16] = user.getLoginAttempts();
-			params[17] = user.getApiTokenExpiresOn();
+			params[12] = user.getActivationCodeCreated();
+			params[13] = user.isActive();
+			params[14] = user.getApiToken();
+			params[15] = user.getLastLogin();
+			params[16] = user.getLockedUntil();
+			params[17] = user.getLoginAttempts();
+			params[18] = user.getApiTokenExpiresOn();
 
 			int id = insert(sql, params);
 			user.setId(id);
@@ -67,12 +69,12 @@ public class UserDao extends JdbcDataAccessObject {
 		String sql = "UPDATE `user` SET "
 				+ "username = ?, password = ?, full_name = ?, aws_key = ?, aws_secret_key = ?, save_keys = ?, "
 				+ "export_to_s3 = ?, s3_bucket = ?, mail = ?, role = ?, export_input_to_s3 = ?, active = ?, "
-				+ "activation_code = ?, api_token = ?, last_login = ?, locked_until = ?, login_attempts = ?, "
-				+ "api_token_expires_on = ? "
+				+ "activation_code = ?, activation_code_created = ?, api_token = ?, last_login = ?, locked_until = ?, "
+				+ "login_attempts = ?, api_token_expires_on = ? "
 				+ "WHERE id = ?";
 
 		try {
-			Object[] params = new Object[19];
+			Object[] params = new Object[20];
 			params[0] = user.getUsername().toLowerCase();
 			params[1] = user.getPassword();
 			params[2] = user.getFullName();
@@ -86,12 +88,13 @@ public class UserDao extends JdbcDataAccessObject {
 			params[10] = false;
 			params[11] = user.isActive();
 			params[12] = user.getActivationCode();
-			params[13] = user.getApiToken();
-			params[14] = user.getLastLogin();
-			params[15] = user.getLockedUntil();
-			params[16] = user.getLoginAttempts();
-			params[17] = user.getApiTokenExpiresOn();
-			params[18] = user.getId();
+			params[13] = user.getActivationCodeCreated();
+			params[14] = user.getApiToken();
+			params[15] = user.getLastLogin();
+			params[16] = user.getLockedUntil();
+			params[17] = user.getLoginAttempts();
+			params[18] = user.getApiTokenExpiresOn();
+			params[19] = user.getId();
 
 			update(sql, params);
 			log.debug("update user '{}' successful.", user.getUsername());
@@ -258,6 +261,12 @@ public class UserDao extends JdbcDataAccessObject {
 			}
 
 			user.setActivationCode(rs.getString("user.activation_code"));
+
+			Timestamp activationCodeCreated = rs.getTimestamp("user.activation_code_created");
+			if (activationCodeCreated != null) {
+				user.setActivationCodeCreated(activationCodeCreated.toInstant());
+			}
+
 			user.setActive(rs.getBoolean("user.active"));
 			user.setApiToken(rs.getString("user.api_token"));
 			user.setLastLogin(rs.getTimestamp("user.last_login"));

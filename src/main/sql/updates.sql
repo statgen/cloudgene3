@@ -233,3 +233,7 @@ ALTER TABLE counters_history ADD CONSTRAINT counters_history_id_unique UNIQUE (i
 ALTER TABLE html_snippets    ADD CONSTRAINT html_snippets_id_unique    UNIQUE (id);
 ALTER TABLE job_values       ADD CONSTRAINT job_values_id_unique       UNIQUE (id);
 ALTER TABLE banners          ADD CONSTRAINT banners_id_unique          UNIQUE (id);
+
+-- 3.1.4-statgen.27
+
+ALTER TABLE `user` ADD COLUMN activation_code_created TIMESTAMP NULL DEFAULT NULL;
