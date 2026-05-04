@@ -3,6 +3,8 @@ package cloudgene.mapred.api.v2.users;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNull.notNullValue;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,19 +43,21 @@ public class UpdatePasswordTest {
 		testUser1.setMail("test-1@update.password.test");
 		testUser1.setRoles(new String[] { "User" });
 		testUser1.setActive(true);
-		testUser1.setActivationCode("ACTIVATION-CODE-FROM-MAIL");
+		testUser1.setActivationCode(HashUtil.hashPassword("ACTIVATION-CODE-FROM-MAIL"));
+		testUser1.setActivationCodeCreated(Instant.now());
 		testUser1.setPassword(HashUtil.hashPassword("Old-P4ssword!"));
 		userDao.insert(testUser1);
 
-		User testUse2 = new User();
-		testUse2.setUsername("test-2");
-		testUse2.setFullName("Test 2");
-		testUse2.setMail("test-2@update.password.test");
-		testUse2.setRoles(new String[] { "User" });
-		testUse2.setActive(false);
-		testUse2.setActivationCode("ACTIVATION-CODE-FROM-MAIL");
-		testUse2.setPassword(HashUtil.hashPassword("Old-P4ssword!"));
-		userDao.insert(testUse2);
+		User testUser2 = new User();
+		testUser2.setUsername("test-2");
+		testUser2.setFullName("Test 2");
+		testUser2.setMail("test-2@update.password.test");
+		testUser2.setRoles(new String[] { "User" });
+		testUser2.setActive(false);
+		testUser2.setActivationCode(HashUtil.hashPassword("ACTIVATION-CODE-FROM-MAIL"));
+		testUser2.setActivationCodeCreated(Instant.now());
+		testUser2.setPassword(HashUtil.hashPassword("Old-P4ssword!"));
+		userDao.insert(testUser2);
 
 		User testUser3 = new User();
 		testUser3.setUsername("test-3");
@@ -61,9 +65,21 @@ public class UpdatePasswordTest {
 		testUser3.setMail("test-3@update.password.test");
 		testUser3.setRoles(new String[] { "User" });
 		testUser3.setActive(true);
-		testUser3.setActivationCode("ACTIVATION-CODE-FROM-MAIL-3");
+		testUser3.setActivationCode(HashUtil.hashPassword("ACTIVATION-CODE-FROM-MAIL-3"));
+		testUser3.setActivationCodeCreated(Instant.now());
 		testUser3.setPassword(HashUtil.hashPassword("Old-P4ssword!"));
 		userDao.insert(testUser3);
+
+		User testUser4 = new User();
+		testUser4.setUsername("test-4");
+		testUser4.setFullName("Test 4");
+		testUser4.setMail("test-4@update.password.test");
+		testUser4.setRoles(new String[] { "User" });
+		testUser4.setActive(true);
+		testUser4.setActivationCode(HashUtil.hashPassword("ACTIVATION-CODE-FROM-MAIL-4"));
+		testUser4.setActivationCodeCreated(Instant.now().minus(1, ChronoUnit.DAYS));
+		testUser4.setPassword(HashUtil.hashPassword("Old-P4ssword!"));
+		userDao.insert(testUser4);
 	}
 
 	@Test
@@ -205,5 +221,24 @@ public class UpdatePasswordTest {
 				.statusCode(200)
 				.body("success", equalTo(false))
 				.body("message", equalTo("Account is not activated."));
+	}
+
+	@Test
+	public void testWithExpiredToken() {
+		Map<String, String> form = Map.of(
+				"token", "ACTIVATION-CODE-FROM-MAIL-4",
+				"username", "test-4",
+				"new-password", "Nu^P4sS+64?",
+				"confirm-new-password", "Nu^P4sS+64?");
+
+		RestAssured
+				.given()
+				.formParams(form)
+				.when()
+				.post("/api/v2/users/update-password")
+				.then()
+				.statusCode(200)
+				.body("success", equalTo(false))
+				.body("message", equalTo("Your recovery request is invalid or expired."));
 	}
 }

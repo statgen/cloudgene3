@@ -6,7 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Instant;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -40,24 +43,26 @@ public class ResetPasswordTest {
 		UserDao userDao = new UserDao(database);
 
 		User testUser1 = new User();
-		testUser1.setUsername("testreset1");
+		testUser1.setUsername("test_reset_1");
 		testUser1.setFullName("Test Reset 1");
-		testUser1.setMail("testreset1@test.com");
+		testUser1.setMail("test_reset_1@reset.password.test");
 		testUser1.setRoles(new String[] { "User" });
 		testUser1.setActive(true);
 		testUser1.setActivationCode("");
-		testUser1.setPassword(HashUtil.hashPassword("oldpassword"));
+		testUser1.setActivationCodeCreated(null);
+		testUser1.setPassword(HashUtil.hashPassword("olD-Password+1024?"));
 		userDao.insert(testUser1);
 
-		User testUse2 = new User();
-		testUse2.setUsername("testreset2");
-		testUse2.setFullName("Test Reset 2");
-		testUse2.setMail("testreset2@test.com");
-		testUse2.setRoles(new String[] { "User" });
-		testUse2.setActive(false);
-		testUse2.setActivationCode("fdsfdsfsdfsdfsd");
-		testUse2.setPassword(HashUtil.hashPassword("oldpassword"));
-		userDao.insert(testUse2);
+		User testUser2 = new User();
+		testUser2.setUsername("test_reset_2");
+		testUser2.setFullName("Test Reset 2");
+		testUser2.setMail("test_reset_2@reset.password.test");
+		testUser2.setRoles(new String[] { "User" });
+		testUser2.setActive(false);
+		testUser2.setActivationCode(HashUtil.hashPassword("fdsfdsfsdfsdfsd"));
+		testUser2.setActivationCodeCreated(Instant.now());
+		testUser2.setPassword(HashUtil.hashPassword("olD-Password+2048?"));
+		userDao.insert(testUser2);
 	}
 
 	@Test
@@ -85,7 +90,7 @@ public class ResetPasswordTest {
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
-		Map<String, String> form = Map.of("username", "testreset2");
+		Map<String, String> form = Map.of("username", "test_reset_2");
 
 		RestAssured
 				.given()
@@ -145,7 +150,7 @@ public class ResetPasswordTest {
 		TestMailServer mailServer = TestMailServer.getInstance();
 		int mailsBefore = mailServer.getReceivedEmailSize();
 
-		Map<String, String> form = Map.of("username", "testreset1");
+		Map<String, String> form = Map.of("username", "test_reset_1");
 
 		// rest password and check if mail was sent
 		RestAssured
@@ -160,7 +165,7 @@ public class ResetPasswordTest {
 
 		assertEquals(mailsBefore + 1, mailServer.getReceivedEmailSize());
 
-		// try it a second time (nervous user)
+		// try it a second time (nervous user) -> fails (too soon)
 		RestAssured
 				.given()
 				.formParams(form)
@@ -168,23 +173,29 @@ public class ResetPasswordTest {
 				.post("/api/v2/users/reset")
 				.then()
 				.statusCode(200)
-				.body("success", equalTo(true))
-				.body("message", containsString("We sent you an email"));
+				.body("success", equalTo(false))
+				.body("message", containsString("You must wait"));
 
-		assertEquals(mailsBefore + 2, mailServer.getReceivedEmailSize());
+		// No new mail sent
+		assertEquals(mailsBefore + 1, mailServer.getReceivedEmailSize());
 
 		// get activation key from database and check if key was reused in mail2
 		Database database = application.getDatabase();
 		UserDao userDao = new UserDao(database);
-		User user = userDao.findByUsername("testreset1");
+		User user = userDao.findByUsername("test_reset_1");
 		assertNotNull(user);
 
-		// check if correct key is in mail1
-		SmtpMessage message1 = mailServer.getReceivedEmailAsList().get(mailsBefore);
-		assertTrue(message1.getBody().contains(user.getActivationCode()));
+		// check if correct key is in mail
+		SmtpMessage message = mailServer.getReceivedEmailAsList().get(mailsBefore);
+		String activationCode = extractActivationCode(message.getBody());
+		assertTrue(HashUtil.checkPassword(activationCode, user.getActivationCode()));
+	}
 
-		// check if correct key is in mail2
-		SmtpMessage message2 = mailServer.getReceivedEmailAsList().get(mailsBefore + 1);
-		assertTrue(message2.getBody().contains(user.getActivationCode()));
+	private static final Pattern URL_PATTERN = Pattern.compile("https?://[^/]+/#!recovery/test_reset_1/([a-zA-Z0-9]+)");
+
+	private static String extractActivationCode(String mailBody) {
+		Matcher matcher = URL_PATTERN.matcher(mailBody);
+		assertTrue(matcher.find());
+		return matcher.group(1);
 	}
 }
