@@ -1,59 +1,23 @@
 package cloudgene.mapred.server.responses;
 
-import cloudgene.mapred.database.dao.JobValueDao;
+import cloudgene.mapred.jobs.JobValue;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
+import io.micronaut.core.annotation.NonNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @JsonClassDescription
-public class JobValueResponse {
-
-	private String name;
-	private String value;
-	private int count;
-
-	public void setName(String name) {
-		this.name = name;
+public record JobValueResponse(String name, String value, int count) {
+	@NonNull
+	public static JobValueResponse build(JobValue jobValue) {
+		return new JobValueResponse(
+				jobValue.name(),
+				jobValue.value(),
+				jobValue.count());
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
-
-	public String getValue() {
-		return value;
-	}
-
-	public void setCount(int count) {
-		this.count = count;
-	}
-
-	public int getCount() {
-		return count;
-	}
-
-	public static JobValueResponse build(JobValueDao.JobValue jobValue) {
-		JobValueResponse response = new JobValueResponse();
-
-		response.setName(jobValue.getName());
-		response.setValue(jobValue.getValue());
-		response.setCount(jobValue.getCount());
-
-		return response;
-	}
-
-	public static List<JobValueResponse> build(List<JobValueDao.JobValue> data) {
-		List<JobValueResponse> responses = new ArrayList<>();
-
-		for (JobValueDao.JobValue jobValue : data) {
-			responses.add(JobValueResponse.build(jobValue));
-		}
-
-		return responses;
+	@NonNull
+	public static List<JobValueResponse> build(@NonNull List<JobValue> data) {
+		return data.stream().map(JobValueResponse::build).toList();
 	}
 }

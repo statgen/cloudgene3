@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import cloudgene.mapred.database.dao.CounterDao;
+import cloudgene.mapred.database.dao.JobValueDao;
+import cloudgene.mapred.jobs.JobValue;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
 import jakarta.inject.Singleton;
@@ -496,7 +498,15 @@ public class UserService {
 	@NonNull
 	public Map<String, Long> getUserCounters(@NonNull User user) {
 		CounterDao counterDao = new CounterDao(application.getDatabase());
-		Map<String, Long> counters = counterDao.getByUser(user);
-		return counters;
+		return counterDao.getByUser(user);
+	}
+
+	/**
+	 * Queries the database for all job values related to this user.
+	 */
+	@NonNull
+	public List<JobValue> getUserValues(@NonNull User user) {
+		JobValueDao valueDao = new JobValueDao(application.getDatabase());
+		return valueDao.getByUser(user);
 	}
 }

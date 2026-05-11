@@ -2,6 +2,7 @@ package cloudgene.mapred.server.responses;
 
 import cloudgene.mapred.core.User;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
+import io.micronaut.core.annotation.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,8 @@ public class UserCounterResponse {
 		this.counters = counters;
 	}
 
-	public static UserCounterResponse build(User user, Map<String, Long> counters) {
+	@NonNull
+	public static UserCounterResponse build(@NonNull User user, @NonNull Map<String, Long> counters) {
 		UserCounterResponse response = new UserCounterResponse();
 
 		response.setUsername(user.getUsername());

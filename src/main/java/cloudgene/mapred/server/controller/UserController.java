@@ -3,7 +3,8 @@ package cloudgene.mapred.server.controller;
 import java.util.List;
 import java.util.Map;
 
-import cloudgene.mapred.server.responses.UserCounterResponse;
+import cloudgene.mapred.jobs.JobValue;
+import cloudgene.mapred.server.responses.*;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.http.HttpStatus;
 import org.slf4j.Logger;
@@ -14,9 +15,6 @@ import cloudgene.mapred.database.dao.UserDao;
 import cloudgene.mapred.server.Application;
 import cloudgene.mapred.server.auth.AuthenticationService;
 import cloudgene.mapred.server.auth.AuthenticationType;
-import cloudgene.mapred.server.responses.MessageResponse;
-import cloudgene.mapred.server.responses.PageResponse;
-import cloudgene.mapred.server.responses.UserResponse;
 import cloudgene.mapred.server.services.UserService;
 import cloudgene.mapred.util.Page;
 import io.micronaut.core.annotation.Nullable;
@@ -121,6 +119,20 @@ public class UserController {
 		Map<String, Long> counters = userService.getUserCounters(user);
 
 		UserCounterResponse response = UserCounterResponse.build(user, counters);
+		return HttpResponse.ok(response);
+	}
+
+	@Get("/api/v2/users/{username}/values")
+	@Secured(User.ROLE_ADMIN)
+	public HttpResponse<List<JobValueResponse>> getValues(String username) {
+		User user = userService.getByUsername(username);
+		if (user == null) {
+			return HttpResponse.notFound();
+		}
+
+		List<JobValue> values = userService.getUserValues(user);
+
+		List<JobValueResponse> response = JobValueResponse.build(values);
 		return HttpResponse.ok(response);
 	}
 

@@ -59,7 +59,7 @@ public class ServerController {
 
 	@Get("/values")
 	@Secured(User.ROLE_ADMIN)
-	public Object values() {
+	public List<JobValueResponse> values() {
 		JobValueDao jobValueDao = new JobValueDao(application.getDatabase());
 		return JobValueResponse.build(jobValueDao.getAll());
 	}

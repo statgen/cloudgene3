@@ -52,7 +52,7 @@ public class CounterDao extends JdbcDataAccessObject {
 	}
 
 	@NonNull
-	public Map<String, Long> getByUser(User user) {
+	public Map<String, Long> getByUser(@NonNull User user) {
 		String sql = "SELECT counters.name AS name, SUM(counters.`value`) AS `value` "
 				+ "FROM counters INNER JOIN job ON counters.job_id = job.id "
 				+ "WHERE job.user_id = ? "
