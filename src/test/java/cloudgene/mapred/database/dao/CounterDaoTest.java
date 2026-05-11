@@ -34,7 +34,7 @@ public class CounterDaoTest {
 		boolean success;
 
 		CloudgeneJob dummyJob = new CloudgeneJob();
-		dummyJob.setId("dummy-job");
+		dummyJob.setId("DummyJob-CounterDaoTest-testInsertAndGetAll");
 
 		// Counter DAO starts empty.
 		observed = counterDao.getAll();
