@@ -501,6 +501,12 @@ public class UserService {
 		return counterDao.getByUser(user);
 	}
 
+	@NonNull
+	public Map<String, List<CounterDao.HistoryEntry>> getUserCounterHistory(@NonNull User user) {
+		CounterDao counterDao = new CounterDao(application.getDatabase());
+		return counterDao.getHistoryByUser(user);
+	}
+
 	/**
 	 * Queries the database for all job values related to this user.
 	 */

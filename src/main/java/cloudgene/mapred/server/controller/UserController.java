@@ -123,6 +123,21 @@ public class UserController {
 		return HttpResponse.ok(response);
 	}
 
+	@Get("/api/v2/users/{username}/counter-history")
+	@Secured(User.ROLE_ADMIN)
+	public HttpResponse<UserCounterHistoryResponse> getCounterHistory(String username) {
+		User user = userService.getByUsername(username);
+
+		if (user == null) {
+			return HttpResponse.notFound();
+		}
+
+		Map<String, List<CounterDao.HistoryEntry>> counters = userService.getUserCounterHistory(user);
+
+		UserCounterHistoryResponse response = UserCounterHistoryResponse.build(user, counters);
+		return HttpResponse.ok(response);
+	}
+
 	@Get("/api/v2/users/{username}/values")
 	@Secured(User.ROLE_ADMIN)
 	public HttpResponse<List<JobValueResponse>> getValues(String username) {
