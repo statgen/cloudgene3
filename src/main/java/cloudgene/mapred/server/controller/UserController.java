@@ -3,6 +3,7 @@ package cloudgene.mapred.server.controller;
 import java.util.List;
 import java.util.Map;
 
+import cloudgene.mapred.database.dao.CounterDao;
 import cloudgene.mapred.jobs.JobValue;
 import cloudgene.mapred.server.responses.*;
 import io.micronaut.context.annotation.Parameter;
@@ -116,7 +117,7 @@ public class UserController {
 			return HttpResponse.notFound();
 		}
 
-		Map<String, Long> counters = userService.getUserCounters(user);
+		Map<String, CounterDao.Stats> counters = userService.getUserCounters(user);
 
 		UserCounterResponse response = UserCounterResponse.build(user, counters);
 		return HttpResponse.ok(response);

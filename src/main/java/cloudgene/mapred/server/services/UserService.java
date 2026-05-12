@@ -496,7 +496,7 @@ public class UserService {
 	 * method does not show data for ongoing or failed jobs.
 	 */
 	@NonNull
-	public Map<String, Long> getUserCounters(@NonNull User user) {
+	public Map<String, CounterDao.Stats> getUserCounters(@NonNull User user) {
 		CounterDao counterDao = new CounterDao(application.getDatabase());
 		return counterDao.getByUser(user);
 	}

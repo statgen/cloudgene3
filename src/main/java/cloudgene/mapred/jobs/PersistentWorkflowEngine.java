@@ -176,7 +176,7 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 		}
 	}
 
-	public Map<String, Long> getCountersByUser(User user) {
+	public Map<String, CounterDao.Stats> getCountersByUser(User user) {
 		return counterDao.getByUser(user);
 	}
 

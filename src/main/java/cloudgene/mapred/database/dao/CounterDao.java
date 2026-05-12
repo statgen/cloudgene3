@@ -52,14 +52,14 @@ public class CounterDao extends JdbcDataAccessObject {
 	}
 
 	@NonNull
-	public Map<String, Long> getByUser(@NonNull User user) {
-		String sql = "SELECT counters.name AS name, SUM(counters.`value`) AS `value` "
+	public Map<String, Stats> getByUser(@NonNull User user) {
+		String sql = "SELECT counters.name AS name, SUM(counters.`value`) AS total, AVG(counters.`value`) AS mean "
 				+ "FROM counters INNER JOIN job ON counters.job_id = job.id "
 				+ "WHERE job.user_id = ? "
 				+ "GROUP BY counters.name";
 
 		try {
-			Map<String, Long> result = queryForMap(sql, new CounterMapper(), user.getId());
+			Map<String, Stats> result = queryForMap(sql, new CounterStatsMapper(), user.getId());
 			log.debug("Find counters by user successful. Results: {}", result);
 			return result;
 		} catch (SQLException e) {
@@ -67,6 +67,8 @@ public class CounterDao extends JdbcDataAccessObject {
 			return new HashMap<>();
 		}
 	}
+
+	public record Stats(long total, double mean) {}
 
 	static class CounterMapper implements IRowMapMapper<String, Long> {
 		@Override
@@ -77,6 +79,20 @@ public class CounterDao extends JdbcDataAccessObject {
 		@Override
 		public Long getRowValue(ResultSet rs, int row) throws SQLException {
 			return rs.getLong(2);
+		}
+	}
+
+	static class CounterStatsMapper implements IRowMapMapper<String, Stats> {
+		@Override
+		public String getRowKey(ResultSet rs, int row) throws SQLException {
+			return rs.getString("name");
+		}
+
+		@Override
+		public Stats getRowValue(ResultSet rs, int row) throws SQLException {
+			return new Stats(
+					rs.getLong("total"),
+					rs.getDouble("mean"));
 		}
 	}
 }

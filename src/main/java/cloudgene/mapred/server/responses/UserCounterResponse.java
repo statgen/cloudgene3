@@ -1,6 +1,7 @@
 package cloudgene.mapred.server.responses;
 
 import cloudgene.mapred.core.User;
+import cloudgene.mapred.database.dao.CounterDao;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import io.micronaut.core.annotation.NonNull;
 
@@ -8,34 +9,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 @JsonClassDescription
-public class UserCounterResponse {
-
-	private String username = "";
-	private Map<String, Long> counters = new HashMap<>();
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public Map<String, Long> getCounters() {
-		return counters;
-	}
-
-	public void setCounters(Map<String, Long> counters) {
-		this.counters = counters;
-	}
+public record UserCounterResponse(String username, Map<String, Stats> counters) {
+	@JsonClassDescription
+	public record Stats(long total, double mean) {}
 
 	@NonNull
-	public static UserCounterResponse build(@NonNull User user, @NonNull Map<String, Long> counters) {
-		UserCounterResponse response = new UserCounterResponse();
+	public static UserCounterResponse build(@NonNull User user, @NonNull Map<String, CounterDao.Stats> counters) {
+		String username = user.getUsername();
+		if (username == null || username.isBlank()) {
+			username = "";
+		}
 
-		response.setUsername(user.getUsername());
-		response.setCounters(counters);
+		Map<String, Stats> processed = new HashMap<>();
+		for (String key : counters.keySet()) {
+			CounterDao.Stats dbStat = counters.get(key);
+			Stats jsonStats = new Stats(dbStat.total(), dbStat.mean());
+			processed.put(key, jsonStats);
+		}
 
-		return response;
+		return new UserCounterResponse(username, processed);
 	}
 }

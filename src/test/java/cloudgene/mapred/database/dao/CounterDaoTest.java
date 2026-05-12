@@ -76,7 +76,7 @@ public class CounterDaoTest {
 
 	@Test
 	public void testGetByUser() {
-		Map<String, Long> observed;
+		Map<String, CounterDao.Stats> observed;
 		boolean success;
 
 		// First we need two distinct users recorded on the DB.
@@ -128,18 +128,18 @@ public class CounterDaoTest {
 		observed = counterDao.getByUser(alice);
 		assertEquals(
 				Map.of(
-						"alice", 1L,
-						"both", 2L),
+						"alice", new CounterDao.Stats(1L, 1.0D),
+						"both", new CounterDao.Stats(2L, 2.0D)),
 				observed);
 
 		observed = counterDao.getByUser(bob);
 		assertEquals(
 				Map.of(
-						"bob", 3L,
-						"both", 4L),
+						"bob", new CounterDao.Stats(3L, 3.0D),
+						"both", new CounterDao.Stats(4L, 4.0D)),
 				observed);
 
-		// As usual, we're returning sums over the names:
+		// We're returning sums and means over the names:
 
 		success = counterDao.insert("alice", 5, aliceJob);
 		assertTrue(success);
@@ -159,15 +159,15 @@ public class CounterDaoTest {
 		observed = counterDao.getByUser(alice);
 		assertEquals(
 				Map.of(
-						"alice", 12L,
-						"both", 9L),
+						"alice", new CounterDao.Stats(12L, 4.0D),
+						"both", new CounterDao.Stats(9L, 4.5D)),
 				observed);
 
 		observed = counterDao.getByUser(bob);
 		assertEquals(
 				Map.of(
-						"bob", 11L,
-						"both", 13L),
+						"bob", new CounterDao.Stats(11L, 5.5D),
+						"both", new CounterDao.Stats(13L, 6.5D)),
 				observed);
 	}
 }
