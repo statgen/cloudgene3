@@ -76,7 +76,7 @@ public class CounterDaoTest {
 
 	@Test
 	public void testGetByUser() {
-		Map<String, CounterDao.Stats> observed;
+		Map<String, Map<String, CounterDao.Stats>> observed;
 		boolean success;
 
 		// First we need two distinct users recorded on the DB.
@@ -127,16 +127,16 @@ public class CounterDaoTest {
 
 		observed = counterDao.getByUser(alice);
 		assertEquals(
-				Map.of(
-						"alice", new CounterDao.Stats(1L, 1.0D),
-						"both", new CounterDao.Stats(2L, 2.0D)),
+				Map.of("unassigned", Map.of(
+						"alice", new CounterDao.Stats("unassigned", "alice", 1L, 1.0D),
+						"both", new CounterDao.Stats("unassigned", "both", 2L, 2.0D))),
 				observed);
 
 		observed = counterDao.getByUser(bob);
 		assertEquals(
-				Map.of(
-						"bob", new CounterDao.Stats(3L, 3.0D),
-						"both", new CounterDao.Stats(4L, 4.0D)),
+				Map.of("unassigned", Map.of(
+						"bob", new CounterDao.Stats("unassigned", "bob", 3L, 3.0D),
+						"both", new CounterDao.Stats("unassigned", "both", 4L, 4.0D))),
 				observed);
 
 		// We're returning sums and means over the names:
@@ -158,16 +158,16 @@ public class CounterDaoTest {
 
 		observed = counterDao.getByUser(alice);
 		assertEquals(
-				Map.of(
-						"alice", new CounterDao.Stats(12L, 4.0D),
-						"both", new CounterDao.Stats(9L, 4.5D)),
+				Map.of("unassigned", Map.of(
+						"alice", new CounterDao.Stats("unassigned", "alice", 12L, 4.0D),
+						"both", new CounterDao.Stats("unassigned", "both", 9L, 4.5D))),
 				observed);
 
 		observed = counterDao.getByUser(bob);
 		assertEquals(
-				Map.of(
-						"bob", new CounterDao.Stats(11L, 5.5D),
-						"both", new CounterDao.Stats(13L, 6.5D)),
+				Map.of("unassigned", Map.of(
+						"bob", new CounterDao.Stats("unassigned", "bob", 11L, 5.5D),
+						"both", new CounterDao.Stats("unassigned", "both", 13L, 6.5D))),
 				observed);
 	}
 }

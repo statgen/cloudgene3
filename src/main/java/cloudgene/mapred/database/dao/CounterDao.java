@@ -3,10 +3,9 @@ package cloudgene.mapred.database.dao;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.database.util.IRowMapper;
@@ -56,16 +55,45 @@ public class CounterDao extends JdbcDataAccessObject {
 	}
 
 	@NonNull
-	public Map<String, Stats> getByUser(@NonNull User user) {
-		String sql = "SELECT counters.name AS name, SUM(counters.`value`) AS total, AVG(counters.`value`) AS mean "
-				+ "FROM counters INNER JOIN job ON counters.job_id = job.id "
+	public Map<String, Map<String, Stats>> getByUser(@NonNull User user) {
+		String sql = "SELECT "
+				+     "COALESCE(vals.application, 'unassigned') AS application, "
+				+     "counters.name AS name, "
+				+     "SUM(counters.`value`) AS total, "
+				+     "AVG(counters.`value`) AS mean "
+				+ "FROM "
+				+     "counters "
+				+     "INNER JOIN job ON counters.job_id = job.id "
+				+     "LEFT JOIN ( "
+				+         "SELECT "
+				+             "job_values.job_id AS job_id, "
+				+             "job_values.`value` AS application "
+				+         "FROM "
+				+             "job_values "
+				+             "INNER JOIN job ON job_values.job_id = job.id "
+				+         "WHERE "
+				+             "job_values.name = 'application' "
+				+     ") vals ON vals.job_id = job.id "
 				+ "WHERE job.user_id = ? "
-				+ "GROUP BY counters.name";
+				+ "GROUP BY application, name "
+				+ "ORDER BY application, name";
 
 		try {
-			Map<String, Stats> result = queryForMap(sql, new CounterStatsMapper(), user.getId());
+			Object[] params = new Object[1];
+			params[0] = user.getId();
+			List<Stats> result = query(sql, params, new CounterStatsMapper());
+
+			// application -> counter -> entries
+			Map<String, Map<String, Stats>> output = result.stream()
+					.collect(Collectors.groupingBy(
+							Stats::application,
+							LinkedHashMap::new,
+							Collectors.toMap(
+									Stats::counter,
+									Function.identity())));
+
 			log.debug("Find counters by user successful. Results: {}", result);
-			return result;
+			return output;
 		} catch (SQLException e) {
 			log.error("Find counters by user failed", e);
 			return new HashMap<>();
@@ -75,62 +103,46 @@ public class CounterDao extends JdbcDataAccessObject {
 	@NonNull
 	public Map<String, Map<String, List<HistoryEntry>>> getHistoryByUser(@NonNull User user) {
 		String sql = "SELECT "
-				     + "counters.name AS name, "
-				     + "SUM(counters.`value`) OVER ( "
-				         + "PARTITION BY counters.name "
-				         + "ORDER BY job.finished_on "
-				         + "ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW "
-				     + ") AS `value`, "
-				     + "job.finished_on AS time, "
-				     + "vals.application AS application "
+				 +     "counters.name AS name, "
+				 +     "SUM(counters.`value`) OVER ( "
+				 +         "PARTITION BY counters.name "
+				 +         "ORDER BY job.finished_on "
+				 +         "ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW "
+				 +     ") AS `value`, "
+				 +     "job.finished_on AS time, "
+				 +     "COALESCE(vals.application, 'unassigned') AS application "
 				 + "FROM "
-				     + "counters "
-				     + "INNER JOIN job ON counters.job_id = job.id "
-				     + "LEFT JOIN ( "
-				         + "SELECT "
-				             + "job_values.job_id AS job_id, "
-				             + "job_values.`value` AS application "
-				         + "FROM "
-				             + "job_values "
-				             + "INNER JOIN job ON job_values.job_id = job.id "
-				         + "WHERE "
-				             + "job_values.name = 'application' "
-				     + ") vals ON vals.job_id = job.id "
+				 +     "counters "
+				 +     "INNER JOIN job ON counters.job_id = job.id "
+				 +     "LEFT JOIN ( "
+				 +         "SELECT "
+				 +             "job_values.job_id AS job_id, "
+				 +             "job_values.`value` AS application "
+				 +         "FROM "
+				 +             "job_values "
+				 +             "INNER JOIN job ON job_values.job_id = job.id "
+				 +         "WHERE "
+				 +             "job_values.name = 'application' "
+				 +     ") vals ON vals.job_id = job.id "
 				 + "WHERE "
-				     + "job.user_id = ? AND "
-				     + "job.finished_on > 0 "
-				 + "ORDER BY "
-				     + "counters.name, "
-				     + "job.finished_on";
+				 +     "job.user_id = ? AND "
+				 +     "job.finished_on > 0 "
+				 + "ORDER BY application, name";
 
 		try {
 			Object[] params = new Object[1];
 			params[0] = user.getId();
 			List<HistoryEntry> result = query(sql, params, new CounterHistoryMapper());
 
-			// application -> counter -> entry
-			Map<String, Map<String, List<HistoryEntry>>> output = new HashMap<>();
-			for (HistoryEntry entry : result) {
-				if (output.containsKey(entry.application())) {
-					Map<String, List<HistoryEntry>> appHist = output.get(entry.application());
-
-					if (appHist.containsKey(entry.counter())) {
-						appHist.get(entry.counter()).add(entry);
-					} else {
-						List<HistoryEntry> list = new ArrayList<>();
-						list.add(entry);
-						appHist.put(entry.counter(), list);
-					}
-				} else {
-					List<HistoryEntry> inner = new ArrayList<>();
-					inner.add(entry);
-
-					Map<String, List<HistoryEntry>> outer = new HashMap<>();
-					outer.put(entry.counter(), inner);
-
-					output.put(entry.application(), outer);
-				}
-			}
+			// application -> counter -> entries
+			Map<String, Map<String, List<HistoryEntry>>> output = result.stream()
+					.collect(Collectors.groupingBy(
+							HistoryEntry::application,
+							LinkedHashMap::new,
+							Collectors.groupingBy(
+									HistoryEntry::counter,
+									LinkedHashMap::new,
+									Collectors.toList())));
 
 			log.debug("Get counter history by user successful.");
 			return output;
@@ -140,7 +152,7 @@ public class CounterDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public record Stats(long total, double mean) {}
+	public record Stats(String application, String counter, long total, double mean) {}
 
 	public record HistoryEntry(String application, String counter, Instant time, long value) {}
 
@@ -156,17 +168,15 @@ public class CounterDao extends JdbcDataAccessObject {
 		}
 	}
 
-	static class CounterStatsMapper implements IRowMapMapper<String, Stats> {
+	static class CounterStatsMapper implements IRowMapper<Stats> {
 		@Override
-		public String getRowKey(ResultSet rs, int row) throws SQLException {
-			return rs.getString("name");
-		}
+		public Stats mapRow(ResultSet rs, int row) throws SQLException {
+			String application = rs.getString("application");
+			String counter = rs.getString("name");
+			long total = rs.getLong("total");
+			double mean = rs.getDouble("mean");
 
-		@Override
-		public Stats getRowValue(ResultSet rs, int row) throws SQLException {
-			return new Stats(
-					rs.getLong("total"),
-					rs.getDouble("mean"));
+			return new Stats(application, counter, total, mean);
 		}
 	}
 
@@ -174,10 +184,6 @@ public class CounterDao extends JdbcDataAccessObject {
 		@Override
 		public HistoryEntry mapRow(ResultSet rs, int row) throws SQLException {
 			String application = rs.getString("application");
-			if (application == null || application.isBlank()) {
-				application = "unassigned";
-			}
-
 			String name = rs.getString("name");
 			Instant time = Instant.ofEpochMilli(rs.getLong("time"));
 			long value = rs.getLong("value");

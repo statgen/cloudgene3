@@ -117,7 +117,7 @@ public class UserController {
 			return HttpResponse.notFound();
 		}
 
-		Map<String, CounterDao.Stats> counters = userService.getUserCounters(user);
+		Map<String, Map<String, CounterDao.Stats>> counters = userService.getUserCounters(user);
 
 		UserCounterResponse response = UserCounterResponse.build(user, counters);
 		return HttpResponse.ok(response);
