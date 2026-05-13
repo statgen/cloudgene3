@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class JobValueDao extends JdbcDataAccessObject {
 
@@ -44,11 +44,13 @@ public class JobValueDao extends JdbcDataAccessObject {
 
 	@NonNull
 	public List<JobValue> getAll() {
-		String sql = "SELECT name, `value`, COUNT(*) AS n FROM job_values "
-				+ "GROUP BY name, `value` ORDER BY name, `value`";
+		String sql = "SELECT name, `value`, COUNT(*) AS count "
+				+ "FROM job_values "
+				+ "GROUP BY name, `value` "
+				+ "ORDER BY name, `value`";
 
 		try {
-			List<JobValue> result = query(sql, new ValueMapper());
+			List<JobValue> result = query(sql, new BasicValueMapper());
 			log.debug("Find all values successful. results: {}", result);
 			return result;
 		} catch (SQLException e) {
@@ -58,33 +60,71 @@ public class JobValueDao extends JdbcDataAccessObject {
 	}
 
 	@NonNull
-	public List<JobValue> getByUser(@NonNull User user) {
-		String sql = "SELECT job_values.name AS `name`, job_values.`value` AS `value`, COUNT(*) AS n "
-				+ "FROM job_values INNER JOIN job ON job_values.job_id = job.id "
-				+ "WHERE job.user_id = ? GROUP BY job_values.name, job_values.`value` "
-				+ "ORDER BY job_values.name, job_values.`value`";
+	public Map<String, List<JobValue>> getByUser(@NonNull User user) {
+		String sql = "SELECT "
+				+     "COALESCE(vals.application, 'unassigned') AS application, "
+				+     "job_values.name AS `name`, "
+				+     "job_values.`value` AS `value`, "
+				+     "COUNT(*) AS count "
+				+ "FROM "
+				+     "job_values "
+				+     "INNER JOIN job ON job_values.job_id = job.id "
+				+     "LEFT JOIN ( "
+				+         "SELECT "
+				+             "job_values.job_id AS job_id, "
+				+             "job_values.`value` AS application "
+				+         "FROM "
+				+             "job_values "
+				+             "INNER JOIN job ON job_values.job_id = job.id "
+				+         "WHERE "
+				+             "job_values.name = 'application' "
+				+     ") vals ON vals.job_id = job.id "
+				+ "WHERE "
+				+     "job.user_id = ? AND "
+				+     "job_values.name <> 'application' "
+				+ "GROUP BY application, name, `value` "
+				+ "ORDER BY application, name, `value`";
 
 		try {
 			Object[] params = new Object[1];
 			params[0] = user.getId();
 
-			List<JobValue> result = query(sql, params, new ValueMapper());
+			List<JobValue> result = query(sql, params, new ExtendedValueMapper());
+
+			Map<String, List<JobValue>> output = result.stream()
+					.collect(Collectors.groupingBy(
+							JobValue::application,
+							LinkedHashMap::new,
+							Collectors.toList()));
+
 			log.debug("Find values by user successful. results: {}", result);
-			return result;
+			return output;
 		} catch (SQLException e) {
 			log.error("Find values by user failed", e);
-			return new ArrayList<>();
+			return new LinkedHashMap<>();
 		}
 	}
 
-	static class ValueMapper implements IRowMapper<JobValue> {
+	static class BasicValueMapper implements IRowMapper<JobValue> {
 		@Override
 		public JobValue mapRow(ResultSet rs, int row) throws SQLException {
 			String name = rs.getString("name");
 			String value = rs.getString("value");
-			int count = rs.getInt("n");
+			int count = rs.getInt("count");
 
-			return new JobValue(name, value, count);
+			return new JobValue(null, name, value, count);
+		}
+	}
+
+	static class ExtendedValueMapper implements IRowMapper<JobValue> {
+		@Override
+		public JobValue mapRow(ResultSet rs, int row) throws SQLException {
+			String application = rs.getString("application");
+			String name = rs.getString("name");
+			String value = rs.getString("value");
+			int count = rs.getInt("count");
+
+			return new JobValue(application, name, value, count);
 		}
 	}
 }

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,7 +50,7 @@ public class JobValueDaoTest {
 		observed = valueDao.getAll();
 		assertNotNull(observed);
 		assertEquals(
-				List.of(new JobValue("hello", "there", 1)),
+				List.of(new JobValue(null, "hello", "there", 1)),
 				observed);
 
 		// Repeating the same key-value pair just increases the count.
@@ -59,7 +60,7 @@ public class JobValueDaoTest {
 		observed = valueDao.getAll();
 		assertNotNull(observed);
 		assertEquals(
-				List.of(new JobValue("hello", "there", 2)),
+				List.of(new JobValue(null, "hello", "there", 2)),
 				observed);
 
 		// Using the same key but using a different value creates a new entry.
@@ -71,8 +72,8 @@ public class JobValueDaoTest {
 		assertEquals(
 				List.of(
 						// Sorted alphabetically key -> value
-						new JobValue("hello", "friend", 1),
-						new JobValue("hello", "there", 2)),
+						new JobValue(null, "hello", "friend", 1),
+						new JobValue(null, "hello", "there", 2)),
 				observed);
 
 		// Using a different key also creates a new entry.
@@ -84,15 +85,15 @@ public class JobValueDaoTest {
 		assertEquals(
 				List.of(
 						// Sorted alphabetically key -> value
-						new JobValue("hello", "friend", 1),
-						new JobValue("hello", "there", 2),
-						new JobValue("stop", "there", 1)),
+						new JobValue(null, "hello", "friend", 1),
+						new JobValue(null, "hello", "there", 2),
+						new JobValue(null, "stop", "there", 1)),
 				observed);
 	}
 
 	@Test
 	public void testGetByUser() {
-		List<JobValue> observed;
+		Map<String, List<JobValue>> observed;
 		boolean success;
 
 		// First we need two distinct users recorded on the DB.
@@ -155,17 +156,17 @@ public class JobValueDaoTest {
 
 		observed = valueDao.getByUser(alessandro);
 		assertEquals(
-				List.of(
-						new JobValue("nickname", "Alex", 2),
-						new JobValue("nickname", "Xander", 1)),
+				Map.of("unassigned", List.of(
+						new JobValue("unassigned", "nickname", "Alex", 2),
+						new JobValue("unassigned", "nickname", "Xander", 1))),
 				observed);
 
 		observed = valueDao.getByUser(bianca);
 		assertEquals(
-				List.of(
-						new JobValue("apple", "green", 4),
-						new JobValue("apple", "red", 2),
-						new JobValue("mandarin", "orange", 1)),
+				Map.of("unassigned", List.of(
+						new JobValue("unassigned", "apple", "green", 4),
+						new JobValue("unassigned", "apple", "red", 2),
+						new JobValue("unassigned", "mandarin", "orange", 1))),
 				observed);
 	}
 }

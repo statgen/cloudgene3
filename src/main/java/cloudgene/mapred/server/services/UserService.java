@@ -509,9 +509,12 @@ public class UserService {
 
 	/**
 	 * Queries the database for all job values related to this user.
+	 *
+	 * @return Mapping from application ID to all logged values under the given user
+	 *         and app.
 	 */
 	@NonNull
-	public List<JobValue> getUserValues(@NonNull User user) {
+	public Map<String, List<JobValue>> getUserValues(@NonNull User user) {
 		JobValueDao valueDao = new JobValueDao(application.getDatabase());
 		return valueDao.getByUser(user);
 	}

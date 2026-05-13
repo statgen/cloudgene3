@@ -141,15 +141,15 @@ public class UserController {
 
 	@Get("/api/v2/users/{username}/values")
 	@Secured(User.ROLE_ADMIN)
-	public HttpResponse<List<JobValueResponse>> getValues(String username) {
+	public HttpResponse<Map<String, List<JobValueResponse>>> getValues(String username) {
 		User user = userService.getByUsername(username);
 		if (user == null) {
 			return HttpResponse.notFound();
 		}
 
-		List<JobValue> values = userService.getUserValues(user);
+		Map<String, List<JobValue>> values = userService.getUserValues(user);
 
-		List<JobValueResponse> response = JobValueResponse.build(values);
+		Map<String, List<JobValueResponse>> response = JobValueResponse.build(values);
 		return HttpResponse.ok(response);
 	}
 
