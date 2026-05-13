@@ -2,10 +2,7 @@ package cloudgene.mapred.server.responses;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import cloudgene.mapred.apps.Application;
 import cloudgene.mapred.apps.ApplicationRepository;
@@ -69,7 +66,7 @@ public class ApplicationResponse {
 		List<Environment.Variable> environment = settings.buildEnvironment().addApplication(app.getWdlApp()).toList();
 		appResponse.setEnvironment(environment);
 
-		Map<String, String> config = new HashMap<String, String>();
+		Map<String, String> config = new LinkedHashMap<>();
 		for (IPlugin plugin : PluginManager.getInstance().getPlugins()) {
 			try {
 				Map<String, String> pluginConfig = plugin.getConfig(app.getWdlApp());
@@ -78,8 +75,9 @@ public class ApplicationResponse {
 				}
 				config.putAll(pluginConfig);
 			} catch (IOException e) {
-				log.warn("Loading configuration for plugin '" + plugin.getName() + "' and application '"
-						+ app.getWdlApp().getId() + "' failed.", e);
+				log.warn(
+						"Loading configuration for plugin '{}' and application '{}' failed.",
+						plugin.getName(), app.getWdlApp().getId(), e);
 			}
 		}
 		appResponse.setConfig(config);

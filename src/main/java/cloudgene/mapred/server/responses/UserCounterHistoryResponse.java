@@ -5,7 +5,7 @@ import cloudgene.mapred.database.dao.CounterDao;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import io.micronaut.core.annotation.NonNull;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,10 +32,10 @@ public record UserCounterHistoryResponse(
 			username = "";
 		}
 
-		Map<String, Map<String, List<HistoryEntry>>> processed = new HashMap<>();
+		Map<String, Map<String, List<HistoryEntry>>> processed = new LinkedHashMap<>();
 		for (String application : counterHistory.keySet()) {
 			Map<String, List<CounterDao.HistoryEntry>> appHist = counterHistory.get(application);
-			Map<String, List<HistoryEntry>> inner = new HashMap<>();
+			Map<String, List<HistoryEntry>> inner = new LinkedHashMap<>();
 
 			for (String counter : appHist.keySet()) {
 				List<CounterDao.HistoryEntry> dbHist = appHist.get(counter);
