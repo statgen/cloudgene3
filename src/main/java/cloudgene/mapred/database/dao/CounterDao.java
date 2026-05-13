@@ -73,32 +73,62 @@ public class CounterDao extends JdbcDataAccessObject {
 	}
 
 	@NonNull
-	public Map<String, List<HistoryEntry>> getHistoryByUser(@NonNull User user) {
+	public Map<String, Map<String, List<HistoryEntry>>> getHistoryByUser(@NonNull User user) {
 		String sql = "SELECT "
-				+ "counters.name AS name, "
-				+ "SUM(counters.`value`) OVER ( "
-				+ "    PARTITION BY counters.name "
-				+ "    ORDER BY job.finished_on "
-				+ "    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW "
-				+ ") AS `value`, "
-				+ "job.finished_on AS time "
-				+ "FROM counters INNER JOIN job ON counters.job_id = job.id "
-				+ "WHERE job.user_id = ? AND job.finished_on > 0 "
-				+ "ORDER BY counters.name, job.finished_on";
+				     + "counters.name AS name, "
+				     + "SUM(counters.`value`) OVER ( "
+				         + "PARTITION BY counters.name "
+				         + "ORDER BY job.finished_on "
+				         + "ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW "
+				     + ") AS `value`, "
+				     + "job.finished_on AS time, "
+				     + "vals.application AS application "
+				 + "FROM "
+				     + "counters "
+				     + "INNER JOIN job ON counters.job_id = job.id "
+				     + "LEFT JOIN ( "
+				         + "SELECT "
+				             + "job_values.job_id AS job_id, "
+				             + "job_values.`value` AS application "
+				         + "FROM "
+				             + "job_values "
+				             + "INNER JOIN job ON job_values.job_id = job.id "
+				         + "WHERE "
+				             + "job_values.name = 'application' "
+				     + ") vals ON vals.job_id = job.id "
+				 + "WHERE "
+				     + "job.user_id = ? AND "
+				     + "job.finished_on > 0 "
+				 + "ORDER BY "
+				     + "counters.name, "
+				     + "job.finished_on";
 
 		try {
 			Object[] params = new Object[1];
 			params[0] = user.getId();
 			List<HistoryEntry> result = query(sql, params, new CounterHistoryMapper());
 
-			Map<String, List<HistoryEntry>> output = new HashMap<>();
+			// application -> counter -> entry
+			Map<String, Map<String, List<HistoryEntry>>> output = new HashMap<>();
 			for (HistoryEntry entry : result) {
-				if (output.containsKey(entry.counter())) {
-					output.get(entry.counter()).add(entry);
+				if (output.containsKey(entry.application())) {
+					Map<String, List<HistoryEntry>> appHist = output.get(entry.application());
+
+					if (appHist.containsKey(entry.counter())) {
+						appHist.get(entry.counter()).add(entry);
+					} else {
+						List<HistoryEntry> list = new ArrayList<>();
+						list.add(entry);
+						appHist.put(entry.counter(), list);
+					}
 				} else {
-					List<HistoryEntry> list = new ArrayList<>();
-					list.add(entry);
-					output.put(entry.counter, list);
+					List<HistoryEntry> inner = new ArrayList<>();
+					inner.add(entry);
+
+					Map<String, List<HistoryEntry>> outer = new HashMap<>();
+					outer.put(entry.counter(), inner);
+
+					output.put(entry.application(), outer);
 				}
 			}
 
@@ -112,7 +142,7 @@ public class CounterDao extends JdbcDataAccessObject {
 
 	public record Stats(long total, double mean) {}
 
-	public record HistoryEntry(String counter, Instant time, long value) {}
+	public record HistoryEntry(String application, String counter, Instant time, long value) {}
 
 	static class CounterMapper implements IRowMapMapper<String, Long> {
 		@Override
@@ -143,11 +173,16 @@ public class CounterDao extends JdbcDataAccessObject {
 	static class CounterHistoryMapper implements IRowMapper<HistoryEntry> {
 		@Override
 		public HistoryEntry mapRow(ResultSet rs, int row) throws SQLException {
+			String application = rs.getString("application");
+			if (application == null || application.isBlank()) {
+				application = "unassigned";
+			}
+
 			String name = rs.getString("name");
 			Instant time = Instant.ofEpochMilli(rs.getLong("time"));
 			long value = rs.getLong("value");
 
-			return new HistoryEntry(name, time, value);
+			return new HistoryEntry(application, name, time, value);
 		}
 	}
 }

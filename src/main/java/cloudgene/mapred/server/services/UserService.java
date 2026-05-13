@@ -502,7 +502,7 @@ public class UserService {
 	}
 
 	@NonNull
-	public Map<String, List<CounterDao.HistoryEntry>> getUserCounterHistory(@NonNull User user) {
+	public Map<String, Map<String, List<CounterDao.HistoryEntry>>> getUserCounterHistory(@NonNull User user) {
 		CounterDao counterDao = new CounterDao(application.getDatabase());
 		return counterDao.getHistoryByUser(user);
 	}

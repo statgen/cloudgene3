@@ -132,7 +132,8 @@ public class UserController {
 			return HttpResponse.notFound();
 		}
 
-		Map<String, List<CounterDao.HistoryEntry>> counters = userService.getUserCounterHistory(user);
+		// application -> counter -> history
+		Map<String, Map<String, List<CounterDao.HistoryEntry>>> counters = userService.getUserCounterHistory(user);
 
 		UserCounterHistoryResponse response = UserCounterHistoryResponse.build(user, counters);
 		return HttpResponse.ok(response);
