@@ -159,6 +159,9 @@ public class CloudgeneJob extends AbstractJob {
 			context.setValue("application", getApp().getId());
 			context.submitValue("application");
 
+			context.setValue("app-version", getApp().getVersion());
+			context.submitValue("app-version");
+
 			setError(null);
 			return true;
 
