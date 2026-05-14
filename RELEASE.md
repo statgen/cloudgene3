@@ -19,9 +19,7 @@ Update version according Sematic Versioning:
 > https://semver.org/
 
 
-We track our current version in
-- `pom.xml`
-- `src/main/html/webapp/package.json`.
+We track our current version in `pom.xml`.
 
 Set the new version without the `v` prefix.
 
