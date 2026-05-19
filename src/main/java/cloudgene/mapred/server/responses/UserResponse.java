@@ -1,5 +1,6 @@
 package cloudgene.mapred.server.responses;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -8,53 +9,45 @@ import cloudgene.mapred.core.User;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 
 @JsonClassDescription
-public class UserResponse {
-
-	private int id;
-	private String username = "";
-	private String fullName = "";
-	private String lastLogin = "";
-	private String lockedUntil = "";
-	private boolean active = false;
-	private int loginAttempts;
-	private String role = "";
-	private String mail = "";
-	private boolean admin = false;
-	private boolean hasApiToken = false;
-	private String apiTokenMessage = "";
-	private boolean apiTokenValid = true;
-
-	public static final String MESSAGE_VALID_TOKEN = "API Token was created by %s and is valid until %s.";
-	public static final String MESSAGE_EXPIRED_TOKEN = "API Token was created by %s and expired on %s.";
+public record UserResponse(
+		int id,
+		String username,
+		String fullName,
+		Instant lastLogin,
+		String lockedUntil,
+		boolean active,
+		int loginAttempts,
+		String role,
+		String mail,
+		boolean admin,
+		boolean hasApiToken,
+		Instant apiTokenExpiresOn,
+		boolean apiTokenValid) {
 
 	public static UserResponse build(User user) {
-		UserResponse response = new UserResponse();
+		int id = user.getId();
+		String username = user.getUsername();
+		String fullName = user.getFullName();
+		Instant lastLogin = user.getLastLogin() != null ? user.getLastLogin().toInstant() : null;
+		String lockedUntil = lockedUntilToString(user.getLockedUntil());
+		boolean active = user.isActive();
+		int loginAttempts = user.getLoginAttempts();
+		String role = String.join(User.ROLE_SEPARATOR, user.getRoles()).toLowerCase();
+		String mail = user.getMail();
+		boolean admin = user.isAdmin();
 
-		response.setId(user.getId());
-		response.setUsername(user.getUsername());
-		response.setFullName(user.getFullName());
-		response.setLastLogin(user.getLastLogin() != null ? user.getLastLogin().toString() : "");
-		response.setLockedUntil(lockedUntilToString(user.getLockedUntil()));
-		response.setActive(user.isActive());
-		response.setLoginAttempts(user.getLoginAttempts());
-		response.setRole(String.join(User.ROLE_SEPARATOR, user.getRoles()).toLowerCase());
-		response.setMail(user.getMail());
-		response.setAdmin(user.isAdmin());
-		response.setHasApiToken(user.getApiToken() != null && !user.getApiToken().isEmpty());
+		boolean hasApiToken = user.getApiToken() != null && !user.getApiToken().isEmpty();
+		boolean apiTokenValid = false;
+		Instant apiTokenExpiresOn = user.getApiTokenExpiresOn() != null ? user.getApiTokenExpiresOn().toInstant() : null;
 
-		if (response.isHasApiToken() && user.getApiTokenExpiresOn() != null) {
-			if (user.getApiTokenExpiresOn().getTime() > System.currentTimeMillis()) {
-				response.setApiTokenValid(true);
-				response.setApiTokenMessage(
-						String.format(MESSAGE_VALID_TOKEN, user.getUsername(), user.getApiTokenExpiresOn()));
-			} else {
-				response.setApiTokenValid(false);
-				response.setApiTokenMessage(
-						String.format(MESSAGE_EXPIRED_TOKEN, user.getUsername(), user.getApiTokenExpiresOn()));
+		if (hasApiToken && apiTokenExpiresOn != null) {
+			if (apiTokenExpiresOn.toEpochMilli() > System.currentTimeMillis()) {
+				apiTokenValid = true;
 			}
 		}
 
-		return response;
+		return new UserResponse(id, username, fullName, lastLogin, lockedUntil, active, loginAttempts, role, mail,
+				admin, hasApiToken, apiTokenExpiresOn, apiTokenValid);
 	}
 
 	public static List<UserResponse> build(List<User> users) {
@@ -78,109 +71,4 @@ public class UserResponse {
 			return "";
 		}
 	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public void setFullName(String fullName) {
-		this.fullName = fullName;
-	}
-
-	public void setLastLogin(String lastLogin) {
-		this.lastLogin = lastLogin;
-	}
-
-	public void setLockedUntil(String lockedUntil) {
-		this.lockedUntil = lockedUntil;
-	}
-
-	public void setActive(boolean active) {
-		this.active = active;
-	}
-
-	public void setLoginAttempts(int loginAttempts) {
-		this.loginAttempts = loginAttempts;
-	}
-
-	public void setRole(String role) {
-		this.role = role;
-	}
-
-	public void setMail(String mail) {
-		this.mail = mail;
-	}
-
-	public void setAdmin(boolean admin) {
-		this.admin = admin;
-	}
-
-	public void setHasApiToken(boolean hasApiToken) {
-		this.hasApiToken = hasApiToken;
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public String getFullName() {
-		return fullName;
-	}
-
-	public String getLastLogin() {
-		return lastLogin;
-	}
-
-	public String getLockedUntil() {
-		return lockedUntil;
-	}
-
-	public boolean isActive() {
-		return active;
-	}
-
-	public int getLoginAttempts() {
-		return loginAttempts;
-	}
-
-	public String getRole() {
-		return role;
-	}
-
-	public String getMail() {
-		return mail;
-	}
-
-	public boolean isAdmin() {
-		return admin;
-	}
-
-	public boolean isHasApiToken() {
-		return hasApiToken;
-	}
-
-	public void setApiTokenMessage(String apiTokenMessage) {
-		this.apiTokenMessage = apiTokenMessage;
-	}
-
-	public String getApiTokenMessage() {
-		return apiTokenMessage;
-	}
-
-	public void setApiTokenValid(boolean apiTokenValid) {
-		this.apiTokenValid = apiTokenValid;
-	}
-
-	public boolean isApiTokenValid() {
-		return apiTokenValid;
-	}
-
 }
