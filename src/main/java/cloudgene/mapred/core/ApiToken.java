@@ -1,5 +1,5 @@
 package cloudgene.mapred.core;
 
-import java.util.Date;
+import java.time.Instant;
 
-public record ApiToken(String accessToken, String hash, Date expiresOn) {}
+public record ApiToken(String accessToken, String hash, Instant expiresOn) {}

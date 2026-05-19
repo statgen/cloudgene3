@@ -65,21 +65,21 @@ public class ApiTokenController {
 					"Bad inputs on API token request for user {} (ID {} - email {}). Reason: {}",
 					user.getUsername(), user.getId(), user.getMail(), e.getMessage());
 
-			return HttpResponse.badRequest(new ApiTokenResponse(MESSAGE_APT_TOKEN_BAD_INPUT, false));
+			return HttpResponse.badRequest(ApiTokenResponse.fail(MESSAGE_APT_TOKEN_BAD_INPUT));
 		} catch (IOException e) {
 			log.warn(
 					"Failed to create API token for user {} (ID {} - email {}). Reason: {}",
 					user.getUsername(), user.getId(), user.getMail(), e.getMessage());
 
 			// NOTE(Marc): Keeping OK for backwards compatibility. Should probably be SERVER_ERROR.
-			return HttpResponse.ok(new ApiTokenResponse(MESSAGE_APT_TOKEN_ERROR, false));
+			return HttpResponse.ok(ApiTokenResponse.fail(MESSAGE_APT_TOKEN_ERROR));
 		}
 
 		log.info(
 				"User: generated API token for user {} (ID {} - email {})",
 				user.getUsername(), user.getId(), user.getMail());
 
-		return HttpResponse.ok(new ApiTokenResponse(apiToken));
+		return HttpResponse.ok(ApiTokenResponse.ok(apiToken));
 	}
 
 	@Delete("/api/v2/users/{username}/api-token")

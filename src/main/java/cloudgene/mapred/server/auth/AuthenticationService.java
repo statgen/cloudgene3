@@ -133,7 +133,7 @@ public class AuthenticationService {
 
 		Date expiresOn = new Date(System.currentTimeMillis() + (lifetimeSeconds * 1_000L));
 
-		ApiToken apiToken = new ApiToken(jwt.get(), hash, expiresOn);
+		ApiToken apiToken = new ApiToken(jwt.get(), hash, expiresOn.toInstant());
 
 		// store random hash (not access token) in database to validate token
 		user.setApiToken(hash);
