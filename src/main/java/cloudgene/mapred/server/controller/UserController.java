@@ -67,8 +67,8 @@ public class UserController {
 		User user = userService.getByUsername(username);
 		user = userService.deleteUser(user);
 
-		log.info(String.format("User: Deleted user %s (ID %s) (by ADMIN user ID %s - email %s)", user.getUsername(),
-				user.getId(), admin.getId(), admin.getMail()));
+		log.info("User: Deleted user {} (ID {}) (by ADMIN user ID {} - email {})",
+				user.getUsername(), user.getId(), admin.getId(), admin.getMail());
 
 		return UserResponse.build(user);
 	}
@@ -83,8 +83,8 @@ public class UserController {
 		User user = userService.getByUsername(username);
 		user = userService.changeRoles(user, role);
 
-		log.info(String.format("User: Changed group membership for %s (ID %s) to %s (by ADMIN user ID %s - email %s)",
-				user.getUsername(), user.getId(), String.join(",", user.getRoles()), admin.getId(), admin.getMail()));
+		log.info("User: Changed group membership for {} (ID {}) to {} (by ADMIN user ID {} - email {})",
+				user.getUsername(), user.getId(), String.join(",", user.getRoles()), admin.getId(), admin.getMail());
 
 		return UserResponse.build(user);
 	}
@@ -92,7 +92,6 @@ public class UserController {
 	@Get("/api/v2/users/{username}/profile")
 	@Secured(SecurityRule.IS_AUTHENTICATED)
 	public HttpResponse<UserResponse> get(Authentication authentication, String username) {
-
 		User inquirer = authenticationService.getUserByAuthentication(authentication, AuthenticationType.ALL_TOKENS);
 
 		if (!inquirer.isAdmin() && !inquirer.getUsername().equals(username)) {
@@ -101,6 +100,7 @@ public class UserController {
 
 		User subject = userService.getByUsername(username);
 
+		// TODO(Marc): I don't think this does anything?
 		UserDao dao = new UserDao(application.getDatabase());
 		User updatedSubject = dao.findByUsername(subject.getUsername());
 

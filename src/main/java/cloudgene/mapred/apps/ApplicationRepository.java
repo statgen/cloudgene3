@@ -35,7 +35,7 @@ public class ApplicationRepository {
 
 	private List<Application> apps;
 
-	private Map<String, Application> indexApps;
+	private final Map<String, Application> indexApps = new HashMap<>();
 
 	public static final String CONFIG_PATH = Configuration.getConfigDirectory();
 
@@ -68,7 +68,7 @@ public class ApplicationRepository {
 	}
 
 	public void reload() {
-		indexApps = new HashMap<>();
+		indexApps.clear();
 		log.info("Reload applications...");
 
 		for (Application app : apps) {
@@ -481,7 +481,7 @@ public class ApplicationRepository {
 		try {
 			application.loadWdlApp();
 		} catch (IOException e) {
-			log.warn("Ignore file " + filename + ". Not a valid cloudgene file.", e);
+			log.warn("Ignore file {}. Not a valid cloudgene file.", filename, e);
 			return null;
 		}
 
@@ -510,7 +510,7 @@ public class ApplicationRepository {
 			try {
 				application.loadWdlApp();
 			} catch (IOException e) {
-				log.warn("Ignore file " + filename + ". Not a valid cloudgene file.", e);
+				log.warn("Ignore file {}. Not a valid cloudgene file.", filename, e);
 				return null;
 			}
 		}
