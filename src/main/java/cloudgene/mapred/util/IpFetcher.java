@@ -1,5 +1,7 @@
 package cloudgene.mapred.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.regions.internal.util.EC2MetadataUtils;
 
@@ -13,6 +15,8 @@ import java.util.Enumeration;
  * server's IP.
  */
 public final class IpFetcher {
+
+	private static final Logger log = LoggerFactory.getLogger(IpFetcher.class);
 
 	private IpFetcher() {}
 
@@ -44,8 +48,11 @@ public final class IpFetcher {
 					}
 				}
 			}
+
+			log.warn("No system IP found (is the computer offline?)");
 			return null;
 		} catch (Exception e) {
+			log.error("Error while trying to fetch system IPv4", e);
 			return null;
 		}
 	}
