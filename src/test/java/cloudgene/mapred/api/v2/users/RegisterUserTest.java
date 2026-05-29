@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 import cloudgene.mapred.TestApplication;
-import cloudgene.mapred.util.TestMailServer;
+import cloudgene.mapred.test.TestMailServer;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.restassured.RestAssured;
 import jakarta.inject.Inject;

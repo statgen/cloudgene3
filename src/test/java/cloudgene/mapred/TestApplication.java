@@ -12,7 +12,7 @@ import cloudgene.mapred.database.dao.UserDao;
 import cloudgene.mapred.database.util.Database;
 import cloudgene.mapred.util.HashUtil;
 import cloudgene.mapred.util.config.Settings;
-import cloudgene.mapred.util.TestMailServer;
+import cloudgene.mapred.test.TestMailServer;
 import genepi.io.FileUtil;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Replaces;

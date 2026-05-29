@@ -6,7 +6,7 @@ import cloudgene.mapred.database.dao.UserDao;
 import cloudgene.mapred.jobs.workspace.IWorkspace;
 import cloudgene.mapred.jobs.workspace.WorkspaceFactory;
 import cloudgene.mapred.util.config.Settings;
-import cloudgene.mapred.util.TestMailServer;
+import cloudgene.mapred.test.TestMailServer;
 import cloudgene.mapred.wdl.WdlApp;
 import cloudgene.mapred.wdl.WdlReader;
 import com.dumbster.smtp.SmtpMessage;

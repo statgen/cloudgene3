@@ -1,4 +1,4 @@
-package cloudgene.mapred.util;
+package cloudgene.mapred.test;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -8,22 +8,17 @@ import com.dumbster.smtp.SimpleSmtpServer;
 import com.dumbster.smtp.SmtpMessage;
 
 /**
- * A JUnit Rule which runs a mock SMTP server
- *
- * @see org.junit.rules.TestRule
+ * Singleton providing a mock SMTP server
  */
 public class TestMailServer {
-	public final static int PORT = 9985;
 
-	private SimpleSmtpServer smtp;
+	public final static int PORT = 9985;
 
 	private static TestMailServer instance;
 
-	/**
-	 * Creates a SMTP server listening on port 25.
-	 */
-	private TestMailServer() {
-	}
+	private SimpleSmtpServer smtp;
+
+	private TestMailServer() {}
 
 	public static TestMailServer getInstance() {
 		if (instance == null) {
@@ -42,17 +37,18 @@ public class TestMailServer {
 		return smtp.getReceivedEmailSize();
 	}
 
-	public synchronized Iterator getReceivedEmail() {
-		return smtp.getReceivedEmail();
+	public synchronized Iterator<SmtpMessage> getReceivedEmail() {
+		return (Iterator<SmtpMessage>) smtp.getReceivedEmail();
 	}
 
 	public List<SmtpMessage> getReceivedEmailAsList() {
-		Iterator<SmtpMessage> iterator = (Iterator<SmtpMessage>) getReceivedEmail();
-		List<SmtpMessage> list = new ArrayList<SmtpMessage>();
+		Iterator<SmtpMessage> iterator = getReceivedEmail();
+		List<SmtpMessage> list = new ArrayList<>();
+
 		while (iterator.hasNext()) {
 			list.add(iterator.next());
 		}
+
 		return list;
 	}
-
 }
