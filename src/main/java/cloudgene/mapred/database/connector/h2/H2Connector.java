@@ -65,7 +65,7 @@ public class H2Connector implements DatabaseConnector {
 				dataSource.setMaxIdle(10_000);
 				dataSource.setDefaultAutoCommit(true);
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error("Failed to connect to H2 database", e);
 			}
 		} else {
 			log.error("H2 Driver Class not found");
