@@ -5,7 +5,6 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import cloudgene.mapred.jobs.state.JobState;
 import org.junit.jupiter.api.Test;
 
-import cloudgene.mapred.TestApplication;
 import cloudgene.mapred.test.CloudgeneClientRestAssured;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.restassured.RestAssured;
@@ -14,9 +13,6 @@ import jakarta.inject.Inject;
 
 @MicronautTest
 public class CancelJobTest {
-
-	@Inject
-	TestApplication application;
 
 	@Inject
 	CloudgeneClientRestAssured client;

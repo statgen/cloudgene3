@@ -8,7 +8,6 @@ import java.io.File;
 
 import org.junit.jupiter.api.Test;
 
-import cloudgene.mapred.TestApplication;
 import cloudgene.mapred.jobs.state.JobState;
 import cloudgene.mapred.test.CloudgeneClientRestAssured;
 import genepi.io.FileUtil;
@@ -20,9 +19,6 @@ import jakarta.inject.Inject;
 
 @MicronautTest
 public class GetLogsTest {
-
-	@Inject
-	TestApplication application;
 
 	@Inject
 	CloudgeneClientRestAssured client;

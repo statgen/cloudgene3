@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import cloudgene.mapred.TestApplication;
 import cloudgene.mapred.jobs.state.JobState;
 import cloudgene.mapred.test.CloudgeneClientRestAssured;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
@@ -18,9 +17,6 @@ import jakarta.inject.Inject;
 
 @MicronautTest
 public class GetJobsTest {
-
-	@Inject
-	TestApplication application;
 
 	@Inject
 	CloudgeneClientRestAssured client;

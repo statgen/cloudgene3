@@ -30,10 +30,13 @@ public class SubmitJobTest {
 
 	@Test
 	public void testSubmitWithoutLogin() {
-
-		RestAssured.given().multiPart("input", "input-file").when().post("/api/v2/jobs/submit/all-possible-inputs")
-				.then().statusCode(401);
-
+		RestAssured
+				.given()
+				.multiPart("input", "input-file")
+				.when()
+				.post("/api/v2/jobs/submit/all-possible-inputs")
+				.then()
+				.statusCode(401);
 	}
 
 	@Test
