@@ -29,7 +29,6 @@ public class WdlParameterInput implements WdlParameter {
 		}
 	}
 
-
 	private String id;
 	private String type; // Needed, because yamlbeans expects property AND getter/setter methods.
 	private WdlParameterInputType typeEnum; // Actual type storage

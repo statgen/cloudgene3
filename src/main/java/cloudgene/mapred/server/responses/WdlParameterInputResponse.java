@@ -239,7 +239,7 @@ public class WdlParameterInputResponse {
 			List<PropertyResponse> propertyResponses = new ArrayList<>();
 
 			Map<String, WdlParameterInput.ListGroup> groups = input.getGroups();
-			for(Map.Entry<String, WdlParameterInput.ListGroup> entry: groups.entrySet()) {
+			for (Map.Entry<String, WdlParameterInput.ListGroup> entry : groups.entrySet()) {
 				String groupID = entry.getKey();
 				WdlParameterInput.ListGroup group = entry.getValue();
 
