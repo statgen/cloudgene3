@@ -36,14 +36,14 @@ public class UserProfileTest {
 	CloudgeneClientRestAssured client;
 
 	@BeforeAll
-	protected void setUp() throws Exception {
+	protected void setUp() {
 		// insert two dummy users
 		Database database = application.getDatabase();
 		UserDao userDao = new UserDao(database);
 
 		User testUser1 = new User();
 		testUser1.setUsername("test1");
-		testUser1.setFullName("test1");
+		testUser1.setFullName("Test One");
 		testUser1.setMail("test1@test.com");
 		testUser1.setRoles(new String[] { "User" });
 		testUser1.setActive(true);
@@ -53,7 +53,7 @@ public class UserProfileTest {
 
 		User testUser2 = new User();
 		testUser2.setUsername("test2");
-		testUser2.setFullName("test2");
+		testUser2.setFullName("Test Two");
 		testUser2.setMail("test2@test.com");
 		testUser2.setRoles(new String[] { "User" });
 		testUser2.setActive(true);
@@ -159,9 +159,9 @@ public class UserProfileTest {
 		Header accessToken = client.login("test1", "Test1Password!");
 
 		// try to update password for test2
-		Map<String, String> form = new HashMap<String, String>();
+		Map<String, String> form = new HashMap<>();
 		form.put("username", "test2");
-		form.put("full-name", "test2 test1");
+		form.put("full-name", "Test Two Test One");
 		form.put("mail", "test1@test.com");
 		form.put("new-password", "Password27");
 		form.put("confirm-new-password", "Password27");
@@ -185,7 +185,7 @@ public class UserProfileTest {
 
 		Map<String, String> form = new HashMap<>();
 		form.put("username", "test1");
-		form.put("full-name", "test1 new");
+		form.put("full-name", "Test One New");
 		form.put("mail", "test1@test.com");
 		form.put("new-password", "aaa");
 		form.put("confirm-new-password", "abbb");
@@ -208,7 +208,7 @@ public class UserProfileTest {
 
 		Map<String, String> form = new HashMap<>();
 		form.put("username", "test1");
-		form.put("full-name", "test1 new");
+		form.put("full-name", "Test One New");
 		form.put("mail", "test1@test.com");
 		form.put("new-password", "P&SSWORD=3141592");
 		form.put("confirm-new-password", "P&SSWORD=3141592");
@@ -232,7 +232,7 @@ public class UserProfileTest {
 
 		Map<String, String> form = new HashMap<>();
 		form.put("username", "test1");
-		form.put("full-name", "test1 new");
+		form.put("full-name", "Test One New");
 		form.put("mail", "test1@test.com");
 		form.put("new-password", "PASSWORDpassword");
 		form.put("confirm-new-password", "PASSWORDpassword");
@@ -256,7 +256,7 @@ public class UserProfileTest {
 
 		Map<String, String> form = new HashMap<>();
 		form.put("username", "test1");
-		form.put("full-name", "test1 new");
+		form.put("full-name", "Test One New");
 		form.put("mail", "test1@test.com");
 		form.put("new-password", "passwordword27");
 		form.put("confirm-new-password", "passwordword27");
@@ -280,7 +280,7 @@ public class UserProfileTest {
 
 		Map<String, String> form = new HashMap<>();
 		form.put("username", "test1");
-		form.put("full-name", "test1 new");
+		form.put("full-name", "Test One New");
 		form.put("mail", "");
 
 		RestAssured
@@ -304,7 +304,7 @@ public class UserProfileTest {
 		// downgrade by removing email
 		Map<String, String> form = new HashMap<>();
 		form.put("username", "test1");
-		form.put("full-name", "test1 new");
+		form.put("full-name", "Test One New");
 		form.put("mail", "");
 
 		RestAssured
@@ -327,7 +327,7 @@ public class UserProfileTest {
 		// upgrade by adding email
 		form = new HashMap<>();
 		form.put("username", "test1");
-		form.put("full-name", "test1 new");
+		form.put("full-name", "Test One New");
 		form.put("mail", "test1@test.com");
 
 		RestAssured

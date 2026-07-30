@@ -21,7 +21,8 @@ public class User {
 	private static final Pattern EMAIL = Pattern.compile("^[_A-Za-z0-9+-]+(\\.[_A-Za-z0-9-]+)*@"
 			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$");
 	private static final Pattern USERNAME = Pattern.compile("^[a-z][a-z0-9_]+[a-z0-9]$");
-	private static final Pattern FULL_NAME = Pattern.compile("^\\p{L}[\\p{L}\\s]*\\p{L}$");
+	// \p{?} matches Unicode characters belonging to category ?. L -> letter, Pd -> dashes.
+	private static final Pattern FULL_NAME = Pattern.compile("^\\p{L}[\\p{L}\\p{Pd}\\s]*\\p{L}$");
 
 	private int id;
 	private String username;
@@ -346,7 +347,7 @@ public class User {
 	 * Checks if the provided {@code fullName} follows the formatting requirements.
 	 * <p>
 	 * Must be a non-blank string containing 2 or more Unicode letter characters,
-	 * optionally separated by whitespace.
+	 * optionally separated by whitespace and/or dashes.
 	 *
 	 * @param fullName String to check for email format compliance.
 	 * @return {@code null} if no errors were found; error message otherwise.
@@ -357,7 +358,7 @@ public class User {
 		}
 
 		if (!FULL_NAME.matcher(fullName).find()) {
-			return "Please enter a valid full name.";
+			return "Invalid full name. It must contain at least two letters, optionally separated by spaces and/or dashes.";
 		}
 
 		return null;

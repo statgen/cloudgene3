@@ -159,11 +159,21 @@ public class UserTest {
 				arguments("", "The full name is required."),
 				arguments(" ", "The full name is required."),
 				arguments(" \t\n ", "The full name is required."),
+				arguments("a", "Invalid full name. It must contain at least two letters, optionally separated by spaces and/or dashes."),
+				arguments("@#%^%!#%^236347375", "Invalid full name. It must contain at least two letters, optionally separated by spaces and/or dashes."),
+				arguments("012", "Invalid full name. It must contain at least two letters, optionally separated by spaces and/or dashes."),
+				arguments("Aa34", "Invalid full name. It must contain at least two letters, optionally separated by spaces and/or dashes."),
+				arguments("identifier_style", "Invalid full name. It must contain at least two letters, optionally separated by spaces and/or dashes."),
+				arguments(" aa", "Invalid full name. It must contain at least two letters, optionally separated by spaces and/or dashes."),
+				arguments("aa\t", "Invalid full name. It must contain at least two letters, optionally separated by spaces and/or dashes."),
 
-				arguments("a", null),
-				arguments("AA", null),
+				arguments("aa", null),
 				arguments("Foo Bar", null),
-				arguments("@#%^%!#%^236347375", null));
+				arguments("So Many Surnames Here", null),
+				arguments("Dashes - are—Allowed", null),
+				arguments("Marçal Fàbrega", null),
+				arguments("Håkan Jörgensson", null),
+				arguments("马新", null));
 	}
 
 	@ParameterizedTest
