@@ -21,6 +21,7 @@ public class User {
 	private static final Pattern EMAIL = Pattern.compile("^[_A-Za-z0-9+-]+(\\.[_A-Za-z0-9-]+)*@"
 			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$");
 	private static final Pattern USERNAME = Pattern.compile("^[a-z][a-z0-9_]+[a-z0-9]$");
+	private static final Pattern FULL_NAME = Pattern.compile("^\\p{L}[\\p{L}\\s]*\\p{L}$");
 
 	private int id;
 	private String username;
@@ -344,7 +345,8 @@ public class User {
 	/**
 	 * Checks if the provided {@code fullName} follows the formatting requirements.
 	 * <p>
-	 * Just needs to be non-blank.
+	 * Must be a non-blank string containing 2 or more Unicode letter characters,
+	 * optionally separated by whitespace.
 	 *
 	 * @param fullName String to check for email format compliance.
 	 * @return {@code null} if no errors were found; error message otherwise.
@@ -352,6 +354,10 @@ public class User {
 	public static String checkFullName(@Nullable String fullName) {
 		if (fullName == null || fullName.isBlank()) {
 			return "The full name is required.";
+		}
+
+		if (!FULL_NAME.matcher(fullName).find()) {
+			return "Please enter a valid full name.";
 		}
 
 		return null;
