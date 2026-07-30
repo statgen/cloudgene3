@@ -7,44 +7,50 @@ import java.util.Map;
 
 @JsonClassDescription
 public class WdlParameterInput implements WdlParameter {
+	@JsonClassDescription
+	public static class ListGroup {
+		String label;
+		Map<String, String> values;
+
+		public String getLabel() {
+			return label;
+		}
+
+		public void setLabel(String label) {
+			this.label = label;
+		}
+
+		public Map<String, String> getValues() {
+			return values;
+		}
+
+		public void setValues(Map<String, String> values) {
+			this.values = values;
+		}
+	}
+
 
 	private String id;
-
+	private String type; // Needed, because yamlbeans expects property AND getter/setter methods.
+	private WdlParameterInputType typeEnum; // Actual type storage
 	private String description;
-
 	private String value = "";
-
-	//needed, because yamlbeans expects property AND getter/setter methods.
-	private String type;
-	
-	private WdlParameterInputType typeEnum;
-
-	private boolean visible = true;
-
-	private boolean required = true;
-
 	public Map<String, String> values;
-
+	private boolean visible = true;
+	private boolean required = true;
 	private boolean adminOnly = false;
-
 	private String help = null;
-
 	private String category = null;
-
 	private String accept = null;
-
 	private String details = null;
-
 	private String pattern = null;
-
 	private String emptySelection = null;
-
 	private boolean serialize = true;
-
 	private String writeFile = null;
+	private Map<String, ListGroup> groups = null;
 
 	public WdlParameterInput() {
-		values = new HashMap<String, String>();
+		values = new HashMap<>();
 		values.put("true", "true");
 		values.put("false", "false");
 	}
@@ -210,4 +216,11 @@ public class WdlParameterInput implements WdlParameter {
 		}
 	}
 
+	public Map<String, ListGroup> getGroups() {
+		return groups;
+	}
+
+	public void setGroups(Map<String, ListGroup> groups) {
+		this.groups = groups;
+	}
 }

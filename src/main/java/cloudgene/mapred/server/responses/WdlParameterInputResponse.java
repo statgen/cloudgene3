@@ -208,7 +208,7 @@ public class WdlParameterInputResponse {
 			String category = input.getValues().get("category");
 			String property = input.getValues().get("property");
 			String bind = input.getValues().get("bind");
-			List<PropertyResponse> propertyResponses = new ArrayList<PropertyResponse>();
+			List<PropertyResponse> propertyResponses = new ArrayList<>();
 
 			for (Application app : apps) {
 				if (category == null || category.isEmpty()) {
@@ -234,14 +234,35 @@ public class WdlParameterInputResponse {
 			return response;
 		}
 
+		if (input.getTypeAsEnum() == WdlParameterInputType.BINDED_LIST && input.getGroups() != null) {
+			String bind = input.getValue();
+			List<PropertyResponse> propertyResponses = new ArrayList<>();
+
+			Map<String, WdlParameterInput.ListGroup> groups = input.getGroups();
+			for(Map.Entry<String, WdlParameterInput.ListGroup> entry: groups.entrySet()) {
+				String groupID = entry.getKey();
+				WdlParameterInput.ListGroup group = entry.getValue();
+
+				PropertyResponse propertyResponse = PropertyResponse.build(groupID, group.getLabel(), group.getValues());
+				propertyResponses.add(propertyResponse);
+			}
+
+			response.setValue(""); // Avoid confusing API response: don't duplicate the bind value.
+			response.setValues(propertyResponses);
+			response.setBind(bind);
+			response.setType("binded_list");
+
+			return response;
+		}
+
 		if (input.getTypeAsEnum() == WdlParameterInputType.LIST
 				|| input.getTypeAsEnum() == WdlParameterInputType.CHECKBOX
 				|| input.getTypeAsEnum() == WdlParameterInputType.RADIO) {
 
 			Map<String, String> values = input.getValues();
-			List<String> keys = new ArrayList<String>(values.keySet());
+			List<String> keys = new ArrayList<>(values.keySet());
 			Collections.sort(keys);
-			List<PropertyResponse> propertyResponses = new ArrayList<PropertyResponse>();
+			List<PropertyResponse> propertyResponses = new ArrayList<>();
 
 			for (String key : keys) {
 				String value = values.get(key);
@@ -253,7 +274,7 @@ public class WdlParameterInputResponse {
 		}
 
 		if (input.getTypeAsEnum() == WdlParameterInputType.APP_LIST) {
-			List<PropertyResponse> propertyResponses = new ArrayList<PropertyResponse>();
+			List<PropertyResponse> propertyResponses = new ArrayList<>();
 			for (Application app : apps) {
 				String inputCategory = input.getCategory();
 

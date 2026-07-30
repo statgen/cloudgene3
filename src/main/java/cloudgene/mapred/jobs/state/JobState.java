@@ -21,7 +21,7 @@ public enum JobState {
 
 	/**
 	 * The job is close to done: it completed the primary running phase and is
-	 * exporting he produced artifacts.
+	 * exporting the produced artifacts.
 	 * <p>
 	 * Maps to {@code AbstractJob.after()}.
 	 */
