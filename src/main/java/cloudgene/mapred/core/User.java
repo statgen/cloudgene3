@@ -18,7 +18,7 @@ public class User {
 	private static final Pattern LOWERCASE = Pattern.compile("[a-z]");
 	private static final Pattern UPPERCASE = Pattern.compile("[A-Z]");
 	private static final Pattern SPECIAL = Pattern.compile("[\"#$%&'()*+,./:;<=>?@\\[\\]\\\\^_`{|}~!-]");
-	private static final Pattern EMAIL = Pattern.compile("^[_A-Za-z0-9+-]+(\\.[_A-Za-z0-9-]+)*@"
+	private static final Pattern EMAIL = Pattern.compile("^[_A-Za-z0-9+-]+(\\.[_A-Za-z0-9+-]+)*@"
 			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$");
 	private static final Pattern USERNAME = Pattern.compile("^[a-z][a-z0-9_]+[a-z0-9]$");
 	// \p{?} matches Unicode characters belonging to category ?. L -> letter, Pd -> dashes.
