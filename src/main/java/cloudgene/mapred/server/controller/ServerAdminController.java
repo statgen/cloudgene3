@@ -2,8 +2,9 @@ package cloudgene.mapred.server.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.database.dao.CounterHistoryDao;
@@ -132,17 +133,16 @@ public class ServerAdminController {
 	}
 
 	@Get("/statistics")
-	public List<Map<String, String>> getStatistics(@Nullable @QueryValue("days") Integer days) {
-
+	public List<StatisticsResponse.Entry> getStatistics(@Nullable @QueryValue("days") Integer days) {
 		if (days == null) {
 			days = 1;
 		}
 
 		CounterHistoryDao dao = new CounterHistoryDao(application.getDatabase());
+		Instant end = Instant.now();
+		Instant start = end.minus(days, ChronoUnit.DAYS);
 
-		List<Map<String, String>> stats = dao.getAllBetween(
-				System.currentTimeMillis() - (1000L * 60L * 60L * 24L * days), System.currentTimeMillis());
-
+		List<CounterHistoryDao.Entry> stats = dao.getAllBetween(start, end);
 		return StatisticsResponse.build(stats);
 	}
 }
