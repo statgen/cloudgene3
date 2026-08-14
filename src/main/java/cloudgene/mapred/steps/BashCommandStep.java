@@ -1,6 +1,5 @@
 package cloudgene.mapred.steps;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,21 +40,6 @@ public class BashCommandStep extends CloudgeneStep {
 		boolean streamStdout = stdout.equals("true");
 
 		List<String> params = Arrays.asList(originalCommand.split(" "));
-
-		File file = new File(params.get(0));
-
-		if (!file.exists()) {
-			context.error("Command '" + file.getAbsolutePath()
-					+ "' was not found. Please set the correct path in the cloudgene.yaml file.");
-			return false;
-		}
-
-		if (!file.canExecute()) {
-			context.error("Command '" + file.getAbsolutePath()
-					+ "' was found but can not be executed. Please check the permissions.");
-			return false;
-		}
-
 		List<String> executedCommand = new ArrayList<>();
 
 		if (useBash) {

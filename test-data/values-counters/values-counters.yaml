@@ -1,0 +1,29 @@
+id: values-counters
+name: Values and Counters
+description: This job sets some values and counters before quitting.
+version: 1.2.3
+website: https://statgen.github.io/
+category: cloudgene
+
+
+workflow:
+  steps:
+    - name: Execute Command
+      type: command
+      exec: ./values-counters.sh
+      stdout: true
+
+  inputs:
+    - id: input
+      description: Dummy Input
+      type: local-file
+
+  outputs:
+    - id: output
+      description: Statistics
+      type: local-file
+      download: true
+      temp: false
+      zip: false
+      removeHeader: true
+      mergeOutput: true
