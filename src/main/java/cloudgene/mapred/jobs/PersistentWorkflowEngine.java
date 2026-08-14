@@ -32,7 +32,7 @@ public class PersistentWorkflowEngine extends WorkflowEngine {
 		log.info("Init Counters....");
 
 		counterDao = new CounterDao(database);
-		counters = counterDao.getAll();
+		counters = counterDao.getSum();
 
 		jobDao = new JobDao(database);
 

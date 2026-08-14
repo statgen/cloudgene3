@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import cloudgene.mapred.core.User;
+import cloudgene.mapred.database.dao.CounterDao;
 import cloudgene.mapred.database.dao.CounterHistoryDao;
 import cloudgene.mapred.jobs.JobValue;
 import cloudgene.mapred.server.Application;
@@ -144,6 +145,12 @@ public class ServerAdminController {
 
 		List<CounterHistoryDao.Entry> stats = dao.getAllBetween(start, end);
 		return StatisticsResponse.build(stats);
+	}
+
+	@Get("/counters")
+	public CounterStatisticsResponse getCounters() {
+		Map<String, Map<String, CounterDao.Stats>> counters = serverService.getCounterStatistics();
+		return CounterStatisticsResponse.build(counters);
 	}
 
 	@Get("/values")

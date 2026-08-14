@@ -40,25 +40,89 @@ public class CounterDao extends JdbcDataAccessObject {
 		}
 	}
 
+	/**
+	 * Aggregates all counters by name and returns their sum as a map
+	 * {@code (counter name) -> (total sum)}
+	 * <p>
+	 * Note that this will happily aggregate across different apps.
+	 */
 	@NonNull
-	public Map<String, Long> getAll() {
+	public Map<String, Long> getSum() {
 		String sql = "SELECT name, SUM(`value`) FROM counters GROUP BY name";
 
 		try {
 			Map<String, Long> result = queryForMap(sql, new CounterMapper());
-			log.debug("find all counters successful. results: {}", result);
+			log.debug("find sum of counters successful. results: {}", result);
 			return result;
 		} catch (SQLException e) {
-			log.error("find all counters failed", e);
+			log.error("find sum of counters failed", e);
 			return new HashMap<>();
 		}
 	}
 
+	/**
+	 * Gets all counter entries, aggregated by application and counter name.
+	 * <p>
+	 * Returns a map {@code (application ID without version) -> (counter name) -> stats}.
+	 * See {@link CounterDao.Stats}
+	 */
+	@NonNull
+	public Map<String, Map<String, Stats>> getAll() {
+		String sql = "SELECT "
+				+     "COALESCE(vals.application, 'unassigned') AS application, "
+				+     "counters.name AS name, "
+				+     "COUNT(counters.`value`) AS count, "
+				+     "SUM(counters.`value`) AS total, "
+				+     "AVG(counters.`value`) AS mean "
+				+ "FROM "
+				+     "counters "
+				+     "INNER JOIN job ON counters.job_id = job.id "
+				+     "LEFT JOIN ( "
+				+         "SELECT "
+				+             "job_values.job_id AS job_id, "
+				+             "job_values.`value` AS application "
+				+         "FROM "
+				+             "job_values "
+				+             "INNER JOIN job ON job_values.job_id = job.id "
+				+         "WHERE "
+				+             "job_values.name = 'application' "
+				+     ") vals ON vals.job_id = job.id "
+				+ "GROUP BY application, name "
+				+ "ORDER BY application, name";
+
+		try {
+			List<Stats> result = query(sql, new CounterStatsMapper());
+
+			// application -> counter -> entries
+			Map<String, Map<String, Stats>> output = result.stream()
+					.collect(Collectors.groupingBy(
+							Stats::application,
+							LinkedHashMap::new,
+							Collectors.toMap(
+									Stats::name,
+									Function.identity())));
+
+			log.debug("Find all counters successful. Results: {}", result);
+			return output;
+		} catch (SQLException e) {
+			log.error("Find all counters failed", e);
+			return new HashMap<>();
+		}
+	}
+
+	/**
+	 * Gets the counter entries associated with {@code user}, aggregated by
+	 * application and counter name.
+	 * <p>
+	 * Returns a map {@code (application ID without version) -> (counter name) -> stats}.
+	 * See {@link CounterDao.Stats}
+	 */
 	@NonNull
 	public Map<String, Map<String, Stats>> getByUser(@NonNull User user) {
 		String sql = "SELECT "
 				+     "COALESCE(vals.application, 'unassigned') AS application, "
 				+     "counters.name AS name, "
+				+     "COUNT(counters.`value`) AS count, "
 				+     "SUM(counters.`value`) AS total, "
 				+     "AVG(counters.`value`) AS mean "
 				+ "FROM "
@@ -89,7 +153,7 @@ public class CounterDao extends JdbcDataAccessObject {
 							Stats::application,
 							LinkedHashMap::new,
 							Collectors.toMap(
-									Stats::counter,
+									Stats::name,
 									Function.identity())));
 
 			log.debug("Find counters by user successful. Results: {}", result);
@@ -152,7 +216,11 @@ public class CounterDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public record Stats(String application, String counter, long total, double mean) {}
+	/**
+	 * Aggregated counter statistics: {@code application} ID (without version),
+	 * counter {@code name}, entry {@code count}, {@code total} sum, {@code mean}.
+	 */
+	public record Stats(String application, String name, long count, long total, double mean) {}
 
 	public record HistoryEntry(String application, String counter, Instant time, long value) {}
 
@@ -172,11 +240,12 @@ public class CounterDao extends JdbcDataAccessObject {
 		@Override
 		public Stats mapRow(ResultSet rs, int row) throws SQLException {
 			String application = rs.getString("application");
-			String counter = rs.getString("name");
+			String name = rs.getString("name");
+			long count = rs.getLong("count");
 			long total = rs.getLong("total");
 			double mean = rs.getDouble("mean");
 
-			return new Stats(application, counter, total, mean);
+			return new Stats(application, name, count, total, mean);
 		}
 	}
 

@@ -29,7 +29,7 @@ public class CounterDaoTest {
 	}
 
 	@Test
-	public void testInsertAndGetAll() {
+	public void testInsertAndGetSum() {
 		Map<String, Long> observed;
 		boolean success;
 
@@ -37,7 +37,7 @@ public class CounterDaoTest {
 		dummyJob.setId("DummyJob-CounterDaoTest-testInsertAndGetAll");
 
 		// Counter DAO starts empty.
-		observed = counterDao.getAll();
+		observed = counterDao.getSum();
 		assertNotNull(observed);
 		assertEquals(Map.of(), observed);
 
@@ -45,7 +45,7 @@ public class CounterDaoTest {
 		success = counterDao.insert("hawk-sightings", 2L, dummyJob);
 		assertTrue(success);
 
-		observed = counterDao.getAll();
+		observed = counterDao.getSum();
 		assertNotNull(observed);
 		assertEquals(Map.of("hawk-sightings", 2L), observed);
 
@@ -53,7 +53,7 @@ public class CounterDaoTest {
 		success = counterDao.insert("early-lunches", 1L, dummyJob);
 		assertTrue(success);
 
-		observed = counterDao.getAll();
+		observed = counterDao.getSum();
 		assertNotNull(observed);
 		assertEquals(
 				Map.of(
@@ -65,7 +65,7 @@ public class CounterDaoTest {
 		success = counterDao.insert("hawk-sightings", 3L, dummyJob);
 		assertTrue(success);
 
-		observed = counterDao.getAll();
+		observed = counterDao.getSum();
 		assertNotNull(observed);
 		assertEquals(
 				Map.of(
@@ -128,15 +128,15 @@ public class CounterDaoTest {
 		observed = counterDao.getByUser(alice);
 		assertEquals(
 				Map.of("unassigned", Map.of(
-						"alice", new CounterDao.Stats("unassigned", "alice", 1L, 1.0D),
-						"both", new CounterDao.Stats("unassigned", "both", 2L, 2.0D))),
+						"alice", new CounterDao.Stats("unassigned", "alice", 1L, 1L, 1.0D),
+						"both", new CounterDao.Stats("unassigned", "both", 1L, 2L, 2.0D))),
 				observed);
 
 		observed = counterDao.getByUser(bob);
 		assertEquals(
 				Map.of("unassigned", Map.of(
-						"bob", new CounterDao.Stats("unassigned", "bob", 3L, 3.0D),
-						"both", new CounterDao.Stats("unassigned", "both", 4L, 4.0D))),
+						"bob", new CounterDao.Stats("unassigned", "bob", 1L, 3L, 3.0D),
+						"both", new CounterDao.Stats("unassigned", "both", 1L, 4L, 4.0D))),
 				observed);
 
 		// We're returning sums and means over the names:
@@ -159,15 +159,15 @@ public class CounterDaoTest {
 		observed = counterDao.getByUser(alice);
 		assertEquals(
 				Map.of("unassigned", Map.of(
-						"alice", new CounterDao.Stats("unassigned", "alice", 12L, 4.0D),
-						"both", new CounterDao.Stats("unassigned", "both", 9L, 4.5D))),
+						"alice", new CounterDao.Stats("unassigned", "alice", 3L, 12L, 4.0D),
+						"both", new CounterDao.Stats("unassigned", "both", 2L, 9L, 4.5D))),
 				observed);
 
 		observed = counterDao.getByUser(bob);
 		assertEquals(
 				Map.of("unassigned", Map.of(
-						"bob", new CounterDao.Stats("unassigned", "bob", 11L, 5.5D),
-						"both", new CounterDao.Stats("unassigned", "both", 13L, 6.5D))),
+						"bob", new CounterDao.Stats("unassigned", "bob", 2L, 11L, 5.5D),
+						"both", new CounterDao.Stats("unassigned", "both", 2L, 13L, 6.5D))),
 				observed);
 	}
 }

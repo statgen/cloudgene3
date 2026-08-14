@@ -4,6 +4,7 @@ import cloudgene.mapred.BuildInfo;
 import cloudgene.mapred.apps.ApplicationRepository;
 import cloudgene.mapred.core.Template;
 import cloudgene.mapred.core.User;
+import cloudgene.mapred.database.dao.CounterDao;
 import cloudgene.mapred.database.dao.JobValueDao;
 import cloudgene.mapred.jobs.JobValue;
 import cloudgene.mapred.plugins.IPlugin;
@@ -224,6 +225,19 @@ public class ServerService {
 		NextflowPlugin plugin = (NextflowPlugin) PluginManager.getInstance().getPlugin(NextflowPlugin.ID);
 		String filename = plugin.getNextflowEnv();
 		FileUtil.writeStringBufferToFile(filename, new StringBuffer(content));
+	}
+
+	/**
+	 * Queries the database for all counters, and returns summary statistics (count,
+	 * sum, mean) grouped by application and counter.
+	 * <p>
+	 * Since the database only stores counters for successfully completed jobs, this
+	 * method does not show data for ongoing or failed jobs.
+	 */
+	@NonNull
+	public Map<String, Map<String, CounterDao.Stats>> getCounterStatistics() {
+		CounterDao counterDao = new CounterDao(application.getDatabase());
+		return counterDao.getAll();
 	}
 
 	/**
