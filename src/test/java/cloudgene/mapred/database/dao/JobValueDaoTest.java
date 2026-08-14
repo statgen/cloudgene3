@@ -92,7 +92,7 @@ public class JobValueDaoTest {
 	}
 
 	@Test
-	public void testGetByUser() {
+	public void testGetByUserAndGetAllGrouped() {
 		Map<String, List<JobValue>> observed;
 		boolean success;
 
@@ -130,6 +130,8 @@ public class JobValueDaoTest {
 
 		// Finally we need some job values per user in the DB.
 
+		success = valueDao.insert("shared", "shared", alessandroJob);
+		assertTrue(success);
 		success = valueDao.insert("nickname", "Alex", alessandroJob);
 		assertTrue(success);
 		success = valueDao.insert("nickname", "Alex", alessandroJob);
@@ -137,6 +139,8 @@ public class JobValueDaoTest {
 		success = valueDao.insert("nickname", "Xander", alessandroJob);
 		assertTrue(success);
 
+		success = valueDao.insert("shared", "shared", biancaJob);
+		assertTrue(success);
 		success = valueDao.insert("apple", "green", biancaJob);
 		assertTrue(success);
 		success = valueDao.insert("apple", "green", biancaJob);
@@ -152,13 +156,14 @@ public class JobValueDaoTest {
 		success = valueDao.insert("mandarin", "orange", biancaJob);
 		assertTrue(success);
 
-		// Now we can check that we only read the data from one user.
+		// getByUser() only gets data from one user.
 
 		observed = valueDao.getByUser(alessandro);
 		assertEquals(
 				Map.of("unassigned", List.of(
 						new JobValue("unassigned", "nickname", "Alex", 2),
-						new JobValue("unassigned", "nickname", "Xander", 1))),
+						new JobValue("unassigned", "nickname", "Xander", 1),
+						new JobValue("unassigned", "shared", "shared", 1))),
 				observed);
 
 		observed = valueDao.getByUser(bianca);
@@ -166,7 +171,22 @@ public class JobValueDaoTest {
 				Map.of("unassigned", List.of(
 						new JobValue("unassigned", "apple", "green", 4),
 						new JobValue("unassigned", "apple", "red", 2),
-						new JobValue("unassigned", "mandarin", "orange", 1))),
+						new JobValue("unassigned", "mandarin", "orange", 1),
+						new JobValue("unassigned", "shared", "shared", 1))),
+				observed);
+
+		// getAllGrouped() returns the same format as getByUser(), but does not care
+		// about users.
+
+		observed = valueDao.getAllGrouped();
+		assertEquals(
+				Map.of("unassigned", List.of(
+						new JobValue("unassigned", "apple", "green", 4),
+						new JobValue("unassigned", "apple", "red", 2),
+						new JobValue("unassigned", "mandarin", "orange", 1),
+						new JobValue("unassigned", "nickname", "Alex", 2),
+						new JobValue("unassigned", "nickname", "Xander", 1),
+						new JobValue("unassigned", "shared", "shared", 2))),
 				observed);
 	}
 }

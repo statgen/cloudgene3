@@ -60,6 +60,42 @@ public class JobValueDao extends JdbcDataAccessObject {
 	}
 
 	@NonNull
+	public Map<String, List<JobValue>> getAllGrouped() {
+		String sql = "SELECT "
+				+ "    COALESCE(app.`value`, 'unassigned') AS application, "
+				+ "    vals.name AS `name`, "
+				+ "    vals.`value` AS `value`, "
+				+ "    COUNT(*) AS count "
+				+ " FROM "
+				+ "    job_values AS vals "
+				+ "LEFT JOIN "
+				+ "    job_values AS app "
+				+ "ON "
+				+ "    app.job_id = vals.job_id AND "
+				+ "    app.name = 'application' "
+				+ "WHERE "
+				+ "    vals.name <> 'application' "
+				+ "GROUP BY application, name, `value` "
+				+ "ORDER BY application, name, `value`";
+
+		try {
+			List<JobValue> result = query(sql, new ExtendedValueMapper());
+
+			Map<String, List<JobValue>> output = result.stream()
+					.collect(Collectors.groupingBy(
+							JobValue::application,
+							LinkedHashMap::new,
+							Collectors.toList()));
+
+			log.debug("Find grouped values successful. results: {}", result);
+			return output;
+		} catch (SQLException e) {
+			log.error("Find grouped values failed", e);
+			return new LinkedHashMap<>();
+		}
+	}
+
+	@NonNull
 	public Map<String, List<JobValue>> getByUser(@NonNull User user) {
 		String sql = "SELECT "
 				+     "COALESCE(vals.application, 'unassigned') AS application, "

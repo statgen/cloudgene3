@@ -4,6 +4,8 @@ import cloudgene.mapred.BuildInfo;
 import cloudgene.mapred.apps.ApplicationRepository;
 import cloudgene.mapred.core.Template;
 import cloudgene.mapred.core.User;
+import cloudgene.mapred.database.dao.JobValueDao;
+import cloudgene.mapred.jobs.JobValue;
 import cloudgene.mapred.plugins.IPlugin;
 import cloudgene.mapred.plugins.PluginManager;
 import cloudgene.mapred.plugins.nextflow.NextflowPlugin;
@@ -12,6 +14,7 @@ import cloudgene.mapred.server.responses.ClusterDetailsResponse;
 import cloudgene.mapred.server.responses.ServerResponse;
 import cloudgene.mapred.util.config.Settings;
 import genepi.io.FileUtil;
+import io.micronaut.core.annotation.NonNull;
 import io.micronaut.security.oauth2.configuration.OauthClientConfigurationProperties;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -221,5 +224,18 @@ public class ServerService {
 		NextflowPlugin plugin = (NextflowPlugin) PluginManager.getInstance().getPlugin(NextflowPlugin.ID);
 		String filename = plugin.getNextflowEnv();
 		FileUtil.writeStringBufferToFile(filename, new StringBuffer(content));
+	}
+
+	/**
+	 * Queries the database for all job values, and returns counts grouped by
+	 * application, name, and value.
+	 * <p>
+	 * Since the database only stores values for successfully completed jobs, this
+	 * method does not show data for ongoing or failed jobs.
+	 */
+	@NonNull
+	public Map<String, List<JobValue>> getValues() {
+		JobValueDao valueDao = new JobValueDao(application.getDatabase());
+		return valueDao.getAllGrouped();
 	}
 }

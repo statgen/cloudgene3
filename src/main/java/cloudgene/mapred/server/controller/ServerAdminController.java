@@ -5,18 +5,18 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 
 import cloudgene.mapred.core.User;
 import cloudgene.mapred.database.dao.CounterHistoryDao;
+import cloudgene.mapred.jobs.JobValue;
 import cloudgene.mapred.server.Application;
 import cloudgene.mapred.server.auth.AuthenticationService;
-import cloudgene.mapred.server.responses.ClusterDetailsResponse;
-import cloudgene.mapred.server.responses.NextflowConfigResponse;
-import cloudgene.mapred.server.responses.ServerSettingsResponse;
-import cloudgene.mapred.server.responses.StatisticsResponse;
+import cloudgene.mapred.server.responses.*;
 import cloudgene.mapred.server.services.ServerService;
 import cloudgene.mapred.util.TextUtil;
 import io.micronaut.core.annotation.Nullable;
+import io.micronaut.http.HttpResponse;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
@@ -144,5 +144,12 @@ public class ServerAdminController {
 
 		List<CounterHistoryDao.Entry> stats = dao.getAllBetween(start, end);
 		return StatisticsResponse.build(stats);
+	}
+
+	@Get("/values")
+	public HttpResponse<Map<String, List<JobValueResponse>>> getValues() {
+		Map<String, List<JobValue>> values = serverService.getValues();
+		Map<String, List<JobValueResponse>> response = JobValueResponse.build(values);
+		return HttpResponse.ok(response);
 	}
 }

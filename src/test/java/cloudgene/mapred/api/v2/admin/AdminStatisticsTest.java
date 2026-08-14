@@ -43,7 +43,7 @@ public class AdminStatisticsTest {
 		// Admin user allowed.
 		Header adminToken = client.login("admin", "admin1978");
 
-		// Add a warning
+		// Get server statistics.
 		List<Map<String, Object>> payload = RestAssured
 				.given()
 				.header(adminToken)
