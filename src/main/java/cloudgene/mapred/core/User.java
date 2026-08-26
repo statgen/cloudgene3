@@ -1,9 +1,10 @@
 package cloudgene.mapred.core;
 
 import cloudgene.mapred.util.HashUtil;
-import jakarta.annotation.Nullable;
+import io.micronaut.core.annotation.Nullable;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -102,7 +103,7 @@ public class User {
 		return false;
 	}
 
-	public boolean hasRole(String[] roles) {
+	public boolean hasRole(@Nullable Collection<String> roles) {
 		if (this.roles == null || roles == null) {
 			return false;
 		}

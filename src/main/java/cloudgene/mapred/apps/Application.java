@@ -1,6 +1,8 @@
 package cloudgene.mapred.apps;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import cloudgene.mapred.wdl.WdlApp;
 import cloudgene.mapred.wdl.WdlReader;
@@ -8,8 +10,7 @@ import cloudgene.mapred.wdl.WdlReader;
 public class Application implements Comparable<Application> {
 
 	private String filename;
-	private String permission;
-
+	private String permission; // TODO(Marc): This should be stored internally as a list of strings.
 	private boolean syntaxError = false;
 	private WdlApp wdlApp = null;
 	private String errorMessage = "";
@@ -35,8 +36,10 @@ public class Application implements Comparable<Application> {
 		return permission;
 	}
 
-	public String[] getPermissions() {
-		return permission.split(",");
+	public List<String> getPermissions() {
+		return Arrays.stream(permission.split(","))
+				.filter(s -> !s.isEmpty())
+				.toList();
 	}
 
 	public void setPermission(String permission) {
