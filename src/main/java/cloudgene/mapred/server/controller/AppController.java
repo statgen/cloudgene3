@@ -91,11 +91,8 @@ public class AppController {
 	@Secured(User.ROLE_ADMIN)
 	public ApplicationResponse getAppSettings(String appId) {
 		Application app = applicationService.getById(appId);
-		ApplicationRepository repository = applicationService.getRepository();
-
 		log.info("Application settings loaded successfully for '{}'", appId);
-		return ApplicationResponse.buildWithDetails(app, this.application.getSettings(), repository);
-
+		return ApplicationResponse.buildWithDetails(app, this.application.getSettings());
 	}
 
 	@Put("/api/v2/server/apps/{appId}/settings")
@@ -109,8 +106,7 @@ public class AppController {
 		log.info("Updated settings for application '{}'. Config keys: {}",
 				appId, config != null ? config.keySet() : null);
 
-		ApplicationRepository repository = applicationService.getRepository();
-		return ApplicationResponse.buildWithDetails(app, this.application.getSettings(), repository);
+		return ApplicationResponse.buildWithDetails(app, this.application.getSettings());
 
 	}
 
@@ -131,9 +127,8 @@ public class AppController {
 		}
 
 		List<Application> apps = applicationService.listApps(reload);
-		ApplicationRepository repository = applicationService.getRepository();
 
 		log.info("Returning {} applications. IDs: {}", apps.size(), apps.stream().map(Application::getId).toList());
-		return ApplicationResponse.buildWithDetails(apps, application.getSettings(), repository);
+		return ApplicationResponse.build(apps);
 	}
 }

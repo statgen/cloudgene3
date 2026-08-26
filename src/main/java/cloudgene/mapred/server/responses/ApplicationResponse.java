@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.*;
 
 import cloudgene.mapred.apps.Application;
-import cloudgene.mapred.apps.ApplicationRepository;
 import cloudgene.mapred.jobs.Environment;
 import cloudgene.mapred.plugins.IPlugin;
 import cloudgene.mapred.plugins.PluginManager;
@@ -17,6 +16,8 @@ import org.slf4j.LoggerFactory;
 
 @JsonClassDescription
 public class ApplicationResponse {
+
+	private static final Logger log = LoggerFactory.getLogger(ApplicationResponse.class);
 
 	private String id = "";
 	private boolean enabled = false;
@@ -32,8 +33,6 @@ public class ApplicationResponse {
 	private boolean workflow = true;
 	private List<Environment.Variable> environment;
 	private Map<String, String> config;
-
-	private static final Logger log = LoggerFactory.getLogger(ApplicationResponse.class);
 
 	public static ApplicationResponse build(Application app) {
 		ApplicationResponse appResponse = new ApplicationResponse();
@@ -56,10 +55,20 @@ public class ApplicationResponse {
 		return appResponse;
 	}
 
-	public static ApplicationResponse buildWithDetails(
-			Application app,
-			Settings settings,
-			ApplicationRepository repository) {
+	public static List<ApplicationResponse> build(List<Application> applications) {
+		List<ApplicationResponse> response = new ArrayList<>();
+
+		for (Application app : applications) {
+			response.add(ApplicationResponse.build(app));
+		}
+
+		return response;
+	}
+
+	/**
+	 * Extended version of {@link #build(Application)}. Uses {@code settings} to populate the response {@link #environment} (env vars) and {@link #config} (plugin settings).
+	 */
+	public static ApplicationResponse buildWithDetails(Application app, Settings settings) {
 
 		ApplicationResponse appResponse = build(app);
 
@@ -83,20 +92,6 @@ public class ApplicationResponse {
 		appResponse.setConfig(config);
 
 		return appResponse;
-	}
-
-	public static List<ApplicationResponse> buildWithDetails(
-			List<Application> applications,
-			Settings settings,
-			ApplicationRepository repository) {
-
-		List<ApplicationResponse> response = new ArrayList<>();
-
-		for (Application app : applications) {
-			response.add(ApplicationResponse.build(app));
-		}
-
-		return response;
 	}
 
 	public String getId() {
