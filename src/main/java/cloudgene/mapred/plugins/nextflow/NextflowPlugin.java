@@ -75,7 +75,7 @@ public class NextflowPlugin implements IPlugin {
 		FileUtil.writeStringBufferToFile(nextflowConfig, contentNextflowConfig);
 
 		String nextflowProperties = FileUtil.path(appFolder, NEXTFLOW_YAML);
-		Map<String, String> properties = new HashMap<String, String>();
+		Map<String, String> properties = new HashMap<>();
 		properties.put("profile", config.get("nextflow.profile"));
 		properties.put("work", config.get("nextflow.work"));
 
@@ -94,7 +94,7 @@ public class NextflowPlugin implements IPlugin {
 
 		String appFolder = settings.getApplicationRepository().getConfigDirectory(app);
 
-		Map<String, String> config = new HashMap<String, String>();
+		Map<String, String> config = new HashMap<>();
 
 		String nextflowConfig = FileUtil.path(appFolder, NEXTFLOW_CONFIG);
 		if (new File(nextflowConfig).exists()) {
@@ -126,7 +126,6 @@ public class NextflowPlugin implements IPlugin {
 		}
 
 		return config;
-
 	}
 
 	public String getNextflowConfig() {

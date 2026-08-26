@@ -19,9 +19,6 @@ public class GroupController {
 	@Get("/")
 	@Secured(User.ROLE_ADMIN)
 	public List<Group> list() {
-
 		return groupService.getAll();
-
 	}
-
 }
