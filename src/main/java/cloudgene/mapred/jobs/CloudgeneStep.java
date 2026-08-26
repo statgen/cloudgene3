@@ -60,18 +60,18 @@ public abstract class CloudgeneStep {
 		return null;
 	}
 
-	protected boolean executeCommand(List<String> command, CloudgeneContext context)
+	protected int executeCommand(List<String> command, CloudgeneContext context)
 			throws IOException, InterruptedException {
 		return executeCommand(command, context, null);
 	}
 
-	protected boolean executeCommand(List<String> command, CloudgeneContext context, StringBuilder output)
+	protected int executeCommand(List<String> command, CloudgeneContext context, StringBuilder output)
 			throws IOException, InterruptedException {
 		File workDir = new File(context.getWorkingDirectory());
 		return executeCommand(command, context, output, workDir);
 	}
 
-	protected boolean executeCommand(List<String> command, CloudgeneContext context, StringBuilder output, File workDir)
+	protected int executeCommand(List<String> command, CloudgeneContext context, StringBuilder output, File workDir)
 			throws IOException, InterruptedException {
 
 		Environment environment = context.getSettings().buildEnvironment().addContext(context)
@@ -90,31 +90,25 @@ public abstract class CloudgeneStep {
 		builder.environment().putAll(environment.toMap());
 		builder.directory(workDir);
 		builder.redirectErrorStream(true);
-		builder.redirectOutput();
+
 		process = builder.start();
-		InputStream is = process.getInputStream();
-		InputStreamReader isr = new InputStreamReader(is, "ISO-8859-1");
-		BufferedReader br = new BufferedReader(isr);
-		String line;
-		while ((line = br.readLine()) != null) {
-			context.println(line);
-			if (output != null) {
-				output.append(line).append("\n");
+
+		try (InputStream is = process.getInputStream();
+				InputStreamReader isr = new InputStreamReader(is);
+				BufferedReader br = new BufferedReader(isr)) {
+			String line;
+			while ((line = br.readLine()) != null) {
+				context.println(line);
+				if (output != null) {
+					output.append(line).append("\n");
+				}
 			}
 		}
-		br.close();
-		isr.close();
-		is.close();
 
 		process.waitFor();
 		context.log("Exit Code: " + process.exitValue());
 
-		if (process.exitValue() != 0) {
-			return false;
-		} else {
-			process.destroy();
-		}
-		return true;
+		return process.exitValue();
 	}
 
 	public void kill() {

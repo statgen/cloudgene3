@@ -363,6 +363,8 @@ public class CloudgeneContext extends WorkflowContext {
 	}
 
 	public void endTask(Step step, String message, int type) {
+		// TODO(Marc): Why are we overwriting the last message???
+		//             Do we even know one exists???
 		Message status = step.getLogMessages().getLast();
 		status.setType(type);
 		status.setMessage(message);

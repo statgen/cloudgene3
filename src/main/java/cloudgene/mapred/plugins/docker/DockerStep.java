@@ -88,8 +88,8 @@ public class DockerStep extends CloudgeneStep {
 
 			try {
 				context.beginTask("Running Command...");
-				boolean successful = executeCommand(command, context, output);
-				if (successful) {
+				int ret = executeCommand(command, context, output);
+				if (ret == 0) {
 					if (streamStdout) {
 						context.endTask(output.toString(), Message.OK);
 					} else {
@@ -107,7 +107,7 @@ public class DockerStep extends CloudgeneStep {
 					return false;
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				e.printStackTrace(); // TODO: Behave better!
 				return false;
 			}
 

@@ -90,8 +90,10 @@ public class CommandTest {
 
 		List<Message> messages = job.getSteps().get(0).getLogMessages();
 		assertEquals(1, messages.size());
-		assertEquals(WorkflowContext.ERROR, messages.get(0).getType());
-		assertTrue(messages.get(0).getMessage().contains("Command '/bin/lukas/forer' was not found."));
+
+		Message msg = messages.get(0);
+		assertEquals(WorkflowContext.ERROR, msg.getType());
+		assertEquals("Execution failed: could not run the program.", msg.getMessage());
 	}
 
 	// TODO: check file staging

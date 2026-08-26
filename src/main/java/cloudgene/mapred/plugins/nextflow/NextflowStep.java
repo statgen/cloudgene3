@@ -154,11 +154,12 @@ public class NextflowStep extends CloudgeneStep {
 
 		try {
 			File executionDir = new File(context.getLocalOutput());
-
 			StringBuilder output = new StringBuilder();
-			boolean successful = executeCommand(nextflow.buildCommand(), context, output, executionDir);
 
-			if (!successful) {
+			int ret = executeCommand(nextflow.buildCommand(), context, output, executionDir);
+			boolean success = (ret == 0);
+
+			if (!success) {
 				// set all running processes to failed
 				List<NextflowProcess> processes = collector.getProcesses(context);
 				for (NextflowProcess process : processes) {
@@ -184,14 +185,12 @@ public class NextflowStep extends CloudgeneStep {
 			}
 
 			updateProgress();
-
 			collector.cleanProcesses(context);
-
 			parseOutput(output);
 
 			File outputFile = new File(executionDir, "cloudgene.out");
 			if (!outputFile.exists()) {
-				return successful;
+				return success;
 			}
 
 			context.log("Load output file from '" + outputFile.getCanonicalPath() + "'");
@@ -201,8 +200,7 @@ public class NextflowStep extends CloudgeneStep {
 				log.error("[Job {}] Invalid output file.", context.getJobId(), e);
 			}
 
-			return successful;
-
+			return success;
 		} catch (Exception e) {
 			log.error("[Job {}] Running nextflow script failed.", context.getJobId(), e);
 			return false;

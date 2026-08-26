@@ -57,8 +57,8 @@ public class BashCommandStep extends CloudgeneStep {
 
 		try {
 			context.beginTask("Running Command...");
-			boolean successful = executeCommand(executedCommand, context, output);
-			if (successful) {
+			int ret = executeCommand(executedCommand, context, output);
+			if (ret == 0) {
 				if (streamStdout) {
 					context.endTask(output.toString(), Message.OK);
 				} else {
@@ -69,13 +69,12 @@ public class BashCommandStep extends CloudgeneStep {
 				if (streamStdout) {
 					context.endTask(output.toString(), Message.ERROR);
 				} else {
-					context.endTask(
-							"Execution failed. Please contact the server administrators for help if you believe this job should have completed successfully.",
-							Message.ERROR);
+					context.endTask("Execution failed: the program returned error code " + ret, Message.ERROR);
 				}
 				return false;
 			}
 		} catch (Exception e) {
+			context.endTask("Execution failed: could not run the program.", Message.ERROR);
 			context.log("Execution failed.", e);
 			return false;
 		}

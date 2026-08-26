@@ -75,8 +75,8 @@ public class JavaExternalStep extends CloudgeneStep {
 		}
 		try {
 			context.beginTask("Running Java Application...");
-			boolean successful = executeCommand(command, context, output);
-			if (successful) {
+			int ret = executeCommand(command, context, output);
+			if (ret == 0) {
 				if (streamStdout) {
 					context.endTask(output.toString(), Message.OK);
 				} else {
