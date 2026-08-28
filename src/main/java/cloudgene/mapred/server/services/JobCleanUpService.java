@@ -75,6 +75,9 @@ public class JobCleanUpService {
 		/** Set retirement date and sent notification for this SUCCESSFUL job. */
 		SUCCESSFUL_JOB_NOTIFIED,
 
+		/** Set retirement but did not notify this SUCCESSFUL job. */
+		SUCCESSFUL_JOB_SKIPPED,
+
 		/** Failed to send a notification for this SUCCESSFUL job. */
 		SUCCESSFUL_JOB_ERROR,
 
@@ -89,6 +92,8 @@ public class JobCleanUpService {
 		return switch (result) {
 			case SUCCESSFUL_JOB_NOTIFIED ->
 				"Set deletion date and sent notification for successful job: " + job.getId();
+			case SUCCESSFUL_JOB_SKIPPED -> "Set deletion date for successful job: " + job.getId()
+					+ ". No notification sent.";
 			case SUCCESSFUL_JOB_ERROR ->
 				"Failed to send notification for successful job: " + job.getId();
 			case FAILED_JOB_SKIPPED ->
@@ -112,10 +117,13 @@ public class JobCleanUpService {
 		switch (job.getState()) {
 			case SUCCESS -> {
 				try {
-					String mail = job.getUser().getMail();
-					boolean mailProvided = (mail != null && !mail.isBlank());
+					String userMail = job.getUser().getMail();
 
-					if (mailProvided) {
+					boolean userHasMail = (userMail != null && !userMail.isBlank());
+					boolean settingsHasMail = settings.getMail() != null;
+					NotifyResult out = NotifyResult.SUCCESSFUL_JOB_SKIPPED;
+
+					if (settingsHasMail && userHasMail) {
 						String subject = "[" + settings.getName() + "] Job " + job.getId()
 								+ " will be retired in " + days + " days";
 
@@ -125,14 +133,15 @@ public class JobCleanUpService {
 								days,
 								job.getId());
 
-						MailUtil.send(settings, mail, subject, body);
+						MailUtil.send(settings, userMail, subject, body);
+						out = NotifyResult.SUCCESSFUL_JOB_NOTIFIED;
 					}
 
 					job.setState(JobState.SUCCESS_AND_NOTIFICATION_SENT);
 					job.setDeletedOn(deletedOn);
 					dao.update(job);
 
-					return NotifyResult.SUCCESSFUL_JOB_NOTIFIED;
+					return out;
 				} catch (MessagingException e) {
 					return NotifyResult.SUCCESSFUL_JOB_ERROR;
 				}

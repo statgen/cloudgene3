@@ -32,6 +32,9 @@ public final class MailUtil {
 	public static void send(Settings settings, String recipients, String subject, String text)
 			throws MessagingException {
 		Map<String, String> mail = settings.getMail();
+		if (mail == null || mail.isEmpty()) {
+			throw new MessagingException("Mail configuration missing from server settings.");
+		}
 
 		send(
 				mail.get("smtp"),
