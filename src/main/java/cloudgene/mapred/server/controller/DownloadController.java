@@ -121,8 +121,7 @@ public class DownloadController {
 		DownloadDao dao = new DownloadDao(application.getDatabase());
 		List<Download> downloads = dao.findAllByParameter(param);
 
-		String hostname = application.getSettings().getServerUrl();
-		hostname += application.getSettings().getBaseUrl();
+		String baseUrl = application.getSettings().getFullUrl();
 
 		StringBuffer script = new StringBuffer();
 		script.append("#!/bin/bash\n");
@@ -131,11 +130,11 @@ public class DownloadController {
 		script.append("NC='\033[0m'\n");
 		int i = 1;
 		for (Download download : downloads) {
+			String url = baseUrl + "/share/results/" + download.getHash() + "/" + download.getName();
 			script.append("echo \"\"\n");
 			script.append(
 					"echo \"Downloading file " + download.getName() + " (" + i + "/" + downloads.size() + ")...\"\n");
-			script.append("curl -L " + hostname + "/share/results/" + download.getHash() + "/" + download.getName()
-					+ " -o " + download.getName() + " --create-dirs \n");
+			script.append("curl -L " + url + " -o " + download.getName() + " --create-dirs \n");
 			i++;
 		}
 		script.append("echo \"\"\n");

@@ -1,6 +1,8 @@
 package cloudgene.mapred.util.config;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -8,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +30,9 @@ public class Settings {
 
 	public static final String DEFAULT_SECURITY_KEY = "default-key-change-me-immediately";
 
-	private String serverUrl = "http://localhost:8082";
+	/** Authority (domain + optional port) for this website's URL. */
+	private String serverUrl = "localhost:8082";
+	/** Path (slash-separated sequence of path components) for this website's URL. */
 	private String baseUrl = "";
 	private String tempPath = "tmp";
 	private String localWorkspace = "workspace";
@@ -94,10 +100,6 @@ public class Settings {
 		log.info("Retire jobs after {} days.", settings.retireAfter);
 		log.info("Notify user after {} days.", settings.notificationAfter);
 		log.info("Write statistics: {}", settings.writeStatistics);
-
-		if (settings.getServerUrl() == null || settings.getServerUrl().trim().isEmpty()) {
-			throw new IOException("Error: serverUrl not set. Please set serverUrl in file '" + filename + "'");
-		}
 
 		return settings;
 	}
@@ -405,20 +407,101 @@ public class Settings {
 		this.counters = counters;
 	}
 
+	/**
+	 * Sets the authority (domain + optional port) of this website's URL.
+	 * <p>
+	 * {@code serverUrl} must be non-blank, and parseable as a URL authority.
+	 * Otherwise, {@link IllegalArgumentException} is thrown.
+	 */
 	public void setServerUrl(String serverUrl) {
-		this.serverUrl = serverUrl;
+		if (serverUrl == null || serverUrl.isBlank()) {
+			throw new IllegalArgumentException("server URL must be a non-blank string.");
+		}
+		serverUrl = serverUrl.strip();
+
+		try {
+			URI uri = new URI("//" + serverUrl).parseServerAuthority();
+
+			if (uri.getHost() == null
+					|| uri.getUserInfo() != null
+					|| !uri.getRawPath().isEmpty()
+					|| uri.getRawQuery() != null
+					|| uri.getRawFragment() != null
+					|| uri.getHost().endsWith(".")
+					|| serverUrl.endsWith(":")
+					|| uri.getPort() > 65_535) {
+				throw new IllegalArgumentException("Invalid server URL: " + serverUrl);
+			}
+
+			this.serverUrl = serverUrl;
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Invalid server URL: " + serverUrl, e);
+		}
 	}
 
+	/** Returns the authority (domain + optional port) of this website's URL */
 	public String getServerUrl() {
 		return serverUrl;
 	}
 
-	public String getBaseUrl() {
+	/** Returns the path segment of this website's URL. */
+	public @NonNull String getBaseUrl() {
 		return baseUrl;
 	}
 
-	public void setBaseUrl(String baseUrl) {
-		this.baseUrl = baseUrl;
+	/**
+	 * Sets the path segment of this website's URL.
+	 * <p>
+	 * {@code baseUrl} must either be null/blank (normalized to empty string) or a
+	 * path using forward-slash as separator ({@code /}).
+	 * <p>
+	 * After normalization, valid non-empty strings will be stored with a leading
+	 * slash and no trailing slashes (so you can make paths by appending a string
+	 * that starts with a slash, e.g. {@code "/foo/bar"}).
+	 */
+	public void setBaseUrl(@Nullable String baseUrl) {
+		if (baseUrl == null || baseUrl.isBlank()) {
+			this.baseUrl = "";
+			return;
+		}
+		baseUrl = baseUrl.strip();
+
+		while (baseUrl.endsWith("/")) {
+			baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+		}
+
+		// Corner case: the string was a sequence of slashes.
+		if (baseUrl.isEmpty()) {
+			this.baseUrl = "";
+			return;
+		}
+
+		try {
+			URI uri = new URI(baseUrl);
+
+			if (uri.getScheme() != null
+					|| uri.getRawAuthority() != null
+					|| uri.getRawQuery() != null
+					|| uri.getRawFragment() != null) {
+				throw new IllegalArgumentException("Invalid base URL: " + baseUrl);
+			}
+
+			if (!baseUrl.startsWith("/")) {
+				baseUrl = "/" + baseUrl;
+			}
+
+			this.baseUrl = baseUrl;
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Invalid base URL: " + baseUrl, e);
+		}
+	}
+
+	/**
+	 * Returns the full URL pointing to this website:
+	 * {@code https://<serverUrl>/<baseUrl>}
+	 */
+	public String getFullUrl() {
+		return "https://" + getServerUrl() + getBaseUrl();
 	}
 
 	public Environment buildEnvironment() {

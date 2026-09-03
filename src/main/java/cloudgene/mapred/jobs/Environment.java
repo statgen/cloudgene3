@@ -18,7 +18,7 @@ public class Environment {
 
 	public Environment(Settings settings) {
 		add("SERVICE_NAME", settings.getName());
-		add("SERVICE_URL", settings.getServerUrl() + settings.getBaseUrl());
+		add("SERVICE_URL", settings.getFullUrl());
 		add("CONTACT_EMAIL", settings.getAdminMail());
 		add("CONTACT_NAME", settings.getAdminName());
 
