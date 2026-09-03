@@ -25,6 +25,31 @@ public class UserDao extends JdbcDataAccessObject {
 		super(database);
 	}
 
+	/**
+	 * Returns the SQL clause needed to sort by the given {@code column},
+	 * {@code ascending} or descending. Verifies that the column name is valid.
+	 */
+	private @NonNull String orderBy(@NonNull String column, boolean ascending) {
+		String sanitized = switch (column) {
+			case "id" -> "id";
+			case "username" -> "username";
+			case "full_name" -> "full_name";
+			case "mail" -> "mail";
+			case "api_token" -> "api_token";
+			case "last_login" -> "last_login";
+			default -> throw new IllegalArgumentException("Unrecognized user table column: " + column);
+		};
+
+		String direction = ascending ? "ASC" : "DESC";
+
+		String clause = " ORDER BY " + sanitized + " " + direction;
+		if (!sanitized.equals("username")) {
+			clause += ", username ASC";
+		}
+		clause += " ";
+		return clause;
+	}
+
 	public boolean insert(User user) {
 		String sql = "INSERT INTO `user` "
 				+ "(username, password, full_name, aws_key, aws_secret_key, save_keys, export_to_s3, s3_bucket, mail, "
@@ -153,8 +178,14 @@ public class UserDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public List<User> findAll() {
-		String sql = "SELECT * FROM `user` ORDER BY username";
+	/** Returns all users, sorted by username (ascending). */
+	public @NonNull List<User> findAll() {
+		return findAll("username", true);
+	}
+
+	/** Returns all users, with custom sorting. */
+	public @NonNull List<User> findAll(@NonNull String sortColumn, boolean sortAscending) {
+		String sql = "SELECT * FROM `user`" + orderBy(sortColumn, sortAscending);
 
 		try {
 			List<User> result = query(sql, new UserMapper());
@@ -180,10 +211,23 @@ public class UserDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public List<User> findByQuery(String query) {
+	/**
+	 * Returns all users whose {@code mail}, {@code username} or {@code full_name}
+	 * match the provided {@code query}. Sorts by username (ascending).
+	 */
+	public @NonNull List<User> findByQuery(@NonNull String query) {
+		return findByQuery(query, "username", true);
+	}
+
+	/**
+	 * Returns all users whose {@code mail}, {@code username} or {@code full_name}
+	 * match the provided {@code query}. Uses custom sorting based on
+	 * {@code sortColumn} and {@code sortAscending}.
+	 */
+	public @NonNull List<User> findByQuery(@NonNull String query, @NonNull String sortColumn, boolean sortAscending) {
 		String sql = "SELECT * FROM `user` "
 				+ "WHERE mail LIKE ? OR username LIKE ? OR full_name LIKE ? "
-				+ "ORDER BY username";
+				+ orderBy(sortColumn, sortAscending);
 
 		try {
 			Object[] params = new Object[3];
@@ -200,8 +244,24 @@ public class UserDao extends JdbcDataAccessObject {
 		}
 	}
 
-	public List<User> findAll(int offset, int limit) {
-		String sql = "SELECT * FROM `user` ORDER BY username LIMIT ?,?";
+	/**
+	 * Returns the subset of all users determined by {@code offset} (how many rows
+	 * to skip) and {@code limit} (how many rows to return). Sorts by username
+	 * (ascending) before taking the offset.
+	 */
+	public @NonNull List<User> findAll(int offset, int limit) {
+		return findAll("username", true, offset, limit);
+	}
+
+	/**
+	 * Returns the subset of all users determined by {@code offset} (how many rows
+	 * to skip) and {@code limit} (how many rows to return). Sorts based on
+	 * {@code sortColumn} and {@code sortAscending} before taking the offset.
+	 */
+	public @NonNull List<User> findAll(@NonNull String sortColumn, boolean sortAscending, int offset, int limit) {
+		String sql = "SELECT * FROM `user` "
+				+ orderBy(sortColumn, sortAscending)
+				+ " LIMIT ?,?";
 
 		try {
 			Object[] params = new Object[2];

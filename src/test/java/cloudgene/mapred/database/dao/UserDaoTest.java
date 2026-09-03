@@ -7,6 +7,7 @@ import cloudgene.mapred.util.HashUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,7 +38,7 @@ public class UserDaoTest {
 		// - 'public' can additionally be injected by PublicUser (called on
 		//   UserDao.delete()).
 
-		// findAll() with no parameters returns all users.
+		// findAll() with no parameters returns all users, sorted by username ascending.
 		List<User> defaultUsers = dao.findAll();
 		assertNotNull(defaultUsers);
 		assertEquals(5, defaultUsers.size());
@@ -45,7 +46,28 @@ public class UserDaoTest {
 				List.of("admin", "foobar", "public", "snorlax", "user"),
 				extractUsernames(defaultUsers));
 
-		// findAll(offset, limit) returns 'limit' entries, starting at 'offset'.
+		// findAll(sortColumn, sortAscending) returns all users, sorted by sortColumn and sortAscending.
+		List<User> allFullNameAsc = dao.findAll("full_name", true);
+		assertNotNull(allFullNameAsc);
+		assertEquals(5, allFullNameAsc.size());
+		assertEquals(
+				//        public, admin, foobar,    snorlax,   user
+				Arrays.asList(null, "", "Foo Bar", "Snorlax", "User User"),
+				extractFullNames(allFullNameAsc));
+
+		// Same but descending.
+		List<User> allFullNameDesc = dao.findAll("full_name", false);
+		assertNotNull(allFullNameDesc);
+		assertEquals(5, allFullNameDesc.size());
+		assertEquals(
+				//             user,        snorlax,   foobar, admin, public
+				Arrays.asList("User User", "Snorlax", "Foo Bar", "", null),
+				extractFullNames(allFullNameDesc));
+
+		// Accepted columns: id, username, full_name, mail, api_token, last_login
+		assertThrows(IllegalArgumentException.class, () -> dao.findAll("fake_column", true));
+
+		// findAll(offset, limit) returns 'limit' entries, starting at 'offset', sorted by username ascending.
 		List<User> top2 = dao.findAll(0, 2);
 		assertNotNull(top2);
 		assertEquals(
@@ -67,6 +89,15 @@ public class UserDaoTest {
 		List<User> wrongLimit = dao.findAll(0, -1);
 		assertNotNull(wrongLimit);
 		assertTrue(wrongLimit.isEmpty());
+
+		// Sort by full name descending, offset by 1, keep 3.
+		List<User> offsetFullNameDesc = dao.findAll("full_name", false, 1, 3);
+		assertNotNull(offsetFullNameDesc);
+		assertEquals(3, offsetFullNameDesc.size());
+		assertEquals(
+				//             snorlax,   foobar,   admin
+				Arrays.asList("Snorlax", "Foo Bar", ""),
+				extractFullNames(offsetFullNameDesc));
 	}
 
 	@Test
@@ -137,7 +168,13 @@ public class UserDaoTest {
 		assertTrue(found.hasRole(User.ROLE_USER));
 	}
 
+	// TODO: test findByQuery()
+
 	private List<String> extractUsernames(List<User> users) {
 		return users.stream().map(User::getUsername).toList();
+	}
+
+	private List<String> extractFullNames(List<User> users) {
+		return users.stream().map(User::getFullName).toList();
 	}
 }

@@ -50,9 +50,13 @@ public class UserController {
 
 	@Get("/api/v2/admin/users")
 	@Secured(User.ROLE_ADMIN)
-	public PageResponse get(@Nullable @QueryValue("page") Integer page, @Nullable @QueryValue("query") String query) {
+	public PageResponse get(
+			@Nullable @QueryValue("page") Integer page,
+			@Nullable @QueryValue("query") String query,
+			@Nullable @QueryValue("sortCol") String sortColumn,
+			@Nullable @QueryValue("sortAsc") Boolean sortAscending) {
 
-		Page<User> users = userService.getAll(query, page, DEFAULT_PAGE_SIZE);
+		Page<User> users = userService.getAll(query, page, DEFAULT_PAGE_SIZE, sortColumn, sortAscending);
 		List<UserResponse> userResponses = UserResponse.build(users.getData());
 		return PageResponse.build(users, userResponses);
 

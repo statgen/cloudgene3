@@ -68,7 +68,12 @@ public class UserService {
 		this.application = application;
 	}
 
-	public Page<User> getAll(String query, Integer page, int pageSize) {
+	public Page<User> getAll(
+			String query,
+			Integer page,
+			int pageSize,
+			@Nullable String sortColumn,
+			@Nullable Boolean sortAscending) {
 		int offset = 0;
 
 		if (page != null) {
@@ -79,22 +84,30 @@ public class UserService {
 			offset = (offset - 1) * pageSize;
 		}
 
+		if (sortColumn == null || sortColumn.isBlank()) {
+			sortColumn = "username";
+		}
+
+		if (sortAscending == null) {
+			sortAscending = true;
+		}
+
 		UserDao dao = new UserDao(application.getDatabase());
 
 		List<User> users;
 		int count;
 
 		if (query != null && !query.isEmpty()) {
-			users = dao.findByQuery(query);
+			users = dao.findByQuery(query, sortColumn, sortAscending);
 			page = 1;
 			count = users.size();
 			pageSize = count;
 		} else {
 			if (page != null) {
-				users = dao.findAll(offset, pageSize);
-				count = dao.findAll().size();
+				users = dao.findAll(sortColumn, sortAscending, offset, pageSize);
+				count = dao.countAll();
 			} else {
-				users = dao.findAll();
+				users = dao.findAll(sortColumn, sortAscending);
 				page = 1;
 				count = users.size();
 				pageSize = count;
