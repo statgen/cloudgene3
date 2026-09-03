@@ -337,10 +337,8 @@ public class UserService {
 		String key = user.createActivationCode();
 		dao.update(user);
 
-		String hostname = application.getSettings().getServerUrl();
-		hostname += application.getSettings().getBaseUrl();
-
-		String link = hostname + "/#!recovery/" + user.getUsername() + "/" + key;
+		String baseUrl = application.getSettings().getFullUrl();
+		String link = baseUrl + "/#!recovery/" + user.getUsername() + "/" + key;
 
 		// send email with activation code
 		String app = application.getSettings().getName();
@@ -420,8 +418,7 @@ public class UserService {
 		newUser.setPassword(HashUtil.hashPassword(newPassword));
 
 		try {
-			String hostname = application.getSettings().getServerUrl();
-			hostname += application.getSettings().getBaseUrl();
+			String baseUrl = application.getSettings().getFullUrl();
 
 			// if email server configured, send mails with activation link. Else
 			// activate user immediately.
@@ -433,7 +430,7 @@ public class UserService {
 				// send email with activation code
 				String appName = application.getSettings().getName();
 				String subject = "[" + appName + "] Signup activation";
-				String activationLink = hostname + "/#!activate/" + username + "/" + activationKey;
+				String activationLink = baseUrl + "/#!activate/" + username + "/" + activationKey;
 				String body = application.getTemplate(Template.REGISTER_MAIL, fullName, appName, activationLink);
 
 				MailUtil.send(application.getSettings(), mail, subject, body);
