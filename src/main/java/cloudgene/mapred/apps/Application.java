@@ -6,11 +6,12 @@ import java.util.List;
 
 import cloudgene.mapred.wdl.WdlApp;
 import cloudgene.mapred.wdl.WdlReader;
+import io.micronaut.core.annotation.NonNull;
 
 public class Application implements Comparable<Application> {
 
 	private String filename;
-	private String permission; // TODO(Marc): This should be stored internally as a list of strings.
+	private @NonNull String permission; // TODO(Marc): This should be stored internally as a list of strings.
 	private boolean syntaxError = false;
 	private WdlApp wdlApp = null;
 	private String errorMessage = "";
@@ -19,7 +20,7 @@ public class Application implements Comparable<Application> {
 	public Application() {
 	}
 
-	public Application(String filename, String permission) {
+	public Application(String filename, @NonNull String permission) {
 		this.filename = filename;
 		this.permission = permission;
 	}
@@ -36,7 +37,7 @@ public class Application implements Comparable<Application> {
 		return permission;
 	}
 
-	public List<String> getPermissions() {
+	public @NonNull List<String> getPermissions() {
 		return Arrays.stream(permission.split(","))
 				.filter(s -> !s.isEmpty())
 				.toList();
@@ -95,6 +96,8 @@ public class Application implements Comparable<Application> {
 				if (wdlApp.getCategory() != null && !wdlApp.getCategory().isEmpty()) {
 					return wdlApp.getCategory();
 				} else {
+					// TODO(Marc): This seems unreachable, as WdlApp defaults to category="Application",
+					//             and the YAML reader normalizes empty value => missing property.
 					return "Package";
 				}
 			}
