@@ -32,25 +32,18 @@ import net.lingala.zip4j.ZipFile;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 public class ApplicationRepository {
-
-	private List<Application> apps;
-
-	private final Map<String, Application> indexApps = new HashMap<>();
-
-	public static final String CONFIG_PATH = Configuration.getConfigDirectory();
-
-	private String appsFolder = Configuration.getAppsDirectory();
-
 	private static final Logger log = LoggerFactory.getLogger(ApplicationRepository.class);
+	private static final String CONFIG_PATH = Configuration.getConfigDirectory();
 
 	public static int APPS = 1;
-
 	public static int APPS_AND_DATASETS = 2;
-
 	public static int DATASETS = 4;
 
+	private List<Application> apps = new ArrayList<>();
+	private final Map<String, Application> indexApps = new HashMap<>();
+	private String appsFolder = Configuration.getAppsDirectory();
+
 	public ApplicationRepository() {
-		apps = new ArrayList<>();
 		reload();
 	}
 
