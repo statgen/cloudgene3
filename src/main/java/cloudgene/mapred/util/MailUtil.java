@@ -47,14 +47,14 @@ public final class MailUtil {
 				text);
 	}
 
-	public static void send(final String smtp, final String port, final String username, final String password,
+	public static void send(final String host, final String port, final String username, final String password,
 			final String name, String recipients, String subject, String text) throws MessagingException {
 
 		Properties props = new Properties();
-		props.put("mail.smtp.host", smtp);
+		props.put("mail.smtp.host", host);
 		props.put("mail.smtp.port", port);
 
-		Session session = null;
+		Session session;
 
 		if (username != null && !username.isEmpty()) {
 			props.put("mail.smtp.auth", "true");
@@ -79,9 +79,7 @@ public final class MailUtil {
 			message.setText(text);
 
 			Transport.send(message);
-
 			log.debug("E-Mail sent to {}.", recipients);
-
 		} catch (MessagingException e) {
 			throw new MessagingException("Failed to send mail", e);
 		}

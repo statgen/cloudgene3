@@ -30,18 +30,15 @@ public class TemplateController {
 	@Get("/")
 	@Secured(User.ROLE_ADMIN)
 	public List<Template> list() {
-
 		TemplateDao dao = new TemplateDao(application.getDatabase());
 		List<Template> templates = dao.findAll();
 
 		return templates;
-
 	}
 
 	@Post("/{key}")
 	@Secured(User.ROLE_ADMIN)
 	public Template update(String key, String text) {
-
 		Template template = new Template(key, text);
 
 		TemplateDao dao = new TemplateDao(application.getDatabase());
@@ -50,15 +47,12 @@ public class TemplateController {
 		application.reloadTemplates();
 
 		return template;
-
 	}
 
 	@Get("/{key}")
 	@Secured(SecurityRule.IS_AUTHENTICATED)
 	public Template get(String key) {
-
 		TemplateDao dao = new TemplateDao(application.getDatabase());
-
 		Template template = dao.findByKey(key);
 
 		if (template == null) {
@@ -66,7 +60,5 @@ public class TemplateController {
 		}
 
 		return template;
-
 	}
-
 }
