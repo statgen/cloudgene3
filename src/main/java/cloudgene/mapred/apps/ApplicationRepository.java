@@ -138,7 +138,7 @@ public class ApplicationRepository {
 				listApps.add(application);
 			} else if (filter == APPS && wdlApp.getWorkflow() != null) {
 				listApps.add(application);
-			} else if (filter == DATASETS && wdlApp.getWorkflow() != null) {
+			} else if (filter == DATASETS && wdlApp.getWorkflow() == null) {
 				listApps.add(application);
 			}
 		}
