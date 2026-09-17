@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import cloudgene.mapred.plugins.IPlugin;
 import cloudgene.mapred.plugins.PluginManager;
@@ -35,17 +38,27 @@ public class ApplicationRepository {
 	private static final Logger log = LoggerFactory.getLogger(ApplicationRepository.class);
 	private static final String CONFIG_PATH = Configuration.getConfigDirectory();
 
+	/** {@link #getAllByUser} flag to retrieve only executable apps */
 	public static int APPS = 1;
+
+	/** {@link #getAllByUser} flag to retrieve all apps, regardless of type. */
 	public static int APPS_AND_DATASETS = 2;
+
+	/**
+	 * {@link #getAllByUser} flag to retrieve only dataset apps (non-executable).
+	 */
 	public static int DATASETS = 4;
 
+	/**
+	 * Sorted list containing all installed apps. Order enforced in {@link #reload}.
+	 */
 	private List<Application> apps = new ArrayList<>();
-	private final Map<String, Application> indexApps = new HashMap<>();
-	private String appsFolder = Configuration.getAppsDirectory();
 
-	public ApplicationRepository() {
-		reload();
-	}
+	/** Lookup mapping {@code "app-id@version" -> app}. */
+	private final Map<String, Application> indexApps = new HashMap<>();
+
+	/** Path to the root folder that apps will be installed in. */
+	private String appsFolder = Configuration.getAppsDirectory();
 
 	public void setAppsFolder(String appsFolder) {
 		this.appsFolder = appsFolder;
@@ -72,6 +85,7 @@ public class ApplicationRepository {
 			} catch (IOException e) {
 				log.error("Application {} has syntax errors.", app.getFilename(), e);
 			}
+
 			indexApps.put(app.getId(), app);
 		}
 
@@ -89,8 +103,18 @@ public class ApplicationRepository {
 		return null;
 	}
 
-	public Application getById(String id) {
+	/**
+	 * Matches an application {@code id} with all registered apps, and if anything
+	 * matches it returns the app.
+	 * <p>
+	 * {@code id} must match the form {@code <app-id>[@<version>]} (mandatory base
+	 * ID string; optional version string separated by at-sign).
+	 */
+	public Application getById(@NonNull String id) {
+		// NOTE(Marc): Versioned matches happen here: indexApps keys follow the full
+		// <id>@<version> pattern.
 		Application application = indexApps.get(id);
+
 		if (application != null) {
 			return application;
 		}
@@ -514,28 +538,17 @@ public class ApplicationRepository {
 		return application;
 	}
 
-	private String[] getDirectories(@NonNull String path) {
-		File dir = new File(path);
-		File[] files = dir.listFiles();
+	private List<String> getDirectories(@NonNull String dir) throws IOException {
+		Path path = Path.of(dir);
 
-		int count = 0;
-		for (File file : files) {
-			if (file.isDirectory()) {
-				count++;
-			}
+		try (Stream<Path> entries = Files.list(path)) {
+			return entries
+					.filter(Files::isDirectory)
+					.map(Path::toAbsolutePath)
+					.sorted()
+					.map(Path::toString)
+					.toList();
 		}
-
-		String[] names = new String[count];
-
-		count = 0;
-		for (File file : files) {
-			if (file.isDirectory()) {
-				names[count] = file.getAbsolutePath();
-				count++;
-			}
-		}
-
-		return names;
 	}
 
 	public String getConfigDirectory(String id) {
