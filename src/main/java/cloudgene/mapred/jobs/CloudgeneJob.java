@@ -21,8 +21,6 @@ import cloudgene.mapred.wdl.WdlStep;
 
 public class CloudgeneJob extends AbstractJob {
 
-	public static final int MAX_DOWNLOAD = 10;
-
 	private static final Logger log = LoggerFactory.getLogger(CloudgeneJob.class);
 	private static final String CLOUDGENE_LOGS_PARAM = "cloudgene_logs";
 
@@ -263,13 +261,16 @@ public class CloudgeneJob extends AbstractJob {
 			@NonNull List<String> includes,
 			@NonNull List<String> excludes) throws IOException {
 
+		Settings settings = getSettings();
+		int maxDownloads = settings.getMaxDownloads();
+
 		writeLog("  Exporting parameter " + out.getName() + "...");
 		out.setJobId(getId());
 
 		List<Download> downloads = workspace.getDownloads(out.getValue());
 		for (Download download : downloads) {
 			download.setParameter(out);
-			download.setCount(MAX_DOWNLOAD);
+			download.setCount(maxDownloads);
 
 			// check if it is on excludes or not in includes
 			if (!GlobUtil.isFileIncluded(download.getName(), includes, excludes)) {
