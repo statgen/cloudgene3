@@ -8,6 +8,7 @@ import java.util.Map;
 import cloudgene.mapred.database.dao.CounterDao;
 import cloudgene.mapred.database.dao.JobValueDao;
 import cloudgene.mapred.jobs.JobValue;
+import cloudgene.mapred.util.config.Settings;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
 import jakarta.inject.Singleton;
@@ -324,6 +325,8 @@ public class UserService {
 			return MessageResponse.error(MESSAGE_INVALID_USERNAME);
 		}
 
+		Settings settings = application.getSettings();
+
 		UserDao dao = new UserDao(application.getDatabase());
 		User user = dao.findByUsername(username);
 
@@ -350,18 +353,19 @@ public class UserService {
 		String key = user.createActivationCode();
 		dao.update(user);
 
-		String baseUrl = application.getSettings().getFullUrl();
-		String link = baseUrl + "/#!recovery/" + user.getUsername() + "/" + key;
+		String baseUrl = settings.getFullUrl();
+		boolean vue = settings.isVueFrontend();
+		String link = baseUrl + (vue ? "/" : "/#!") + "recovery/" + user.getUsername() + "/" + key;
 
 		// send email with activation code
-		String app = application.getSettings().getName();
+		String app = settings.getName();
 		String subject = "[" + app + "] Password Recovery";
 		String body = application.getTemplate(Template.RECOVERY_MAIL, user.getFullName(), app, link);
 
 		try {
 			if (user.getMail() != null && !user.getMail().isEmpty()) {
 				log.info("Password reset link requested for user '{}'", username);
-				MailUtil.send(application.getSettings(), user.getMail(), subject, body);
+				MailUtil.send(settings, user.getMail(), subject, body);
 				return MessageResponse.success(MESSAGE_EMAIL_SENT);
 			} else {
 				return MessageResponse.error(MESSAGE_EMAIL_NOT_AVAILABLE);
@@ -377,6 +381,8 @@ public class UserService {
 			String newPassword,
 			String confirmNewPassword,
 			String fullName) {
+
+		Settings settings = application.getSettings();
 
 		// ==== USERNAME ==== //
 
@@ -396,7 +402,7 @@ public class UserService {
 
 		boolean mailProvided = (mail != null && !mail.isEmpty());
 
-		if (application.getSettings().isEmailRequired() || mailProvided) {
+		if (settings.isEmailRequired() || mailProvided) {
 			// Check mail format
 			error = User.checkMail(mail);
 			if (error != null) {
@@ -431,22 +437,24 @@ public class UserService {
 		newUser.setPassword(HashUtil.hashPassword(newPassword));
 
 		try {
-			String baseUrl = application.getSettings().getFullUrl();
+			String baseUrl = settings.getFullUrl();
 
 			// if email server configured, send mails with activation link. Else
 			// activate user immediately.
 
-			if (application.getSettings().getMail() != null && mailProvided) {
+			if (settings.getMail() != null && mailProvided) {
 				String activationKey = newUser.createActivationCode();
 				newUser.setActive(false);
 
 				// send email with activation code
-				String appName = application.getSettings().getName();
+				String appName = settings.getName();
+				boolean vue = settings.isVueFrontend();
+
 				String subject = "[" + appName + "] Signup activation";
-				String activationLink = baseUrl + "/#!activate/" + username + "/" + activationKey;
+				String activationLink = baseUrl + ( vue ? "/" : "/#!") + "activate/" + username + "/" + activationKey;
 				String body = application.getTemplate(Template.REGISTER_MAIL, fullName, appName, activationLink);
 
-				MailUtil.send(application.getSettings(), mail, subject, body);
+				MailUtil.send(settings, mail, subject, body);
 			} else {
 				newUser.setActive(true);
 				newUser.clearActivationCode();

@@ -62,6 +62,7 @@ public class Settings {
 	private boolean workspaceCleanup = true;
 	private List<String> counters = new ArrayList<>();
 	private ApplicationRepository repository;
+	private boolean vueFrontend = false;
 
 	// fake!
 	private List<Application> apps = new ArrayList<>();
@@ -369,6 +370,14 @@ public class Settings {
 
 	public void setExternalWorkspace(Map<String, String> externalWorkspace) {
 		this.externalWorkspace = externalWorkspace;
+	}
+
+	public boolean isVueFrontend() {
+		return vueFrontend;
+	}
+
+	public void setVueFrontend(boolean vueFrontend) {
+		this.vueFrontend = vueFrontend;
 	}
 
 	public String getExternalWorkspaceLocation() {
