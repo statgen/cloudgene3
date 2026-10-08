@@ -19,9 +19,6 @@ micronaut:
       - pattern: /api/**
         access:
           - isAuthenticated()
-      - pattern: /static/**
-        access:
-          - isAnonymous()
       - pattern: /**
         access:
           - isAnonymous()

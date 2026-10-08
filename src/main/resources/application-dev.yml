@@ -3,22 +3,6 @@ micronaut:
     netty:
       access-logger:
         enabled: false
-  router:
-    static-resources:
-      webapp:
-        mapping: "${micronaut.server.context-path:}/**"
-        paths:
-          - file:src/main/html/webapp
-        enabled: true
-      pages:
-        enabled: true
-        mapping: "${micronaut.server.context-path:}/static/**"
-        paths:
-          - file:pages
-          - classpath:/pages
-  views:
-    folder: src/main/html/webapp
-
   autoRetireInterval: 10m
   serde:
     serialization:

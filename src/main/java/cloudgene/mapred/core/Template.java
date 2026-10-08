@@ -21,6 +21,7 @@ public class Template {
 			new Template(REGISTER_MAIL,
 			"""
 				Dear %s,
+
 				This email has been sent automatically by the "%s" system to confirm that your profile has now been registered.
 
 				To confirm your email address, please click on this activation link %s"""),
@@ -28,6 +29,7 @@ public class Template {
 			new Template(RETIRE_JOB_MAIL,
 			"""
 				Dear %s,
+
 				Your job retires in %s days! All imputation results will be deleted at that time.
 
 				Please ensure that you have downloaded all results from https://imputationserver.sph.umich.edu/start.html#!jobs/%s"""),
@@ -35,6 +37,7 @@ public class Template {
 			new Template(RECOVERY_MAIL,
 			"""
 				Dear %s,
+
 				This email has been sent automatically by the "%s" system.
 
 				To reset your password, please click on this link %s."""),
