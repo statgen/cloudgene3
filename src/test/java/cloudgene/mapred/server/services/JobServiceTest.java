@@ -115,12 +115,18 @@ public class JobServiceTest {
 
 		// If we pass a "job-name" parameter, it is used to set the job name.
 
-		List<FormUtil.Parameter> params = List.of(new FormUtil.Parameter("job-name", "Hello, world!"));
+		List<FormUtil.Parameter> params = List.of(new FormUtil.Parameter("job-name", "My Job"));
 		job = jobService.submitJob("return-true-step-public", params, admin, "agent");
 
 		assertNotNull(job);
-		assertEquals("Hello, world!", job.getName()); // Name is set...
+		assertEquals("My Job", job.getName()); // Name is set...
 		assertTrue(job.getId().startsWith("job-")); // But ID is still auto-generated.
+
+		// The name has to be "clean": [a-zA-Z0-9 ,.:_-]{0,64} (avoids string interpolation issues downstream).
+
+		List<FormUtil.Parameter> badParams = List.of(new FormUtil.Parameter("job-name", "A/B"));
+		assertThrows(Exception.class,
+				() -> jobService.submitJob("return-true-step-public", badParams, admin, "agent"));
 
 		// Passing an input that does not match the expected inputs throws an exception.
 		assertThrows(JsonHttpStatusException.class,

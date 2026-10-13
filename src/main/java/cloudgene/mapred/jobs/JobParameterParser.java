@@ -18,12 +18,14 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class JobParameterParser {
 
 	private static final Logger log = LoggerFactory.getLogger(JobParameterParser.class);
 
 	private static final String PARAM_JOB_NAME = "job-name";
+	private static final Pattern JOB_NAME_REGEX = Pattern.compile("^[a-zA-Z0-9 ,.:_-]{0,64}$");
 
 	@Inject
 	protected Application application;
@@ -139,7 +141,12 @@ public class JobParameterParser {
 			}
 		}
 
-		params.put(PARAM_JOB_NAME, props.get(PARAM_JOB_NAME));
+		String jobName = props.get(PARAM_JOB_NAME);
+		params.put(PARAM_JOB_NAME, jobName);
+		if(jobName != null && !JOB_NAME_REGEX.matcher(jobName).matches()) {
+			log.error("Invalid job name: {}", jobName);
+			throw new Exception("Invalid job name: " + jobName);
+		}
 
 		return params;
 	}
