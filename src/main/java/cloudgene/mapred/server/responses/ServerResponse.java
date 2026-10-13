@@ -5,15 +5,39 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.List;
 
+/**
+ * Response type for {@code GET /api/v2/server}
+ *
+ * @param name                        Name of this server.
+ * @param emailRequired               Are users required to provide an email
+ *                                    address?
+ * @param serverUsesEmail             Is the server configured to send email?
+ * @param userEmailDescription        Display string explaining how it works if
+ *                                    the user provides an email address.
+ * @param userWithoutEmailDescription Display string explaining how it works if
+ *                                    the user does NOT provide an email
+ *                                    address.
+ * @param oauth                       Possibly unused?
+ * @param user                        Basic metadata about the user. Only filled
+ *                                    if the user is logged in.
+ * @param apps                        Primary list of available Cloudgene apps.
+ * @param deprecatedApps              List of DEPRECATED Cloudgene apps.
+ * @param experimentalApps            List of EXPERIMENTAL Cloudgene apps.
+ * @param loggedIn                    True if the user is logged in.
+ * @param maintenance                 True if the server is in maintenance mode.
+ * @param maintenanceMessage          Display message to be shown in a banner if
+ *                                    the server is in maintenance mode.
+ */
 @JsonClassDescription
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ServerResponse(
 		String name,
-		boolean emailRequired,
 
-		// TODO(Marc): maybe we should get rid of these two.
-		String userEmailDescription,
-		String userWithoutEmailDescription,
+		boolean emailRequired,
+		boolean serverUsesEmail,
+
+		@Deprecated String userEmailDescription,
+		@Deprecated String userWithoutEmailDescription,
 
 		List<String> oauth, // TODO(Marc): Is this used?
 

@@ -51,6 +51,7 @@ public class ServerService {
 	public ServerResponse getRoot(User user) {
 		String name = application.getSettings().getName();
 		boolean emailRequired = application.getSettings().isEmailRequired();
+		boolean serverUsesEmail = application.getSettings().getMail() != null;
 
 		String userEmailDescription = application.getTemplate(Template.USER_EMAIL_DESCRIPTION);
 		String userWithoutEmailDescription = application.getTemplate(Template.USER_WITHOUT_EMAIL_DESCRIPTION);
@@ -107,6 +108,7 @@ public class ServerService {
 		return new ServerResponse(
 				name,
 				emailRequired,
+				serverUsesEmail,
 				userEmailDescription,
 				userWithoutEmailDescription,
 				oauth,
