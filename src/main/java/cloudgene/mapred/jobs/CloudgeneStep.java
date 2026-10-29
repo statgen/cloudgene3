@@ -18,26 +18,10 @@ public abstract class CloudgeneStep {
 	private CloudgeneJob job;
 
 	protected Process process;
-
 	protected CloudgeneContext context;
-
 	protected boolean killed = false;
 
-	public CloudgeneStep() {
-
-	}
-
-	public String getFolder(Class<?> clazz) {
-		return new File(clazz.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent();
-	}
-
-	public CloudgeneJob getJob() {
-		return job;
-	}
-
-	public void setJob(CloudgeneJob job) {
-		this.job = job;
-	}
+	public CloudgeneStep() {}
 
 	public void setup(CloudgeneContext context) {
 		this.context = context;
@@ -47,17 +31,10 @@ public abstract class CloudgeneStep {
 		return true;
 	}
 
-	public void updateProgress() {
-
-	}
+	public void updateProgress() {}
 
 	public String[] getRequirements() {
 		return new String[] {};
-	}
-
-	// dummy for beam serialization (setup --> property up!)
-	public CloudgeneContext getup() {
-		return null;
 	}
 
 	protected int executeCommand(List<String> command, CloudgeneContext context)
@@ -124,5 +101,13 @@ public abstract class CloudgeneStep {
 				}
 			}
 		}
+	}
+
+	public CloudgeneJob getJob() {
+		return job;
+	}
+
+	public void setJob(CloudgeneJob job) {
+		this.job = job;
 	}
 }
