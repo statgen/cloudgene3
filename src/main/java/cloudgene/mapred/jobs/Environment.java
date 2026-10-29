@@ -19,6 +19,7 @@ public class Environment {
 	public Environment(Settings settings) {
 		add("SERVICE_NAME", settings.getName());
 		add("SERVICE_URL", settings.getFullUrl());
+		add("SERVICE_FRONTEND", settings.isVueFrontend() ? "vue" : "canjs");
 		add("CONTACT_EMAIL", settings.getAdminMail());
 		add("CONTACT_NAME", settings.getAdminName());
 
