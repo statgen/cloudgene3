@@ -5,8 +5,7 @@ import java.util.*;
 
 public final class CommandOutputParser {
 
-	private CommandOutputParser() {
-	}
+	private CommandOutputParser() {}
 
 	/**
 	 * Reads all lines in the provided {@code in} stream and parses any commands of
@@ -93,8 +92,9 @@ public final class CommandOutputParser {
 	}
 
 	/**
-	 * Called by {@code parseOutput()} and {@code parseGroup()} to parse a single
-	 * line. Returns a parsed {@link Command} if the line is a valid command of form
+	 * Called by {@link #parseOutput(InputStream)} and
+	 * {@link #parseGroup(Command, BufferedReader)} to parse a single line. Returns
+	 * a parsed {@link Command} if the line is a valid command of form
 	 * {@code ::<name> [k1=v1, k2=v2, ...]:: [value]}. Returns {@code null}
 	 * otherwise.
 	 */

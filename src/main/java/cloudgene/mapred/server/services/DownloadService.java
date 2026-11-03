@@ -48,10 +48,9 @@ public class DownloadService {
 		String publicUrl = workspace.createPublicLink(download.getPath());
 		if (publicUrl != null) {
 			URI location = new URI(publicUrl);
-			return HttpResponse.redirect(location);
+			return HttpResponse.temporaryRedirect(location);
 		} else {
 			return HttpResponse.ok(workspace.download(download.getPath()));
 		}
 	}
-
 }
