@@ -24,7 +24,7 @@ import jakarta.inject.Inject;
 @Controller
 public class LogController {
 
-	private static Logger log = LoggerFactory.getLogger(LogController.class);
+	private static final Logger log = LoggerFactory.getLogger(LogController.class);
 
 	@Inject
 	protected Application application;
@@ -41,23 +41,37 @@ public class LogController {
 	@Get("/logs/{id}")
 	@Secured(SecurityRule.IS_AUTHENTICATED)
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getByJob(Authentication authentication, String id) throws IOException {
+	public String getByJob(Authentication authentication, String id) {
 
 		User user = authenticationService.getUserByAuthentication(authentication, AuthenticationType.ALL_TOKENS);
 		AbstractJob job = jobService.getByIdAndUser(id, user);
 
-		String logContent = jobService.getJobLog(job, AbstractJob.JOB_LOG);
-		String outputContent = jobService.getJobLog(job, AbstractJob.JOB_OUT);
-		
-		StringBuffer buffer = new StringBuffer();
+		String logContent = "";
+		try {
+			logContent = jobService.getJobLog(job, AbstractJob.JOB_LOG);
+		} catch (IOException e) {
+			log.warn("Missing log file {} for job ID {}", AbstractJob.JOB_LOG, job.getId());
+		}
+
+		String outputContent = "";
+		try {
+			outputContent = jobService.getJobLog(job, AbstractJob.JOB_OUT);
+		} catch (IOException e) {
+			log.warn("Missing output file {} for job ID {}", AbstractJob.JOB_OUT, job.getId());
+		}
+
+		StringBuilder builder = new StringBuilder();
 		if (!logContent.isEmpty()) {
-			buffer.append("job.txt:\n\n");
-			buffer.append(logContent);
+			builder.append(AbstractJob.JOB_LOG);
+			builder.append(":\n\n");
+			builder.append(logContent);
 		}
 
 		if (!outputContent.isEmpty()) {
-			buffer.append("\n\nstd.out:\n\n");
-			buffer.append(outputContent);
+			builder.append("\n\n");
+			builder.append(AbstractJob.JOB_OUT);
+			builder.append(":\n\n");
+			builder.append(outputContent);
 		}
 
 		String message = String.format("Job: viewing logs for job ID %s", job.getId());
@@ -66,7 +80,6 @@ public class LogController {
 		}
 		log.info(message);
 
-		return buffer.toString();
-
+		return builder.toString();
 	}
 }
