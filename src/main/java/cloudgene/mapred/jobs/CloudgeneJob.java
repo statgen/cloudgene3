@@ -136,8 +136,7 @@ public class CloudgeneJob extends AbstractJob {
 	public boolean execute() {
 		try {
 			// evaluate WDL and replace all variables (e.g. ${job_id})
-			Planner planner = new Planner();
-			WdlApp app = planner.evaluateWDL(this.app, context, getSettings());
+			WdlApp app = Planner.evaluateWDL(this.app, context, getSettings());
 
 			// merge setup steps and normal steps
 			List<WdlStep> steps = new ArrayList<>(app.getWorkflow().getSetups());
