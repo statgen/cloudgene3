@@ -354,8 +354,10 @@ public class ApplicationRepository {
 		}
 
 		Path appPath = Path.of(appsFolder, "s3-download");
-		PathUtils.delete(appPath);
-		Files.createDirectory(appPath);
+		if (Files.exists(appPath)) {
+			PathUtils.delete(appPath);
+		}
+		Files.createDirectories(appPath);
 
 		S3Util.UriParts uriParts = S3Util.getParts(uri);
 		String bucket = uriParts.bucket();
@@ -375,7 +377,7 @@ public class ApplicationRepository {
 			System.out.println("Found folder: " + bucket + "/" + key);
 			String relativeKey = key.replaceAll(prefix, "");
 			Path target = appPath.resolve(relativeKey);
-			Files.createDirectory(target);
+			Files.createDirectories(target);
 		}
 
 		// Second pass: copy files.
@@ -395,7 +397,7 @@ public class ApplicationRepository {
 			// create parent folder
 			Path parent = target.getParent();
 			if (!Files.exists(parent)) {
-				Files.createDirectory(parent);
+				Files.createDirectories(parent);
 			}
 
 			System.out.println("Copy file from " + bucket + "/" + key + " to " + target);
@@ -435,8 +437,10 @@ public class ApplicationRepository {
 		int hash = zipFile.hashCode();
 		Path appPath = Path.of(appsFolder, "archive_" + hash);
 
-		PathUtils.delete(appPath);
-		Files.createDirectory(appPath);
+		if (Files.exists(appPath)) {
+			PathUtils.delete(appPath);
+		}
+		Files.createDirectories(appPath);
 
 		try (ZipFile file = new ZipFile(zipFile.toFile())) {
 			file.extractAll(appPath.toString());
@@ -515,11 +519,11 @@ public class ApplicationRepository {
 
 			Path target = Path.of(appsFolder, application.getWdlApp().getId(), application.getWdlApp().getVersion());
 
-			Files.createDirectory(target);
+			Files.createDirectories(target);
 
 			// copy to apps and update filename
 			PathUtils.copyDirectory(parent, target);
-			application.setFilename(target.resolve(file).toString());
+			application.setFilename(target.resolve(file.getFileName()).toString());
 
 			// delete older directory
 			PathUtils.delete(parent);
