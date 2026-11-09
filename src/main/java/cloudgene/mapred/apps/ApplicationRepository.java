@@ -258,6 +258,8 @@ public class ApplicationRepository {
 		// download file from url
 		Path zipFile = getArchiveFile(url);
 		URI uri = new URI(url);
+
+		PathUtils.createParentDirectories(zipFile);
 		PathUtils.copyFile(uri.toURL(), zipFile);
 
 		Application application = installFromZipFile(zipFile);
@@ -418,6 +420,7 @@ public class ApplicationRepository {
 		Path zipFile = getArchiveFile(url);
 		URI uri = new URI(url);
 
+		PathUtils.createParentDirectories(zipFile);
 		PathUtils.copyFile(uri.toURL(), zipFile);
 
 		Application application = installFromZipFile(zipFile, repository.getYaml());
