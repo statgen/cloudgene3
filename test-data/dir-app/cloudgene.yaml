@@ -1,0 +1,10 @@
+id: dir-app
+name: Directory App
+description: I am always chosen first!
+version: 9.7.5
+category: cloudgene
+
+workflow:
+  steps:
+    - name: ReturnTrueStep
+      classname: cloudgene.mapred.jobs.steps.ReturnTrueStep

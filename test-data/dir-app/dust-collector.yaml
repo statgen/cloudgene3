@@ -1,0 +1,10 @@
+id: dust-collector
+name: Dust Collector
+description: I am ignored by default.
+version: 2.4.6
+category: cloudgene
+
+workflow:
+  steps:
+    - name: ReturnTrueStep
+      classname: cloudgene.mapred.jobs.steps.ReturnTrueStep
