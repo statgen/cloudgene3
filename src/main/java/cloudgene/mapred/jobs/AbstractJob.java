@@ -1,13 +1,14 @@
 package cloudgene.mapred.jobs;
 
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -78,7 +79,7 @@ abstract public class AbstractJob extends PriorityRunnable {
 		return state;
 	}
 
-	/** 
+	/**
 	 * Only sets {@code this.state}, leaving other state fields unchanged.
 	 * <p>
 	 * You should prefer {@link #setState(JobState)} whenever possible.
@@ -87,10 +88,11 @@ abstract public class AbstractJob extends PriorityRunnable {
 		this.state = state;
 	}
 
-	/** 
+	/**
 	 * Sets {@code this.state}, and deduces other state fields from its value.
 	 * <p>
-	 * If you're sure you shouldn't synchronize fields, you can use {@link #setRawState(JobState)}.
+	 * If you're sure you shouldn't synchronize fields, you can use
+	 * {@link #setRawState(JobState)}.
 	 */
 	public void setState(JobState state) {
 		this.state = state;
@@ -374,12 +376,15 @@ abstract public class AbstractJob extends PriorityRunnable {
 			stdOutStream.close();
 			logStream.close();
 
-			// stage files to workspace
-			workspace.uploadLog(new File(FileUtil.path(localWorkspace, JOB_OUT)));
-			workspace.uploadLog(new File(FileUtil.path(localWorkspace, JOB_LOG)));
+			Path jobOut = Path.of(localWorkspace, JOB_OUT);
+			Path jobLog = Path.of(localWorkspace, JOB_LOG);
 
-			FileUtil.deleteFile(FileUtil.path(localWorkspace, JOB_OUT));
-			FileUtil.deleteFile(FileUtil.path(localWorkspace, JOB_LOG));
+			// stage files to workspace
+			workspace.uploadLog(jobOut.toFile());
+			workspace.uploadLog(jobLog.toFile());
+
+			Files.delete(jobOut);
+			Files.delete(jobLog);
 		} catch (IOException e) {
 			log.error("[Job {}]: Staging log files failed.", getId(), e);
 		}

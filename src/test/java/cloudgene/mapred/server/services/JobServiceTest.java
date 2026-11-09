@@ -12,6 +12,7 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class JobServiceTest {
 	// It's significantly slower, but at least it behaves correctly. Perhaps a
 	// better solution would be to use mocks.
 	@BeforeEach
-	public void setup() throws SQLException {
+	public void setup() throws SQLException, IOException {
 		application = new TestApplication();
 		workspaceFactory = new WorkspaceFactory(application);
 		userService = new UserService(application);
@@ -122,7 +123,8 @@ public class JobServiceTest {
 		assertEquals("My Job", job.getName()); // Name is set...
 		assertTrue(job.getId().startsWith("job-")); // But ID is still auto-generated.
 
-		// The name has to be "clean": [a-zA-Z0-9 ,.:_-]{0,64} (avoids string interpolation issues downstream).
+		// The name has to be "clean": [a-zA-Z0-9 ,.:_-]{0,64} (avoids string
+		// interpolation issues downstream).
 
 		List<FormUtil.Parameter> badParams = List.of(new FormUtil.Parameter("job-name", "A/B"));
 		assertThrows(Exception.class,

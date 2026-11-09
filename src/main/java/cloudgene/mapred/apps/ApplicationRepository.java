@@ -4,12 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import cloudgene.mapred.plugins.IPlugin;
 import cloudgene.mapred.plugins.PluginManager;
@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.file.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -209,15 +210,16 @@ public class ApplicationRepository {
 			Repository repository = GitHubUtil.parseShorthand(repo);
 			application = installFromGitHub(repository);
 		} else {
-			if (new File(url).exists()) {
+			Path asPath = Path.of(url);
+			if (Files.exists(asPath)) {
 				if (url.endsWith(".zip")) {
-					application = installFromZipFile(url);
+					application = installFromZipFile(asPath);
 				} else if (url.endsWith(".yaml")) {
-					application = installFromYaml(url, false);
+					application = installFromYaml(asPath, false);
 				} else if (url.endsWith(".yml")) {
-					application = installFromYaml(url, false);
+					application = installFromYaml(asPath, false);
 				} else {
-					application = installFromDirectory(url, false);
+					application = installFromDirectory(asPath, false);
 				}
 			} else {
 				String repo = url.replace("github://", "");
@@ -240,10 +242,10 @@ public class ApplicationRepository {
 	 * @param key Used to uniquely identify the download, to avoid collisions.
 	 * @return Path to a (potential) archive file unique to the {@code key}'s hash.
 	 */
-	private File getArchiveFile(@NonNull String key) {
+	private Path getArchiveFile(@NonNull String key) {
 		int hash = key.hashCode();
-		String path = FileUtil.path(appsFolder, "archive_" + hash + ".zip");
-		return new File(path);
+		String filename = "archive_" + hash + ".zip";
+		return Path.of(appsFolder, filename);
 	}
 
 	public List<Application> installFromUrl(@NonNull String url)
@@ -254,13 +256,13 @@ public class ApplicationRepository {
 		}
 
 		// download file from url
-		File zipFile = getArchiveFile(url);
+		Path zipFile = getArchiveFile(url);
 		URI uri = new URI(url);
-		FileUtils.copyURLToFile(uri.toURL(), zipFile);
+		PathUtils.copyFile(uri.toURL(), zipFile);
 
-		Application application = installFromZipFile(zipFile.getAbsolutePath());
+		Application application = installFromZipFile(zipFile);
 
-		zipFile.delete();
+		Files.delete(zipFile);
 
 		List<Application> applications = new ArrayList<>();
 		applications.add(application);
@@ -342,18 +344,18 @@ public class ApplicationRepository {
 	public Application installFromS3(String uri) throws IOException {
 		// download file from s3 bucket
 		if (uri.endsWith(".zip")) {
-			File zipFile = getArchiveFile(uri);
-			S3Util.copyToFile(uri, zipFile);
+			Path zipFile = getArchiveFile(uri);
+			S3Util.copyToFile(uri, zipFile.toFile());
 
-			Application application = installFromZipFile(zipFile.getAbsolutePath());
+			Application application = installFromZipFile(zipFile);
 
-			zipFile.delete();
+			Files.delete(zipFile);
 			return application;
 		}
 
-		String appPath = FileUtil.path(appsFolder, "s3-download");
-		FileUtil.deleteDirectory(appPath);
-		FileUtil.createDirectory(appPath);
+		Path appPath = Path.of(appsFolder, "s3-download");
+		PathUtils.delete(appPath);
+		Files.createDirectory(appPath);
 
 		S3Util.UriParts uriParts = S3Util.getParts(uri);
 		String bucket = uriParts.bucket();
@@ -372,8 +374,8 @@ public class ApplicationRepository {
 
 			System.out.println("Found folder: " + bucket + "/" + key);
 			String relativeKey = key.replaceAll(prefix, "");
-			String target = FileUtil.path(appPath, relativeKey);
-			FileUtil.createDirectory(target);
+			Path target = appPath.resolve(relativeKey);
+			Files.createDirectory(target);
 		}
 
 		// Second pass: copy files.
@@ -388,23 +390,22 @@ public class ApplicationRepository {
 			System.out.println("Found file: " + bucket + "/" + key);
 
 			String relativeKey = key.replaceAll(prefix, "");
-			String target = FileUtil.path(appPath, relativeKey);
-			File file = new File(target);
+			Path target = appPath.resolve(relativeKey);
 
 			// create parent folder
-			File parent = file.getParentFile();
-			if (!parent.exists()) {
-				parent.mkdirs();
+			Path parent = target.getParent();
+			if (!Files.exists(parent)) {
+				Files.createDirectory(parent);
 			}
 
 			System.out.println("Copy file from " + bucket + "/" + key + " to " + target);
-			S3Util.copyToFile(bucket, key, file);
+			S3Util.copyToFile(bucket, key, target.toFile());
 		}
 
 		try {
 			return installFromDirectory(appPath, true);
 		} finally {
-			FileUtil.deleteDirectory(appPath);
+			PathUtils.delete(appPath);
 		}
 	}
 
@@ -412,48 +413,47 @@ public class ApplicationRepository {
 			throws IOException, URISyntaxException, GitHubException {
 
 		String url = GitHubUtil.buildUrlFromRepository(repository);
-		File zipFile = getArchiveFile(url);
+		Path zipFile = getArchiveFile(url);
 		URI uri = new URI(url);
 
-		FileUtils.copyURLToFile(uri.toURL(), zipFile);
+		PathUtils.copyFile(uri.toURL(), zipFile);
 
-		String zipFilename = zipFile.getAbsolutePath();
-		Application application = installFromZipFile(zipFilename, repository.getYaml());
+		Application application = installFromZipFile(zipFile, repository.getYaml());
 
-		zipFile.delete();
+		Files.delete(zipFile);
 		return application;
 	}
 
-	public Application installFromZipFile(@NonNull String zipFilename) throws IOException {
-		return installFromZipFile(zipFilename, null);
+	public Application installFromZipFile(@NonNull Path zipFile) throws IOException {
+		return installFromZipFile(zipFile, null);
 	}
 
-	public Application installFromZipFile(@NonNull String zipFilename, @Nullable String yamlFilename)
+	public Application installFromZipFile(@NonNull Path zipFile, @Nullable String yamlFilename)
 			throws IOException {
 
 		// extract in apps folder
-		int hash = zipFilename.hashCode();
-		String appPath = FileUtil.path(appsFolder, "archive_" + hash);
+		int hash = zipFile.hashCode();
+		Path appPath = Path.of(appsFolder, "archive_" + hash);
 
-		FileUtil.deleteDirectory(appPath);
-		FileUtil.createDirectory(appPath);
+		PathUtils.delete(appPath);
+		Files.createDirectory(appPath);
 
-		try (ZipFile file = new ZipFile(zipFilename)) {
-			file.extractAll(appPath);
+		try (ZipFile file = new ZipFile(zipFile.toFile())) {
+			file.extractAll(appPath.toString());
 		}
 
 		try {
 			return installFromDirectory(appPath, true, yamlFilename);
 		} finally {
-			FileUtil.deleteDirectory(appPath);
+			PathUtils.delete(appPath);
 		}
 	}
 
-	public Application installFromDirectory(@NonNull String path, boolean moveToApps) throws IOException {
+	public Application installFromDirectory(@NonNull Path path, boolean moveToApps) throws IOException {
 		return installFromDirectory(path, moveToApps, null);
 	}
 
-	public Application installFromDirectory(@NonNull String path, boolean moveToApps, @Nullable String customYaml)
+	public Application installFromDirectory(@NonNull Path path, boolean moveToApps, @Nullable String customYaml)
 			throws IOException {
 
 		String name = "cloudgene.yaml";
@@ -461,44 +461,47 @@ public class ApplicationRepository {
 			name = customYaml;
 		}
 
-		String cloudgeneFilename = FileUtil.path(path, name);
-		if (new File(cloudgeneFilename).exists()) {
-			Application application = installFromYaml(cloudgeneFilename, moveToApps);
+		Path cloudgeneFile = path.resolve(name);
+		if (Files.exists(cloudgeneFile)) {
+			Application application = installFromYaml(cloudgeneFile, moveToApps);
 			if (application != null) {
 				return application;
 			}
 		}
 
 		// No cloudgene.yaml found. try all other yaml files.
-		String[] files = FileUtil.getFiles(path, "*.yaml");
-		for (String filename : files) {
-			Application application = installFromYaml(filename, moveToApps);
-			if (application != null) {
-				return application;
+		try (DirectoryStream<Path> yamlFiles = Files.newDirectoryStream(path, "*.yaml")) {
+			for (Path file : yamlFiles) {
+				Application application = installFromYaml(file, moveToApps);
+				if (application != null) {
+					return application;
+				}
 			}
 		}
 
-		// search in subfolders. e.g. github zip extracts all in a subfolder.
-		for (String directory : getDirectories(path)) {
-			Application application = installFromDirectory(directory, moveToApps, customYaml);
-			if (application != null) {
-				return application;
+		// Search in subfolders. e.g. github zip extracts all in a subfolder.
+		try (DirectoryStream<Path> subDirectories = Files.newDirectoryStream(path, Files::isDirectory)) {
+			for (Path subDir : subDirectories) {
+				Application application = installFromDirectory(subDir, moveToApps, customYaml);
+				if (application != null) {
+					return application;
+				}
 			}
 		}
 
 		return null;
 	}
 
-	public Application installFromYaml(String filename, boolean moveToApps) throws IOException {
+	public Application installFromYaml(Path file, boolean moveToApps) throws IOException {
 
 		Application application = new Application();
-		application.setFilename(filename);
+		application.setFilename(file.toString());
 		application.setPermission("user");
 
 		try {
 			application.loadWdlApp();
 		} catch (IOException e) {
-			log.warn("Ignore file {}. Not a valid cloudgene file.", filename, e);
+			log.warn("Ignore file {}. Not a valid cloudgene file.", file, e);
 			return null;
 		}
 
@@ -508,26 +511,23 @@ public class ApplicationRepository {
 		}
 
 		if (moveToApps) {
-			File file = new File(filename);
-			File folder = file.getParentFile();
+			Path parent = file.getParent();
 
-			String targetPath = FileUtil.path(appsFolder, application.getWdlApp().getId(),
-					application.getWdlApp().getVersion());
+			Path target = Path.of(appsFolder, application.getWdlApp().getId(), application.getWdlApp().getVersion());
 
-			FileUtil.createDirectory(targetPath);
-			File target = new File(targetPath);
+			Files.createDirectory(target);
 
 			// copy to apps and update filename
-			FileUtils.copyDirectory(folder, target);
-			application.setFilename(FileUtil.path(targetPath, file.getName()));
+			PathUtils.copyDirectory(parent, target);
+			application.setFilename(target.resolve(file).toString());
 
 			// delete older directory
-			FileUtil.deleteDirectory(folder);
+			PathUtils.delete(parent);
 
 			try {
 				application.loadWdlApp();
 			} catch (IOException e) {
-				log.warn("Ignore file {}. Not a valid cloudgene file.", filename, e);
+				log.warn("Ignore file {}. Not a valid Cloudgene file.", file, e);
 				return null;
 			}
 		}
@@ -536,19 +536,6 @@ public class ApplicationRepository {
 		indexApps.put(application.getId(), application);
 
 		return application;
-	}
-
-	private List<String> getDirectories(@NonNull String dir) throws IOException {
-		Path path = Path.of(dir);
-
-		try (Stream<Path> entries = Files.list(path)) {
-			return entries
-					.filter(Files::isDirectory)
-					.map(Path::toAbsolutePath)
-					.sorted()
-					.map(Path::toString)
-					.toList();
-		}
 	}
 
 	public String getConfigDirectory(String id) {

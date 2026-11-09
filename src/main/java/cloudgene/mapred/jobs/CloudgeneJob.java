@@ -136,7 +136,7 @@ public class CloudgeneJob extends AbstractJob {
 	public boolean execute() {
 		try {
 			// evaluate WDL and replace all variables (e.g. ${job_id})
-			WdlApp app = Planner.evaluateWDL(this.app, context, getSettings());
+			WdlApp app = Planner.evaluateWDL(getApp(), context, getSettings());
 
 			// merge setup steps and normal steps
 			List<WdlStep> steps = new ArrayList<>(app.getWorkflow().getSetups());
@@ -161,7 +161,6 @@ public class CloudgeneJob extends AbstractJob {
 
 			setError(null);
 			return true;
-
 		} catch (Exception e) {
 			writeOutput(e.getMessage());
 			setError(e.getMessage());

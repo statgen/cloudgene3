@@ -1,6 +1,7 @@
 package cloudgene.mapred.server.services;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.Map;
 import cloudgene.mapred.database.dao.ParameterDao;
 import cloudgene.mapred.jobs.*;
 import cloudgene.mapred.jobs.state.JobState;
+import org.apache.commons.io.file.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -234,8 +236,12 @@ public class JobService {
 		JobDao dao = new JobDao(application.getDatabase());
 
 		// delete local directory
-		String localOutput = FileUtil.path(settings.getLocalWorkspace(), job.getId());
-		FileUtil.deleteDirectory(localOutput);
+		try {
+			Path localOutput = Path.of(settings.getLocalWorkspace(), job.getId());
+			PathUtils.delete(localOutput);
+		} catch (IOException e) {
+			log.error("Failed to delete local output for job {}", job.getId(), e);
+		}
 
 		// delete job from database
 		job.setState(JobState.DELETED);
@@ -349,8 +355,8 @@ public class JobService {
 
 		try {
 			// delete local directory
-			String localOutput = FileUtil.path(settings.getLocalWorkspace(), job.getId());
-			FileUtil.deleteDirectory(localOutput);
+			Path localOutput = Path.of(settings.getLocalWorkspace(), job.getId());
+			PathUtils.delete(localOutput);
 
 			job.setState(JobState.RETIRED);
 			dao.update(job);

@@ -9,6 +9,7 @@ import cloudgene.mapred.util.HashUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,7 @@ public class JobValueDaoTest {
 	private JobDao jobDao;
 
 	@BeforeEach
-	public void setup() throws SQLException {
+	public void setup() throws SQLException, IOException {
 		TestApplication application = new TestApplication();
 		Database db = application.getDatabase();
 

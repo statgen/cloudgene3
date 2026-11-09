@@ -3,6 +3,7 @@ package cloudgene.mapred.apps;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,14 +20,18 @@ public class ApplicationRepositoryTest {
 	@Test
 	public void testInstallFromYaml() throws IOException {
 		ApplicationRepository repo = new ApplicationRepository();
-		repo.installFromYaml("test-data/return-true.yaml", false);
+		repo.installFromYaml(
+				Path.of("test-data/return-true.yaml"),
+				false);
 
 		List<Application> apps = repo.getAll();
 		assertNotNull(apps);
 		assertEquals(1, apps.size());
 		assertEquals("return-true-step-public@1.0.1", apps.get(0).getId());
 
-		repo.installFromYaml("test-data/return-false.yaml", false);
+		repo.installFromYaml(
+				Path.of("test-data/return-false.yaml"),
+				false);
 
 		apps = repo.getAll();
 		assertNotNull(apps);
@@ -38,8 +43,12 @@ public class ApplicationRepositoryTest {
 	@Test
 	public void testGetById() throws IOException {
 		ApplicationRepository repo = new ApplicationRepository();
-		repo.installFromYaml("test-data/return-true.yaml", false);
-		repo.installFromYaml("test-data/return-false.yaml", false);
+		repo.installFromYaml(
+				Path.of("test-data/return-true.yaml"),
+				false);
+		repo.installFromYaml(
+				Path.of("test-data/return-false.yaml"),
+				false);
 
 		Application app;
 

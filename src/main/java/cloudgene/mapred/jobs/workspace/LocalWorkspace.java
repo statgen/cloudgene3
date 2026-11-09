@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.file.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,10 +110,10 @@ public class LocalWorkspace implements IWorkspace {
 	public void delete(String job) throws IOException {
 		try {
 			log.debug("Deleting {} on local workspace...", job);
-			String workspace = FileUtil.path(location, job);
-			FileUtil.deleteDirectory(workspace);
+			Path workspace = Path.of(location, job);
+			PathUtils.delete(workspace);
 
-			log.debug("Deleted all files on local workspace for job {}.", job);
+			log.debug("Deleted ALL files on local workspace for job {}.", job);
 		} catch (Exception e) {
 			log.error("Deleting {} failed.", job, e);
 			throw new IOException("Deleting " + job + " failed.", e);
@@ -121,18 +122,15 @@ public class LocalWorkspace implements IWorkspace {
 
 	@Override
 	public void cleanup(String job) throws IOException {
-
-		// TODO: add flag to disable cleanup (e.g. debugging)
-
 		try {
 			log.debug("Cleanup {} on local workspace...", job);
-			String temp = FileUtil.path(location, job, TEMP_DIRECTORY);
-			FileUtil.deleteDirectory(temp);
+			Path temp = Path.of(location, job, TEMP_DIRECTORY);
+			PathUtils.delete(temp);
 
-			String inputs = FileUtil.path(location, job, INPUT_DIRECTORY);
-			FileUtil.deleteDirectory(inputs);
+			Path inputs = Path.of(location, job, INPUT_DIRECTORY);
+			PathUtils.delete(inputs);
 
-			log.debug("Deleted all files on local workspace for job {}.", job);
+			log.debug("Deleted input and temporary files on local workspace for job {}.", job);
 		} catch (Exception e) {
 			log.error("Deleting {} failed.", job, e);
 			throw new IOException("Deleting " + job + " failed.", e);

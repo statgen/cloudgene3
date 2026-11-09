@@ -1,5 +1,7 @@
 package cloudgene.mapred;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,12 +15,12 @@ import cloudgene.mapred.database.util.Database;
 import cloudgene.mapred.util.HashUtil;
 import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.test.TestMailServer;
-import genepi.io.FileUtil;
 import io.micronaut.context.annotation.Context;
 import io.micronaut.context.annotation.Replaces;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.Environment;
 import jakarta.inject.Inject;
+import org.apache.commons.io.file.PathUtils;
 
 @Context
 @Replaces(cloudgene.mapred.server.Application.class)
@@ -26,7 +28,7 @@ import jakarta.inject.Inject;
 public class TestApplication extends cloudgene.mapred.server.Application {
 
 	@Inject // Use this constructor for dependency injection.
-	public TestApplication() throws SQLException {
+	public TestApplication() throws SQLException, IOException {
 		super(loadSettings("primary"));
 	}
 
@@ -34,7 +36,7 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 		super(settings);
 	}
 
-	public static Settings loadSettings(String prefix) {
+	public static Settings loadSettings(String prefix) throws IOException {
 		Settings settings = new Settings();
 
 		HashMap<String, String> mail = new HashMap<>();
@@ -46,7 +48,7 @@ public class TestApplication extends cloudgene.mapred.server.Application {
 		settings.setMail(mail);
 
 		// delete old database
-		FileUtil.deleteDirectory("test-database");
+		PathUtils.deleteDirectory(Path.of("test-database"));
 
 		HashMap<String, String> database = new HashMap<>();
 		database.put("driver", "h2");

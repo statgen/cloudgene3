@@ -1,9 +1,12 @@
 package cloudgene.mapred.server.services;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 import cloudgene.mapred.jobs.state.JobState;
 import jakarta.mail.MessagingException;
+import org.apache.commons.io.file.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +20,6 @@ import cloudgene.mapred.jobs.workspace.IWorkspace;
 import cloudgene.mapred.server.Application;
 import cloudgene.mapred.util.MailUtil;
 import cloudgene.mapred.util.config.Settings;
-import genepi.io.FileUtil;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
@@ -44,8 +46,12 @@ public class JobCleanUpService {
 		for (AbstractJob job : oldJobs) {
 			if (job.getDeletedOn() < System.currentTimeMillis()) {
 				// delete local directory
-				String localOutput = FileUtil.path(settings.getLocalWorkspace(), job.getId());
-				FileUtil.deleteDirectory(localOutput);
+				Path localOutput = Path.of(settings.getLocalWorkspace(), job.getId());
+				try {
+					PathUtils.delete(localOutput);
+				} catch (IOException e) {
+					log.error("Failed to delete local workspace for job {}", job.getId(), e);
+				}
 
 				job.setState(JobState.RETIRED);
 				dao.update(job);

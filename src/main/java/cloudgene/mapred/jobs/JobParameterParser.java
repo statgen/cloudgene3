@@ -9,6 +9,7 @@ import cloudgene.mapred.wdl.WdlParameterInputType;
 import genepi.io.FileUtil;
 import io.micronaut.core.annotation.NonNull;
 import jakarta.inject.Inject;
+import org.apache.commons.io.file.PathUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +83,7 @@ public class JobParameterParser {
 						props.put(key, target);
 					}
 				} finally {
-					FileUtil.deleteFile(inputFile.getAbsolutePath());
+					PathUtils.delete(inputFile.toPath());
 				}
 
 				log.debug("Parameter {} processed.", key);
@@ -143,7 +144,7 @@ public class JobParameterParser {
 
 		String jobName = props.get(PARAM_JOB_NAME);
 		params.put(PARAM_JOB_NAME, jobName);
-		if(jobName != null && !JOB_NAME_REGEX.matcher(jobName).matches()) {
+		if (jobName != null && !JOB_NAME_REGEX.matcher(jobName).matches()) {
 			log.error("Invalid job name: {}", jobName);
 			throw new Exception("Invalid job name: " + jobName);
 		}
