@@ -24,6 +24,8 @@ import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.Produces;
 import io.micronaut.http.annotation.QueryValue;
+import io.micronaut.scheduling.TaskExecutors;
+import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
@@ -148,12 +150,14 @@ public class ServerAdminController {
 	}
 
 	@Get("/counters")
+	@ExecuteOn(TaskExecutors.IO)
 	public CounterStatisticsResponse getCounters() {
 		Map<String, Map<String, CounterDao.Stats>> counters = serverService.getCounterStatistics();
 		return CounterStatisticsResponse.build(counters);
 	}
 
 	@Get("/values")
+	@ExecuteOn(TaskExecutors.IO)
 	public HttpResponse<Map<String, List<JobValueResponse>>> getValues() {
 		Map<String, List<JobValue>> values = serverService.getValues();
 		Map<String, List<JobValueResponse>> response = JobValueResponse.build(values);

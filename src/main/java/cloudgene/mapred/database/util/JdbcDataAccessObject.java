@@ -5,12 +5,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.StatementConfiguration;
 
 public abstract class JdbcDataAccessObject {
 
@@ -19,8 +21,12 @@ public abstract class JdbcDataAccessObject {
 	protected Database database;
 
 	public JdbcDataAccessObject(Database database) {
+		StatementConfiguration statementConfiguration = new StatementConfiguration.Builder()
+				.queryTimeout(Duration.ofSeconds(10))
+				.build();
+
 		this.database = database;
-		runner = new QueryRunner(database.getDataSource());
+		this.runner = new QueryRunner(database.getDataSource(), statementConfiguration);
 	}
 
 	public <T> T queryForObject(String sql, IRowMapper<T> mapper) throws SQLException {
