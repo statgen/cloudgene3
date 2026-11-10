@@ -104,7 +104,7 @@ public class GitHubUtil {
 	 * @return The URL to the repo's {@code zipball}.
 	 */
 	@NonNull
-	public static String buildUrlFromRepository(@NonNull Repository repo) throws GitHubException {
+	public static URI buildUrlFromRepository(@NonNull Repository repo) throws GitHubException {
 		String tag = repo.getTag();
 
 		if (tag != null && tag.equalsIgnoreCase("latest")) {
@@ -117,7 +117,7 @@ public class GitHubUtil {
 			url += "/" + tag;
 		}
 
-		return url;
+		return URI.create(url);
 	}
 
 	/**

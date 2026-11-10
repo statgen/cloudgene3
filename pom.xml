@@ -59,6 +59,7 @@
 		<exec.mainClass>cloudgene.mapred.CommandLineInterface</exec.mainClass>
 		<micronaut.runtime>netty</micronaut.runtime>
 		<micronaut.aot.enabled>false</micronaut.aot.enabled>
+		<argLine />
 	</properties>
 
 	<dependencyManagement>
@@ -188,6 +189,8 @@
 			<version>6.5.2</version>
 		</dependency>
 
+		<!-- Testing -->
+
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
@@ -215,6 +218,12 @@
 			<groupId>uk.org.webcompere</groupId>
 			<artifactId>system-stubs-core</artifactId>
 			<version>2.1.8</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -343,11 +352,11 @@
 			<scope>compile</scope>
 		</dependency>
 
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-text</artifactId>
-            <version>1.15.0</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<version>1.15.0</version>
+		</dependency>
 
 	</dependencies>
 
@@ -536,6 +545,28 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+
+			<!-- Correctly plug in Mockito to the JVM at test time. -->
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>properties</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>@{argLine} -javaagent:"${org.mockito:mockito-core:jar}"</argLine>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

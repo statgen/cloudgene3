@@ -1,6 +1,9 @@
 package cloudgene.mapred.util.config;
 
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import org.apache.commons.io.file.PathUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -8,6 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -17,6 +21,12 @@ import static uk.org.webcompere.systemstubs.SystemStubs.withEnvironmentVariable;
 
 @MicronautTest
 public class SettingsTest {
+
+	@BeforeEach
+	@AfterEach
+	public void removeConfig() throws IOException {
+		PathUtils.delete(Path.of("config"));
+	}
 
 	@Test
 	public void testLoadFileBasic() throws Exception {

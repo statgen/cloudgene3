@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import cloudgene.mapred.util.GitHubUtil.Repository;
 
+import java.net.URI;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class GitHubUtilTest {
@@ -76,7 +78,7 @@ public class GitHubUtilTest {
 		repository.setUser("genepi");
 		repository.setRepo("cloudgene-examples");
 		assertEquals(
-				"https://api.github.com/repos/genepi/cloudgene-examples/zipball",
+				URI.create("https://api.github.com/repos/genepi/cloudgene-examples/zipball"),
 				GitHubUtil.buildUrlFromRepository(repository));
 
 		repository = new Repository();
@@ -84,7 +86,7 @@ public class GitHubUtilTest {
 		repository.setRepo("imputationserver");
 		repository.setTag("1.0.2");
 		assertEquals(
-				"https://api.github.com/repos/genepi/imputationserver/zipball/1.0.2",
+				URI.create("https://api.github.com/repos/genepi/imputationserver/zipball/1.0.2"),
 				GitHubUtil.buildUrlFromRepository(repository));
 
 		repository = new Repository();
@@ -93,7 +95,7 @@ public class GitHubUtilTest {
 		repository.setYaml("subdir/subdir2");
 		repository.setTag("1.0.2");
 		assertEquals(
-				"https://api.github.com/repos/genepi/imputationserver/zipball/1.0.2",
+				URI.create("https://api.github.com/repos/genepi/imputationserver/zipball/1.0.2"),
 				GitHubUtil.buildUrlFromRepository(repository));
 	}
 
@@ -124,9 +126,9 @@ public class GitHubUtilTest {
 			String latest = GitHubUtil.getLatestReleaseFromRepository(repository);
 			assertEquals("1.2.0", latest);
 
-			String repoUrl = GitHubUtil.buildUrlFromRepository(repository);
+			URI repoUrl = GitHubUtil.buildUrlFromRepository(repository);
 			assertEquals(
-					"https://api.github.com/repos/lukfor/hello-cloudgene/zipball/1.2.0",
+					URI.create("https://api.github.com/repos/lukfor/hello-cloudgene/zipball/1.2.0"),
 					repoUrl);
 		}
 	}

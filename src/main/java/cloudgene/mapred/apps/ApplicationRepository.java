@@ -414,11 +414,10 @@ public class ApplicationRepository {
 	}
 
 	public Application installFromGitHub(@NonNull Repository repository)
-			throws IOException, URISyntaxException, GitHubException {
+			throws IOException, GitHubException {
 
-		String url = GitHubUtil.buildUrlFromRepository(repository);
-		Path zipFile = getArchiveFile(url);
-		URI uri = new URI(url);
+		URI uri = GitHubUtil.buildUrlFromRepository(repository);
+		Path zipFile = getArchiveFile(uri.toString());
 
 		PathUtils.createParentDirectories(zipFile);
 		PathUtils.copyFile(uri.toURL(), zipFile);
