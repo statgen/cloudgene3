@@ -237,3 +237,8 @@ ALTER TABLE banners          ADD CONSTRAINT banners_id_unique          UNIQUE (i
 -- 3.1.4-statgen.27
 
 ALTER TABLE `user` ADD COLUMN activation_code_created TIMESTAMP NULL DEFAULT NULL;
+
+-- 3.1.4-statgen.40
+
+CREATE INDEX idx_values_job_name ON job_values(job_id, name);
+CREATE INDEX idx_counters_job_id ON counters(job_id);

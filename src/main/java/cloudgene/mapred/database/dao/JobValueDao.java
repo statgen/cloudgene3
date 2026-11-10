@@ -62,19 +62,15 @@ public class JobValueDao extends JdbcDataAccessObject {
 	@NonNull
 	public Map<String, List<JobValue>> getAllGrouped() {
 		String sql = "SELECT "
-				+ "    COALESCE(app.`value`, 'unassigned') AS application, "
-				+ "    vals.name AS `name`, "
-				+ "    vals.`value` AS `value`, "
-				+ "    COUNT(*) AS count "
-				+ " FROM "
-				+ "    job_values AS vals "
-				+ "LEFT JOIN "
-				+ "    job_values AS app "
-				+ "ON "
-				+ "    app.job_id = vals.job_id AND "
-				+ "    app.name = 'application' "
-				+ "WHERE "
-				+ "    vals.name <> 'application' "
+				+     "COALESCE(app.`value`, 'unassigned') AS application, "
+				+     "vals.name AS name, "
+				+     "vals.`value` AS `value`, "
+				+     "COUNT(*) AS count "
+				+ "FROM job_values AS vals "
+				+ "LEFT JOIN job_values AS app "
+				+     "ON app.job_id = vals.job_id "
+				+     "AND app.name = 'application' "
+				+ "WHERE vals.name <> 'application' "
 				+ "GROUP BY application, name, `value` "
 				+ "ORDER BY application, name, `value`";
 
