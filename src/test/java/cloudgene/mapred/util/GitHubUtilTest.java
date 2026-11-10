@@ -34,66 +34,57 @@ public class GitHubUtilTest {
 		// Correct shorthand, no tag or YAML
 		repo = GitHubUtil.parseShorthand("genepi/cloudgene-examples");
 		assertNotNull(repo);
-		assertEquals("genepi", repo.getUser());
-		assertEquals("cloudgene-examples", repo.getRepo());
-		assertNull(repo.getYaml());
-		assertNull(repo.getTag());
+		assertEquals("genepi", repo.user());
+		assertEquals("cloudgene-examples", repo.repo());
+		assertNull(repo.yaml());
+		assertNull(repo.tag());
 
 		// Correct shorthand, not tag, YAML set to 'fastqc'
 		repo = GitHubUtil.parseShorthand("genepi/cloudgene-examples/fastqc");
 		assertNotNull(repo);
-		assertEquals("genepi", repo.getUser());
-		assertEquals("cloudgene-examples", repo.getRepo());
-		assertEquals("fastqc", repo.getYaml());
-		assertNull(repo.getTag());
+		assertEquals("genepi", repo.user());
+		assertEquals("cloudgene-examples", repo.repo());
+		assertEquals("fastqc", repo.yaml());
+		assertNull(repo.tag());
 
 		// Correct shorthand, tag set to 1.1.0, no YAML
 		repo = GitHubUtil.parseShorthand("genepi/cloudgene-examples@1.1.0");
 		assertNotNull(repo);
-		assertEquals("genepi", repo.getUser());
-		assertEquals("cloudgene-examples", repo.getRepo());
-		assertNull(repo.getYaml());
-		assertEquals("1.1.0", repo.getTag());
+		assertEquals("genepi", repo.user());
+		assertEquals("cloudgene-examples", repo.repo());
+		assertNull(repo.yaml());
+		assertEquals("1.1.0", repo.tag());
 
 		// Correct shorthand, tag set to 1.1.0, YAML set to fastqc.yaml
 		repo = GitHubUtil.parseShorthand("genepi/cloudgene-examples/fastqc.yaml@1.1.0");
 		assertNotNull(repo);
-		assertEquals("genepi", repo.getUser());
-		assertEquals("cloudgene-examples", repo.getRepo());
-		assertEquals("fastqc.yaml", repo.getYaml());
-		assertEquals("1.1.0", repo.getTag());
+		assertEquals("genepi", repo.user());
+		assertEquals("cloudgene-examples", repo.repo());
+		assertEquals("fastqc.yaml", repo.yaml());
+		assertEquals("1.1.0", repo.tag());
 
 		// Correct shorthand, tag set to 1.1.0, YAML set to ngs/fastqc.yaml
 		repo = GitHubUtil.parseShorthand("genepi/cloudgene-examples/ngs/fastqc.yaml@1.1.0");
 		assertNotNull(repo);
-		assertEquals("genepi", repo.getUser());
-		assertEquals("cloudgene-examples", repo.getRepo());
-		assertEquals("ngs/fastqc.yaml", repo.getYaml());
-		assertEquals("1.1.0", repo.getTag());
+		assertEquals("genepi", repo.user());
+		assertEquals("cloudgene-examples", repo.repo());
+		assertEquals("ngs/fastqc.yaml", repo.yaml());
+		assertEquals("1.1.0", repo.tag());
 	}
 
 	@Test
 	public void testBuildUrlFromRepository() throws GitHubException {
-		Repository repository = new Repository();
-		repository.setUser("genepi");
-		repository.setRepo("cloudgene-examples");
+		Repository repository = new Repository("genepi", "cloudgene-examples", null, null);
 		assertEquals(
 				URI.create("https://api.github.com/repos/genepi/cloudgene-examples/zipball"),
 				GitHubUtil.buildUrlFromRepository(repository));
 
-		repository = new Repository();
-		repository.setUser("genepi");
-		repository.setRepo("imputationserver");
-		repository.setTag("1.0.2");
+		repository = new Repository("genepi", "imputationserver", "1.0.2", null);
 		assertEquals(
 				URI.create("https://api.github.com/repos/genepi/imputationserver/zipball/1.0.2"),
 				GitHubUtil.buildUrlFromRepository(repository));
 
-		repository = new Repository();
-		repository.setUser("genepi");
-		repository.setRepo("imputationserver");
-		repository.setYaml("subdir/subdir2");
-		repository.setTag("1.0.2");
+		repository = new Repository("genepi", "imputationserver", "1.0.2", "subdir/subdir2");
 		assertEquals(
 				URI.create("https://api.github.com/repos/genepi/imputationserver/zipball/1.0.2"),
 				GitHubUtil.buildUrlFromRepository(repository));
@@ -103,10 +94,7 @@ public class GitHubUtilTest {
 	public void testGetLatestReleaseFromRepository() throws GitHubException {
 		// Error: repository does not exist
 		{
-			Repository repository = new Repository();
-			repository.setUser("lukfor");
-			repository.setRepo("false-repo-1234");
-			repository.setTag("latest");
+			Repository repository = new Repository("lukfor", "false-repo-1234", "latest", null);
 
 			assertThrows(
 					GitHubException.class,
@@ -118,10 +106,7 @@ public class GitHubUtilTest {
 
 		// Correctly resolves latest (assuming no new releases of hello-cloudgene)
 		{
-			Repository repository = new Repository();
-			repository.setUser("lukfor");
-			repository.setRepo("hello-cloudgene");
-			repository.setTag("latest");
+			Repository repository = new Repository("lukfor", "hello-cloudgene", "latest", null);
 
 			String latest = GitHubUtil.getLatestReleaseFromRepository(repository);
 			assertEquals("1.2.0", latest);

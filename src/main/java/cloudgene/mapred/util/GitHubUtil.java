@@ -15,47 +15,7 @@ import reactor.core.publisher.Mono;
 
 public class GitHubUtil {
 
-	public static class Repository {
-		private String user;
-
-		private String repo;
-
-		private String tag;
-
-		private String yaml = null;
-
-		public String getUser() {
-			return user;
-		}
-
-		public void setUser(String user) {
-			this.user = user;
-		}
-
-		public String getRepo() {
-			return repo;
-		}
-
-		public void setRepo(String repo) {
-			this.repo = repo;
-		}
-
-		public String getTag() {
-			return tag;
-		}
-
-		public void setTag(String tag) {
-			this.tag = tag;
-		}
-
-		public String getYaml() {
-			return yaml;
-		}
-
-		public void setYaml(String yaml) {
-			this.yaml = yaml;
-		}
-	}
+	public record Repository(String user, String repo, String tag, String yaml) {}
 
 	/**
 	 * Parses a GitHub repo string like {@code username/repo[/path/to/cloudgene.yaml][@git-ref]}
@@ -66,8 +26,6 @@ public class GitHubUtil {
 	 * @return The parsed repo details.
 	 */
 	public static Repository parseShorthand(@NonNull String shorthand) throws IllegalArgumentException {
-		Repository repo = new Repository();
-
 		// username/repo[/subdir][@ref]
 		String[] tiles2 = shorthand.split("@");
 		String[] tiles = tiles2[0].split("/", 3);
@@ -78,22 +36,24 @@ public class GitHubUtil {
 							+ shorthand);
 		}
 
-		repo.setUser(tiles[0]);
-		repo.setRepo(tiles[1]);
+		String user = tiles[0];
+		String repo = tiles[1];
 
+		String yaml = null;
 		if (tiles.length > 2) {
-			repo.setYaml(tiles[2]);
+			yaml = tiles[2];
 		}
 
+		String tag = null;
 		if (tiles2.length == 2) {
-			repo.setTag(tiles2[1]);
+			tag = tiles2[1];
 		} else if (tiles2.length > 2) {
 			throw new IllegalArgumentException(
 					"Expected input format 'user/repo[/path][@ref]', but found too many @ signs in shorthand: "
 							+ shorthand);
 		}
 
-		return repo;
+		return new Repository(user, repo, tag, yaml);
 	}
 
 	/**
@@ -105,13 +65,13 @@ public class GitHubUtil {
 	 */
 	@NonNull
 	public static URI buildUrlFromRepository(@NonNull Repository repo) throws GitHubException {
-		String tag = repo.getTag();
+		String tag = repo.tag();
 
 		if (tag != null && tag.equalsIgnoreCase("latest")) {
 			tag = getLatestReleaseFromRepository(repo);
 		}
 
-		String url = "https://api.github.com/repos/" + repo.getUser() + "/" + repo.getRepo() + "/zipball";
+		String url = "https://api.github.com/repos/" + repo.user() + "/" + repo.repo() + "/zipball";
 
 		if (tag != null) {
 			url += "/" + tag;
@@ -128,7 +88,7 @@ public class GitHubUtil {
 	 * @return The latest version {@code tag}.
 	 */
 	public static String getLatestReleaseFromRepository(@NonNull Repository repo) throws GitHubException {
-		String urlString = "https://api.github.com/repos/" + repo.getUser() + "/" + repo.getRepo() + "/releases/latest";
+		String urlString = "https://api.github.com/repos/" + repo.user() + "/" + repo.repo() + "/releases/latest";
 
 		try (HttpClient httpClient = DefaultHttpClient.builder().build()) {
 			URI uri = new URI(urlString);

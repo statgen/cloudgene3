@@ -422,7 +422,7 @@ public class ApplicationRepository {
 		PathUtils.createParentDirectories(zipFile);
 		PathUtils.copyFile(uri.toURL(), zipFile);
 
-		Application application = installFromZipFile(zipFile, repository.getYaml());
+		Application application = installFromZipFile(zipFile, repository.yaml());
 
 		Files.delete(zipFile);
 		return application;
