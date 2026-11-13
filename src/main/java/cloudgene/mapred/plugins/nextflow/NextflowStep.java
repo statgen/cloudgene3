@@ -1,9 +1,9 @@
 package cloudgene.mapred.plugins.nextflow;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import cloudgene.mapred.jobs.workspace.IWorkspace;
 import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.wdl.WdlStep;
-import genepi.io.FileUtil;
 import groovy.json.JsonOutput;
 
 public class NextflowStep extends CloudgeneStep {
@@ -52,14 +51,14 @@ public class NextflowStep extends CloudgeneStep {
 			script = "main.nf";
 		}
 
-		String scriptPath = script;
-		if (!script.startsWith("/")) {
-			scriptPath = FileUtil.path(context.getWorkingDirectory(), script);
+		Path scriptPath = Path.of(script);
+		if (!scriptPath.isAbsolute()) {
+			scriptPath = Path.of(context.getWorkingDirectory(), script);
 		}
-		if (!new File(scriptPath).exists()) {
+		if (!Files.exists(scriptPath)) {
 			context.log("Warning: Nextflow script '" + scriptPath + "' not found. "
 					+ "Try to resolve it on github as '" + script + "'");
-			scriptPath = script;
+			scriptPath = Path.of(script);
 		}
 
 		String revision = step.getString("revision");
@@ -102,55 +101,39 @@ public class NextflowStep extends CloudgeneStep {
 		nextflow.addConfig(globalConfig);
 
 		// set application specific configuration
-		String appConfig = FileUtil.path(appFolder, "nextflow.config");
+		Path appConfig = Path.of(appFolder, "nextflow.config");
 		nextflow.addConfig(appConfig);
 
 		String globalEnv = plugin.getNextflowEnv();
-		nextflow.addEnvScript(new File(globalEnv));
+		nextflow.addEnvScript(Path.of(globalEnv));
 
-		String appEnv = FileUtil.path(appFolder, "nextflow.env");
-		nextflow.addEnvScript(new File(appEnv));
+		Path appEnv = Path.of(appFolder, "nextflow.env");
+		nextflow.addEnvScript(appEnv);
 
 		// set work directory
 		IWorkspace workspace = job.getWorkspace();
 
 		// use workdir if set in settings
-		String work = nextflowSettings.get("nextflow.work");
-		if (work != null && !work.trim().isEmpty()) {
-			nextflow.setWork(work);
-		} else {
-			String workDir = workspace.createTempFolder("nextflow");
-			nextflow.setWork(workDir);
+		String workDir = nextflowSettings.get("nextflow.work");
+		if (workDir == null || workDir.isBlank()) {
+			workDir = workspace.createTempFolder("nextflow");
 		}
+
+		// register job in web collector and set created url
+		String weblogURL = collector.addContext(context, configs);
 
 		String prefix = "step" + context.getStepCounter() + "-";
 
-		// params json file
-		String paramsJsonFilename = FileUtil.path(context.getLocalOutput(), prefix + "params.json");
-		File paramsFile = new File(paramsJsonFilename);
-		try {
-			Map<String, Object> params = createParamsMap(step);
-			writeParamsJson(params, paramsFile);
-			context.log("Wrote params to file '" + paramsJsonFilename + "'");
-
-		} catch (IOException e) {
-			log.error("[Job {}] Writing params.json file failed.", context.getJobId(), e);
-			return false;
-		}
-		nextflow.setParamsFile(paramsFile);
-
-		// register job in web collector and set created url
-		String collectorUrl = collector.addContext(context, configs);
-		nextflow.setWeblog(collectorUrl);
-
 		// log files and reports
-		nextflow.setTrace(workspace.createLogFile(prefix + "trace.csv"));
-		nextflow.setReport(workspace.createLogFile(prefix + "report.html"));
-		nextflow.setTimeline(workspace.createLogFile(prefix + "timeline.html"));
+		String trace = workspace.createLogFile(prefix + "trace.csv");
+		String report = workspace.createLogFile(prefix + "report.html");
+		String timeline = workspace.createLogFile(prefix + "timeline.html");
 
-		String logPath = job.getLocalWorkspace() + "/" + prefix + "nextflow.log";
-		logPath = new File(logPath).getAbsolutePath();
-		nextflow.setLog(logPath);
+		if (!writeParamsJson(prefix, step, nextflow)) return false;
+		if (!writeNextflowConfig(prefix, workDir, weblogURL, trace, report, timeline, nextflow)) return false;
+
+		Path logPath = Path.of(job.getLocalWorkspace(), prefix + "nextflow.log");
+		nextflow.setLogFile(logPath);
 
 		try {
 			File executionDir = new File(context.getLocalOutput());
@@ -206,7 +189,7 @@ public class NextflowStep extends CloudgeneStep {
 			return false;
 		} finally {
 			try {
-				workspace.uploadLog(new File(logPath));
+				workspace.uploadLog(logPath.toFile());
 			} catch (Exception e) {
 				log.error("[Job {}] Uploading Nextflow logs failed.", context.getJobId(), e);
 			}
@@ -330,9 +313,78 @@ public class NextflowStep extends CloudgeneStep {
 		return params;
 	}
 
-	protected void writeParamsJson(Map<String, Object> params, @NonNull File paramsFile) throws IOException {
-		BufferedWriter writer = new BufferedWriter(new FileWriter(paramsFile));
-		writer.write(JsonOutput.prettyPrint(JsonOutput.toJson(params)));
-		writer.close();
+	private boolean writeParamsJson(
+			@NonNull String prefix,
+			@NonNull WdlStep step,
+			@NonNull NextflowBinary nextflow) {
+
+		Path paramsFile = Path.of(context.getLocalOutput(), prefix + "params.json");
+
+		try {
+			Map<String, Object> paramMap = createParamsMap(step);
+			String paramJson = JsonOutput.prettyPrint(JsonOutput.toJson(paramMap));
+
+			Files.writeString(paramsFile, paramJson);
+			context.log("Wrote params to file '" + paramsFile + "'");
+		} catch (IOException e) {
+			log.error("[Job {}] Writing params.json file failed.", context.getJobId(), e);
+			return false;
+		}
+
+		nextflow.setParamsFile(paramsFile);
+		return true;
+	}
+
+	private boolean writeNextflowConfig(
+			@NonNull String prefix,
+			@NonNull String workDir,
+			@NonNull String weblogURL,
+			@NonNull String trace,
+			@NonNull String report,
+			@NonNull String timeline,
+			@NonNull NextflowBinary nextflow) {
+
+		String contents = """
+				plugins {
+					id 'nf-weblog'
+				}
+
+				workDir = '%s'
+
+				weblog {
+					enabled = true
+					url = '%s'
+				}
+
+				trace {
+					enabled = true
+					file = '%s'
+					overwrite = true
+				}
+
+				report {
+					enabled = true
+					file = '%s'
+					overwrite = true
+				}
+
+				timeline {
+					enabled = true
+					file = '%s'
+					overwrite = true
+				}
+				""".formatted(workDir, weblogURL, trace, report, timeline);
+
+		Path configFile = Path.of(context.getLocalOutput(), prefix + "nextflow.config");
+
+		try {
+			Files.writeString(configFile, contents);
+		} catch (IOException e) {
+			log.error("[Job {}] Writing nextflow.config file failed.", context.getJobId(), e);
+			return false;
+		}
+
+		nextflow.addConfig(configFile);
+		return true;
 	}
 }

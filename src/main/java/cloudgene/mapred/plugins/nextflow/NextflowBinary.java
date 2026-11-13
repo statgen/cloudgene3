@@ -1,30 +1,31 @@
 package cloudgene.mapred.plugins.nextflow;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 import cloudgene.mapred.util.BinaryFinder;
 import cloudgene.mapred.util.config.Settings;
 import cloudgene.mapred.util.command.Command;
+import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NextflowBinary {
+	private static final Logger log = LoggerFactory.getLogger(NextflowBinary.class);
 
 	private String binary;
-	private String script;
+	private Path script;
 	private String revision;
 	private String profile;
-	private String work;
-	private File paramsFile;
-	private String weblog;
-	private String trace;
-	private String report;
-	private String timeline;
-	private String log;
+	private Path paramsFile;
+	private Path logFile;
 	private String name;
 
-	private final List<File> configFiles = new ArrayList<>();
-	private final List<File> envScripts = new ArrayList<>();
+	private final List<Path> configFiles = new ArrayList<>();
+	private final List<Path> envScripts = new ArrayList<>();
 
 	public static NextflowBinary build(Settings settings) {
 		String binary = new BinaryFinder("nextflow")
@@ -37,23 +38,23 @@ public class NextflowBinary {
 		return new NextflowBinary(binary);
 	}
 
-	private NextflowBinary(String binary) {
+	private NextflowBinary(@Nullable String binary) {
 		this.binary = binary;
 	}
 
-	public String getBinary() {
+	public @Nullable String getBinary() {
 		return binary;
 	}
 
 	public boolean isInstalled() {
 		if (binary != null) {
-			return (new File(binary)).exists();
+			return Files.exists(Path.of(binary));
 		} else {
 			return false;
 		}
 	}
 
-	public String getVersion() {
+	public @NonNull String getVersion() {
 		if (isInstalled()) {
 			Command command = new Command(binary, "info");
 			StringBuffer stdout = new StringBuffer();
@@ -70,7 +71,7 @@ public class NextflowBinary {
 		this.binary = binary;
 	}
 
-	public void setScript(String script) {
+	public void setScript(Path script) {
 		this.script = script;
 	}
 
@@ -78,66 +79,52 @@ public class NextflowBinary {
 		this.profile = profile;
 	}
 
-	public void addConfig(File configFile) {
+	public void addConfig(Path configFile) {
 		this.configFiles.add(configFile);
 	}
 
-	public void addConfig(String configFilename) {
-		this.configFiles.add(new File(configFilename));
+	public void addConfig(String configFile) {
+		this.configFiles.add(Path.of(configFile));
 	}
 
-	public void setWork(String work) {
-		this.work = work;
-	}
-
-	public void setParamsFile(File paramsFile) {
+	public void setParamsFile(Path paramsFile) {
 		this.paramsFile = paramsFile;
 	}
 
-	public void setWeblog(String weblog) {
-		this.weblog = weblog;
+	public void setRevision(String revision) {
+		this.revision = revision;
 	}
 
-	public void setTrace(String trace) {
-		this.trace = trace;
-	}
-
-	public void setReport(String report) {
-		this.report = report;
-	}
-
-	public void setTimeline(String timeline) {
-		this.timeline = timeline;
-	}
-
-	public void setLog(String log) {
-		this.log = log;
+	public void setLogFile(Path logFile) {
+		this.logFile = logFile;
 	}
 
 	public void setName(String name) {
 		this.name = name;
 	}
 
-	public void addEnvScript(File envScript) {
+	public void addEnvScript(Path envScript) {
 		this.envScripts.add(envScript);
 	}
 
-	public List<String> buildCommand() {
-
+	public @NonNull List<String> buildCommand() {
 		List<String> nextflow = new ArrayList<>();
+
 		nextflow.add("PATH=$PATH:/usr/local/bin");
-		for (File envScript : envScripts) {
-			if (envScript != null && envScript.exists()) {
-				nextflow.add("source " + envScript.getAbsolutePath() + ";");
+
+		for (Path envScript : envScripts) {
+			if (envScript != null && Files.exists(envScript)) {
+				nextflow.add("source " + envScript.toAbsolutePath() + ";");
 			}
 		}
+
 		nextflow.add(getBinary());
 
 		nextflow.add("-log");
-		nextflow.add(log);
+		nextflow.add(logFile.toAbsolutePath().toString());
 
 		nextflow.add("run");
-		nextflow.add(script);
+		nextflow.add(script.toString());
 
 		if (revision != null && !revision.isEmpty()) {
 			nextflow.add("-r");
@@ -155,64 +142,26 @@ public class NextflowBinary {
 			nextflow.add(profile);
 		}
 
-		for (File configFile : configFiles) {
-			if (configFile.exists()) {
+		for (Path configFile : configFiles) {
+			if (Files.exists(configFile)) {
 				nextflow.add("-c");
-				nextflow.add(configFile.getAbsolutePath());
+				nextflow.add(configFile.toAbsolutePath().toString());
 			}
 		}
 
-		nextflow.add("-w");
-		nextflow.add(work);
-
 		nextflow.add("-params-file");
-		nextflow.add(paramsFile.getAbsolutePath());
+		nextflow.add(paramsFile.toAbsolutePath().toString());
 
 		nextflow.add("-ansi-log");
 		nextflow.add("false");
 
-		nextflow.add("-with-weblog");
-		nextflow.add(weblog);
-
-		nextflow.add("-with-trace");
-		nextflow.add(trace);
-		if (new File(trace).exists()) {
-			new File(trace).delete();
-		}
-
-		nextflow.add("-with-report");
-		nextflow.add(report);
-		if (new File(report).exists()) {
-			new File(report).delete();
-		}
-
-		nextflow.add("-with-timeline");
-		nextflow.add(timeline);
-		if (new File(timeline).exists()) {
-			new File(timeline).delete();
-		}
+		String nextflowCommand = String.join(" ", nextflow);
 
 		List<String> command = new ArrayList<>();
 		command.add("/bin/bash");
 		command.add("-c");
-		command.add(join(nextflow));
+		command.add(nextflowCommand);
 
 		return command;
-
-	}
-
-	private String join(List<String> array) {
-		String result = "";
-		for (int i = 0; i < array.size(); i++) {
-			if (i > 0) {
-				result += " ";
-			}
-			result += array.get(i);
-		}
-		return result;
-	}
-
-	public void setRevision(String revision) {
-		this.revision = revision;
 	}
 }
